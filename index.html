@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f5bd8" />
+  <title>외국인 취업도우미</title>
+  <style>
+    :root {
+      --primary: #0f5bd8;
+      --primary-dark: #0a3f9d;
+      --primary-soft: #eaf2ff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #dbe3ef;
+      --surface: #ffffff;
+      --bg: #f5f8fc;
+      --success: #15803d;
+      --danger: #d92d20;
+      --shadow: 0 10px 28px rgba(16, 44, 84, 0.10);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #edf4ff 0, var(--bg) 260px);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .app-shell {
+      width: min(1280px, 100%);
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 78px;
+      padding: 14px 22px;
+      color: #fff;
+      background: linear-gradient(135deg, #0b4dbb, #1476ef);
+      box-shadow: 0 6px 24px rgba(15, 91, 216, 0.24);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      border-radius: 15px;
+      background: rgba(255,255,255,.18);
+      font-size: 28px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(20px, 2vw, 27px);
+      line-height: 1.18;
+      letter-spacing: -.03em;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: rgba(255,255,255,.84);
+      font-size: 13px;
+    }
+
+    .connection-badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fbbf24;
+      box-shadow: 0 0 0 4px rgba(251,191,36,.17);
+    }
+
+    .connection-badge.ok .connection-dot {
+      background: #42df79;
+      box-shadow: 0 0 0 4px rgba(66,223,121,.17);
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 350px minmax(0, 1fr);
+      gap: 20px;
+      padding: 22px;
+    }
+
+    .panel {
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(214,224,238,.95);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .search-panel {
+      position: sticky;
+      top: 100px;
+      align-self: start;
+      padding: 20px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 16px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: -.03em;
+    }
+
+    .field { margin-bottom: 13px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .control {
+      width: 100%;
+      height: 46px;
+      padding: 0 13px;
+      border: 1px solid #cfd9e8;
+      border-radius: 12px;
+      outline: none;
+      background: #fff;
+      color: var(--text);
+      transition: border-color .18s, box-shadow .18s;
+    }
+
+    .control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(15,91,216,.11);
+    }
+
+    .region-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .search-button {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--primary), #1478f2);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(15,91,216,.22);
+    }
+
+    .search-button:disabled { opacity: .62; cursor: wait; }
+
+    .chat-box {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .chat-label {
+      margin: 0 0 9px;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .chat-input-row {
+      display: grid;
+      grid-template-columns: 1fr 46px;
+      gap: 8px;
+    }
+
+    .send-button {
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      font-size: 19px;
+    }
+
+    .bot-message {
+      position: relative;
+      margin-top: 13px;
+      padding: 13px 14px 13px 44px;
+      border-radius: 14px;
+      background: var(--primary-soft);
+      color: #29446d;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .bot-message::before {
+      content: "🤖";
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      font-size: 20px;
+    }
+
+    .results-panel { padding: 20px; min-width: 0; }
+
+    .result-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .result-meta strong { color: var(--primary-dark); }
+
+    .sort-select {
+      width: auto;
+      min-width: 125px;
+      height: 38px;
+      padding: 0 34px 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: #475467;
+      font-size: 13px;
+    }
+
+    .job-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .job-card {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) auto;
+      gap: 15px;
+      align-items: start;
+      padding: 18px;
+      border: 1px solid #d8e1ee;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 5px 16px rgba(16,44,84,.06);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .job-card:hover {
+      transform: translateY(-2px);
+      border-color: #b8cae5;
+      box-shadow: 0 11px 26px rgba(16,44,84,.10);
+    }
+
+    .company-icon {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #2c7af0, #0f5bd8);
+      color: #fff;
+      font-size: 28px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22);
+    }
+
+    .company-name {
+      margin: 0 0 5px;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .job-title {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.35;
+      letter-spacing: -.025em;
+    }
+
+    .job-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px 13px;
+      margin-top: 12px;
+      color: #5d6b7f;
+      font-size: 13px;
+    }
+
+    .info-item { display: inline-flex; align-items: center; gap: 5px; }
+
+    .summary {
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-radius: 11px;
+      background: #f7f9fc;
+      color: #4b5d73;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 112px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 11px;
+      border: 1px solid #b9c9df;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .action-btn.primary { border-color: var(--primary); }
+    .action-btn.muted { color: #98a2b3; border-color: #e4e7ec; cursor: default; }
+
+    .empty-state, .loading-state, .error-state {
+      display: grid;
+      place-items: center;
+      min-height: 330px;
+      padding: 35px;
+      border: 1px dashed #c8d5e6;
+      border-radius: 16px;
+      background: #fbfdff;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state .big-icon,
+    .loading-state .big-icon,
+    .error-state .big-icon { font-size: 44px; margin-bottom: 11px; }
+
+    .empty-state h3, .error-state h3 { margin: 0 0 8px; color: #344054; }
+    .empty-state p, .error-state p { margin: 0; line-height: 1.65; }
+
+    .spinner {
+      width: 38px;
+      height: 38px;
+      margin-bottom: 15px;
+      border: 4px solid #dce9fb;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .page-btn {
+      min-width: 42px;
+      min-height: 38px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .page-btn:disabled { opacity: .45; cursor: default; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15,23,42,.54);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(680px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 24px 70px rgba(0,0,0,.24);
+    }
+
+    .modal-header {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      z-index: 1;
+    }
+
+    .modal-header h3 { margin: 0; font-size: 20px; }
+
+    .close-btn {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 10px;
+      background: #f2f4f7;
+      color: #344054;
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    .modal-body { padding: 20px; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 150px minmax(0,1fr);
+      border-top: 1px solid var(--line);
+    }
+
+    .detail-grid dt, .detail-grid dd {
+      margin: 0;
+      padding: 11px 8px;
+      border-bottom: 1px solid var(--line);
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-grid dt { color: #475467; font-weight: 800; }
+    .detail-grid dd { color: #27364a; }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .mobile-nav { display: none; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 310px minmax(0, 1fr); gap: 14px; padding: 16px; }
+      .job-card { grid-template-columns: 50px minmax(0,1fr); }
+      .company-icon { width: 50px; height: 50px; }
+      .card-actions { grid-column: 1 / -1; width: 100%; flex-direction: row; }
+      .card-actions .action-btn { flex: 1; }
+    }
+
+    @media (max-width: 767px) {
+      body { padding-bottom: 68px; }
+      .topbar { position: relative; min-height: 76px; padding: 13px 15px; }
+      .brand-icon { width: 43px; height: 43px; flex-basis: 43px; font-size: 25px; }
+      .brand h1 { font-size: 20px; }
+      .brand p { font-size: 12px; }
+      .connection-badge { position: absolute; right: 12px; bottom: -15px; color: var(--primary-dark); background: #fff; border-color: #d7e4f6; box-shadow: 0 5px 16px rgba(16,44,84,.12); }
+      .main-layout { display: block; padding: 25px 10px 14px; }
+      .search-panel { position: static; padding: 16px; }
+      .results-panel { margin-top: 12px; padding: 14px 10px; }
+      .section-title h2 { font-size: 19px; }
+      .region-row { grid-template-columns: 1fr 1fr; }
+      .job-card { grid-template-columns: 45px minmax(0,1fr); padding: 14px 12px; gap: 11px; border-radius: 14px; }
+      .company-icon { width: 45px; height: 45px; border-radius: 12px; font-size: 22px; }
+      .company-name { font-size: 12px; }
+      .job-title { font-size: 17px; }
+      .job-info { display: grid; grid-template-columns: 1fr; gap: 5px; font-size: 12px; }
+      .summary { font-size: 12px; }
+      .card-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .action-btn { min-height: 38px; padding: 7px 5px; font-size: 11px; }
+      .result-meta { align-items: flex-start; }
+      .sort-select { min-width: 112px; }
+      .empty-state, .loading-state, .error-state { min-height: 240px; padding: 24px 15px; }
+      .detail-grid { grid-template-columns: 105px minmax(0,1fr); font-size: 13px; }
+      .modal-actions { grid-template-columns: 1fr; }
+      .mobile-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        min-height: 62px;
+        padding-bottom: env(safe-area-inset-bottom);
+        border-top: 1px solid #dce4ef;
+        background: rgba(255,255,255,.97);
+        box-shadow: 0 -5px 18px rgba(16,44,84,.08);
+      }
+      .mobile-nav button {
+        border: 0;
+        background: transparent;
+        color: #667085;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .mobile-nav button span { display: block; margin-bottom: 2px; font-size: 20px; }
+      .mobile-nav button.active { color: var(--primary); }
+    }
+
+    @media (max-width: 390px) {
+      .region-row { grid-template-columns: 1fr; }
+      .card-actions { grid-template-columns: 1fr 1fr; }
+      .card-actions .detail-trigger { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar" id="home">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">🤖</div>
+        <div>
+          <h1>외국인 취업도우미</h1>
+          <p>지역별 기업 채용공고 조회</p>
+        </div>
+      </div>
+      <div class="connection-badge" id="connectionBadge" aria-live="polite">
+        <span class="connection-dot"></span>
+        <span id="connectionText">DB 확인 중</span>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <section class="panel search-panel" id="searchSection" aria-labelledby="searchHeading">
+        <div class="section-title">
+          <h2 id="searchHeading">검색 / 챗봇</h2>
+        </div>
+
+        <form id="searchForm">
+          <div class="field">
+            <label for="provinceSelect">지역</label>
+            <div class="region-row">
+              <select class="control" id="provinceSelect" aria-label="시도 선택">
+                <option value="">전체 시·도</option>
+              </select>
+              <select class="control" id="citySelect" aria-label="시군구 선택">
+                <option value="">전체 시·군·구</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="categorySelect">직종</label>
+            <select class="control" id="categorySelect">
+              <option value="">전체 직종</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="keywordInput">검색어</label>
+            <input class="control" id="keywordInput" type="search" placeholder="회사명, 직무, CNC 등" autocomplete="off" />
+          </div>
+
+          <button class="search-button" id="searchButton" type="submit">🔍 채용공고 검색</button>
+        </form>
+
+        <div class="chat-box">
+          <p class="chat-label">문장으로 검색</p>
+          <div class="chat-input-row">
+            <input class="control" id="chatInput" type="text" placeholder="예: 천안 생산직 보여줘" autocomplete="off" />
+            <button class="send-button" id="chatSendButton" type="button" aria-label="챗봇 검색">➤</button>
+          </div>
+          <div class="bot-message" id="botMessage" aria-live="polite">
+            지역과 직종을 선택하거나 문장으로 검색해 보세요.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel results-panel" id="jobsSection" aria-labelledby="jobsHeading">
+        <div class="section-title">
+          <h2 id="jobsHeading">채용공고 목록</h2>
+        </div>
+
+        <div class="result-meta">
+          <div><strong id="resultCount">0건</strong>의 공고</div>
+          <select class="sort-select" id="sortSelect" aria-label="정렬 방식">
+            <option value="latest">최근 수집순</option>
+            <option value="deadline">마감 임박순</option>
+          </select>
+        </div>
+
+        <div id="jobList" class="job-list" aria-live="polite"></div>
+        <div id="pagination" class="pagination" hidden></div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="하단 메뉴">
+    <button type="button" class="active" data-target="home"><span>⌂</span>홈</button>
+    <button type="button" data-target="searchSection"><span>⌕</span>검색</button>
+    <button type="button" data-target="jobsSection"><span>▤</span>채용</button>
+  </nav>
+
+  <div class="modal-backdrop" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">채용공고 상세정보</h3>
+        <button class="close-btn" id="modalCloseButton" type="button" aria-label="닫기">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    // 현재 배포된 Code.gs 웹 앱 주소
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzzOzmR_w3y53nfWHnOYurMTQ53mJbyq3lPdqxmNzOfYfLnW248FdiJZ50EoDwOzhQ2/exec';
+
+    const state = {
+      filters: { provinces: [], cities: [], categories: [] },
+      jobs: [],
+      currentPage: 1,
+      totalPages: 1,
+      total: 0,
+      limit: 20,
+      loading: false,
+    };
+
+    const elements = {
+      connectionBadge: document.getElementById('connectionBadge'),
+      connectionText: document.getElementById('connectionText'),
+      province: document.getElementById('provinceSelect'),
+      city: document.getElementById('citySelect'),
+      category: document.getElementById('categorySelect'),
+      keyword: document.getElementById('keywordInput'),
+      chatInput: document.getElementById('chatInput'),
+      botMessage: document.getElementById('botMessage'),
+      searchForm: document.getElementById('searchForm'),
+      searchButton: document.getElementById('searchButton'),
+      chatSendButton: document.getElementById('chatSendButton'),
+      sort: document.getElementById('sortSelect'),
+      jobList: document.getElementById('jobList'),
+      resultCount: document.getElementById('resultCount'),
+      pagination: document.getElementById('pagination'),
+      modal: document.getElementById('detailModal'),
+      modalBody: document.getElementById('modalBody'),
+      modalClose: document.getElementById('modalCloseButton'),
+    };
+
+    function jsonpRequest(params, timeoutMs = 15000) {
+      return new Promise((resolve, reject) => {
+        const callbackName = '__jobApiCallback_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const script = document.createElement('script');
+        const query = new URLSearchParams({ ...params, callback: callbackName });
+        let settled = false;
+
+        const cleanup = () => {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+        };
+
+        const timer = window.setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          reject(new Error('서버 응답 시간이 초과되었습니다.'));
+        }, timeoutMs);
+
+        window[callbackName] = (data) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timer);
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timer);
+          cleanup();
+          reject(new Error('채용공고 서버에 연결할 수 없습니다.'));
+        };
+
+        script.src = API_URL + '?' + query.toString();
+        document.head.appendChild(script);
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function safeHttpUrl(value) {
+      const text = String(value || '').trim();
+      if (!text) return '';
+      try {
+        const url = new URL(text);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function safePhone(value) {
+      return String(value || '').replace(/[^0-9+*#-]/g, '');
+    }
+
+    function safeEmail(value) {
+      const text = String(value || '').trim();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text) ? text : '';
+    }
+
+    function displayText(value, fallback = '공개되지 않음') {
+      const text = String(value || '').trim();
+      return text || fallback;
+    }
+
+    function formatMoney(value) {
+      const numeric = Number(String(value || '').replace(/[^0-9.-]/g, ''));
+      return Number.isFinite(numeric) && numeric !== 0 ? numeric.toLocaleString('ko-KR') : '';
+    }
+
+    function formatSalary(job) {
+      const type = displayText(job.salary_type, '급여');
+      const min = formatMoney(job.salary_min);
+      const max = formatMoney(job.salary_max);
+      if (min && max) return `${type} ${min}~${max}원`;
+      if (min) return `${type} ${min}원 이상`;
+      if (max) return `${type} ${max}원 이하`;
+      return '급여 협의';
+    }
+
+    function locationText(job) {
+      return [job.region_province, job.region_city].filter(Boolean).join(' ') || '지역 미공개';
+    }
+
+    function setConnection(ok, text) {
+      elements.connectionBadge.classList.toggle('ok', Boolean(ok));
+      elements.connectionText.textContent = text;
+    }
+
+    function setLoading(isLoading) {
+      state.loading = isLoading;
+      elements.searchButton.disabled = isLoading;
+      elements.chatSendButton.disabled = isLoading;
+      if (isLoading) {
+        elements.jobList.innerHTML = '<div class="loading-state"><div><div class="spinner"></div><div>채용공고를 불러오고 있습니다.</div></div></div>';
+        elements.pagination.hidden = true;
+      }
+    }
+
+    function fillSelect(select, items, firstLabel) {
+      const current = select.value;
+      select.innerHTML = `<option value="">${escapeHtml(firstLabel)}</option>` +
+        items.map((item) => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+      if (items.includes(current)) select.value = current;
+    }
+
+    async function loadHealth() {
+      try {
+        const data = await jsonpRequest({ action: 'health' });
+        if (!data.ok) throw new Error(data.error || '연결 확인 실패');
+        setConnection(true, `DB 연결됨 · ${Number(data.data_rows || 0)}건`);
+      } catch (error) {
+        setConnection(false, 'DB 연결 실패');
+        console.error(error);
+      }
+    }
+
+    async function loadFilters() {
+      try {
+        const data = await jsonpRequest({ action: 'filters' });
+        if (!data.ok) throw new Error(data.error || '검색조건 불러오기 실패');
+        state.filters.provinces = Array.isArray(data.provinces) ? data.provinces : [];
+        state.filters.cities = Array.isArray(data.cities) ? data.cities : [];
+        state.filters.categories = Array.isArray(data.categories) ? data.categories : [];
+        fillSelect(elements.province, state.filters.provinces, '전체 시·도');
+        fillSelect(elements.city, state.filters.cities, '전체 시·군·구');
+        fillSelect(elements.category, state.filters.categories, '전체 직종');
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function buildSearchParams(page = 1) {
+      return {
+        action: 'list',
+        province: elements.province.value,
+        city: elements.city.value,
+        category: elements.category.value,
+        keyword: elements.keyword.value.trim(),
+        sort: elements.sort.value,
+        page: String(page),
+        limit: String(state.limit),
+      };
+    }
+
+    async function searchJobs(page = 1, message = '') {
+      if (state.loading) return;
+      setLoading(true);
+      try {
+        const data = await jsonpRequest(buildSearchParams(page));
+        if (!data.ok) throw new Error(data.error || '공고 조회 실패');
+        state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+        state.currentPage = Number(data.page || 1);
+        state.totalPages = Math.max(Number(data.total_pages || 1), 1);
+        state.total = Number(data.total || 0);
+        renderJobs();
+        renderPagination();
+        elements.resultCount.textContent = `${state.total}건`;
+        elements.botMessage.textContent = message || (state.total > 0
+          ? `조건에 맞는 채용공고 ${state.total}건을 찾았습니다.`
+          : '조건에 맞는 채용공고가 없습니다. 검색 조건을 바꿔보세요.');
+      } catch (error) {
+        console.error(error);
+        elements.resultCount.textContent = '0건';
+        elements.jobList.innerHTML = `
+          <div class="error-state">
+            <div>
+              <div class="big-icon">⚠️</div>
+              <h3>채용공고를 불러오지 못했습니다.</h3>
+              <p>${escapeHtml(error.message)}</p>
+            </div>
+          </div>`;
+        elements.botMessage.textContent = '서버 연결을 확인한 뒤 다시 검색해 주세요.';
+        elements.pagination.hidden = true;
+      } finally {
+        state.loading = false;
+        elements.searchButton.disabled = false;
+        elements.chatSendButton.disabled = false;
+      }
+    }
+
+    function renderJobs() {
+      if (!state.jobs.length) {
+        elements.jobList.innerHTML = `
+          <div class="empty-state">
+            <div>
+              <div class="big-icon">📭</div>
+              <h3>현재 표시할 채용공고가 없습니다.</h3>
+              <p>구글 시트에 채용공고가 저장되면<br>이 화면에 자동으로 표시됩니다.</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      elements.jobList.innerHTML = state.jobs.map((job, index) => {
+        const sourceUrl = safeHttpUrl(job.source_url);
+        const phone = safePhone(job.contact_phone);
+        const email = safeEmail(job.contact_email);
+        const summary = job.ai_summary || job.description;
+        return `
+          <article class="job-card">
+            <div class="company-icon" aria-hidden="true">🏭</div>
+            <div>
+              <p class="company-name">${escapeHtml(displayText(job.company_name, '회사명 미공개'))}</p>
+              <h3 class="job-title">${escapeHtml(displayText(job.job_title, '채용제목 미공개'))}</h3>
+              <div class="job-info">
+                <span class="info-item">📍 ${escapeHtml(locationText(job))}</span>
+                <span class="info-item">💰 ${escapeHtml(formatSalary(job))}</span>
+                <span class="info-item">🕒 ${escapeHtml(displayText(job.work_schedule, '근무시간 확인 필요'))}</span>
+                <span class="info-item">👤 ${escapeHtml(displayText(job.career_requirement, '경력 조건 확인 필요'))}</span>
+                <span class="info-item">🎓 ${escapeHtml(displayText(job.education_requirement, '학력 조건 확인 필요'))}</span>
+                <span class="info-item">🏠 기숙사 ${escapeHtml(displayText(job.dormitory, '확인 필요'))}</span>
+                <span class="info-item">📅 마감 ${escapeHtml(displayText(job.deadline, '채용 시까지'))}</span>
+              </div>
+              ${summary ? `<p class="summary">${escapeHtml(summary)}</p>` : ''}
+            </div>
+            <div class="card-actions">
+              <button type="button" class="action-btn primary detail-trigger" data-job-index="${index}">상세보기</button>
+              ${phone
+                ? `<a class="action-btn" href="tel:${escapeHtml(phone)}">전화하기</a>`
+                : '<span class="action-btn muted">전화 없음</span>'}
+              ${sourceUrl
+                ? `<a class="action-btn" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">원본공고</a>`
+                : email
+                  ? `<a class="action-btn" href="mailto:${escapeHtml(email)}">이메일</a>`
+                  : '<span class="action-btn muted">연락처 없음</span>'}
+            </div>
+          </article>`;
+      }).join('');
+
+      document.querySelectorAll('.detail-trigger').forEach((button) => {
+        button.addEventListener('click', () => openDetail(Number(button.dataset.jobIndex)));
+      });
+    }
+
+    function detailRows(job) {
+      return [
+        ['회사명', job.company_name],
+        ['채용제목', job.job_title],
+        ['근무지역', locationText(job)],
+        ['주소', job.address],
+        ['직종', job.job_category],
+        ['급여', formatSalary(job)],
+        ['근무시간', job.work_schedule],
+        ['경력조건', job.career_requirement],
+        ['학력조건', job.education_requirement],
+        ['기숙사', job.dormitory],
+        ['고용형태', job.employment_type],
+        ['마감일', job.deadline],
+        ['담당자', job.contact_name],
+        ['전화번호', job.contact_phone],
+        ['이메일', job.contact_email],
+        ['지원방법', job.application_method],
+        ['상세내용', job.description],
+        ['AI 요약', job.ai_summary],
+        ['정보출처', job.source_name],
+      ];
+    }
+
+    function openDetail(index) {
+      const job = state.jobs[index];
+      if (!job) return;
+      const phone = safePhone(job.contact_phone);
+      const email = safeEmail(job.contact_email);
+      const sourceUrl = safeHttpUrl(job.source_url);
+      const companyUrl = safeHttpUrl(job.company_website);
+
+      const rows = detailRows(job)
+        .map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(displayText(value))}</dd>`)
+        .join('');
+
+      elements.modalBody.innerHTML = `
+        <p class="company-name">${escapeHtml(displayText(job.company_name, '회사명 미공개'))}</p>
+        <h3 class="job-title">${escapeHtml(displayText(job.job_title, '채용제목 미공개'))}</h3>
+        <dl class="detail-grid">${rows}</dl>
+        <div class="modal-actions">
+          ${sourceUrl ? `<a class="action-btn primary" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">원본공고 보기</a>` : '<span class="action-btn muted">원본공고 없음</span>'}
+          ${phone ? `<a class="action-btn" href="tel:${escapeHtml(phone)}">전화하기</a>` : '<span class="action-btn muted">전화번호 없음</span>'}
+          ${email ? `<a class="action-btn" href="mailto:${escapeHtml(email)}">이메일 보내기</a>` : companyUrl ? `<a class="action-btn" href="${escapeHtml(companyUrl)}" target="_blank" rel="noopener noreferrer">회사 홈페이지</a>` : '<span class="action-btn muted">이메일 없음</span>'}
+        </div>`;
+
+      elements.modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      elements.modalClose.focus();
+    }
+
+    function closeDetail() {
+      elements.modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function renderPagination() {
+      if (state.totalPages <= 1) {
+        elements.pagination.hidden = true;
+        return;
+      }
+      elements.pagination.hidden = false;
+      elements.pagination.innerHTML = `
+        <button class="page-btn" id="prevPage" type="button" ${state.currentPage <= 1 ? 'disabled' : ''}>이전</button>
+        <span>${state.currentPage} / ${state.totalPages}</span>
+        <button class="page-btn" id="nextPage" type="button" ${state.currentPage >= state.totalPages ? 'disabled' : ''}>다음</button>`;
+      document.getElementById('prevPage').addEventListener('click', () => searchJobs(state.currentPage - 1));
+      document.getElementById('nextPage').addEventListener('click', () => searchJobs(state.currentPage + 1));
+    }
+
+    function tokenizeChat(text) {
+      const stopWords = new Set(['채용공고', '채용', '공고', '보여줘', '보여주세요', '찾아줘', '찾아주세요', '검색', '일자리', '구인', '회사', '에서', '지역', '관련']);
+      return text
+        .replace(/[,.!?/]/g, ' ')
+        .split(/\s+/)
+        .map((token) => token.trim())
+        .filter((token) => token.length >= 2 && !stopWords.has(token));
+    }
+
+    function searchFromChat() {
+      const text = elements.chatInput.value.trim();
+      if (!text) {
+        elements.botMessage.textContent = '검색할 내용을 입력해 주세요.';
+        elements.chatInput.focus();
+        return;
+      }
+
+      const matchedProvince = state.filters.provinces.find((item) => text.includes(item));
+      const matchedCity = state.filters.cities.find((item) => text.includes(item) || text.includes(item.replace(/시|군|구/g, '')));
+      const matchedCategory = state.filters.categories.find((item) => {
+        const pieces = item.split(/[·/\s-]+/).filter(Boolean);
+        return text.includes(item) || pieces.some((piece) => piece.length >= 2 && text.includes(piece));
+      });
+
+      if (matchedProvince) elements.province.value = matchedProvince;
+      if (matchedCity) elements.city.value = matchedCity;
+      if (matchedCategory) elements.category.value = matchedCategory;
+
+      const removed = [matchedProvince, matchedCity, matchedCategory].filter(Boolean);
+      let remaining = text;
+      removed.forEach((value) => { remaining = remaining.replace(value, ' '); });
+      const tokens = tokenizeChat(remaining);
+      elements.keyword.value = tokens[0] || '';
+
+      const summary = [matchedProvince, matchedCity, matchedCategory, tokens[0]].filter(Boolean).join(' · ');
+      searchJobs(1, summary ? `${summary} 조건으로 검색했습니다.` : '입력하신 문장으로 검색했습니다.');
+    }
+
+    elements.searchForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      searchJobs(1);
+    });
+
+    elements.chatSendButton.addEventListener('click', searchFromChat);
+    elements.chatInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') searchFromChat();
+    });
+
+    elements.sort.addEventListener('change', () => searchJobs(1));
+    elements.modalClose.addEventListener('click', closeDetail);
+    elements.modal.addEventListener('click', (event) => {
+      if (event.target === elements.modal) closeDetail();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && elements.modal.classList.contains('open')) closeDetail();
+    });
+
+    document.querySelectorAll('.mobile-nav button').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.mobile-nav button').forEach((item) => item.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(button.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    async function initialize() {
+      setLoading(true);
+      await Promise.all([loadHealth(), loadFilters()]);
+      state.loading = false;
+      elements.searchButton.disabled = false;
+      elements.chatSendButton.disabled = false;
+      await searchJobs(1);
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
