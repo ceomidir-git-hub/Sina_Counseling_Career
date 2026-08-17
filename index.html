@@ -6,37 +6,88 @@
   <title>시나브로 Counselling & Career Plus Center</title>
   <style>
     /* =========================================================
-       [수치 설계 기준]
-       기준 해상도: 1920 x 1080
-       좌측 메뉴: 240px
-       우측 영역: 1920 - 240 = 1680px
-       콘텐츠 좌우 여백: 24px x 2 = 48px
-       실제 콘텐츠 폭: 1680 - 48 = 1632px
+       [수치 재설계 기준 - PC 한 화면 100% 사용]
 
-       KPI 5개:
-       (1632 - (12 x 4)) / 5 = 316.8px
+       1) 가로 기준
+          - 기존 실제 sidebar = 220px @ 1920px
+          - 비율 = 220 / 1920 = 11.4583%
+          - 적용 = clamp(200px, 11.458vw, 240px)
 
-       중앙 3개:
-       1632 - (12 x 2) = 1608px
-       32% / 36% / 32%
-       1608 x 0.32 = 514.56px
-       1608 x 0.36 = 578.88px
-       1608 x 0.32 = 514.56px
+          - 기존 outer gap = 18px @ 1920px
+          - 비율 = 18 / 1920 = 0.9375%
+          - 적용 = clamp(14px, 0.9375vw, 22px)
 
-       Hover:
-       카드 Y축 -4px / scale 1.015 / 180ms
-       메뉴 X축 +4px / 180ms
-       버튼 scale 1.04 / 160ms
+       2) 세로 기준
+          기존 실제 사용 높이:
+          header 46
+          section1 = head 21 + KPI 82   = 103
+          section2 = head 21 + 분석 206 = 227
+          section3 = head 21 + 하단 290 = 311
+
+          3개 section 비율 합 = 103 + 227 + 311 = 641
+          section1 = 103 / 641 = 16.07%
+          section2 = 227 / 641 = 35.41%
+          section3 = 311 / 641 = 48.52%
+
+          따라서 화면 높이에서 header와 row-gap을 제외한 나머지를
+          16.07 : 35.41 : 48.52 로 자동 분배합니다.
+
+       3) 예: 2048 x 1030 화면
+          main 세로 padding-bottom = 6px
+          content height = 1030 - 6 = 1024px
+          header = 46px
+          row-gap = 5px x 3 = 15px
+          section 가용높이 = 1024 - 46 - 15 = 963px
+
+          section1 = 963 x 0.1607 = 154.8px
+          section2 = 963 x 0.3541 = 341.0px
+          section3 = 963 x 0.4852 = 467.2px
+
+          각 section의 제목영역 21px을 제외하면 카드 실높이는
+          KPI 약 133.8px / 분석 약 320.0px / 하단 약 446.2px
+
+          => 하단 잔여공간 0px 목표
        ========================================================= */
 
     :root{
-      --sidebar-w:220px;
-      --outer-gap:18px;
+      --sidebar-w:clamp(200px,11.458vw,240px);
+      --outer-gap:clamp(14px,.9375vw,22px);
       --section-gap:5px;
       --card-gap:10px;
       --header-h:46px;
-      --kpi-h:82px;
-      --analysis-h:206px;
+      --section-head-h:21px;
+
+      /* 기존 section 총높이 103:227:311을 정규화한 비율 */
+      --section1-ratio:16.07fr;
+      --section2-ratio:35.41fr;
+      --section3-ratio:48.52fr;
+
+      /* =====================================================
+         [문자 크기 수치 기준 - 1920~2048px PC 화면]
+         2048px 기준 실제 계산값:
+         meta    = min(9px, 2048×0.44vw=9.01px)   = 9px
+         small   = min(10px,2048×0.50vw=10.24px) = 10px
+         body    = min(11px,2048×0.55vw=11.26px) = 11px
+         nav     = min(12px,2048×0.60vw=12.29px) = 12px
+         panel   = min(11.5px,2048×0.58vw=11.88) = 11.5px
+         section = min(12.5px,2048×0.62vw=12.70) = 12.5px
+         title   = min(18px,2048×0.88vw=18.02px) = 18px
+         strong  = min(14px,2048×0.68vw=13.93px) = 13.93px
+         KPI     = min(21px,2048×1.00vw=20.48px) = 20.48px
+
+         1280px에서도 clamp 최소값을 보장하여 글자가 과도하게
+         작아지지 않도록 하고, 2048px 이상에서는 최대값으로 제한.
+         ===================================================== */
+      --fs-meta:clamp(8px,.44vw,9px);
+      --fs-small:clamp(9px,.50vw,10px);
+      --fs-body:clamp(10px,.55vw,11px);
+      --fs-nav:clamp(11px,.60vw,12px);
+      --fs-panel:clamp(10.5px,.58vw,11.5px);
+      --fs-section:clamp(11.5px,.62vw,12.5px);
+      --fs-title:clamp(16px,.88vw,18px);
+      --fs-strong:clamp(12px,.68vw,14px);
+      --fs-kpi:clamp(18px,1vw,21px);
+      --fs-table:clamp(9px,.50vw,10.5px);
 
       --navy:#172742;
       --navy2:#203554;
@@ -55,7 +106,12 @@
     }
 
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+    }
     body{
       background:var(--bg);
       color:var(--text);
@@ -64,15 +120,18 @@
     }
 
     .layout{
-      min-height:100vh;
+      width:100vw;
+      height:100vh;
+      height:100dvh;
       display:grid;
       grid-template-columns:var(--sidebar-w) minmax(0,1fr);
+      overflow:hidden;
     }
 
-    /* LEFT 240px */
+    /* LEFT: 200~240px, 1920px 기준 220px */
     .sidebar{
       width:var(--sidebar-w);
-      min-height:100vh;
+      min-height:0;
       background:linear-gradient(180deg,var(--navy) 0%,#122038 100%);
       color:#fff;
       padding:8px 10px;
@@ -80,27 +139,29 @@
       top:0;
       align-self:start;
       height:100vh;
+      height:100dvh;
+      overflow:hidden;
     }
 
     .brand{
-      height:72px;
+      height:82px;
       padding:4px 8px 8px;
       border-bottom:1px solid rgba(255,255,255,.09);
       margin-bottom:8px;
     }
-    .brand-title{font-size:15px;font-weight:900;line-height:1.3}
-    .brand-sub{font-size:9px;line-height:1.35;color:#b8c5d8;margin-top:3px}
+    .brand-title{font-size:clamp(15px,.80vw,16.5px);font-weight:900;line-height:1.24}
+    .brand-sub{font-size:var(--fs-small);line-height:1.38;color:#b8c5d8;margin-top:4px}
 
     .nav{display:grid;gap:3px}
     .nav-item{
-      height:36px;
+      height:38px;
       border-radius:8px;
       padding:0 10px;
       display:flex;
       align-items:center;
       gap:10px;
       color:#d4deec;
-      font-size:11px;
+      font-size:var(--fs-nav);
       font-weight:700;
       cursor:pointer;
       transition:transform 180ms ease, background 180ms ease, color 180ms ease;
@@ -115,12 +176,23 @@
       color:#fff;
       box-shadow:0 7px 16px rgba(102,90,226,.27);
     }
-    .nav-icon{width:18px;text-align:center;font-size:12px}
+    .nav-icon{width:18px;text-align:center;font-size:clamp(12px,.65vw,13px)}
 
-    /* RIGHT: 1680px @ 1920 baseline */
+    /* RIGHT: viewport 전체 높이를 정확히 사용 */
     .main{
       min-width:0;
-      padding:0 var(--outer-gap) 4px;
+      min-height:0;
+      height:100vh;
+      height:100dvh;
+      padding:0 var(--outer-gap) 6px;
+      display:grid;
+      grid-template-rows:
+        var(--header-h)
+        minmax(0,var(--section1-ratio))
+        minmax(0,var(--section2-ratio))
+        minmax(0,var(--section3-ratio));
+      row-gap:var(--section-gap);
+      overflow:hidden;
     }
 
     .topbar{
@@ -131,15 +203,15 @@
       gap:10px;
     }
     .headline h1{
-      font-size:15px;
+      font-size:var(--fs-title);
       margin:0;
       letter-spacing:-.5px;
     }
     .headline h1 strong{color:var(--purple)}
-    .headline p{font-size:9px;color:var(--muted);margin:2px 0 0}
+    .headline p{font-size:var(--fs-small);line-height:1.3;color:var(--muted);margin:2px 0 0}
 
     .date-control{
-      height:26px;
+      height:30px;
       display:flex;
       align-items:center;
       border:1px solid var(--line);
@@ -149,7 +221,7 @@
       box-shadow:0 4px 12px rgba(32,48,76,.04);
     }
     .date-control button{
-      width:28px;height:28px;border:0;background:#fff;cursor:pointer;
+      width:30px;height:30px;border:0;background:#fff;cursor:pointer;
       color:#59667c;font-weight:900;
       transition:transform 160ms ease, background 160ms ease, color 160ms ease;
     }
@@ -159,17 +231,24 @@
       color:#fff;
     }
     #dateLabel{
-      width:116px;text-align:center;font-size:9px;font-weight:800;
+      width:124px;text-align:center;font-size:var(--fs-small);font-weight:800;
     }
 
-    .section{margin-bottom:var(--section-gap)}
+    .section{
+      min-height:0;
+      margin:0;
+      display:grid;
+      grid-template-rows:var(--section-head-h) minmax(0,1fr);
+      overflow:visible;
+    }
     .section-head{
       height:18px;
       display:flex;align-items:center;justify-content:space-between;
       margin-bottom:3px;
+      min-height:0;
     }
-    .section-head h2{font-size:11px;margin:0}
-    .section-head span{font-size:8px;color:var(--muted)}
+    .section-head h2{font-size:var(--fs-section);line-height:1.2;margin:0}
+    .section-head span{font-size:var(--fs-meta);line-height:1.2;color:var(--muted)}
 
     .card{
       background:var(--card);
@@ -180,7 +259,7 @@
       overflow:hidden;
     }
     .card:hover{
-      transform:translateY(-4px) scale(1.015);
+      transform:translateY(-2px) scale(1.006);
       box-shadow:var(--shadow-hover);
       border-color:#cbd5e5;
       z-index:2;
@@ -188,22 +267,24 @@
 
     /* KPI = exact 5 equal columns */
     .kpi-grid{
+      min-height:0;
+      height:100%;
       display:grid;
       grid-template-columns:repeat(5,minmax(0,1fr));
       gap:var(--card-gap);
     }
     .kpi-card{
-      height:var(--kpi-h);
+      height:100%;
       padding:8px 10px;
       display:flex;
       align-items:center;
       gap:13px;
     }
     .kpi-icon{
-      width:34px;height:34px;border-radius:50%;
+      width:38px;height:38px;border-radius:50%;
       display:grid;place-items:center;
-      color:#fff;font-size:12px;font-weight:900;
-      flex:0 0 34px;
+      color:#fff;font-size:clamp(12px,.68vw,14px);font-weight:900;
+      flex:0 0 38px;
       box-shadow:inset 0 0 0 5px rgba(255,255,255,.18);
     }
     .p{background:linear-gradient(135deg,#8a7df2,#6859e3)}
@@ -211,30 +292,38 @@
     .g{background:linear-gradient(135deg,#69cb89,#3da95f)}
     .o{background:linear-gradient(135deg,#ffc16a,#ea972b)}
     .r{background:linear-gradient(135deg,#ef86b7,#d64d8e)}
-    .k-label{font-size:9px;color:#6d788d}
-    .k-value{font-size:17px;font-weight:900;margin-top:1px}
-    .k-sub{font-size:8px;color:#8994a6;margin-top:2px}
+    .k-label{font-size:var(--fs-body);line-height:1.2;color:#6d788d}
+    .k-value{font-size:var(--fs-kpi);line-height:1.12;font-weight:900;margin-top:3px}
+    .k-sub{font-size:var(--fs-small);line-height:1.25;color:#8994a6;margin-top:4px}
     .up{color:#32a55c;font-weight:800}
 
     /* 중앙 32 / 36 / 32 */
     .analysis-grid{
-      height:var(--analysis-h);
+      min-height:0;
+      height:100%;
       display:grid;
       grid-template-columns:32fr 36fr 32fr;
       gap:var(--card-gap);
     }
-    .panel{padding:9px;height:var(--analysis-h)}
-    .panel-title{font-size:10px;font-weight:900;margin-bottom:6px}
+    .panel{
+      min-height:0;
+      height:100%;
+      padding:9px;
+      display:flex;
+      flex-direction:column;
+    }
+    .panel-title{font-size:var(--fs-panel);line-height:1.2;font-weight:900;margin-bottom:7px}
 
     .donut-area{
-      height:164px;
+      flex:1;
+      min-height:0;
       display:grid;
       grid-template-columns:100px 1fr;
       align-items:center;
       gap:9px;
     }
     .donut{
-      width:96px;height:96px;border-radius:50%;
+      width:clamp(96px,10.5vh,118px);height:clamp(96px,10.5vh,118px);border-radius:50%;
       background:conic-gradient(var(--purple) 0 42%,var(--blue) 42% 73%,var(--green) 73% 100%);
       position:relative;
       transition:transform 180ms ease;
@@ -246,16 +335,18 @@
       position:absolute;inset:17px;
       background:white;border-radius:50%;
       display:grid;place-items:center;
-      text-align:center;font-size:8px;font-weight:900;line-height:1.35;
+      text-align:center;font-size:var(--fs-small);font-weight:900;line-height:1.35;
     }
-    .legend{display:grid;gap:6px;font-size:8px}
+    .legend{display:grid;gap:7px;font-size:var(--fs-small);line-height:1.25}
     .legend-row{display:flex;align-items:center;gap:8px}
     .dot{width:9px;height:9px;border-radius:3px;flex:0 0 9px}
 
     .flow{
-      height:160px;
+      flex:1;
+      min-height:0;
       display:grid;
       grid-template-columns:repeat(5,1fr);
+      grid-template-rows:minmax(0,1fr) 28px;
       align-items:center;
       gap:6px;
     }
@@ -264,7 +355,7 @@
       content:"→";
       position:absolute;
       right:-7px;top:10px;
-      color:#aeb8c8;font-size:17px;
+      color:#aeb8c8;font-size:18px;
     }
     .flow-icon{
       width:28px;height:28px;border-radius:50%;
@@ -278,37 +369,52 @@
       border-color:var(--purple);
       color:var(--purple);
     }
-    .flow-step b{font-size:8px;display:block}
-    .flow-step strong{font-size:12px;display:block;margin-top:2px}
+    .flow-step b{font-size:var(--fs-small);line-height:1.2;display:block}
+    .flow-step strong{font-size:var(--fs-strong);line-height:1.15;display:block;margin-top:4px}
     .success-rate{
       grid-column:1/-1;
       height:26px;
       display:flex;align-items:center;justify-content:center;
-      background:#fff2ee;border-radius:6px;font-size:8px;margin-top:-12px;
+      background:#fff2ee;border-radius:6px;font-size:var(--fs-small);margin-top:0;
+      align-self:end;
     }
-    .success-rate strong{color:var(--blue);font-size:12px;margin-left:5px}
+    .success-rate strong{color:var(--blue);font-size:var(--fs-strong);margin-left:6px}
 
-    .chart-wrap{height:160px}
+    .chart-wrap{flex:1;min-height:0}
     .chart-wrap svg{width:100%;height:100%}
     .axis{stroke:#dfe5ef;stroke-width:1}
     .line-a{fill:none;stroke:#705fe7;stroke-width:3}
     .line-b{fill:none;stroke:#51b56f;stroke-width:3}
     .pt-a{fill:#705fe7}.pt-b{fill:#51b56f}
-    .svg-text{fill:#7f8a9d;font-size:10px}
+    .svg-text{fill:#7f8a9d;font-size:11px;font-weight:600}
 
     /* 하단: 40% / 60%, 정확히 gap 12px */
     .bottom-grid{
+      min-height:0;
+      height:100%;
       display:grid;
       grid-template-columns:40fr 60fr;
       gap:var(--card-gap);
-      height:290px;
     }
-    .left-stack{display:grid;grid-template-rows:138px 142px;gap:var(--card-gap)}
-    .bar-card,.list-card,.table-card{padding:8px}
+    .left-stack{
+      min-height:0;
+      display:grid;
+      grid-template-rows:1fr 1fr;
+      gap:var(--card-gap);
+    }
+    .bar-card,.list-card,.table-card{
+      min-height:0;
+      height:100%;
+      padding:8px;
+    }
+    .table-card{
+      display:flex;
+      flex-direction:column;
+    }
     .bars{display:grid;gap:5px}
     .bar-row{
-      display:grid;grid-template-columns:74px 1fr 50px;
-      gap:5px;align-items:center;font-size:8px;
+      display:grid;grid-template-columns:82px 1fr 58px;
+      gap:6px;align-items:center;font-size:var(--fs-small);line-height:1.2;
     }
     .bar{
       height:6px;border-radius:6px;background:#eef2f7;overflow:hidden;
@@ -330,11 +436,16 @@
       transition:transform 180ms ease,background 180ms ease;
     }
     .mini-stat div:hover{transform:translateY(-3px);background:#faf9ff}
-    .mini-stat small{display:block;color:var(--muted);font-size:7px}
-    .mini-stat strong{font-size:12px;display:block;margin-top:1px}
+    .mini-stat small{display:block;color:var(--muted);font-size:var(--fs-meta);line-height:1.2}
+    .mini-stat strong{font-size:var(--fs-strong);line-height:1.15;display:block;margin-top:3px}
 
-    .table-wrap{overflow:auto;max-height:198px}
-    table{width:100%;border-collapse:collapse;font-size:8px}
+    .table-wrap{
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      max-height:none;
+    }
+    table{width:100%;border-collapse:collapse;font-size:var(--fs-table);line-height:1.25}
     th,td{
       padding:5px 6px;
       border-bottom:1px solid #edf1f6;
@@ -345,7 +456,7 @@
     tbody tr:hover{background:#f5f2ff}
 
     .badge{
-      padding:4px 7px;border-radius:999px;font-size:9px;font-weight:900;
+      padding:4px 8px;border-radius:999px;font-size:var(--fs-small);font-weight:900;
       display:inline-block;
     }
     .bg-green{background:#e8f7ed;color:#298d4e}
@@ -354,17 +465,10 @@
 
 
 
-    /* PC 전용: 모바일 반응형 사용 안 함 */
-    @media (max-height: 920px){
-      .sidebar{height:100vh}
-      .main{height:100vh;overflow:hidden}
-    }
-
-    @media (min-width:1280px){
-      .main{
-        max-height:100vh;
-        overflow:hidden;
-      }
+    /* PC 전용 안전장치: 1280px 미만에서는 가로 스크롤 허용 */
+    @media (max-width:1279px){
+      body{overflow:auto}
+      .layout{min-width:1280px}
     }
 
   </style>
@@ -409,7 +513,7 @@
     <section class="section">
       <div class="section-head">
         <h2>01. 핵심 현황</h2>
-        <span>5개 KPI / 카드간격 10px / 카드높이 82px</span>
+        <span>5개 KPI / 카드간격 10px / 화면높이 자동배분</span>
       </div>
       <div class="kpi-grid">
         <div class="card kpi-card">
@@ -438,7 +542,7 @@
     <section class="section">
       <div class="section-head">
         <h2>02. 상담 · 구직 · 취업 분석</h2>
-        <span>32% / 36% / 32% 유지 / 중앙 높이 206px</span>
+        <span>32% / 36% / 32% 유지 / 화면높이 자동배분</span>
       </div>
 
       <div class="analysis-grid">
@@ -493,7 +597,7 @@
     <section class="section">
       <div class="section-head">
         <h2>03. 상담 유형 · 매칭 · 최근 취업 현황</h2>
-        <span>하단 40% / 60% 분할 / 높이 290px / 간격 10px</span>
+        <span>하단 40% / 60% 분할 / 화면높이 자동배분 / 간격 10px</span>
       </div>
 
       <div class="bottom-grid">
@@ -517,7 +621,7 @@
               <div><small>기업 제안</small><strong>22</strong></div>
               <div><small>면접 예정</small><strong>17</strong></div>
             </div>
-            <div style="font-size:10px;color:var(--muted);line-height:1.8">
+            <div style="font-size:var(--fs-body);color:var(--muted);line-height:1.75">
               · 상담 미배정 7건<br>
               · 기업 회신 대기 12건<br>
               · 취업 후 사후상담 예정 9건
