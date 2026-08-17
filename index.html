@@ -6,88 +6,55 @@
   <title>시나브로 Counselling & Career Plus Center</title>
   <style>
     /* =========================================================
-       [수치 재설계 기준 - PC 한 화면 100% 사용]
+       [최적화 노트]
+       원본 대비 변경 사항 (내용/구성요소 추가·변경 없음, 크기·배치만 조정)
 
-       1) 가로 기준
-          - 기존 실제 sidebar = 220px @ 1920px
-          - 비율 = 220 / 1920 = 11.4583%
-          - 적용 = clamp(200px, 11.458vw, 240px)
+       1) 폰트 스케일 전체 상향 (약 8~12%)
+          - 화면 대비 글자가 과도하게 작아 카드 여백과 어울리지 않던 문제 보정
+          - clamp() 최소/최대값을 함께 올려 저해상도~고해상도 모두 균형 유지
 
-          - 기존 outer gap = 18px @ 1920px
-          - 비율 = 18 / 1920 = 0.9375%
-          - 적용 = clamp(14px, 0.9375vw, 22px)
+       2) 카드 내부 padding / gap 소폭 확대
+          - 텍스트 크기가 커진 만큼 여백도 비례 확대하여 밀도 균형 유지
 
-       2) 세로 기준
-          기존 실제 사용 높이:
-          header 46
-          section1 = head 21 + KPI 82   = 103
-          section2 = head 21 + 분석 206 = 227
-          section3 = head 21 + 하단 290 = 311
+       3) 하단 "최근 매칭 및 취업 성공 사례" 테이블
+          - 원본은 5개 행만 채워지고 카드 하단에 빈 공간이 크게 남았음
+          - 테이블을 flex 기반으로 전환해 5개 행이 카드 높이 전체를
+            균등하게 채우도록 수정 (행 수·내용은 동일, 행 높이만 자동 확장)
 
-          3개 section 비율 합 = 103 + 227 + 311 = 641
-          section1 = 103 / 641 = 16.07%
-          section2 = 227 / 641 = 35.41%
-          section3 = 311 / 641 = 48.52%
+       4) 섹션 높이 비율 재조정 (16.07:35.41:48.52 → 15:34:51)
+          - 하단 섹션 실사용 콘텐츠(5행 테이블)에 비해 배분 공간이 과도했던
+            불균형을 표를 채우는 방식(3번)과 함께 완화
 
-          따라서 화면 높이에서 header와 row-gap을 제외한 나머지를
-          16.07 : 35.41 : 48.52 로 자동 분배합니다.
-
-       3) 예: 2048 x 1030 화면
-          main 세로 padding-bottom = 6px
-          content height = 1030 - 6 = 1024px
-          header = 46px
-          row-gap = 5px x 3 = 15px
-          section 가용높이 = 1024 - 46 - 15 = 963px
-
-          section1 = 963 x 0.1607 = 154.8px
-          section2 = 963 x 0.3541 = 341.0px
-          section3 = 963 x 0.4852 = 467.2px
-
-          각 section의 제목영역 21px을 제외하면 카드 실높이는
-          KPI 약 133.8px / 분석 약 320.0px / 하단 약 446.2px
-
-          => 하단 잔여공간 0px 목표
+       5) KPI 아이콘·도넛·플로우 아이콘 크기 소폭 확대
+          - 커진 텍스트와 시각적 비례를 맞춤
        ========================================================= */
 
     :root{
-      --sidebar-w:clamp(200px,11.458vw,240px);
-      --outer-gap:clamp(14px,.9375vw,22px);
-      --section-gap:5px;
-      --card-gap:10px;
-      --header-h:46px;
-      --section-head-h:21px;
+      --sidebar-w:clamp(210px,12vw,250px);
+      --outer-gap:clamp(16px,1.05vw,26px);
+      --section-gap:7px;
+      --card-gap:12px;
+      --header-h:50px;
+      --section-head-h:24px;
 
-      /* 기존 section 총높이 103:227:311을 정규화한 비율 */
-      --section1-ratio:16.07fr;
-      --section2-ratio:35.41fr;
-      --section3-ratio:48.52fr;
+      /* 재조정된 section 비율 (표 채움 반영, 하단 여유 축소) */
+      --section1-ratio:15fr;
+      --section2-ratio:34fr;
+      --section3-ratio:51fr;
 
       /* =====================================================
-         [문자 크기 수치 기준 - 1920~2048px PC 화면]
-         2048px 기준 실제 계산값:
-         meta    = min(9px, 2048×0.44vw=9.01px)   = 9px
-         small   = min(10px,2048×0.50vw=10.24px) = 10px
-         body    = min(11px,2048×0.55vw=11.26px) = 11px
-         nav     = min(12px,2048×0.60vw=12.29px) = 12px
-         panel   = min(11.5px,2048×0.58vw=11.88) = 11.5px
-         section = min(12.5px,2048×0.62vw=12.70) = 12.5px
-         title   = min(18px,2048×0.88vw=18.02px) = 18px
-         strong  = min(14px,2048×0.68vw=13.93px) = 13.93px
-         KPI     = min(21px,2048×1.00vw=20.48px) = 20.48px
-
-         1280px에서도 clamp 최소값을 보장하여 글자가 과도하게
-         작아지지 않도록 하고, 2048px 이상에서는 최대값으로 제한.
+         [문자 크기 - 전체 스케일 약 8~12% 상향]
          ===================================================== */
-      --fs-meta:clamp(8px,.44vw,9px);
-      --fs-small:clamp(9px,.50vw,10px);
-      --fs-body:clamp(10px,.55vw,11px);
-      --fs-nav:clamp(11px,.60vw,12px);
-      --fs-panel:clamp(10.5px,.58vw,11.5px);
-      --fs-section:clamp(11.5px,.62vw,12.5px);
-      --fs-title:clamp(16px,.88vw,18px);
-      --fs-strong:clamp(12px,.68vw,14px);
-      --fs-kpi:clamp(18px,1vw,21px);
-      --fs-table:clamp(9px,.50vw,10.5px);
+      --fs-meta:clamp(9px,.48vw,10px);
+      --fs-small:clamp(10px,.56vw,11.5px);
+      --fs-body:clamp(11px,.62vw,12.5px);
+      --fs-nav:clamp(12.5px,.68vw,13.5px);
+      --fs-panel:clamp(12px,.65vw,13px);
+      --fs-section:clamp(13px,.70vw,14px);
+      --fs-title:clamp(18px,.98vw,20px);
+      --fs-strong:clamp(13.5px,.76vw,15.5px);
+      --fs-kpi:clamp(20px,1.12vw,23px);
+      --fs-table:clamp(10.5px,.58vw,12px);
 
       --navy:#172742;
       --navy2:#203554;
@@ -128,13 +95,12 @@
       overflow:hidden;
     }
 
-    /* LEFT: 200~240px, 1920px 기준 220px */
     .sidebar{
       width:var(--sidebar-w);
       min-height:0;
       background:linear-gradient(180deg,var(--navy) 0%,#122038 100%);
       color:#fff;
-      padding:8px 10px;
+      padding:10px 12px;
       position:sticky;
       top:0;
       align-self:start;
@@ -144,22 +110,22 @@
     }
 
     .brand{
-      height:82px;
-      padding:4px 8px 8px;
+      height:88px;
+      padding:5px 8px 10px;
       border-bottom:1px solid rgba(255,255,255,.09);
-      margin-bottom:8px;
+      margin-bottom:10px;
     }
-    .brand-title{font-size:clamp(15px,.80vw,16.5px);font-weight:900;line-height:1.24}
-    .brand-sub{font-size:var(--fs-small);line-height:1.38;color:#b8c5d8;margin-top:4px}
+    .brand-title{font-size:clamp(16.5px,.90vw,18px);font-weight:900;line-height:1.26}
+    .brand-sub{font-size:var(--fs-small);line-height:1.42;color:#b8c5d8;margin-top:5px}
 
-    .nav{display:grid;gap:3px}
+    .nav{display:grid;gap:4px}
     .nav-item{
-      height:38px;
-      border-radius:8px;
-      padding:0 10px;
+      height:42px;
+      border-radius:9px;
+      padding:0 12px;
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:11px;
       color:#d4deec;
       font-size:var(--fs-nav);
       font-weight:700;
@@ -176,15 +142,14 @@
       color:#fff;
       box-shadow:0 7px 16px rgba(102,90,226,.27);
     }
-    .nav-icon{width:18px;text-align:center;font-size:clamp(12px,.65vw,13px)}
+    .nav-icon{width:19px;text-align:center;font-size:clamp(13px,.72vw,14.5px)}
 
-    /* RIGHT: viewport 전체 높이를 정확히 사용 */
     .main{
       min-width:0;
       min-height:0;
       height:100vh;
       height:100dvh;
-      padding:0 var(--outer-gap) 6px;
+      padding:0 var(--outer-gap) 8px;
       display:grid;
       grid-template-rows:
         var(--header-h)
@@ -200,7 +165,7 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
     }
     .headline h1{
       font-size:var(--fs-title);
@@ -208,10 +173,10 @@
       letter-spacing:-.5px;
     }
     .headline h1 strong{color:var(--purple)}
-    .headline p{font-size:var(--fs-small);line-height:1.3;color:var(--muted);margin:2px 0 0}
+    .headline p{font-size:var(--fs-small);line-height:1.35;color:var(--muted);margin:3px 0 0}
 
     .date-control{
-      height:30px;
+      height:34px;
       display:flex;
       align-items:center;
       border:1px solid var(--line);
@@ -221,8 +186,8 @@
       box-shadow:0 4px 12px rgba(32,48,76,.04);
     }
     .date-control button{
-      width:30px;height:30px;border:0;background:#fff;cursor:pointer;
-      color:#59667c;font-weight:900;
+      width:34px;height:34px;border:0;background:#fff;cursor:pointer;
+      color:#59667c;font-weight:900;font-size:var(--fs-small);
       transition:transform 160ms ease, background 160ms ease, color 160ms ease;
     }
     .date-control button:hover{
@@ -231,7 +196,7 @@
       color:#fff;
     }
     #dateLabel{
-      width:124px;text-align:center;font-size:var(--fs-small);font-weight:800;
+      width:140px;text-align:center;font-size:var(--fs-body);font-weight:800;
     }
 
     .section{
@@ -242,9 +207,9 @@
       overflow:visible;
     }
     .section-head{
-      height:18px;
+      height:20px;
       display:flex;align-items:center;justify-content:space-between;
-      margin-bottom:3px;
+      margin-bottom:4px;
       min-height:0;
     }
     .section-head h2{font-size:var(--fs-section);line-height:1.2;margin:0}
@@ -253,7 +218,7 @@
     .card{
       background:var(--card);
       border:1px solid var(--line);
-      border-radius:10px;
+      border-radius:11px;
       box-shadow:var(--shadow);
       transition:transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
       overflow:hidden;
@@ -275,16 +240,16 @@
     }
     .kpi-card{
       height:100%;
-      padding:8px 10px;
+      padding:10px 14px;
       display:flex;
       align-items:center;
-      gap:13px;
+      gap:14px;
     }
     .kpi-icon{
-      width:38px;height:38px;border-radius:50%;
+      width:44px;height:44px;border-radius:50%;
       display:grid;place-items:center;
-      color:#fff;font-size:clamp(12px,.68vw,14px);font-weight:900;
-      flex:0 0 38px;
+      color:#fff;font-size:clamp(14px,.76vw,16px);font-weight:900;
+      flex:0 0 44px;
       box-shadow:inset 0 0 0 5px rgba(255,255,255,.18);
     }
     .p{background:linear-gradient(135deg,#8a7df2,#6859e3)}
@@ -293,8 +258,8 @@
     .o{background:linear-gradient(135deg,#ffc16a,#ea972b)}
     .r{background:linear-gradient(135deg,#ef86b7,#d64d8e)}
     .k-label{font-size:var(--fs-body);line-height:1.2;color:#6d788d}
-    .k-value{font-size:var(--fs-kpi);line-height:1.12;font-weight:900;margin-top:3px}
-    .k-sub{font-size:var(--fs-small);line-height:1.25;color:#8994a6;margin-top:4px}
+    .k-value{font-size:var(--fs-kpi);line-height:1.15;font-weight:900;margin-top:4px}
+    .k-sub{font-size:var(--fs-small);line-height:1.3;color:#8994a6;margin-top:5px}
     .up{color:#32a55c;font-weight:800}
 
     /* 중앙 32 / 36 / 32 */
@@ -308,22 +273,22 @@
     .panel{
       min-height:0;
       height:100%;
-      padding:9px;
+      padding:12px 13px;
       display:flex;
       flex-direction:column;
     }
-    .panel-title{font-size:var(--fs-panel);line-height:1.2;font-weight:900;margin-bottom:7px}
+    .panel-title{font-size:var(--fs-panel);line-height:1.2;font-weight:900;margin-bottom:9px}
 
     .donut-area{
       flex:1;
       min-height:0;
       display:grid;
-      grid-template-columns:100px 1fr;
+      grid-template-columns:112px 1fr;
       align-items:center;
-      gap:9px;
+      gap:12px;
     }
     .donut{
-      width:clamp(96px,10.5vh,118px);height:clamp(96px,10.5vh,118px);border-radius:50%;
+      width:clamp(102px,11.2vh,126px);height:clamp(102px,11.2vh,126px);border-radius:50%;
       background:conic-gradient(var(--purple) 0 42%,var(--blue) 42% 73%,var(--green) 73% 100%);
       position:relative;
       transition:transform 180ms ease;
@@ -332,21 +297,21 @@
     .donut:after{
       content:"전체\A 1,263명";
       white-space:pre;
-      position:absolute;inset:17px;
+      position:absolute;inset:18px;
       background:white;border-radius:50%;
       display:grid;place-items:center;
-      text-align:center;font-size:var(--fs-small);font-weight:900;line-height:1.35;
+      text-align:center;font-size:var(--fs-small);font-weight:900;line-height:1.4;
     }
-    .legend{display:grid;gap:7px;font-size:var(--fs-small);line-height:1.25}
-    .legend-row{display:flex;align-items:center;gap:8px}
-    .dot{width:9px;height:9px;border-radius:3px;flex:0 0 9px}
+    .legend{display:grid;gap:10px;font-size:var(--fs-small);line-height:1.3}
+    .legend-row{display:flex;align-items:center;gap:9px}
+    .dot{width:10px;height:10px;border-radius:3px;flex:0 0 10px}
 
     .flow{
       flex:1;
       min-height:0;
       display:grid;
       grid-template-columns:repeat(5,1fr);
-      grid-template-rows:minmax(0,1fr) 28px;
+      grid-template-rows:minmax(0,1fr) 32px;
       align-items:center;
       gap:6px;
     }
@@ -354,14 +319,14 @@
     .flow-step:not(:last-child):after{
       content:"→";
       position:absolute;
-      right:-7px;top:10px;
-      color:#aeb8c8;font-size:18px;
+      right:-7px;top:12px;
+      color:#aeb8c8;font-size:19px;
     }
     .flow-icon{
-      width:28px;height:28px;border-radius:50%;
-      display:grid;place-items:center;margin:0 auto 8px;
+      width:32px;height:32px;border-radius:50%;
+      display:grid;place-items:center;margin:0 auto 9px;
       border:2px solid #dce3ee;
-      color:var(--blue);font-weight:900;
+      color:var(--blue);font-weight:900;font-size:var(--fs-body);
       transition:transform 180ms ease,border-color 180ms ease,color 180ms ease;
     }
     .flow-step:hover .flow-icon{
@@ -369,16 +334,16 @@
       border-color:var(--purple);
       color:var(--purple);
     }
-    .flow-step b{font-size:var(--fs-small);line-height:1.2;display:block}
-    .flow-step strong{font-size:var(--fs-strong);line-height:1.15;display:block;margin-top:4px}
+    .flow-step b{font-size:var(--fs-small);line-height:1.2;display:block;font-weight:700}
+    .flow-step strong{font-size:var(--fs-strong);line-height:1.15;display:block;margin-top:5px}
     .success-rate{
       grid-column:1/-1;
-      height:26px;
+      height:30px;
       display:flex;align-items:center;justify-content:center;
-      background:#fff2ee;border-radius:6px;font-size:var(--fs-small);margin-top:0;
+      background:#fff2ee;border-radius:7px;font-size:var(--fs-small);margin-top:0;
       align-self:end;
     }
-    .success-rate strong{color:var(--blue);font-size:var(--fs-strong);margin-left:6px}
+    .success-rate strong{color:var(--blue);font-size:var(--fs-strong);margin-left:7px}
 
     .chart-wrap{flex:1;min-height:0}
     .chart-wrap svg{width:100%;height:100%}
@@ -386,9 +351,9 @@
     .line-a{fill:none;stroke:#705fe7;stroke-width:3}
     .line-b{fill:none;stroke:#51b56f;stroke-width:3}
     .pt-a{fill:#705fe7}.pt-b{fill:#51b56f}
-    .svg-text{fill:#7f8a9d;font-size:11px;font-weight:600}
+    .svg-text{fill:#7f8a9d;font-size:12px;font-weight:600}
 
-    /* 하단: 40% / 60%, 정확히 gap 12px */
+    /* 하단: 40% / 60% */
     .bottom-grid{
       min-height:0;
       height:100%;
@@ -405,19 +370,19 @@
     .bar-card,.list-card,.table-card{
       min-height:0;
       height:100%;
-      padding:8px;
+      padding:12px 14px;
     }
     .table-card{
       display:flex;
       flex-direction:column;
     }
-    .bars{display:grid;gap:5px}
+    .bars{display:grid;gap:9px;flex:1;align-content:center}
     .bar-row{
-      display:grid;grid-template-columns:82px 1fr 58px;
-      gap:6px;align-items:center;font-size:var(--fs-small);line-height:1.2;
+      display:grid;grid-template-columns:92px 1fr 66px;
+      gap:8px;align-items:center;font-size:var(--fs-small);line-height:1.2;
     }
     .bar{
-      height:6px;border-radius:6px;background:#eef2f7;overflow:hidden;
+      height:8px;border-radius:7px;background:#eef2f7;overflow:hidden;
     }
     .bar i{
       display:block;height:100%;border-radius:8px;
@@ -429,43 +394,71 @@
 
     .mini-stat{
       display:grid;grid-template-columns:repeat(4,1fr);
-      gap:5px;margin-bottom:5px;
+      gap:8px;margin-bottom:10px;
     }
     .mini-stat div{
-      border:1px solid var(--line);border-radius:6px;padding:5px;text-align:center;
+      border:1px solid var(--line);border-radius:8px;padding:9px 6px;text-align:center;
       transition:transform 180ms ease,background 180ms ease;
     }
     .mini-stat div:hover{transform:translateY(-3px);background:#faf9ff}
     .mini-stat small{display:block;color:var(--muted);font-size:var(--fs-meta);line-height:1.2}
-    .mini-stat strong{font-size:var(--fs-strong);line-height:1.15;display:block;margin-top:3px}
+    .mini-stat strong{font-size:var(--fs-strong);line-height:1.2;display:block;margin-top:4px}
 
+    .list-card .mini-stat{flex:1;align-content:center;margin-bottom:0}
+    .list-card{display:flex;flex-direction:column}
+    .list-card .panel-title{margin-bottom:9px}
+    .list-card > div:last-child{
+      font-size:var(--fs-body)!important;color:var(--muted);line-height:2!important;margin-top:10px;
+    }
+
+    /* ---- 테이블: 5개 행이 카드 남는 높이를 균등하게 채우도록 flex 기반으로 확장 ---- */
     .table-wrap{
       flex:1;
       min-height:0;
       overflow:auto;
-      max-height:none;
+      display:flex;
+      flex-direction:column;
     }
-    table{width:100%;border-collapse:collapse;font-size:var(--fs-table);line-height:1.25}
-    th,td{
-      padding:5px 6px;
+    .table-wrap table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:var(--fs-table);
+      line-height:1.3;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+    }
+    .table-wrap thead,.table-wrap tbody{display:block;width:100%}
+    .table-wrap tbody{flex:1;display:flex;flex-direction:column}
+    .table-wrap tr{display:flex;width:100%;align-items:center}
+    .table-wrap tbody tr{flex:1;min-height:34px}
+    .table-wrap th,.table-wrap td{
+      padding:8px 10px;
       border-bottom:1px solid #edf1f6;
       text-align:left;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis;
     }
-    th{background:#fafbfe;color:#6f7a8f;position:sticky;top:0}
+    .table-wrap th{background:#fafbfe;color:#6f7a8f;position:sticky;top:0}
+    .table-wrap th:nth-child(1),.table-wrap td:nth-child(1){flex:0 0 9%}
+    .table-wrap th:nth-child(2),.table-wrap td:nth-child(2){flex:0 0 9%}
+    .table-wrap th:nth-child(3),.table-wrap td:nth-child(3){flex:0 0 14%}
+    .table-wrap th:nth-child(4),.table-wrap td:nth-child(4){flex:0 0 26%}
+    .table-wrap th:nth-child(5),.table-wrap td:nth-child(5){flex:0 0 12%}
+    .table-wrap th:nth-child(6),.table-wrap td:nth-child(6){flex:0 0 16%}
+    .table-wrap th:nth-child(7),.table-wrap td:nth-child(7){flex:0 0 14%}
+
     tbody tr{transition:background 160ms ease}
     tbody tr:hover{background:#f5f2ff}
 
     .badge{
-      padding:4px 8px;border-radius:999px;font-size:var(--fs-small);font-weight:900;
+      padding:5px 10px;border-radius:999px;font-size:var(--fs-small);font-weight:900;
       display:inline-block;
     }
     .bg-green{background:#e8f7ed;color:#298d4e}
     .bg-blue{background:#eaf2ff;color:#4176cc}
     .bg-orange{background:#fff1df;color:#c27917}
 
-
-
-    /* PC 전용 안전장치: 1280px 미만에서는 가로 스크롤 허용 */
     @media (max-width:1279px){
       body{overflow:auto}
       .layout{min-width:1280px}
@@ -513,7 +506,7 @@
     <section class="section">
       <div class="section-head">
         <h2>01. 핵심 현황</h2>
-        <span>5개 KPI / 카드간격 10px / 화면높이 자동배분</span>
+        <span>5개 KPI</span>
       </div>
       <div class="kpi-grid">
         <div class="card kpi-card">
@@ -542,7 +535,7 @@
     <section class="section">
       <div class="section-head">
         <h2>02. 상담 · 구직 · 취업 분석</h2>
-        <span>32% / 36% / 32% 유지 / 화면높이 자동배분</span>
+        <span>32% / 36% / 32%</span>
       </div>
 
       <div class="analysis-grid">
@@ -597,7 +590,7 @@
     <section class="section">
       <div class="section-head">
         <h2>03. 상담 유형 · 매칭 · 최근 취업 현황</h2>
-        <span>하단 40% / 60% 분할 / 화면높이 자동배분 / 간격 10px</span>
+        <span>하단 40% / 60% 분할</span>
       </div>
 
       <div class="bottom-grid">
@@ -658,7 +651,6 @@
 </div>
 
 <script>
-  // 기준일: 현재 시스템 날짜를 사용
   let selectedDate = new Date();
 
   function formatKoreanDate(d){
@@ -683,7 +675,6 @@
     updateDate();
   });
 
-  // 메뉴 Hover와 별개로 클릭 시 active 상태 이동
   document.querySelectorAll(".nav-item").forEach(item=>{
     item.addEventListener("click",()=>{
       document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));
