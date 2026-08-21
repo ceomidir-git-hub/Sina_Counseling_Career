@@ -3,478 +3,143 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>시나브로 Counselling & Career Plus Center</title>
+  <title>시나브로 Counselling & Career Plus Center - 2분할 Dashboard</title>
   <style>
-    /* =========================================================
-       [최적화 노트]
-       원본 대비 변경 사항 (내용/구성요소 추가·변경 없음, 크기·배치만 조정)
-
-       1) 폰트 스케일 전체 상향 (약 8~12%)
-          - 화면 대비 글자가 과도하게 작아 카드 여백과 어울리지 않던 문제 보정
-          - clamp() 최소/최대값을 함께 올려 저해상도~고해상도 모두 균형 유지
-
-       2) 카드 내부 padding / gap 소폭 확대
-          - 텍스트 크기가 커진 만큼 여백도 비례 확대하여 밀도 균형 유지
-
-       3) 하단 "최근 매칭 및 취업 성공 사례" 테이블
-          - 원본은 5개 행만 채워지고 카드 하단에 빈 공간이 크게 남았음
-          - 테이블을 flex 기반으로 전환해 5개 행이 카드 높이 전체를
-            균등하게 채우도록 수정 (행 수·내용은 동일, 행 높이만 자동 확장)
-
-       4) 섹션 높이 비율 재조정 (16.07:35.41:48.52 → 15:34:51)
-          - 하단 섹션 실사용 콘텐츠(5행 테이블)에 비해 배분 공간이 과도했던
-            불균형을 표를 채우는 방식(3번)과 함께 완화
-
-       5) KPI 아이콘·도넛·플로우 아이콘 크기 소폭 확대
-          - 커진 텍스트와 시각적 비례를 맞춤
-       ========================================================= */
-
     :root{
-      --sidebar-w:clamp(210px,12vw,250px);
-      --outer-gap:clamp(16px,1.05vw,26px);
-      --section-gap:7px;
-      --card-gap:12px;
-      --header-h:50px;
-      --section-head-h:24px;
-
-      /* 재조정된 section 비율 (표 채움 반영, 하단 여유 축소) */
-      --section1-ratio:15fr;
-      --section2-ratio:34fr;
-      --section3-ratio:51fr;
-
-      /* =====================================================
-         [문자 크기 - 전체 스케일 약 8~12% 상향]
-         ===================================================== */
-      --fs-meta:clamp(9px,.48vw,10px);
-      --fs-small:clamp(10px,.56vw,11.5px);
-      --fs-body:clamp(11px,.62vw,12.5px);
-      --fs-nav:clamp(12.5px,.68vw,13.5px);
-      --fs-panel:clamp(12px,.65vw,13px);
-      --fs-section:clamp(13px,.70vw,14px);
-      --fs-title:clamp(18px,.98vw,20px);
-      --fs-strong:clamp(13.5px,.76vw,15.5px);
-      --fs-kpi:clamp(20px,1.12vw,23px);
-      --fs-table:clamp(10.5px,.58vw,12px);
-
-      --navy:#172742;
-      --navy2:#203554;
+      --sidebar-w:210px;
+      --gap:10px;
       --bg:#f4f7fb;
-      --card:#ffffff;
+      --card:#fff;
       --line:#dfe5ef;
       --text:#1d2940;
       --muted:#7f8a9c;
+      --navy:#172742;
       --purple:#6c63e8;
       --blue:#4e90f8;
       --green:#4eb875;
       --orange:#f0a540;
       --pink:#db5b99;
-      --shadow:0 8px 22px rgba(32,48,76,.08);
-      --shadow-hover:0 15px 30px rgba(32,48,76,.15);
+      --shadow:0 6px 18px rgba(32,48,76,.08);
     }
 
     *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      width:100%;
-      height:100%;
-      font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
-    }
-    body{
-      background:var(--bg);
-      color:var(--text);
-      min-width:1280px;
-      overflow:hidden;
-    }
+    html,body{margin:0;width:100%;height:100%;font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif}
+    body{background:var(--bg);color:var(--text);min-width:1440px;overflow:hidden}
 
     .layout{
-      width:100vw;
-      height:100vh;
-      height:100dvh;
-      display:grid;
+      width:100vw;height:100vh;display:grid;
       grid-template-columns:var(--sidebar-w) minmax(0,1fr);
       overflow:hidden;
     }
 
+    /* ---------------- Sidebar: 기존 구조 유지 ---------------- */
     .sidebar{
-      width:var(--sidebar-w);
-      min-height:0;
       background:linear-gradient(180deg,var(--navy) 0%,#122038 100%);
-      color:#fff;
-      padding:10px 12px;
-      position:sticky;
-      top:0;
-      align-self:start;
-      height:100vh;
-      height:100dvh;
-      overflow:hidden;
+      color:#fff;padding:10px 10px;height:100vh;overflow:hidden;
     }
-
-    .brand{
-      height:88px;
-      padding:5px 8px 10px;
-      border-bottom:1px solid rgba(255,255,255,.09);
-      margin-bottom:10px;
-    }
-    .brand-title{font-size:clamp(16.5px,.90vw,18px);font-weight:900;line-height:1.26}
-    .brand-sub{font-size:var(--fs-small);line-height:1.42;color:#b8c5d8;margin-top:5px}
-
+    .brand{height:82px;padding:4px 6px 10px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:10px}
+    .brand-title{font-size:16px;font-weight:900;line-height:1.25}
+    .brand-sub{font-size:10px;line-height:1.4;color:#b8c5d8;margin-top:5px}
     .nav{display:grid;gap:4px}
     .nav-item{
-      height:42px;
-      border-radius:9px;
-      padding:0 12px;
-      display:flex;
-      align-items:center;
-      gap:11px;
-      color:#d4deec;
-      font-size:var(--fs-nav);
-      font-weight:700;
-      cursor:pointer;
-      transition:transform 180ms ease, background 180ms ease, color 180ms ease;
+      height:38px;border-radius:8px;padding:0 10px;display:flex;align-items:center;gap:9px;
+      color:#d4deec;font-size:12px;font-weight:700;cursor:pointer;transition:.18s ease;
     }
-    .nav-item:hover{
-      transform:translateX(4px);
-      background:rgba(255,255,255,.10);
-      color:#fff;
-    }
-    .nav-item.active{
-      background:linear-gradient(135deg,#7466ef,#5d58d8);
-      color:#fff;
-      box-shadow:0 7px 16px rgba(102,90,226,.27);
-    }
-    .nav-icon{width:19px;text-align:center;font-size:clamp(13px,.72vw,14.5px)}
+    .nav-item:hover{transform:translateX(3px);background:rgba(255,255,255,.09);color:#fff}
+    .nav-item.active{background:linear-gradient(135deg,#7466ef,#5d58d8);color:#fff;box-shadow:0 6px 14px rgba(102,90,226,.25)}
+    .nav-icon{width:18px;text-align:center}
 
-    .main{
-      min-width:0;
-      min-height:0;
-      height:100vh;
-      height:100dvh;
-      padding:0 var(--outer-gap) 8px;
-      display:grid;
-      grid-template-rows:
-        var(--header-h)
-        minmax(0,var(--section1-ratio))
-        minmax(0,var(--section2-ratio))
-        minmax(0,var(--section3-ratio));
-      row-gap:var(--section-gap);
-      overflow:hidden;
-    }
+    /* ---------------- Main ---------------- */
+    .main{min-width:0;height:100vh;padding:8px 12px 10px;display:grid;grid-template-rows:42px minmax(0,1fr);gap:8px;overflow:hidden}
 
-    .topbar{
-      height:var(--header-h);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .headline h1{font-size:18px;margin:0;letter-spacing:-.4px}.headline h1 strong{color:var(--purple)}
+    .headline p{font-size:10px;color:var(--muted);margin:3px 0 0}
+    .date-control{height:30px;display:flex;align-items:center;border:1px solid var(--line);background:#fff;border-radius:9px;overflow:hidden}
+    .date-control button{width:30px;height:30px;border:0;background:#fff;color:#59667c;font-weight:900;cursor:pointer}
+    #dateLabel{width:128px;text-align:center;font-size:10.5px;font-weight:800}
+
+    /* 핵심: 우측 화면 50 : 50 정확한 2분할 */
+    .split-dashboard{
+      min-height:0;height:100%;display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
       gap:12px;
     }
-    .headline h1{
-      font-size:var(--fs-title);
-      margin:0;
-      letter-spacing:-.5px;
-    }
-    .headline h1 strong{color:var(--purple)}
-    .headline p{font-size:var(--fs-small);line-height:1.35;color:var(--muted);margin:3px 0 0}
 
-    .date-control{
-      height:34px;
-      display:flex;
-      align-items:center;
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:10px;
-      overflow:hidden;
-      box-shadow:0 4px 12px rgba(32,48,76,.04);
-    }
-    .date-control button{
-      width:34px;height:34px;border:0;background:#fff;cursor:pointer;
-      color:#59667c;font-weight:900;font-size:var(--fs-small);
-      transition:transform 160ms ease, background 160ms ease, color 160ms ease;
-    }
-    .date-control button:hover{
-      transform:scale(1.04);
-      background:var(--purple);
-      color:#fff;
-    }
-    #dateLabel{
-      width:140px;text-align:center;font-size:var(--fs-body);font-weight:800;
-    }
-
-    .section{
-      min-height:0;
-      margin:0;
+    .dashboard-pane{
+      min-width:0;min-height:0;
       display:grid;
-      grid-template-rows:var(--section-head-h) minmax(0,1fr);
-      overflow:visible;
-    }
-    .section-head{
-      height:20px;
-      display:flex;align-items:center;justify-content:space-between;
-      margin-bottom:4px;
-      min-height:0;
-    }
-    .section-head h2{font-size:var(--fs-section);line-height:1.2;margin:0}
-    .section-head span{font-size:var(--fs-meta);line-height:1.2;color:var(--muted)}
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:11px;
-      box-shadow:var(--shadow);
-      transition:transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+      grid-template-rows:28px 116px minmax(0,1fr) minmax(0,1fr);
+      gap:8px;
+      padding:8px;
+      background:rgba(255,255,255,.30);
+      border:1px solid #e4e9f1;
+      border-radius:12px;
       overflow:hidden;
     }
-    .card:hover{
-      transform:translateY(-2px) scale(1.006);
-      box-shadow:var(--shadow-hover);
-      border-color:#cbd5e5;
-      z-index:2;
-    }
 
-    /* KPI = exact 5 equal columns */
-    .kpi-grid{
-      min-height:0;
-      height:100%;
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:var(--card-gap);
-    }
-    .kpi-card{
-      height:100%;
-      padding:10px 14px;
-      display:flex;
-      align-items:center;
-      gap:14px;
-    }
-    .kpi-icon{
-      width:44px;height:44px;border-radius:50%;
-      display:grid;place-items:center;
-      color:#fff;font-size:clamp(14px,.76vw,16px);font-weight:900;
-      flex:0 0 44px;
-      box-shadow:inset 0 0 0 5px rgba(255,255,255,.18);
-    }
+    /* 중앙 분리선을 명확하게 */
+    .dashboard-pane:first-child{border-right:2px solid #cfd7e5}
+
+    .pane-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px}
+    .pane-head h2{font-size:13px;margin:0}.pane-head span{font-size:9px;color:var(--muted)}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;transition:.18s ease}
+    .card:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(32,48,76,.12)}
+
+    /* 각 패널의 구조를 동일하게 유지: KPI 3개 → 분석 2개 → 하단 2개 */
+    .kpi-grid{height:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .kpi-card{padding:10px;display:flex;align-items:center;gap:9px}
+    .kpi-icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:900;flex:0 0 36px;box-shadow:inset 0 0 0 4px rgba(255,255,255,.18)}
     .p{background:linear-gradient(135deg,#8a7df2,#6859e3)}
     .b{background:linear-gradient(135deg,#69a9ff,#407fe8)}
     .g{background:linear-gradient(135deg,#69cb89,#3da95f)}
     .o{background:linear-gradient(135deg,#ffc16a,#ea972b)}
     .r{background:linear-gradient(135deg,#ef86b7,#d64d8e)}
-    .k-label{font-size:var(--fs-body);line-height:1.2;color:#6d788d}
-    .k-value{font-size:var(--fs-kpi);line-height:1.15;font-weight:900;margin-top:4px}
-    .k-sub{font-size:var(--fs-small);line-height:1.3;color:#8994a6;margin-top:5px}
-    .up{color:#32a55c;font-weight:800}
+    .k-label{font-size:10px;color:#6d788d;white-space:nowrap}.k-value{font-size:17px;font-weight:900;margin-top:3px;white-space:nowrap}.k-sub{font-size:9px;color:#8994a6;margin-top:4px}.up{color:#32a55c;font-weight:800}
 
-    /* 중앙 32 / 36 / 32 */
-    .analysis-grid{
-      min-height:0;
-      height:100%;
-      display:grid;
-      grid-template-columns:32fr 36fr 32fr;
-      gap:var(--card-gap);
-    }
-    .panel{
-      min-height:0;
-      height:100%;
-      padding:12px 13px;
-      display:flex;
-      flex-direction:column;
-    }
-    .panel-title{font-size:var(--fs-panel);line-height:1.2;font-weight:900;margin-bottom:9px}
+    .analysis-grid,.bottom-grid{min-height:0;height:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .panel{min-height:0;padding:10px;display:flex;flex-direction:column}.panel-title{font-size:11px;font-weight:900;margin-bottom:7px;white-space:nowrap}
 
-    .donut-area{
-      flex:1;
-      min-height:0;
-      display:grid;
-      grid-template-columns:112px 1fr;
-      align-items:center;
-      gap:12px;
-    }
-    .donut{
-      width:clamp(102px,11.2vh,126px);height:clamp(102px,11.2vh,126px);border-radius:50%;
-      background:conic-gradient(var(--purple) 0 42%,var(--blue) 42% 73%,var(--green) 73% 100%);
-      position:relative;
-      transition:transform 180ms ease;
-    }
-    .card:hover .donut{transform:rotate(4deg) scale(1.03)}
-    .donut:after{
-      content:"전체\A 1,263명";
-      white-space:pre;
-      position:absolute;inset:18px;
-      background:white;border-radius:50%;
-      display:grid;place-items:center;
-      text-align:center;font-size:var(--fs-small);font-weight:900;line-height:1.4;
-    }
-    .legend{display:grid;gap:10px;font-size:var(--fs-small);line-height:1.3}
-    .legend-row{display:flex;align-items:center;gap:9px}
-    .dot{width:10px;height:10px;border-radius:3px;flex:0 0 10px}
+    .donut-area{flex:1;min-height:0;display:grid;grid-template-columns:90px 1fr;align-items:center;gap:8px}
+    .donut{width:84px;height:84px;border-radius:50%;position:relative;background:conic-gradient(var(--purple) 0 42%,var(--blue) 42% 73%,var(--green) 73% 100%)}
+    .donut:after{content:"전체\A 1,263명";white-space:pre;position:absolute;inset:15px;background:white;border-radius:50%;display:grid;place-items:center;text-align:center;font-size:9px;font-weight:900;line-height:1.3}
+    .legend{display:grid;gap:7px;font-size:9px}.legend-row{display:flex;align-items:center;gap:6px}.dot{width:8px;height:8px;border-radius:2px;flex:0 0 8px}
 
-    .flow{
-      flex:1;
-      min-height:0;
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      grid-template-rows:minmax(0,1fr) 32px;
-      align-items:center;
-      gap:6px;
-    }
-    .flow-step{text-align:center;position:relative}
-    .flow-step:not(:last-child):after{
-      content:"→";
-      position:absolute;
-      right:-7px;top:12px;
-      color:#aeb8c8;font-size:19px;
-    }
-    .flow-icon{
-      width:32px;height:32px;border-radius:50%;
-      display:grid;place-items:center;margin:0 auto 9px;
-      border:2px solid #dce3ee;
-      color:var(--blue);font-weight:900;font-size:var(--fs-body);
-      transition:transform 180ms ease,border-color 180ms ease,color 180ms ease;
-    }
-    .flow-step:hover .flow-icon{
-      transform:scale(1.08);
-      border-color:var(--purple);
-      color:var(--purple);
-    }
-    .flow-step b{font-size:var(--fs-small);line-height:1.2;display:block;font-weight:700}
-    .flow-step strong{font-size:var(--fs-strong);line-height:1.15;display:block;margin-top:5px}
-    .success-rate{
-      grid-column:1/-1;
-      height:30px;
-      display:flex;align-items:center;justify-content:center;
-      background:#fff2ee;border-radius:7px;font-size:var(--fs-small);margin-top:0;
-      align-self:end;
-    }
-    .success-rate strong{color:var(--blue);font-size:var(--fs-strong);margin-left:7px}
+    .flow{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:1fr 26px;align-items:center;gap:2px}
+    .flow-step{text-align:center;position:relative}.flow-step:not(:last-child):after{content:"→";position:absolute;right:-4px;top:7px;color:#aeb8c8;font-size:13px}
+    .flow-icon{width:25px;height:25px;border:1.5px solid #dce3ee;border-radius:50%;display:grid;place-items:center;margin:0 auto 5px;color:var(--blue);font-size:9px;font-weight:900}
+    .flow-step b{display:block;font-size:8.5px;font-weight:700;white-space:nowrap}.flow-step strong{display:block;font-size:10.5px;margin-top:3px}
+    .success-rate{grid-column:1/-1;height:24px;display:flex;align-items:center;justify-content:center;background:#fff2ee;border-radius:6px;font-size:8.5px}.success-rate strong{color:var(--blue);font-size:10px;margin-left:4px}
 
-    .chart-wrap{flex:1;min-height:0}
-    .chart-wrap svg{width:100%;height:100%}
-    .axis{stroke:#dfe5ef;stroke-width:1}
-    .line-a{fill:none;stroke:#705fe7;stroke-width:3}
-    .line-b{fill:none;stroke:#51b56f;stroke-width:3}
-    .pt-a{fill:#705fe7}.pt-b{fill:#51b56f}
-    .svg-text{fill:#7f8a9d;font-size:12px;font-weight:600}
+    .chart-wrap{flex:1;min-height:0}.chart-wrap svg{width:100%;height:100%}.axis{stroke:#dfe5ef;stroke-width:1}.line-a{fill:none;stroke:#705fe7;stroke-width:3}.line-b{fill:none;stroke:#51b56f;stroke-width:3}.pt-a{fill:#705fe7}.pt-b{fill:#51b56f}.svg-text{fill:#7f8a9d;font-size:9px;font-weight:600}
 
-    /* 하단: 40% / 60% */
-    .bottom-grid{
-      min-height:0;
-      height:100%;
-      display:grid;
-      grid-template-columns:40fr 60fr;
-      gap:var(--card-gap);
-    }
-    .left-stack{
-      min-height:0;
-      display:grid;
-      grid-template-rows:1fr 1fr;
-      gap:var(--card-gap);
-    }
-    .bar-card,.list-card,.table-card{
-      min-height:0;
-      height:100%;
-      padding:12px 14px;
-    }
-    .table-card{
-      display:flex;
-      flex-direction:column;
-    }
-    .bars{display:grid;gap:9px;flex:1;align-content:center}
-    .bar-row{
-      display:grid;grid-template-columns:92px 1fr 66px;
-      gap:8px;align-items:center;font-size:var(--fs-small);line-height:1.2;
-    }
-    .bar{
-      height:8px;border-radius:7px;background:#eef2f7;overflow:hidden;
-    }
-    .bar i{
-      display:block;height:100%;border-radius:8px;
-      background:linear-gradient(90deg,#7663e9,#6aa7f8);
-      transition:transform 180ms ease,filter 180ms ease;
-      transform-origin:left;
-    }
-    .bar-row:hover i{transform:scaleX(1.03);filter:brightness(1.05)}
+    .bars{display:grid;gap:7px;flex:1;align-content:center}.bar-row{display:grid;grid-template-columns:65px 1fr 52px;gap:5px;align-items:center;font-size:8.7px}.bar{height:6px;background:#eef2f7;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#7663e9,#6aa7f8)}
 
-    .mini-stat{
-      display:grid;grid-template-columns:repeat(4,1fr);
-      gap:8px;margin-bottom:10px;
-    }
-    .mini-stat div{
-      border:1px solid var(--line);border-radius:8px;padding:9px 6px;text-align:center;
-      transition:transform 180ms ease,background 180ms ease;
-    }
-    .mini-stat div:hover{transform:translateY(-3px);background:#faf9ff}
-    .mini-stat small{display:block;color:var(--muted);font-size:var(--fs-meta);line-height:1.2}
-    .mini-stat strong{font-size:var(--fs-strong);line-height:1.2;display:block;margin-top:4px}
+    .mini-stat{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:6px}.mini-stat div{border:1px solid var(--line);border-radius:7px;padding:6px;text-align:center}.mini-stat small{display:block;color:var(--muted);font-size:8px}.mini-stat strong{display:block;font-size:12px;margin-top:2px}
+    .note-list{font-size:8.7px;color:var(--muted);line-height:1.8;margin-top:auto}
 
-    .list-card .mini-stat{flex:1;align-content:center;margin-bottom:0}
-    .list-card{display:flex;flex-direction:column}
-    .list-card .panel-title{margin-bottom:9px}
-    .list-card > div:last-child{
-      font-size:var(--fs-body)!important;color:var(--muted);line-height:2!important;margin-top:10px;
-    }
+    .table-wrap{flex:1;min-height:0;overflow:hidden}.table-wrap table{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font-size:8.2px}.table-wrap th,.table-wrap td{padding:5px 4px;border-bottom:1px solid #edf1f6;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.table-wrap th{background:#fafbfe;color:#6f7a8f}.badge{padding:3px 6px;border-radius:999px;font-size:7.8px;font-weight:900;display:inline-block}.bg-green{background:#e8f7ed;color:#298d4e}.bg-blue{background:#eaf2ff;color:#4176cc}.bg-orange{background:#fff1df;color:#c27917}
 
-    /* ---- 테이블: 5개 행이 카드 남는 높이를 균등하게 채우도록 flex 기반으로 확장 ---- */
-    .table-wrap{
-      flex:1;
-      min-height:0;
-      overflow:auto;
-      display:flex;
-      flex-direction:column;
+    /* 1600px 이하에서도 2분할 유지 */
+    @media (max-width:1599px){
+      :root{--sidebar-w:200px}
+      .main{padding-left:10px;padding-right:10px}
+      .split-dashboard{gap:10px}
+      .dashboard-pane{padding:7px}
+      .kpi-card{padding:8px;gap:7px}
+      .kpi-icon{width:32px;height:32px;flex-basis:32px}
+      .k-value{font-size:15px}
     }
-    .table-wrap table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:var(--fs-table);
-      line-height:1.3;
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      min-height:100%;
-    }
-    .table-wrap thead,.table-wrap tbody{display:block;width:100%}
-    .table-wrap tbody{flex:1;display:flex;flex-direction:column}
-    .table-wrap tr{display:flex;width:100%;align-items:center}
-    .table-wrap tbody tr{flex:1;min-height:34px}
-    .table-wrap th,.table-wrap td{
-      padding:8px 10px;
-      border-bottom:1px solid #edf1f6;
-      text-align:left;white-space:nowrap;
-      overflow:hidden;text-overflow:ellipsis;
-    }
-    .table-wrap th{background:#fafbfe;color:#6f7a8f;position:sticky;top:0}
-    .table-wrap th:nth-child(1),.table-wrap td:nth-child(1){flex:0 0 9%}
-    .table-wrap th:nth-child(2),.table-wrap td:nth-child(2){flex:0 0 9%}
-    .table-wrap th:nth-child(3),.table-wrap td:nth-child(3){flex:0 0 14%}
-    .table-wrap th:nth-child(4),.table-wrap td:nth-child(4){flex:0 0 26%}
-    .table-wrap th:nth-child(5),.table-wrap td:nth-child(5){flex:0 0 12%}
-    .table-wrap th:nth-child(6),.table-wrap td:nth-child(6){flex:0 0 16%}
-    .table-wrap th:nth-child(7),.table-wrap td:nth-child(7){flex:0 0 14%}
-
-    tbody tr{transition:background 160ms ease}
-    tbody tr:hover{background:#f5f2ff}
-
-    .badge{
-      padding:5px 10px;border-radius:999px;font-size:var(--fs-small);font-weight:900;
-      display:inline-block;
-    }
-    .bg-green{background:#e8f7ed;color:#298d4e}
-    .bg-blue{background:#eaf2ff;color:#4176cc}
-    .bg-orange{background:#fff1df;color:#c27917}
-
-    @media (max-width:1279px){
-      body{overflow:auto}
-      .layout{min-width:1280px}
-    }
-
   </style>
 </head>
 <body>
 <div class="layout">
-
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-title">시나브로<br>Career Plus Center</div>
       <div class="brand-sub">Counselling & Career Plus Center<br>상담 · 구인구직 · 취업연계 통합 시스템</div>
     </div>
-
     <nav class="nav">
       <div class="nav-item active"><span class="nav-icon">◫</span><span>대시보드</span></div>
       <div class="nav-item"><span class="nav-icon">◉</span><span>상담 관리</span></div>
@@ -487,14 +152,13 @@
       <div class="nav-item"><span class="nav-icon">≡</span><span>공지사항 관리</span></div>
       <div class="nav-item"><span class="nav-icon">⚙</span><span>시스템 설정</span></div>
     </nav>
-
   </aside>
 
   <main class="main">
     <header class="topbar">
       <div class="headline">
         <h1>시나브로 <strong>Counselling & Career Plus Center</strong></h1>
-        <p>상담부터 구직 등록, 기업 매칭, 면접, 취업, 사후관리까지 한 화면에서 모니터링합니다.</p>
+        <p>좌측 메뉴는 유지하고, 업무 화면을 50 : 50의 동일 구조 2개 패널로 분리했습니다.</p>
       </div>
       <div class="date-control">
         <button id="prevDate" aria-label="이전 날짜">◀</button>
@@ -503,185 +167,152 @@
       </div>
     </header>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>01. 핵심 현황</h2>
-        <span>5개 KPI</span>
-      </div>
-      <div class="kpi-grid">
-        <div class="card kpi-card">
-          <div class="kpi-icon p">상</div>
-          <div><div class="k-label">상담 신청자</div><div class="k-value">1,263명</div><div class="k-sub">전일 대비 <span class="up">▲ 48명</span></div></div>
+    <div class="split-dashboard">
+      <!-- ================= LEFT PANE ================= -->
+      <section class="dashboard-pane">
+        <div class="pane-head">
+          <h2>01. 상담 · 구직 Dashboard</h2>
+          <span>좌측 50%</span>
         </div>
-        <div class="card kpi-card">
-          <div class="kpi-icon b">진</div>
-          <div><div class="k-label">상담 진행 중</div><div class="k-value">342명</div><div class="k-sub">전일 대비 <span class="up">▲ 23명</span></div></div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-icon g">매</div>
-          <div><div class="k-label">매칭 진행 중</div><div class="k-value">198명</div><div class="k-sub">전일 대비 <span class="up">▲ 18명</span></div></div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-icon o">취</div>
-          <div><div class="k-label">취업 성공 누계</div><div class="k-value">356명</div><div class="k-sub">전일 대비 <span class="up">▲ 15명</span></div></div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-icon r">심</div>
-          <div><div class="k-label">심리 안정도 평균</div><div class="k-value">4.2/5.0</div><div class="k-sub">전일 대비 <span class="up">▲ 0.3</span></div></div>
-        </div>
-      </div>
-    </section>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>02. 상담 · 구직 · 취업 분석</h2>
-        <span>32% / 36% / 32%</span>
-      </div>
+        <div class="kpi-grid">
+          <div class="card kpi-card"><div class="kpi-icon p">상</div><div><div class="k-label">상담 신청자</div><div class="k-value">1,263명</div><div class="k-sub">전일 대비 <span class="up">▲ 48명</span></div></div></div>
+          <div class="card kpi-card"><div class="kpi-icon b">진</div><div><div class="k-label">상담 진행 중</div><div class="k-value">342명</div><div class="k-sub">전일 대비 <span class="up">▲ 23명</span></div></div></div>
+          <div class="card kpi-card"><div class="kpi-icon r">심</div><div><div class="k-label">심리 안정도</div><div class="k-value">4.2/5.0</div><div class="k-sub">전일 대비 <span class="up">▲ 0.3</span></div></div></div>
+        </div>
 
-      <div class="analysis-grid">
-        <div class="card panel">
-          <div class="panel-title">연령·대상별 현황</div>
-          <div class="donut-area">
-            <div class="donut"></div>
-            <div class="legend">
-              <div class="legend-row"><span class="dot" style="background:var(--purple)"></span><span>청년층 42% (530명)</span></div>
-              <div class="legend-row"><span class="dot" style="background:var(--blue)"></span><span>경력단절 여성 31% (391명)</span></div>
-              <div class="legend-row"><span class="dot" style="background:var(--green)"></span><span>중장년층 27% (342명)</span></div>
+        <div class="analysis-grid">
+          <div class="card panel">
+            <div class="panel-title">연령·대상별 현황</div>
+            <div class="donut-area">
+              <div class="donut"></div>
+              <div class="legend">
+                <div class="legend-row"><span class="dot" style="background:var(--purple)"></span><span>청년층 42% (530명)</span></div>
+                <div class="legend-row"><span class="dot" style="background:var(--blue)"></span><span>경력단절 31% (391명)</span></div>
+                <div class="legend-row"><span class="dot" style="background:var(--green)"></span><span>중장년 27% (342명)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card panel">
+            <div class="panel-title">상담 단계별 진행 현황</div>
+            <div class="flow">
+              <div class="flow-step"><div class="flow-icon">1</div><b>신청</b><strong>1,263</strong></div>
+              <div class="flow-step"><div class="flow-icon">2</div><b>초기</b><strong>692</strong></div>
+              <div class="flow-step"><div class="flow-icon">3</div><b>심층</b><strong>342</strong></div>
+              <div class="flow-step"><div class="flow-icon">4</div><b>매칭</b><strong>198</strong></div>
+              <div class="flow-step"><div class="flow-icon">5</div><b>취업</b><strong>356</strong></div>
+              <div class="success-rate">전체 취업 성공률 <strong>28.2%</strong></div>
             </div>
           </div>
         </div>
 
-        <div class="card panel">
-          <div class="panel-title">상담 단계별 진행 현황</div>
-          <div class="flow">
-            <div class="flow-step"><div class="flow-icon">1</div><b>상담 신청</b><strong>1,263</strong></div>
-            <div class="flow-step"><div class="flow-icon">2</div><b>초기 상담</b><strong>692</strong></div>
-            <div class="flow-step"><div class="flow-icon">3</div><b>심층 상담</b><strong>342</strong></div>
-            <div class="flow-step"><div class="flow-icon">4</div><b>구직 매칭</b><strong>198</strong></div>
-            <div class="flow-step"><div class="flow-icon">5</div><b>취업 성공</b><strong>356</strong></div>
-            <div class="success-rate">전체 취업 성공률 <strong>28.2%</strong></div>
-          </div>
-        </div>
-
-        <div class="card panel">
-          <div class="panel-title">상담 만족도 & 심리 안정도 추이</div>
-          <div class="chart-wrap">
-            <svg viewBox="0 0 480 220" aria-label="상담 만족도 추이">
-              <line class="axis" x1="38" y1="34" x2="455" y2="34"/>
-              <line class="axis" x1="38" y1="78" x2="455" y2="78"/>
-              <line class="axis" x1="38" y1="122" x2="455" y2="122"/>
-              <line class="axis" x1="38" y1="166" x2="455" y2="166"/>
-              <polyline class="line-a" points="42,78 105,66 168,78 231,75 294,64 357,61 430,70"/>
-              <polyline class="line-b" points="42,130 105,110 168,127 231,112 294,101 357,101 430,101"/>
-              <g>
-                <circle class="pt-a" cx="42" cy="78" r="4"/><circle class="pt-a" cx="105" cy="66" r="4"/><circle class="pt-a" cx="168" cy="78" r="4"/>
-                <circle class="pt-a" cx="231" cy="75" r="4"/><circle class="pt-a" cx="294" cy="64" r="4"/><circle class="pt-a" cx="357" cy="61" r="4"/><circle class="pt-a" cx="430" cy="70" r="4"/>
-                <circle class="pt-b" cx="42" cy="130" r="4"/><circle class="pt-b" cx="105" cy="110" r="4"/><circle class="pt-b" cx="168" cy="127" r="4"/>
-                <circle class="pt-b" cx="231" cy="112" r="4"/><circle class="pt-b" cx="294" cy="101" r="4"/><circle class="pt-b" cx="357" cy="101" r="4"/><circle class="pt-b" cx="430" cy="101" r="4"/>
-              </g>
-              <text class="svg-text" x="30" y="202">08/11</text><text class="svg-text" x="93" y="202">08/12</text><text class="svg-text" x="156" y="202">08/13</text>
-              <text class="svg-text" x="219" y="202">08/14</text><text class="svg-text" x="282" y="202">08/15</text><text class="svg-text" x="345" y="202">08/16</text><text class="svg-text" x="413" y="202">08/17</text>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <h2>03. 상담 유형 · 매칭 · 최근 취업 현황</h2>
-        <span>하단 40% / 60% 분할</span>
-      </div>
-
-      <div class="bottom-grid">
-        <div class="left-stack">
-          <div class="card bar-card">
+        <div class="bottom-grid">
+          <div class="card panel">
             <div class="panel-title">상담 유형별 현황</div>
             <div class="bars">
               <div class="bar-row"><span>진로탐색</span><div class="bar"><i style="width:88%"></i></div><span>28% / 354</span></div>
-              <div class="bar-row"><span>취업역량강화</span><div class="bar"><i style="width:80%"></i></div><span>26% / 328</span></div>
+              <div class="bar-row"><span>역량강화</span><div class="bar"><i style="width:80%"></i></div><span>26% / 328</span></div>
               <div class="bar-row"><span>이력서·면접</span><div class="bar"><i style="width:64%"></i></div><span>20% / 253</span></div>
               <div class="bar-row"><span>경력설계</span><div class="bar"><i style="width:48%"></i></div><span>14% / 177</span></div>
               <div class="bar-row"><span>심리·정서</span><div class="bar"><i style="width:40%"></i></div><span>12% / 151</span></div>
             </div>
           </div>
-
-          <div class="card list-card">
-            <div class="panel-title">오늘의 운영 현황</div>
+          <div class="card panel">
+            <div class="panel-title">오늘의 상담 운영</div>
             <div class="mini-stat">
               <div><small>신규 상담</small><strong>38</strong></div>
               <div><small>상담 완료</small><strong>31</strong></div>
-              <div><small>기업 제안</small><strong>22</strong></div>
-              <div><small>면접 예정</small><strong>17</strong></div>
+              <div><small>미배정</small><strong>7</strong></div>
+              <div><small>사후상담</small><strong>9</strong></div>
             </div>
-            <div style="font-size:var(--fs-body);color:var(--muted);line-height:1.75">
-              · 상담 미배정 7건<br>
-              · 기업 회신 대기 12건<br>
-              · 취업 후 사후상담 예정 9건
+            <div class="note-list">· 초기 상담 예약 14건<br>· 심층 상담 예정 11건<br>· 상담사 확인 대기 5건</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= RIGHT PANE ================= -->
+      <section class="dashboard-pane">
+        <div class="pane-head">
+          <h2>02. 기업 · 매칭 · 취업 Dashboard</h2>
+          <span>우측 50%</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="card kpi-card"><div class="kpi-icon g">매</div><div><div class="k-label">매칭 진행 중</div><div class="k-value">198명</div><div class="k-sub">전일 대비 <span class="up">▲ 18명</span></div></div></div>
+          <div class="card kpi-card"><div class="kpi-icon o">취</div><div><div class="k-label">취업 성공 누계</div><div class="k-value">356명</div><div class="k-sub">전일 대비 <span class="up">▲ 15명</span></div></div></div>
+          <div class="card kpi-card"><div class="kpi-icon b">기</div><div><div class="k-label">협력 기업</div><div class="k-value">87개사</div><div class="k-sub">당월 신규 <span class="up">▲ 6개사</span></div></div></div>
+        </div>
+
+        <div class="analysis-grid">
+          <div class="card panel">
+            <div class="panel-title">매칭 · 면접 · 취업 현황</div>
+            <div class="mini-stat" style="grid-template-columns:repeat(2,1fr);flex:1;align-content:center">
+              <div><small>매칭 시도</small><strong>512</strong></div>
+              <div><small>매칭 성사</small><strong>198</strong></div>
+              <div><small>면접 진행</small><strong>124</strong></div>
+              <div><small>최종 합격</small><strong>356</strong></div>
+            </div>
+          </div>
+          <div class="card panel">
+            <div class="panel-title">만족도 & 안정도 추이</div>
+            <div class="chart-wrap">
+              <svg viewBox="0 0 360 170" aria-label="상담 만족도 추이">
+                <line class="axis" x1="28" y1="25" x2="340" y2="25"/><line class="axis" x1="28" y1="62" x2="340" y2="62"/><line class="axis" x1="28" y1="99" x2="340" y2="99"/><line class="axis" x1="28" y1="136" x2="340" y2="136"/>
+                <polyline class="line-a" points="32,62 80,50 128,62 176,59 224,48 272,45 330,54"/>
+                <polyline class="line-b" points="32,106 80,88 128,103 176,90 224,81 272,81 330,81"/>
+                <g><circle class="pt-a" cx="32" cy="62" r="3"/><circle class="pt-a" cx="80" cy="50" r="3"/><circle class="pt-a" cx="128" cy="62" r="3"/><circle class="pt-a" cx="176" cy="59" r="3"/><circle class="pt-a" cx="224" cy="48" r="3"/><circle class="pt-a" cx="272" cy="45" r="3"/><circle class="pt-a" cx="330" cy="54" r="3"/>
+                <circle class="pt-b" cx="32" cy="106" r="3"/><circle class="pt-b" cx="80" cy="88" r="3"/><circle class="pt-b" cx="128" cy="103" r="3"/><circle class="pt-b" cx="176" cy="90" r="3"/><circle class="pt-b" cx="224" cy="81" r="3"/><circle class="pt-b" cx="272" cy="81" r="3"/><circle class="pt-b" cx="330" cy="81" r="3"/></g>
+                <text class="svg-text" x="23" y="158">08/11</text><text class="svg-text" x="71" y="158">08/12</text><text class="svg-text" x="119" y="158">08/13</text><text class="svg-text" x="167" y="158">08/14</text><text class="svg-text" x="215" y="158">08/15</text><text class="svg-text" x="263" y="158">08/16</text><text class="svg-text" x="317" y="158">08/17</text>
+              </svg>
             </div>
           </div>
         </div>
 
-        <div class="card table-card">
-          <div class="panel-title">최근 매칭 및 취업 성공 사례</div>
-          <div class="mini-stat">
-            <div><small>매칭 시도</small><strong>512</strong></div>
-            <div><small>매칭 성사</small><strong>198</strong></div>
-            <div><small>면접 진행</small><strong>124</strong></div>
-            <div><small>최종 합격</small><strong>356</strong></div>
+        <div class="bottom-grid">
+          <div class="card panel">
+            <div class="panel-title">오늘의 기업 · 매칭 운영</div>
+            <div class="mini-stat">
+              <div><small>기업 제안</small><strong>22</strong></div>
+              <div><small>면접 예정</small><strong>17</strong></div>
+              <div><small>회신 대기</small><strong>12</strong></div>
+              <div><small>채용 확정</small><strong>9</strong></div>
+            </div>
+            <div class="note-list">· 신규 채용공고 8건<br>· 구직자 추천 21건<br>· 기업 검토 중 13건</div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>구직자</th><th>대상</th><th>상담 분야</th><th>매칭 기업</th><th>직무</th><th>상태</th><th>일자</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>김○○</td><td>청년</td><td>진로탐색</td><td>(주)디지털이노베이션</td><td>마케팅</td><td><span class="badge bg-green">취업성공</span></td><td>2026.08.17</td></tr>
-                <tr><td>이○○</td><td>경력단절</td><td>경력설계</td><td>(주)행복케어</td><td>인사관리</td><td><span class="badge bg-blue">면접진행</span></td><td>2026.08.16</td></tr>
-                <tr><td>박○○</td><td>중장년</td><td>재취업준비</td><td>(주)스마트물류</td><td>물류관리</td><td><span class="badge bg-orange">기업검토</span></td><td>2026.08.15</td></tr>
-                <tr><td>최○○</td><td>청년</td><td>면접컨설팅</td><td>(주)브랜드랩</td><td>디자인</td><td><span class="badge bg-green">취업성공</span></td><td>2026.08.14</td></tr>
-                <tr><td>정○○</td><td>중장년</td><td>직무전환</td><td>(주)세움테크</td><td>품질관리</td><td><span class="badge bg-blue">면접예정</span></td><td>2026.08.13</td></tr>
-              </tbody>
-            </table>
+          <div class="card panel">
+            <div class="panel-title">최근 매칭 및 취업 사례</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>구직자</th><th>기업</th><th>직무</th><th>상태</th><th>일자</th></tr></thead>
+                <tbody>
+                  <tr><td>김○○</td><td>(주)디지털이노베이션</td><td>마케팅</td><td><span class="badge bg-green">취업성공</span></td><td>08.17</td></tr>
+                  <tr><td>이○○</td><td>(주)행복케어</td><td>인사관리</td><td><span class="badge bg-blue">면접진행</span></td><td>08.16</td></tr>
+                  <tr><td>박○○</td><td>(주)스마트물류</td><td>물류관리</td><td><span class="badge bg-orange">기업검토</span></td><td>08.15</td></tr>
+                  <tr><td>최○○</td><td>(주)브랜드랩</td><td>디자인</td><td><span class="badge bg-green">취업성공</span></td><td>08.14</td></tr>
+                  <tr><td>정○○</td><td>(주)세움테크</td><td>품질관리</td><td><span class="badge bg-blue">면접예정</span></td><td>08.13</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 </div>
 
 <script>
-  let selectedDate = new Date();
-
+  let selectedDate = new Date(2026,7,21);
   function formatKoreanDate(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const day = String(d.getDate()).padStart(2,"0");
-    const week = ["일","월","화","수","목","금","토"][d.getDay()];
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,"0");
+    const day=String(d.getDate()).padStart(2,"0");
+    const week=["일","월","화","수","목","금","토"][d.getDay()];
     return `${y}.${m}.${day} (${week})`;
   }
-
-  function updateDate(){
-    document.getElementById("dateLabel").textContent = formatKoreanDate(selectedDate);
-  }
-
-  document.getElementById("prevDate").addEventListener("click",()=>{
-    selectedDate.setDate(selectedDate.getDate()-1);
-    updateDate();
-  });
-
-  document.getElementById("nextDate").addEventListener("click",()=>{
-    selectedDate.setDate(selectedDate.getDate()+1);
-    updateDate();
-  });
-
-  document.querySelectorAll(".nav-item").forEach(item=>{
-    item.addEventListener("click",()=>{
-      document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));
-      item.classList.add("active");
-    });
-  });
-
+  function updateDate(){document.getElementById("dateLabel").textContent=formatKoreanDate(selectedDate)}
+  document.getElementById("prevDate").addEventListener("click",()=>{selectedDate.setDate(selectedDate.getDate()-1);updateDate()});
+  document.getElementById("nextDate").addEventListener("click",()=>{selectedDate.setDate(selectedDate.getDate()+1);updateDate()});
+  document.querySelectorAll(".nav-item").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));item.classList.add("active")}));
   updateDate();
 </script>
 </body>
