@@ -2646,7 +2646,7 @@
       }
 
       document.querySelectorAll('input[name="consultType"]').forEach((el) => {
-        el.disabled = mode === "loaded";
+        el.disabled = false;
       });
 
       updateLoginGate();
@@ -3142,6 +3142,7 @@
         .from(tableName)
         .select(typeCode === "PC" ? psychFields : careerFields)
         .eq("client_id", client.id)
+        .eq("record_active", true)
         .order("receipt_at", { ascending: false, nullsFirst: false });
 
       if (error) throw error;
@@ -3365,12 +3366,11 @@
         showStatus("error", "입력값을 다시 확인해주세요. 빨간색으로 표시된 항목을 채워주세요.");
         return;
       }
-      if (counselType !== loadedRecordType) {
-        showStatus("error", "조회된 접수의 상담구분은 수정할 수 없습니다. 초기화 후 신규 등록해주세요.");
-        return;
-      }
-
-      const confirmed = window.confirm("수정한 내용을 저장하시겠습니까?");
+      const typeChanged = counselType !== loadedRecordType;
+      const confirmMessage = typeChanged
+        ? `${loadedRecordType === "PC" ? "심리상담" : "진로상담"} 기록을 ${counselType === "PC" ? "심리상담" : "진로상담"}으로 변경하시겠습니까?\n기존 기록은 변경이력으로 보존됩니다.`
+        : "수정한 내용을 저장하시겠습니까?";
+      const confirmed = window.confirm(confirmMessage);
       if (!confirmed) return;
 
       editSaveBtn.disabled = true;
@@ -3378,7 +3378,6 @@
       editSaveBtn.textContent = "저장 중...";
 
       try {
-        // 기본정보의 상담구분은 기존 PC/CC/BOTH를 보존하여 다른 상담 이력을 잃지 않게 함
         const { data: currentBasic, error: basicReadError } = await sb
           .from(BASIC_TABLE)
           .select("counsel_type")
@@ -3386,23 +3385,67 @@
           .single();
         if (basicReadError) throw basicReadError;
 
-        const { error: basicError } = await sb
-          .from(BASIC_TABLE)
-          .update({
-            ...basicPayload,
-            counsel_type: mergeCounselType(currentBasic.counsel_type, loadedRecordType)
-          })
-          .eq("id", loadedClientId);
-        if (basicError) throw basicError;
+        if (!typeChanged) {
+          const { error: basicError } = await sb
+            .from(BASIC_TABLE)
+            .update({
+              ...basicPayload,
+              counsel_type: mergeCounselType(currentBasic.counsel_type, loadedRecordType)
+            })
+            .eq("id", loadedClientId);
+          if (basicError) throw basicError;
 
-        const tableName = getSessionTable(loadedRecordType);
-        const { error: sessionError } = await sb
-          .from(tableName)
-          .update(sessionPayload)
-          .eq("id", loadedRecordId);
-        if (sessionError) throw sessionError;
+          const tableName = getSessionTable(loadedRecordType);
+          const { error: sessionError } = await sb
+            .from(tableName)
+            .update(sessionPayload)
+            .eq("id", loadedRecordId);
+          if (sessionError) throw sessionError;
+        } else {
+          const oldTable = getSessionTable(loadedRecordType);
+          const newTable = getSessionTable(counselType);
 
-        showStatus("success", "수정한 접수 상담 정보가 정상적으로 저장되었습니다.");
+          const { error: oldRecordError } = await sb
+            .from(oldTable)
+            .update({
+              record_active: false,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", loadedRecordId)
+            .eq("client_id", loadedClientId);
+          if (oldRecordError) throw oldRecordError;
+
+          const { error: newRecordError } = await sb
+            .from(newTable)
+            .insert([{
+              ...sessionPayload,
+              client_id: loadedClientId,
+              record_active: true
+            }]);
+          if (newRecordError) {
+            await sb
+              .from(oldTable)
+              .update({ record_active: true, updated_at: new Date().toISOString() })
+              .eq("id", loadedRecordId);
+            throw newRecordError;
+          }
+
+          const { error: basicError } = await sb
+            .from(BASIC_TABLE)
+            .update({
+              ...basicPayload,
+              counsel_type: "BOTH"
+            })
+            .eq("id", loadedClientId);
+          if (basicError) throw basicError;
+        }
+
+        showStatus(
+          "success",
+          typeChanged
+            ? "상담구분을 변경하여 정상적으로 저장했습니다. 기존 접수 기록은 변경이력으로 보존됩니다."
+            : "수정한 접수 상담 정보가 정상적으로 저장되었습니다."
+        );
         resetFormToNewMode();
       } catch (error) {
         console.error(error);
