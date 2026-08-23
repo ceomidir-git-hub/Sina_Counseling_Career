@@ -458,7 +458,8 @@
 
         <div class="help-box">
           처음 로그인하거나 비밀번호를 모르는 경우 이메일을 입력한 뒤
-          <b>비밀번호 설정 / 재설정</b>을 누르세요.
+          <b>비밀번호 설정 / 재설정</b>을 누르세요.<br>
+          로그인 성공 후 메인 파일 존재 여부를 먼저 확인하므로 잘못된 주소로 인한 404 이동을 방지합니다.
         </div>
       </div>
 
@@ -628,6 +629,55 @@
     }
   });
 
+
+  // ---------------------------------------------------------
+  // 메인 화면 안전 이동
+  // 1순위: main.html
+  // 2순위: 현재 관제센터 V27 파일명
+  // 실제 파일이 존재하는지 먼저 확인하므로 GitHub Pages 404로 바로 넘어가지 않음
+  // ---------------------------------------------------------
+  const MAIN_PAGE_CANDIDATES = [
+    "main.html",
+    "maeum_sinabro_psych_career_control_center_v27.html"
+  ];
+
+  async function findAvailableMainPage() {
+    for (const fileName of MAIN_PAGE_CANDIDATES) {
+      try {
+        const testUrl = new URL(fileName, window.location.href);
+        testUrl.search = "";
+        testUrl.hash = "";
+
+        const response = await fetch(testUrl.href, {
+          method: "HEAD",
+          cache: "no-store"
+        });
+
+        if (response.ok) {
+          return fileName;
+        }
+      } catch (err) {
+        console.warn("메인 파일 확인 실패:", fileName, err);
+      }
+    }
+    return null;
+  }
+
+  async function goToMainPage(messageElement = loginMessage) {
+    const target = await findAvailableMainPage();
+
+    if (!target) {
+      showMessage(
+        messageElement,
+        "로그인은 성공했지만 메인 화면 파일을 찾을 수 없습니다. GitHub에 main.html 또는 maeum_sinabro_psych_career_control_center_v27.html 파일이 index.html과 같은 폴더에 있는지 확인해 주세요."
+      );
+      return false;
+    }
+
+    window.location.replace(target);
+    return true;
+  }
+
   // 로그인
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -676,8 +726,8 @@
         "success"
       );
 
-      setTimeout(() => {
-        window.location.replace("main.html");
+      setTimeout(async () => {
+        await goToMainPage(loginMessage);
       }, 350);
 
     } catch (err) {
@@ -887,7 +937,7 @@
         JSON.stringify(employee)
       );
 
-      window.location.replace("main.html");
+      await goToMainPage(loginMessage);
 
     } catch (err) {
       await supabaseClient.auth.signOut();
