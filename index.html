@@ -1201,7 +1201,7 @@
   /* =========================================================
      통합 로그인 / 인증 레이어
      - index.html 하나에서 로그인 → 관제센터 전환
-     - main.html 이동 없음
+     - 별도 메인 파일로 이동하지 않음
      ========================================================= */
   #sinaLoginLayer{
     position:fixed;
@@ -2443,7 +2443,9 @@
     SUPABASE_PUBLISHABLE_KEY,
     {
       auth: {
-        persistSession: true,
+        // 로그인 상태를 브라우저 재접속/새로고침까지 자동 유지하지 않음.
+        // 실제 로그인 버튼 성공 후 현재 페이지에서만 인증 상태 사용.
+        persistSession: false,
         autoRefreshToken: true,
         detectSessionInUrl: true
       }
@@ -2549,18 +2551,6 @@
     return data;
   }
 
-  async function validateCurrentSession() {
-    const { data: { user }, error } = await client.auth.getUser();
-
-    if (error || !user) {
-      showLogin();
-      return false;
-    }
-
-    const employee = await getEmployee(user.id);
-    showApp(employee);
-    return true;
-  }
 
   client.auth.onAuthStateChange((event, session) => {
     if (event === "PASSWORD_RECOVERY") {
@@ -2607,7 +2597,7 @@
       setTimeout(() => showApp(employee), 250);
 
     } catch (err) {
-      await client.auth.signOut();
+      await client.auth.signOut({ scope: "local" });
       sessionStorage.removeItem("sina_employee");
       showMessage(loginMessage, err.message || "로그인에 실패했습니다.");
     } finally {
@@ -2699,7 +2689,7 @@
       );
 
       setTimeout(async () => {
-        await client.auth.signOut();
+        await client.auth.signOut({ scope: "local" });
         sessionStorage.removeItem("sina_employee");
         history.replaceState({}, document.title, location.pathname);
         newPasswordEl.value = "";
@@ -2740,39 +2730,51 @@
   });
 
   document.getElementById("sinaBackToLoginBtn").addEventListener("click", async () => {
-    await client.auth.signOut();
+    await client.auth.signOut({ scope: "local" });
     sessionStorage.removeItem("sina_employee");
     history.replaceState({}, document.title, location.pathname);
     showLogin();
   });
 
   document.getElementById("sinaLogoutBtn").addEventListener("click", async () => {
-    await client.auth.signOut();
+    await client.auth.signOut({ scope: "local" });
     sessionStorage.removeItem("sina_employee");
     passwordEl.value = "";
     showLogin();
   });
 
   // 초기 진입
+  // ---------------------------------------------------------
+  // 정상 접속: 기존 브라우저 세션을 현재 세션에서 제거하고 로그인 화면 고정
+  // 비밀번호 복구 링크: 로그아웃하지 않고 recovery 세션을 유지
+  // ---------------------------------------------------------
   (async () => {
+    // 비밀번호 재설정 메일의 recovery URL은 인증 세션이 필요하므로 유지
     if (recoveryMode) {
       showPasswordSetting();
       return;
     }
 
-    // Supabase가 recovery hash를 처리할 최소 시간 확보
-    await new Promise(resolve => setTimeout(resolve, 250));
+    // Supabase가 URL 이벤트를 판별할 시간을 짧게 확보.
+    // 이 시간 이후에도 recoveryMode가 아니면 일반 접속으로 확정.
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    if (recoveryMode) return;
+    if (recoveryMode) {
+      showPasswordSetting();
+      return;
+    }
 
     try {
-      await validateCurrentSession();
+      // 과거 버전에서 localStorage에 남은 인증세션까지 현재 브라우저에서 제거.
+      // scope:'local' → 다른 PC/브라우저 세션에는 영향 없음.
+      await client.auth.signOut({ scope: "local" });
     } catch (err) {
-      console.error("세션 확인 오류:", err);
-      await client.auth.signOut();
-      sessionStorage.removeItem("sina_employee");
-      showLogin();
+      console.warn("기존 로컬 세션 정리:", err);
     }
+
+    sessionStorage.removeItem("sina_employee");
+    passwordEl.value = "";
+    showLogin();
   })();
 })();
 </script>
