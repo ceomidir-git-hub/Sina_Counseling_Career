@@ -7,52 +7,62 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
 <style>
   * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
   body {
     margin: 0;
-    padding: 40px 20px;
-    background: #f4f5f7;
+    padding: 16px;
+    background: #eef2f7;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: #222;
   }
   .container {
-    max-width: 920px;
+    width: 210mm;
+    max-width: 100%;
+    min-height: 297mm;
     margin: 0 auto;
     background: #ffffff;
-    border: 1px solid #e0e2e7;
+    border: 1px solid #d8dee8;
     border-radius: 10px;
-    padding: 32px 40px 40px;
+    padding: 12mm 10mm 12mm;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .08);
   }
   h1 {
-    font-size: 30px;
-    font-weight: 700;
-    margin: 0 0 12px;
-    color: #14171f;
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 14px;
+    color: #111827;
     display: flex;
     align-items: center;
     gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #dbe6f5;
+    letter-spacing: -0.3px;
   }
-  h1 i { font-size: 30px; color: #1a56db; }
+  h1 i { font-size: 27px; color: #1a56db; }
   .section {
-    border: 1px solid #e0e2e7;
+    border: 1px solid #d9e1ec;
     border-radius: 8px;
-    padding: 20px 24px 24px;
-    margin-bottom: 20px;
+    padding: 12px 14px 14px;
+    margin-bottom: 12px;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   .section h2 {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 800;
     color: #1a56db;
-    margin: 0 0 18px;
+    margin: 0 0 12px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .section h2 i { font-size: 17px; }
+  .section h2 i { font-size: 16px; }
   .sectionHeadRow{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    margin-bottom:18px;
+    gap:10px;
+    margin-bottom:12px;
   }
   .sectionHeadRow h2{ margin:0; }
   .lookupBtn{
@@ -62,45 +72,50 @@
     background:#eef2ff;
     border:1px solid #c7d2fe;
     color:#3730a3;
-    font-size:13px;
+    font-size:12px;
     font-weight:800;
-    padding:8px 12px;
+    padding:7px 11px;
     border-radius:8px;
     cursor:pointer;
+    white-space:nowrap;
   }
   .lookupBtn:hover{ background:#e0e7ff; }
   .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
   }
   .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
   .grid.session-row {
-    grid-template-columns: 0.7fr 1.3fr 1.3fr 1.3fr 0.7fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid.session-row .field:last-child {
+    grid-column: 1 / -1;
+    max-width: 180px;
   }
   .grid.next-session-row {
-    grid-template-columns: 0.7fr 1.3fr;
-    max-width: 480px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 100%;
   }
   .field { display: flex; flex-direction: column; }
   .field.full { grid-column: 1 / -1; }
   label {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     color: #374151;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
   input[type="text"],
   input[type="date"],
   select,
   textarea {
     width: 100%;
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #d1d5db;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid #ccd4df;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #111827;
     background: #ffffff;
@@ -120,60 +135,63 @@
     box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
   }
   textarea {
-    height: 110px;
-    padding: 10px 12px;
+    height: 96px;
+    min-height: 96px;
+    padding: 8px 10px;
     resize: vertical;
     line-height: 1.5;
   }
   .char-count {
     text-align: right;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     color: #9ca3af;
     margin-top: 4px;
   }
   .test-tools-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
   }
-  .test-tools-row select { font-size: 14px; }
+  .test-tools-row select { font-size: 13px; }
   .dtRow{
     display:flex;
-    gap:6px;
+    gap:5px;
   }
-  .dtRow input[type="date"]{ flex:1.2; font-size:14px; }
-  .dtRow select{ flex:1; font-size:14px; padding:0 6px; }
+  .dtRow input[type="date"]{ flex:1.25; font-size:13px; }
+  .dtRow select{ flex:0.95; font-size:13px; padding:0 5px; }
   .dtPreview{
-    font-size:13px;
+    font-size:12px;
     font-weight:700;
     color:#1a56db;
     background:#eef4ff;
     border:1px solid #d7e6ff;
     border-radius:6px;
     padding:5px 8px;
-    margin-top:5px;
+    margin-top:4px;
+    min-height: 30px;
+    display:flex;
+    align-items:center;
   }
   .field.invalid input, .field.invalid select{
     border-color:#dc2626 !important;
     box-shadow:0 0 0 3px rgba(220,38,38,.10);
   }
   .actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: clamp(6px, 1.2vw, 10px);
-    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
   }
   .btn {
-    flex: 0 1 clamp(90px, 20vw, 150px);
-    height: 44px;
+    width: 100%;
+    height: 40px;
     border-radius: 6px;
     border: 1px solid #d1d5db;
     background: #ffffff;
     color: #374151;
-    font-size: clamp(12px, 1.6vw, 13px);
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -199,10 +217,10 @@
   .statusMsg{
     display:none;
     border-radius:8px;
-    padding:10px 14px;
-    font-size:13px;
+    padding:9px 12px;
+    font-size:12px;
     font-weight:700;
-    margin-bottom:16px;
+    margin-bottom:10px;
   }
   .statusMsg.show{ display:block; }
   .statusMsg.success{ background:#ecfdf3; border:1px solid #bbf7d0; color:#16a34a; }
@@ -330,17 +348,66 @@
     border:1px dashed #fcd34d; border-radius:8px; padding:7px 9px; line-height:1.5;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 980px) {
+    body { padding: 10px; }
+    .container {
+      width: 100%;
+      min-height: auto;
+      padding: 18px 14px 20px;
+    }
     .grid,
     .grid.cols-3,
     .grid.cols-4,
     .grid.session-row,
     .grid.next-session-row,
-    .test-tools-row {
+    .test-tools-row,
+    .actions {
       grid-template-columns: 1fr;
     }
-    .grid.next-session-row { max-width: 100%; }
-    .container { padding: 22px 20px 28px; }
+    .grid.session-row .field:last-child {
+      max-width: 100%;
+    }
+    .sectionHeadRow {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .lookupBtn { justify-content: center; }
+  }
+
+  @media print {
+    @page { size: A4 portrait; margin: 10mm; }
+    html, body {
+      width: 210mm;
+      min-height: 297mm;
+      background: #ffffff;
+    }
+    body {
+      padding: 0;
+      margin: 0;
+    }
+    .container {
+      width: 100%;
+      min-height: auto;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+    }
+    .lookupOverlay,
+    .actions,
+    .statusMsg { display: none !important; }
+    input, select, textarea {
+      color: #111827 !important;
+      -webkit-text-fill-color: #111827 !important;
+      border-color: #cfd8e3 !important;
+      box-shadow: none !important;
+      background: #fff !important;
+    }
+    .section {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
   }
 </style>
 </head>
@@ -348,6 +415,7 @@
 
 <div class="container">
   <h1><i class="ti ti-clipboard-heart" aria-hidden="true"></i>조회/수정</h1>
+  <div style="font-size:12px;font-weight:700;color:#64748b;margin:-4px 0 12px;">상담등록 문서 양식 · A4 세로 최적화</div>
 
   <div class="statusMsg" id="statusMsg"></div>
 
@@ -523,7 +591,7 @@
       <button type="button" class="btn primary" id="saveBtn"><i class="ti ti-device-floppy" aria-hidden="true"></i>수정/저장</button>
       <button type="reset" class="btn" id="resetBtn"><i class="ti ti-refresh" aria-hidden="true"></i>초기화</button>
       <button type="button" class="btn summary" id="summaryBtn"><i class="ti ti-report-analytics" aria-hidden="true"></i>요약</button>
-      <button type="button" class="btn" id="homeBtn"><i class="ti ti-home" aria-hidden="true"></i>메인화면</button>
+      <button type="button" class="btn" id="homeBtn"><i class="ti ti-arrow-left" aria-hidden="true"></i>이전화면</button>
     </div>
 
   </form>
@@ -1065,7 +1133,11 @@
   });
 
   document.getElementById('homeBtn').addEventListener('click', () => {
-    window.location.href = 'index.html';
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = 'index.html';
+    }
   });
 
   // ===== 11-1) 상담 써머리 (규칙 기반 자동 계산) =====
