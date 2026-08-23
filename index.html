@@ -2529,9 +2529,10 @@
     SUPABASE_PUBLISHABLE_KEY,
     {
       auth: {
-        // 로그인 상태를 브라우저 재접속/새로고침까지 자동 유지하지 않음.
-        // 실제 로그인 버튼 성공 후 현재 페이지에서만 인증 상태 사용.
-        persistSession: false,
+        // 같은 브라우저 탭/창에서 main.html ↔ 업무 HTML 간 로그인 세션을 공유.
+        // sessionStorage이므로 브라우저 창을 닫으면 세션 저장값은 사라집니다.
+        storage: window.sessionStorage,
+        persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true
       }
@@ -3240,7 +3241,6 @@
     }
 
     // Supabase가 URL 이벤트를 판별할 시간을 짧게 확보.
-    // 이 시간 이후에도 recoveryMode가 아니면 일반 접속으로 확정.
     await new Promise(resolve => setTimeout(resolve, 300));
 
     if (recoveryMode) {
@@ -3249,11 +3249,22 @@
     }
 
     try {
-      // 과거 버전에서 localStorage에 남은 인증세션까지 현재 브라우저에서 제거.
-      // scope:'local' → 다른 PC/브라우저 세션에는 영향 없음.
-      await client.auth.signOut({ scope: "local" });
+      // main.html ↔ consult_receipt_register.html 이동 후 돌아왔을 때
+      // 같은 sessionStorage의 로그인 세션을 그대로 사용한다.
+      const { data: { session }, error } = await client.auth.getSession();
+
+      if (error) {
+        console.warn("기존 세션 확인 오류:", error);
+      }
+
+      if (session?.user) {
+        const employee = await getEmployee(session.user.id);
+        currentAccessToken = session.access_token || null;
+        showApp(employee);
+        return;
+      }
     } catch (err) {
-      console.warn("기존 로컬 세션 정리:", err);
+      console.warn("기존 로그인 세션 복원 실패:", err);
     }
 
     sessionStorage.removeItem("sina_employee");
