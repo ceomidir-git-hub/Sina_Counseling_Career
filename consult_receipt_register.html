@@ -2191,7 +2191,7 @@
               <button type="button" class="btn primary" id="lookupSaveBtn">🔍 조회</button>
               <button type="button" class="btn primary" id="editSaveBtn" disabled>✎ 수정(저장)</button>
               <button type="button" class="btn" id="resetBtn">↻ 초기화</button>
-              <a href="main.html" class="btn">⌂ 메인화면</a>
+              <button type="button" class="btn" id="backBtn">← 이전화면</button>
             </div>
 
             <div class="bottom-hint">
@@ -2665,13 +2665,24 @@
       editSaveBtn.disabled = !loggedIn || mode !== "loaded" || !loadedRecordId;
     }
 
-    function resetFormToNewMode() {
+    function resetFormToNewMode(options = {}) {
+      const { clearReceived = false } = options;
+
       form.reset();
       detailsCounter.textContent = "0 / 1000";
       if (clientAgeEl) clientAgeEl.value = "";
       reservationPreviewEl.textContent = "방문일시를 입력하면 여기에 표시됩니다.";
       reservationDateDisplayEl.value = "";
-      setReceivedDefaultToNow();
+
+      if (clearReceived) {
+        receivedDateEl.value = "";
+        receivedDateDisplayEl.value = "";
+        receivedTimeEl.value = "";
+        receivedPreviewEl.textContent = "접수일시를 입력하면 여기에 표시됩니다.";
+      } else {
+        setReceivedDefaultToNow();
+      }
+
       clearAllInvalid();
       hideLookupMsg();
       lookupSelectionAreaEl.style.display = "none";
@@ -2691,8 +2702,19 @@
         const ok = window.confirm("입력 중인 내용이 모두 초기화됩니다. 계속하시겠습니까?");
         if (!ok) return;
       }
-      resetFormToNewMode();
+      resetFormToNewMode({ clearReceived: true });
     });
+
+    const backBtn = document.getElementById("backBtn");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.href = "main.html";
+        }
+      });
+    }
 
 
     // ===== 화면 전용 추가 기능 =====
