@@ -2269,7 +2269,9 @@
     // mode: "new"  -> 새 접수 등록 모드 (기본)
     // mode: "loaded" -> 조회로 기존 기록을 불러와 수정 중인 모드
     let mode = "new";
-    let loadedRecordId = null;
+    let loadedRecordId = null;      // 상담 접수(심리/진로) 레코드 ID
+    let loadedClientId = null;      // DB_basic.id
+    let loadedRecordType = null;    // "PC" 또는 "CC"
 
 
     // ===== 24시간 숫자입력 공통 처리 =====
@@ -2639,7 +2641,13 @@
       } else {
         editModeBadgeEl.classList.remove("show");
         loadedRecordId = null;
+        loadedClientId = null;
+        loadedRecordType = null;
       }
+
+      document.querySelectorAll('input[name="consultType"]').forEach((el) => {
+        el.disabled = mode === "loaded";
+      });
 
       updateLoginGate();
     }
@@ -2668,6 +2676,13 @@
       hideLookupMsg();
       lookupSelectionAreaEl.style.display = "none";
       lookupSelectionAreaEl.innerHTML = "";
+
+      ["foreignNationality", "foreignEntryDate", "foreignExitDate", "foreignNumber", "foreignVisa", "foreignResult"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      openForeignModalBtn.textContent = "외국인";
+
       setMode("new");
     }
 
@@ -2780,10 +2795,44 @@
       sbInitError = err;
       console.error("Supabase 초기화 실패:", err);
     }
-    const TABLE_NAME = "db_sina_counsel";
+    // ===== 7) 신규 DB 구조 연결 =====
+    // 구형 db_sina_counsel_career는 LEGACY READ ONLY 상태이며 신규 저장에 사용하지 않습니다.
+    const BASIC_TABLE = "DB_basic";
+    const PSYCH_TABLE = "DB_psychological_counseling";
+    const CAREER_TABLE = "DB_career_counseling";
 
-    // ===== 7-1) lookup 테이블(sex_codes, counsel_client_type, counsel_topic, job_codes)에서 옵션 동적 로딩 =====
-    // mapObj를 전달하면 code -> name 매핑도 함께 저장 (조회 결과 목록에 이름으로 표시하기 위함)
+    function getSelectedCounselType() {
+      const checked = document.querySelector('input[name="consultType"]:checked');
+      return checked?.value === "진로상담" ? "CC" : "PC";
+    }
+
+    function setSelectedCounselType(typeCode) {
+      const value = typeCode === "CC" ? "진로상담" : "심리상담";
+      const el = document.querySelector(`input[name="consultType"][value="${value}"]`);
+      if (el) el.checked = true;
+    }
+
+    function getSessionTable(typeCode) {
+      return typeCode === "CC" ? CAREER_TABLE : PSYCH_TABLE;
+    }
+
+    function getSessionTimeColumn(typeCode) {
+      return typeCode === "CC" ? "appointment_at" : "visit_at";
+    }
+
+    function mergeCounselType(existingType, incomingType) {
+      if (!existingType) return incomingType;
+      if (existingType === "BOTH" || existingType === incomingType) return existingType;
+      if (["PC", "CC"].includes(existingType) && ["PC", "CC"].includes(incomingType)) return "BOTH";
+      return incomingType;
+    }
+
+    function emptyToNull(value) {
+      const v = String(value ?? "").trim();
+      return v === "" ? null : v;
+    }
+
+    // ===== 7-1) lookup 테이블 동적 로딩 =====
     const sexMap = {};
     const jobMap = {};
     const targetMap = {};
@@ -2808,7 +2857,7 @@
 
       let html = `<option selected disabled value="">선택하세요</option>`;
       data.forEach((row) => {
-        html += `<option value="${row.code}">${row.name}</option>`;
+        html += `<option value="${escapeHTML(row.code)}">${escapeHTML(row.name)}</option>`;
         if (mapObj) mapObj[row.code] = row.name;
       });
       selectEl.innerHTML = html;
@@ -2821,7 +2870,6 @@
 
     // ===== 7-2) 로그인 상태 초기화 및 실시간 반영 =====
     async function initAuth() {
-      // Supabase 연결 실패 시에도 화면은 항상 "로그인 필요" 상태로 안전하게 표시
       if (!sb) {
         currentSession = null;
         updateLoginGate();
@@ -2839,8 +2887,9 @@
     initAuth();
     setMode("new");
 
-    // ===== 8) 등록/저장 폼 값 수집 + 검증 (등록 · 조회 후 수정 저장 공통 사용) =====
+    // ===== 8) 폼 값 수집 + 검증 =====
     function collectAndValidateFormData() {
+      const counselType = getSelectedCounselType();
       const receptionistName = document.getElementById("receptionistName").value.trim();
       const receptionistPhone = receptionistPhoneEl.value.trim();
       const relationship = document.getElementById("relationship").value;
@@ -2848,10 +2897,18 @@
       const gender = document.getElementById("gender").value;
       const clientPhone = clientPhoneEl.value.trim();
       const birthDateRaw = birthDateEl.value.trim();
-      const job = document.getElementById("job").value.trim();
+      const jobCode = document.getElementById("job").value.trim();
+      const clientAddress = document.getElementById("clientAddress").value.trim();
       const consultationTarget = document.getElementById("consultationTarget").value;
       const consultationTopic = document.getElementById("consultationTopic").value;
       const detailsVal = details.value.trim();
+
+      const nationality = document.getElementById("foreignNationality").value.trim();
+      const entryDate = document.getElementById("foreignEntryDate").value;
+      const exitDate = document.getElementById("foreignExitDate").value;
+      const foreignNumber = document.getElementById("foreignNumber").value.trim();
+      const visaType = document.getElementById("foreignVisa").value.trim();
+      const legalStatus = document.getElementById("foreignResult").value;
 
       let hasError = false;
 
@@ -2873,6 +2930,9 @@
       markInvalid(birthDateEl, !birthValid);
       if (!birthValid) hasError = true;
 
+      markInvalid(document.getElementById("job"), !jobCode);
+      if (!jobCode) hasError = true;
+
       markInvalid(document.getElementById("consultationTarget"), !consultationTarget);
       if (!consultationTarget) hasError = true;
 
@@ -2889,26 +2949,105 @@
       markInvalid(receivedTimeEl, !receivedISO);
       if (!receivedISO) hasError = true;
 
-      const payload = {
-        received_at: receivedISO,
-        appointment_at: appointmentISO,
-        receptionist_name: receptionistName || null,
-        receptionist_phone: receptionistPhone || null,
-        relationship: relationship,
-        receptionist_content: detailsVal || null,
+      const basicPayload = {
+        counsel_type: counselType,
+        nationality: emptyToNull(nationality),
+        entry_date: emptyToNull(entryDate),
+        departure_date: emptyToNull(exitDate),
+        foreigner_no: emptyToNull(foreignNumber),
+        visa_type: emptyToNull(visaType),
+        legal_status: emptyToNull(legalStatus),
         client_name: clientName,
-        client_phone: clientPhone,
-        Birth_date: birthDateToISO(birthDateRaw),
         sex_code: gender,
-        client_job: job || null,
-        counsel_client_type: consultationTarget,
-        counsel_topic: consultationTopic
+        birth_date: birthDateToISO(birthDateRaw),
+        client_phone: clientPhone,
+        client_address: emptyToNull(clientAddress),
+        job_code: jobCode,
+        updated_at: new Date().toISOString()
       };
 
-      return { hasError, payload };
+      const commonSessionPayload = {
+        receptionist_name: emptyToNull(receptionistName),
+        receptionist_phone: emptyToNull(receptionistPhone),
+        receptionist_relationship: emptyToNull(relationship),
+        receipt_at: receivedISO,
+        client_type_code: consultationTarget,
+        topic_code: consultationTopic,
+        updated_at: new Date().toISOString()
+      };
+
+      const sessionPayload = counselType === "PC"
+        ? {
+            ...commonSessionPayload,
+            receipt_date: receivedDateEl.value,
+            application_topic_1: consultationTopic,
+            application_date: receivedDateEl.value,
+            application_content: emptyToNull(detailsVal),
+            visit_date: reservationDateEl.value,
+            visit_at: appointmentISO,
+            session_status: "진행"
+          }
+        : {
+            ...commonSessionPayload,
+            appointment_at: appointmentISO,
+            career_topic_1: consultationTopic,
+            counseling_content: emptyToNull(detailsVal),
+            session_status: "진행"
+          };
+
+      return { hasError, counselType, basicPayload, sessionPayload };
     }
 
-    // ===== 9) 등록(신규) 처리 =====
+    async function findExistingClient(name, phone) {
+      let query = sb
+        .from(BASIC_TABLE)
+        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, client_address, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
+        .eq("client_name", name)
+        .eq("client_phone", phone)
+        .limit(2);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      if (!data || data.length === 0) return null;
+      if (data.length > 1) {
+        throw new Error("동일한 이름과 연락처의 기본정보가 2건 이상 존재합니다. DB_basic 중복 여부를 확인해주세요.");
+      }
+      return data[0];
+    }
+
+    async function saveBasicForNewRegistration(basicPayload, counselType) {
+      const existing = await findExistingClient(basicPayload.client_name, basicPayload.client_phone);
+
+      if (!existing) {
+        const insertPayload = {
+          ...basicPayload,
+          counsel_type: counselType
+        };
+        const { data, error } = await sb
+          .from(BASIC_TABLE)
+          .insert([insertPayload])
+          .select("id, counsel_type")
+          .single();
+        if (error) throw error;
+        return data;
+      }
+
+      const mergedType = mergeCounselType(existing.counsel_type, counselType);
+      const updatePayload = {
+        ...basicPayload,
+        counsel_type: mergedType
+      };
+      const { data, error } = await sb
+        .from(BASIC_TABLE)
+        .update(updatePayload)
+        .eq("id", existing.id)
+        .select("id, counsel_type")
+        .single();
+      if (error) throw error;
+      return data;
+    }
+
+    // ===== 9) 신규 등록 =====
     const form = document.getElementById("consultForm");
 
     form.addEventListener("submit", async (e) => {
@@ -2917,56 +3056,95 @@
       hideLookupMsg();
 
       if (mode === "loaded") {
-        // 등록 버튼은 이 모드에서 비활성화되어 있지만, 이중 방어
         showStatus("error", "조회한 기존 데이터를 수정 중입니다. 신규 등록하려면 먼저 초기화를 눌러주세요.");
         return;
       }
-
       if (!sb) {
-        showStatus("error", "저장 서버(Supabase) 연결에 실패했습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.");
+        showStatus("error", "저장 서버(Supabase) 연결에 실패했습니다.");
         return;
       }
-
-      // 로그인 상태가 아니면 등록을 진행하지 않음 (버튼은 잠겨있지만 이중 방어)
       if (!isLoggedIn()) {
         showStatus("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
         updateLoginGate();
         return;
       }
 
-      const { hasError, payload } = collectAndValidateFormData();
+      const { hasError, counselType, basicPayload, sessionPayload } = collectAndValidateFormData();
       if (hasError) {
         showStatus("error", "입력값을 다시 확인해주세요. 빨간색으로 표시된 항목을 채워주세요.");
         return;
       }
 
       submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
       submitBtn.textContent = "등록 중...";
 
-      const { error } = await sb.from(TABLE_NAME).insert([payload]);
+      try {
+        // ① 내담자 기본정보 등록 또는 갱신
+        const basicRow = await saveBasicForNewRegistration(basicPayload, counselType);
 
-      submitBtn.textContent = "▣ 등록";
-      updateLoginGate();
+        // ② 선택 상담유형의 접수 이력 1건 등록
+        const tableName = getSessionTable(counselType);
+        const finalSessionPayload = {
+          ...sessionPayload,
+          client_id: basicRow.id
+        };
+        const { error: sessionError } = await sb.from(tableName).insert([finalSessionPayload]);
+        if (sessionError) throw sessionError;
 
-      if (error) {
+        showStatus(
+          "success",
+          counselType === "PC"
+            ? "심리상담 접수가 정상적으로 등록되었습니다."
+            : "진로상담 접수가 정상적으로 등록되었습니다."
+        );
+        resetFormToNewMode();
+      } catch (error) {
         console.error(error);
-        showStatus("error", "저장 중 오류가 발생했습니다: " + error.message);
-        return;
+        showStatus("error", "저장 중 오류가 발생했습니다: " + (error?.message || error));
+      } finally {
+        submitBtn.textContent = originalText;
+        updateLoginGate();
       }
-
-      showStatus("success", "접수 상담이 정상적으로 등록되었습니다.");
-      resetFormToNewMode();
     });
 
-    // ===== 10) 접수 상담 조회 → 폼에 채우기 → 수정 후 저장 =====
+    // ===== 10) 조회 / 폼 채우기 =====
+    async function fetchSessionsForClient(client, typeCode) {
+      const tableName = getSessionTable(typeCode);
+      const timeColumn = getSessionTimeColumn(typeCode);
 
-    function populateFormFromRecord(row) {
-      const receivedParts = isoToKSTParts(row.received_at);
+      const psychFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, receipt_at, visit_at, client_type_code, topic_code, application_content";
+      const careerFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, receipt_at, appointment_at, client_type_code, topic_code, counseling_content";
+
+      const { data, error } = await sb
+        .from(tableName)
+        .select(typeCode === "PC" ? psychFields : careerFields)
+        .eq("client_id", client.id)
+        .order("receipt_at", { ascending: false, nullsFirst: false });
+
+      if (error) throw error;
+      return (data || []).map((session) => ({
+        __client: client,
+        __session: session,
+        __type: typeCode,
+        __appointmentISO: session[timeColumn]
+      }));
+    }
+
+    function populateFormFromRecord(record) {
+      const client = record.__client;
+      const row = record.__session;
+      const typeCode = record.__type;
+      const appointmentISO = typeCode === "CC" ? row.appointment_at : row.visit_at;
+
+      setSelectedCounselType(typeCode);
+
+      const receivedParts = isoToKSTParts(row.receipt_at);
       if (receivedParts) {
         receivedDateEl.value = receivedParts.date;
         setTimeSelectValue(receivedTimeEl, receivedParts.time);
       }
-      const apptParts = isoToKSTParts(row.appointment_at);
+      const apptParts = isoToKSTParts(appointmentISO);
       if (apptParts) {
         reservationDateEl.value = apptParts.date;
         setTimeSelectValue(reservationTimeEl, apptParts.time);
@@ -2978,65 +3156,87 @@
 
       document.getElementById("receptionistName").value = row.receptionist_name || "";
       receptionistPhoneEl.value = row.receptionist_phone || "";
-      if (row.relationship) document.getElementById("relationship").value = row.relationship;
-      document.getElementById("clientName").value = row.client_name || "";
-      if (row.sex_code) document.getElementById("gender").value = row.sex_code;
-      clientPhoneEl.value = row.client_phone || "";
-      birthDateEl.value = row.Birth_date || "";
+      document.getElementById("relationship").value = row.receptionist_relationship || "본인";
+
+      document.getElementById("clientName").value = client.client_name || "";
+      clientPhoneEl.value = client.client_phone || "";
+      document.getElementById("gender").value = client.sex_code || "";
+      birthDateEl.value = client.birth_date || "";
       updateClientAge();
-      if (row.client_job) document.getElementById("job").value = row.client_job;
-      if (row.counsel_client_type) document.getElementById("consultationTarget").value = row.counsel_client_type;
-      if (row.counsel_topic) document.getElementById("consultationTopic").value = row.counsel_topic;
-      details.value = row.receptionist_content || "";
+      document.getElementById("job").value = client.job_code || "";
+      document.getElementById("clientAddress").value = client.client_address || "";
+
+      document.getElementById("foreignNationality").value = client.nationality || "";
+      document.getElementById("foreignEntryDate").value = client.entry_date || "";
+      document.getElementById("foreignExitDate").value = client.departure_date || "";
+      document.getElementById("foreignNumber").value = client.foreigner_no || "";
+      document.getElementById("foreignVisa").value = client.visa_type || "";
+      document.getElementById("foreignResult").value = client.legal_status || "";
+      openForeignModalBtn.textContent = client.nationality ? `외국인 · ${client.nationality}` : "외국인";
+
+      document.getElementById("consultationTarget").value = row.client_type_code || "";
+      document.getElementById("consultationTopic").value = row.topic_code || "";
+      details.value = typeCode === "CC" ? (row.counseling_content || "") : (row.application_content || "");
       detailsCounter.textContent = `${details.value.length} / 1000`;
 
       clearAllInvalid();
+      loadedClientId = client.id;
       loadedRecordId = row.id;
+      loadedRecordType = typeCode;
       setMode("loaded");
     }
 
-    function proceedWithRecords(rows) {
-      lookupSelectionAreaEl.style.display = "none";
-      lookupSelectionAreaEl.innerHTML = "";
-      if (rows.length === 1) {
-        populateFormFromRecord(rows[0]);
-        showLookupMsg("success", "조회 결과를 불러왔습니다. 수정 모드가 자동 활성화되었습니다. 내용을 수정한 뒤 수정(저장) 버튼을 눌러주세요.");
-      } else {
-        showSessionSelection(rows);
-      }
-    }
-
-    function showPhoneSelection(rows) {
-      const phones = [...new Set(rows.map((r) => r.client_phone))];
+    function showClientSelection(clients, typeCode) {
       let html = `<div class="lookup-result-count">동일한 이름의 내담자가 여러 명 있습니다. 연락처를 선택해주세요.</div>`;
-      phones.forEach((phone) => {
-        const count = rows.filter((r) => r.client_phone === phone).length;
+      clients.forEach((client, idx) => {
         html += `
-          <div class="lookup-item" data-phone="${escapeHTML(phone)}">
-            <div class="lookup-item-date">${escapeHTML(phone)}</div>
-            <div class="lookup-item-sub">접수 기록 ${count}건</div>
+          <div class="lookup-item" data-idx="${idx}">
+            <div class="lookup-item-date">${escapeHTML(client.client_phone || "연락처 없음")}</div>
+            <div class="lookup-item-sub">${escapeHTML(jobMap[client.job_code] || client.job_code || "직업 미등록")}</div>
           </div>`;
       });
       lookupSelectionAreaEl.innerHTML = html;
       lookupSelectionAreaEl.style.display = "block";
 
       lookupSelectionAreaEl.querySelectorAll(".lookup-item").forEach((el) => {
-        el.addEventListener("click", () => {
-          const phone = el.getAttribute("data-phone");
-          const filtered = rows.filter((r) => r.client_phone === phone);
-          proceedWithRecords(filtered);
+        el.addEventListener("click", async () => {
+          const idx = parseInt(el.getAttribute("data-idx"), 10);
+          lookupSelectionAreaEl.style.display = "none";
+          lookupSelectionAreaEl.innerHTML = "";
+          try {
+            const records = await fetchSessionsForClient(clients[idx], typeCode);
+            proceedWithRecords(records);
+          } catch (error) {
+            console.error(error);
+            showLookupMsg("error", "접수 이력 조회 중 오류가 발생했습니다: " + error.message);
+          }
         });
       });
     }
 
-    function showSessionSelection(rows) {
-      let html = `<div class="lookup-result-count">총 ${rows.length}건의 접수 기록이 있습니다. 하나를 선택해주세요.</div>`;
-      rows.forEach((row, idx) => {
-        const target = targetMap[row.counsel_client_type] || row.counsel_client_type || "-";
-        const topic = topicMap[row.counsel_topic] || row.counsel_topic || "-";
+    function proceedWithRecords(records) {
+      lookupSelectionAreaEl.style.display = "none";
+      lookupSelectionAreaEl.innerHTML = "";
+
+      if (!records || records.length === 0) {
+        showLookupMsg("error", "선택한 상담구분의 접수 기록이 없습니다.");
+        return;
+      }
+
+      if (records.length === 1) {
+        populateFormFromRecord(records[0]);
+        showLookupMsg("success", "조회 결과를 불러왔습니다. 수정 모드가 자동 활성화되었습니다.");
+        return;
+      }
+
+      let html = `<div class="lookup-result-count">총 ${records.length}건의 접수 기록이 있습니다. 하나를 선택해주세요.</div>`;
+      records.forEach((record, idx) => {
+        const row = record.__session;
+        const target = targetMap[row.client_type_code] || row.client_type_code || "-";
+        const topic = topicMap[row.topic_code] || row.topic_code || "-";
         html += `
           <div class="lookup-item" data-idx="${idx}">
-            <div class="lookup-item-date">${formatKST(row.received_at)}</div>
+            <div class="lookup-item-date">${formatKST(row.receipt_at)}</div>
             <div class="lookup-item-sub">상담대상: ${escapeHTML(target)} · 상담주제: ${escapeHTML(topic)}</div>
           </div>`;
       });
@@ -3048,8 +3248,8 @@
           const idx = parseInt(el.getAttribute("data-idx"), 10);
           lookupSelectionAreaEl.style.display = "none";
           lookupSelectionAreaEl.innerHTML = "";
-          populateFormFromRecord(rows[idx]);
-          showLookupMsg("success", "조회 결과를 불러왔습니다. 수정 모드가 자동 활성화되었습니다. 내용을 수정한 뒤 수정(저장) 버튼을 눌러주세요.");
+          populateFormFromRecord(records[idx]);
+          showLookupMsg("success", "조회 결과를 불러왔습니다. 수정 모드가 자동 활성화되었습니다.");
         });
       });
     }
@@ -3061,7 +3261,7 @@
       lookupSelectionAreaEl.innerHTML = "";
 
       if (!sb) {
-        showLookupMsg("error", "조회 서버(Supabase) 연결에 실패했습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.");
+        showLookupMsg("error", "조회 서버(Supabase) 연결에 실패했습니다.");
         return;
       }
       if (!isLoggedIn()) {
@@ -3071,14 +3271,13 @@
 
       const name = document.getElementById("clientName").value.trim();
       const phone = clientPhoneEl.value.trim();
+      const typeCode = getSelectedCounselType();
 
       markInvalid(document.getElementById("clientName"), !name);
       if (!name) {
         showLookupMsg("error", "내담자명을 입력해주세요.");
         return;
       }
-      markInvalid(document.getElementById("clientName"), false);
-
       if (phone && !isValidPhone(phone)) {
         markInvalid(clientPhoneEl, true);
         showLookupMsg("error", "연락처 형식이 올바르지 않습니다. (예: 010-0000-0000)");
@@ -3090,40 +3289,38 @@
       const originalText = lookupSaveBtn.textContent;
       lookupSaveBtn.textContent = "조회 중...";
 
-      let query = sb
-        .from(TABLE_NAME)
-        .select(
-          "id, received_at, appointment_at, receptionist_name, receptionist_phone, relationship, receptionist_content, client_name, client_phone, Birth_date, sex_code, client_job, counsel_client_type, counsel_topic"
-        )
-        .eq("client_name", name);
-      if (phone) query = query.eq("client_phone", phone);
-      query = query.order("received_at", { ascending: false });
+      try {
+        let query = sb
+          .from(BASIC_TABLE)
+          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, client_address, job_code")
+          .eq("client_name", name)
+          .order("created_at", { ascending: false });
+        if (phone) query = query.eq("client_phone", phone);
 
-      const { data, error } = await query;
-
-      lookupSaveBtn.textContent = originalText;
-      updateLoginGate();
-
-      if (error) {
-        console.error(error);
-        showLookupMsg("error", "조회 중 오류가 발생했습니다: " + error.message);
-        return;
-      }
-      if (!data || data.length === 0) {
-        showLookupMsg("error", "일치하는 접수 기록이 없습니다.");
-        return;
-      }
-
-      if (!phone) {
-        const uniquePhones = [...new Set(data.map((r) => r.client_phone))];
-        if (uniquePhones.length > 1) {
-          showPhoneSelection(data);
+        const { data: clients, error } = await query;
+        if (error) throw error;
+        if (!clients || clients.length === 0) {
+          showLookupMsg("error", "일치하는 내담자 기본정보가 없습니다.");
           return;
         }
+
+        if (!phone && clients.length > 1) {
+          showClientSelection(clients, typeCode);
+          return;
+        }
+
+        const records = await fetchSessionsForClient(clients[0], typeCode);
+        proceedWithRecords(records);
+      } catch (error) {
+        console.error(error);
+        showLookupMsg("error", "조회 중 오류가 발생했습니다: " + (error?.message || error));
+      } finally {
+        lookupSaveBtn.textContent = originalText;
+        updateLoginGate();
       }
-      proceedWithRecords(data);
     }
 
+    // ===== 11) 조회된 접수 수정 저장 =====
     async function handleSave() {
       hideStatus();
       hideLookupMsg();
@@ -3136,14 +3333,18 @@
         showStatus("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
         return;
       }
-      if (!loadedRecordId) {
+      if (!loadedRecordId || !loadedClientId || !loadedRecordType) {
         showStatus("error", "수정할 기존 데이터가 없습니다. 먼저 조회를 진행해주세요.");
         return;
       }
 
-      const { hasError, payload } = collectAndValidateFormData();
+      const { hasError, counselType, basicPayload, sessionPayload } = collectAndValidateFormData();
       if (hasError) {
         showStatus("error", "입력값을 다시 확인해주세요. 빨간색으로 표시된 항목을 채워주세요.");
+        return;
+      }
+      if (counselType !== loadedRecordType) {
+        showStatus("error", "조회된 접수의 상담구분은 수정할 수 없습니다. 초기화 후 신규 등록해주세요.");
         return;
       }
 
@@ -3151,28 +3352,46 @@
       if (!confirmed) return;
 
       editSaveBtn.disabled = true;
-      const originalEditText = editSaveBtn.textContent;
+      const originalText = editSaveBtn.textContent;
       editSaveBtn.textContent = "저장 중...";
 
-      const { error } = await sb.from(TABLE_NAME).update(payload).eq("id", loadedRecordId);
+      try {
+        // 기본정보의 상담구분은 기존 PC/CC/BOTH를 보존하여 다른 상담 이력을 잃지 않게 함
+        const { data: currentBasic, error: basicReadError } = await sb
+          .from(BASIC_TABLE)
+          .select("counsel_type")
+          .eq("id", loadedClientId)
+          .single();
+        if (basicReadError) throw basicReadError;
 
-      editSaveBtn.textContent = originalEditText;
-      updateLoginGate();
+        const { error: basicError } = await sb
+          .from(BASIC_TABLE)
+          .update({
+            ...basicPayload,
+            counsel_type: mergeCounselType(currentBasic.counsel_type, loadedRecordType)
+          })
+          .eq("id", loadedClientId);
+        if (basicError) throw basicError;
 
-      if (error) {
+        const tableName = getSessionTable(loadedRecordType);
+        const { error: sessionError } = await sb
+          .from(tableName)
+          .update(sessionPayload)
+          .eq("id", loadedRecordId);
+        if (sessionError) throw sessionError;
+
+        showStatus("success", "수정한 접수 상담 정보가 정상적으로 저장되었습니다.");
+        resetFormToNewMode();
+      } catch (error) {
         console.error(error);
-        showStatus("error", "수정 저장 중 오류가 발생했습니다: " + error.message);
-        return;
+        showStatus("error", "수정 저장 중 오류가 발생했습니다: " + (error?.message || error));
+      } finally {
+        editSaveBtn.textContent = originalText;
+        updateLoginGate();
       }
-
-      showStatus("success", "수정한 접수 상담 정보가 정상적으로 저장되었습니다.");
-      resetFormToNewMode();
     }
 
-    // 조회 버튼은 항상 조회 기능만 수행
     lookupSaveBtn.addEventListener("click", handleLookup);
-
-    // 수정(저장) 버튼은 조회 완료 후 자동 활성화되며 저장 기능만 수행
     editSaveBtn.addEventListener("click", handleSave);
 
     // ===== A4 세로 PDF 저장 =====
