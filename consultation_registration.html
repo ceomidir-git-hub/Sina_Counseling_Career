@@ -4,865 +4,201 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>상담 등록</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    padding: 40px 20px;
-    background: #f4f5f7;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color: #222;
+  :root{
+    --blue:#1457a6; --blue-dark:#123f78; --blue-soft:#eef6ff; --line:#b9cce3;
+    --text:#172033; --muted:#6b7788; --paper:#fff; --bg:#eef1f5; --yellow:#fffdf2;
+    --green:#178a4b; --red:#c63c3c; --field-h:36px;
   }
-  .container {
-    max-width: 920px;
-    margin: 0 auto;
-    background: #ffffff;
-    border: 1px solid #e0e2e7;
-    border-radius: 10px;
-    padding: 32px 40px 40px;
-  }
-  h1 {
-    font-size: 30px;
-    font-weight: 700;
-    margin: 0 0 12px;
-    color: #14171f;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  h1 i { font-size: 30px; color: #1a56db; }
-  .section {
-    border: 1px solid #e0e2e7;
-    border-radius: 8px;
-    padding: 20px 24px 24px;
-    margin-bottom: 20px;
-  }
-  .section h2 {
-    font-size: 17px;
-    font-weight: 700;
-    color: #1a56db;
-    margin: 0 0 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .section h2 i { font-size: 17px; }
-  .sectionHeadRow{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:18px;
-  }
-  .sectionHeadRow h2{ margin:0; }
-  .lookupBtn{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    background:#eef2ff;
-    border:1px solid #c7d2fe;
-    color:#3730a3;
-    font-size:13px;
-    font-weight:800;
-    padding:8px 12px;
-    border-radius:8px;
-    cursor:pointer;
-  }
-  .lookupBtn:hover{ background:#e0e7ff; }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px 24px;
-  }
-  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .grid.session-row {
-    grid-template-columns: 0.7fr 1.3fr 1.3fr 1.3fr 0.7fr;
-  }
-  .grid.next-session-row {
-    grid-template-columns: 0.7fr 1.3fr;
-    max-width: 480px;
-  }
-  .field { display: flex; flex-direction: column; }
-  .field.full { grid-column: 1 / -1; }
-  label {
-    font-size: 14px;
-    font-weight: 700;
-    color: #374151;
-    margin-bottom: 6px;
-  }
-  input[type="text"],
-  input[type="date"],
-  select,
-  textarea {
-    width: 100%;
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #111827;
-    background: #ffffff;
-    font-family: inherit;
-  }
-  select { cursor: pointer; }
-  input[readonly] {
-    background: #f3f4f6;
-    color: #6b7280;
-    cursor: not-allowed;
-  }
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #1a56db;
-    box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
-  }
-  textarea {
-    height: 110px;
-    padding: 10px 12px;
-    resize: vertical;
-    line-height: 1.5;
-  }
-  .char-count {
-    text-align: right;
-    font-size: 12px;
-    font-weight: 600;
-    color: #9ca3af;
-    margin-top: 4px;
-  }
-  .test-tools-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-  .test-tools-row select { font-size: 14px; }
-  .dtRow{
-    display:flex;
-    gap:6px;
-  }
-  .dtRow input[type="date"]{ flex:1.2; font-size:14px; }
-  .dtRow select{ flex:1; font-size:14px; padding:0 6px; }
-  .dtPreview{
-    font-size:13px;
-    font-weight:700;
-    color:#1a56db;
-    background:#eef4ff;
-    border:1px solid #d7e6ff;
-    border-radius:6px;
-    padding:5px 8px;
-    margin-top:5px;
-  }
-  .field.invalid input, .field.invalid select{
-    border-color:#dc2626 !important;
-    box-shadow:0 0 0 3px rgba(220,38,38,.10);
-  }
-  .actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 24px;
-  }
-  .btn {
-    flex: 1;
-    height: 46px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background: #ffffff;
-    color: #374151;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-family: inherit;
-  }
-  .btn:hover { background: #f9fafb; }
-  .btn:disabled { opacity:.6; cursor:not-allowed; }
-  .btn.primary {
-    background: #1a56db;
-    border-color: #1a56db;
-    color: #ffffff;
-  }
-  .btn.primary:hover { background: #1747b8; }
-  .statusMsg{
-    display:none;
-    border-radius:8px;
-    padding:10px 14px;
-    font-size:13px;
-    font-weight:700;
-    margin-bottom:16px;
-  }
-  .statusMsg.show{ display:block; }
-  .statusMsg.success{ background:#ecfdf3; border:1px solid #bbf7d0; color:#16a34a; }
-  .statusMsg.error{ background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
-
-  /* 접수상담조회 팝업 */
-  .lookupOverlay{
-    position:fixed; inset:0;
-    background:rgba(15,23,42,.55);
-    display:none; align-items:center; justify-content:center;
-    z-index:999; padding:20px;
-  }
-  .lookupOverlay.open{ display:flex; }
-  .lookupModal{
-    width:100%; max-width:480px;
-    max-height:80vh;
-    overflow-y:auto;
-    background:#fff;
-    border-radius:14px;
-    padding:22px 22px 20px;
-    box-shadow:0 24px 60px rgba(15,23,42,.35);
-    position:relative;
-  }
-  .lookupModal h3{ margin:0 0 4px; font-size:17px; color:#1a56db; }
-  .lookupModal p.sub{ margin:0 0 16px; font-size:11px; color:#6b7280; }
-  .lookupClose{
-    position:absolute; right:14px; top:14px;
-    width:28px; height:28px; border:0;
-    background:#f1f5f9; border-radius:50%;
-    color:#475569; font-size:15px; cursor:pointer;
-  }
-  .lookupRow{
-    display:flex; justify-content:space-between;
-    font-size:14px; padding:7px 0;
-    border-bottom:1px solid #f1f5f9;
-  }
-  .lookupRow b{ color:#374151; font-weight:800; }
-  .lookupRow span{ color:#111827; text-align:right; max-width:60%; }
-  .lookupEmpty{ font-size:14px; color:#6b7280; padding:14px 0; text-align:center; }
-
-  @media (max-width: 1024px) {
-    .grid,
-    .grid.cols-3,
-    .grid.cols-4,
-    .grid.session-row,
-    .grid.next-session-row,
-    .test-tools-row {
-      grid-template-columns: 1fr;
-    }
-    .grid.next-session-row { max-width: 100%; }
-    .container { padding: 22px 20px 28px; }
-    .actions { flex-wrap: wrap; }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;font-family:"Malgun Gothic","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:var(--bg)}
+  button,input,select,textarea{font:inherit}
+  .page-wrap{min-height:100vh;padding:18px 0 30px;display:flex;justify-content:center;align-items:flex-start}
+  .a4-page{width:210mm;min-height:297mm;max-width:calc(100vw - 24px);background:var(--paper);box-shadow:0 10px 30px rgba(15,23,42,.14);padding:10mm 9mm 8mm}
+  .top-row{min-height:17mm;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--blue-dark);padding:0 2mm 4mm;margin-bottom:7mm}
+  h1{margin:0;color:var(--blue-dark);font-size:29px;font-weight:950;letter-spacing:-1.3px;line-height:1}
+  .pdf-btn{height:36px;padding:0 14px;border:1px solid var(--blue);border-radius:7px;background:#fff;color:var(--blue-dark);font-weight:900;font-size:13px;cursor:pointer}
+  .pdf-btn:hover{background:var(--blue-soft)}
+  .statusMsg{display:none;margin:0 0 4mm;padding:9px 11px;border-radius:7px;font-size:12px;font-weight:800}
+  .statusMsg.show{display:block}.statusMsg.success{background:#effaf3;border:1px solid #bfe6cd;color:var(--green)}
+  .statusMsg.error{background:#fff1f1;border:1px solid #efc4c4;color:var(--red)}
+  .statusMsg.info{background:#eef6ff;border:1px solid #c9dff8;color:var(--blue-dark)}
+  .section{border:1px solid #6fa3dc;border-radius:6px;overflow:hidden;margin-bottom:6mm;break-inside:avoid;page-break-inside:avoid}
+  .section-head{min-height:12mm;padding:0 4mm;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%);border-bottom:1px solid #a8c6e7}
+  .section-head h2{margin:0;color:var(--blue);font-size:17px;font-weight:950;letter-spacing:-.5px}
+  .lookup-btn{height:31px;padding:0 11px;border:1px solid var(--blue);border-radius:6px;background:#fff;color:var(--blue-dark);font-size:12px;font-weight:900;cursor:pointer}
+  .lookup-btn:hover{background:var(--blue-soft)}
+  .section-body{padding:4mm 4mm 4.5mm;background:#fff}
+  .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3.2mm 7mm}
+  .form-pair{min-width:0;display:grid;grid-template-columns:27mm minmax(0,1fr);align-items:center;gap:2.5mm}
+  .form-pair.full{grid-column:1/-1;grid-template-columns:27mm minmax(0,1fr)}
+  .form-pair label,.detail-label{font-size:12.5px;font-weight:850;color:#252b34;white-space:nowrap}
+  input[type="text"],input[type="date"],input[type="time"],select,textarea{width:100%;min-width:0;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);color:#161b22;outline:none;font-size:12.5px;font-weight:650}
+  input[type="text"],input[type="date"],input[type="time"],select{height:var(--field-h);padding:0 10px}
+  input[readonly]{background:#f8fafc;color:#384557}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(20,87,166,.11)}
+  .date-time{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,.85fr);gap:5px}
+  .tests{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3.2mm 7mm}
+  .detail-grid{display:grid;grid-template-columns:27mm minmax(0,1fr);gap:2.5mm;align-items:start}
+  textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10px 22px;line-height:1.55}
+  .textarea-wrap{position:relative}.char-count{position:absolute;right:8px;bottom:6px;background:rgba(255,255,255,.92);color:#7b8796;font-size:10px;font-weight:750;padding-left:6px}
+  .session-status-wrap{height:var(--field-h);display:flex;align-items:center;gap:16px;padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow)}
+  .radio-label{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:850;cursor:pointer}.radio-label input{accent-color:var(--blue);margin:0}
+  .actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12mm;width:72%;margin:7mm auto 0}
+  .btn{height:40px;border-radius:6px;border:1px solid var(--blue);background:#fff;color:var(--blue-dark);font-size:13px;font-weight:900;cursor:pointer}
+  .btn.primary{background:#1461bd;color:#fff;border-color:#1461bd}.btn:disabled{opacity:.45;cursor:not-allowed}
+  .receipt-meta{display:none;margin-top:3mm;padding:7px 10px;border-radius:5px;background:#f7fbff;border:1px dashed #9fc0e5;font-size:10.5px;color:#50627a;line-height:1.45}.receipt-meta.show{display:block}
+  .modal-backdrop{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:20px}.modal-backdrop.show{display:flex}
+  .modal{width:min(720px,96vw);max-height:82vh;overflow:hidden;background:#fff;border-radius:12px;box-shadow:0 26px 70px rgba(15,23,42,.3);border:1px solid #d7e1ec;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
+  .modal-head{height:52px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e4eaf1;background:#f7fbff}.modal-head h3{margin:0;color:var(--blue-dark);font-size:17px;font-weight:950}
+  .modal-x{width:32px;height:32px;border:0;border-radius:7px;background:#eef2f6;color:#475569;font-size:20px;cursor:pointer}
+  .modal-search{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr auto;gap:8px;border-bottom:1px solid #edf1f5}.modal-search button{min-width:72px;border:0;border-radius:6px;background:var(--blue);color:#fff;font-size:12px;font-weight:900;cursor:pointer}
+  .lookup-results{min-height:160px;overflow:auto;padding:14px 18px 18px}.lookup-empty{padding:28px 10px;text-align:center;color:#738095;font-size:12px}
+  .lookup-card{border:1px solid #d7e1ec;border-radius:8px;padding:11px 12px;margin-bottom:8px;cursor:pointer;background:#fff}.lookup-card:hover{border-color:#7ca9dd;background:#f7fbff}
+  .lookup-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}.lookup-card-top strong{font-size:13px;color:#233650}
+  .type-badge{padding:3px 7px;border-radius:999px;background:#e9f3ff;color:#1457a6;font-size:10px;font-weight:900;white-space:nowrap}
+  .lookup-card p{margin:2px 0;color:#64748b;font-size:11px;line-height:1.45}.invalid{border-color:var(--red)!important;box-shadow:0 0 0 2px rgba(198,60,60,.10)!important}
+  @media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.top-row{margin-bottom:16px}.grid-2,.tests{grid-template-columns:1fr}.form-pair.full{grid-column:auto}.actions{width:100%;gap:8px}}
+  @page{size:A4 portrait;margin:0}
+  @media print{
+    html,body{width:210mm;height:297mm;margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .page-wrap{width:210mm;height:297mm;min-height:297mm;padding:0;display:block;background:#fff}.a4-page{width:210mm!important;height:297mm!important;min-height:297mm!important;max-width:none!important;box-shadow:none!important;padding:9mm 9mm 7mm!important;overflow:hidden}
+    .no-print,.statusMsg,.receipt-meta,.modal-backdrop{display:none!important}.top-row{min-height:14mm;margin-bottom:5mm;padding-bottom:3mm}h1{font-size:26px}.section{margin-bottom:4mm}.section-head{min-height:10mm}.section-body{padding:3mm 4mm}.grid-2,.tests{gap:2.4mm 6mm}:root{--field-h:32px}
+    .form-pair label,.detail-label{font-size:11.5px}input[type="text"],input[type="date"],input[type="time"],select,textarea{background:#fff!important;box-shadow:none!important;font-size:11.5px}textarea{height:39mm;min-height:39mm;max-height:39mm}.actions{display:none!important}input,select,textarea{border-color:#d4d9df!important}
   }
 </style>
 </head>
 <body>
+<div class="page-wrap">
+<main class="a4-page">
+<header class="top-row"><h1>상담 등록</h1><button type="button" class="pdf-btn no-print" id="pdfSaveBtn">▤ PDF 저장</button></header>
+<div id="statusMsg" class="statusMsg"></div>
+<form id="consultForm" autocomplete="off">
+<section class="section">
+<div class="section-head"><h2>1. 내담자 정보</h2><button type="button" class="lookup-btn no-print" id="lookupBtn">⌕ 접수상담조회</button></div>
+<div class="section-body">
+<div class="grid-2">
+<div class="form-pair"><label for="clientName">내담자명</label><input type="text" id="clientName" placeholder="내담자명 입력"></div>
+<div class="form-pair"><label for="clientPhone">연락처</label><input type="text" id="clientPhone" placeholder="010-0000-0000" maxlength="13" inputmode="numeric"></div>
+<div class="form-pair"><label for="gender">성별</label><input type="text" id="gender" readonly placeholder="접수상담조회 후 자동"></div>
+<div class="form-pair"><label for="birthDate">생년월일</label><input type="text" id="birthDate" readonly placeholder="접수상담조회 후 자동"></div>
+<div class="form-pair"><label for="age">나이</label><input type="text" id="age" readonly placeholder="자동 계산"></div>
+<div class="form-pair"><label for="job">직업</label><input type="text" id="job" readonly placeholder="접수상담조회 후 자동"></div>
+<div class="form-pair full"><label for="address">주소</label><input type="text" id="address" readonly placeholder="접수상담조회 후 자동"></div>
+</div>
+<div id="receiptMeta" class="receipt-meta"></div>
+</div>
+</section>
 
-<div class="container">
-  <h1><i class="ti ti-clipboard-heart" aria-hidden="true"></i>상담 등록</h1>
-
-  <div class="statusMsg" id="statusMsg"></div>
-
-  <form id="intakeForm">
-
-    <!-- 1. 내담자 정보 -->
-    <div class="section">
-      <div class="sectionHeadRow">
-        <h2><i class="ti ti-user" aria-hidden="true"></i>1. 내담자 정보</h2>
-        <button type="button" class="lookupBtn" id="lookupBtn"><i class="ti ti-search" aria-hidden="true"></i>접수상담조회</button>
-      </div>
-      <div class="grid">
-        <div class="field">
-          <label for="clientName">내담자명</label>
-          <input type="text" id="clientName" placeholder="내담자명을 입력하세요">
-        </div>
-        <div class="field">
-          <label for="clientPhone">연락처</label>
-          <input type="text" id="clientPhone" placeholder="010-0000-0000" maxlength="13" inputmode="numeric">
-        </div>
-        <div class="field">
-          <label for="job">직업</label>
-          <select id="job">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="gender">성별</label>
-          <select id="gender">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="birthDate">생년월일</label>
-          <input type="text" id="birthDate" placeholder="YYYY-MM-DD" maxlength="10" inputmode="numeric">
-        </div>
-        <div class="field">
-          <label for="age">나이</label>
-          <input type="text" id="age" placeholder="자동 계산" readonly>
-        </div>
-        <div class="field full">
-          <label for="address">주소</label>
-          <input type="text" id="address" placeholder="주소를 입력하세요">
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. 예약 및 진행 정보 -->
-    <div class="section">
-      <h2><i class="ti ti-calendar-time" aria-hidden="true"></i>2. 예약 및 진행 정보</h2>
-      <div class="grid session-row">
-        <div class="field">
-          <label for="sessionNo">금회 회기</label>
-          <select id="sessionNo">
-            <option value="">선택</option>
-            <option value="1">1회기</option>
-            <option value="2">2회기</option>
-            <option value="3">3회기</option>
-            <option value="4">4회기</option>
-            <option value="5">5회기</option>
-            <option value="6">6회기</option>
-            <option value="7">7회기</option>
-            <option value="8">8회기</option>
-            <option value="9">9회기</option>
-            <option value="10">10회기</option>
-          </select>
-        </div>
-        <div class="field" id="reservationField">
-          <label>예약일</label>
-          <div class="dtRow">
-            <input type="date" id="reservationDate">
-            <select id="reservationTime"><option value="" selected disabled>시간</option></select>
-          </div>
-          <div class="dtPreview" id="reservationPreview">-</div>
-        </div>
-        <div class="field" id="startField">
-          <label>실시일 시작</label>
-          <div class="dtRow">
-            <input type="date" id="startDate">
-            <select id="startTime"><option value="" selected disabled>시간</option></select>
-          </div>
-          <div class="dtPreview" id="startPreview">-</div>
-        </div>
-        <div class="field" id="endField">
-          <label>실시일 종료</label>
-          <div class="dtRow">
-            <input type="date" id="endDate">
-            <select id="endTime"><option value="" selected disabled>시간</option></select>
-          </div>
-          <div class="dtPreview" id="endPreview">-</div>
-        </div>
-        <div class="field">
-          <label for="duration">상담시간</label>
-          <input type="text" id="duration" placeholder="자동" readonly>
-        </div>
-      </div>
-
-      <div class="field full" style="margin-top:16px;">
-        <label>검사도구</label>
-        <div class="test-tools-row">
-          <select id="testTool1">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-          <select id="testTool2">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-          <select id="testTool3">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-          <select id="testTool4">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="grid next-session-row" style="margin-top:16px;">
-        <div class="field">
-          <label for="nextSessionNo">차기 회기</label>
-          <select id="nextSessionNo">
-            <option value="">선택</option>
-            <option value="1">1회기</option>
-            <option value="2">2회기</option>
-            <option value="3">3회기</option>
-            <option value="4">4회기</option>
-            <option value="5">5회기</option>
-            <option value="6">6회기</option>
-            <option value="7">7회기</option>
-            <option value="8">8회기</option>
-            <option value="9">9회기</option>
-            <option value="10">10회기</option>
-          </select>
-        </div>
-        <div class="field" id="nextResField">
-          <label>차기 예약일</label>
-          <div class="dtRow">
-            <input type="date" id="nextReservationDate">
-            <select id="nextReservationTime"><option value="" selected disabled>시간</option></select>
-          </div>
-          <div class="dtPreview" id="nextReservationPreview">-</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. 상담내용 -->
-    <div class="section">
-      <h2><i class="ti ti-notes" aria-hidden="true"></i>3. 상담내용</h2>
-      <div class="grid">
-        <div class="field">
-          <label for="consultationTarget">상담대상</label>
-          <select id="consultationTarget">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="consultationTopic">상담주제</label>
-          <select id="consultationTopic">
-            <option selected disabled value="">불러오는 중...</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label for="counselDetail">상세 상담내용</label>
-          <textarea id="counselDetail" maxlength="1000" placeholder="상담에 대해 자세히 작성해주세요."></textarea>
-          <div class="char-count"><span id="charCount">0</span> / 1000</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button type="submit" class="btn primary" id="submitBtn"><i class="ti ti-device-floppy" aria-hidden="true"></i>등록</button>
-      <button type="reset" class="btn" id="resetBtn"><i class="ti ti-refresh" aria-hidden="true"></i>초기화</button>
-      <button type="button" class="btn" id="homeBtn"><i class="ti ti-home" aria-hidden="true"></i>메인화면</button>
-    </div>
-
-  </form>
+<section class="section">
+<div class="section-head"><h2>2. 예약 및 진행 정보</h2></div>
+<div class="section-body">
+<div class="grid-2">
+<div class="form-pair"><label for="sessionNo">금회 회기</label><select id="sessionNo"><option value="">선택</option><option value="1">1회기</option><option value="2">2회기</option><option value="3">3회기</option><option value="4">4회기</option><option value="5">5회기</option><option value="6">6회기</option><option value="7">7회기</option><option value="8">8회기</option><option value="9">9회기</option><option value="10">10회기</option></select></div>
+<div class="form-pair"><label>예약일</label><div class="date-time"><input type="date" id="reservationDate" readonly><input type="time" id="reservationTime" readonly></div></div>
+<div class="form-pair"><label>실시일 시작</label><div class="date-time"><input type="date" id="startDate"><input type="time" id="startTime"></div></div>
+<div class="form-pair"><label>실시일 종료</label><div class="date-time"><input type="date" id="endDate"><input type="time" id="endTime"></div></div>
+<div class="form-pair"><label for="duration">상담시간</label><input type="text" id="duration" readonly placeholder="자동 계산"></div>
+<div class="form-pair"><label>진행상태</label><div class="session-status-wrap"><label class="radio-label"><input type="radio" name="sessionStatus" value="진행" checked> 진행</label><label class="radio-label"><input type="radio" name="sessionStatus" value="종결"> 종결</label></div></div>
 </div>
 
-<!-- 접수상담조회 팝업 -->
-<div class="lookupOverlay" id="lookupOverlay">
-  <div class="lookupModal">
-    <button class="lookupClose" type="button" onclick="closeLookupModal()">✕</button>
-    <h3>접수상담조회</h3>
-    <p class="sub">내담자명 + 연락처가 일치하는 가장 최근 접수 기록입니다. (참고용, 자동 입력되지 않습니다)</p>
-    <div id="lookupResultBox">
-      <div class="lookupEmpty">내담자명과 연락처를 입력한 뒤 조회해주세요.</div>
-    </div>
-  </div>
+<div class="tests" style="margin-top:3.2mm">
+<div class="form-pair"><label for="testTool1">검사도구1</label><select id="testTool1"><option value="">선택</option></select></div>
+<div class="form-pair"><label for="testTool2">검사도구2</label><select id="testTool2"><option value="">선택</option></select></div>
+<div class="form-pair"><label for="testTool3">검사도구3</label><select id="testTool3"><option value="">선택</option></select></div>
+<div class="form-pair"><label for="testTool4">검사도구4</label><select id="testTool4"><option value="">선택</option></select></div>
+<div class="form-pair"><label for="nextSessionNo">차기 회기</label><input type="text" id="nextSessionNo" readonly placeholder="자동 계산"></div>
+<div class="form-pair"><label>차기 예약일</label><div class="date-time"><input type="date" id="nextReservationDate"><input type="time" id="nextReservationTime"></div></div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><h2>3. 상담내용</h2></div>
+<div class="section-body">
+<div class="grid-2" style="margin-bottom:3.2mm">
+<div class="form-pair"><label for="consultationTarget">상담대상</label><input type="text" id="consultationTarget" readonly placeholder="접수상담조회 후 자동"></div>
+<div class="form-pair"><label for="consultationTopic">상담주제</label><select id="consultationTopic"><option value="">선택</option></select></div>
+</div>
+<div class="detail-grid"><label class="detail-label" for="counselDetail" style="padding-top:8px">상세 상담내용</label><div class="textarea-wrap"><textarea id="counselDetail" maxlength="1000" placeholder="상담내용을 구체적으로 입력하세요."></textarea><div class="char-count"><span id="charCount">0</span> / 1000</div></div></div>
+</div>
+</section>
+
+<div class="actions no-print">
+<button type="submit" class="btn primary" id="submitBtn">✓ 등록</button>
+<button type="reset" class="btn" id="resetBtn">↻ 초기화</button>
+<button type="button" class="btn" id="backBtn">← 이전화면</button>
+</div>
+</form>
+</main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div class="modal-backdrop no-print" id="lookupModalBackdrop" aria-hidden="true">
+<section class="modal" role="dialog" aria-modal="true" aria-labelledby="lookupModalTitle">
+<div class="modal-head"><h3 id="lookupModalTitle">접수상담조회</h3><button type="button" class="modal-x" id="lookupCloseBtn">×</button></div>
+<div class="modal-search"><input type="text" id="lookupName" placeholder="내담자명"><input type="text" id="lookupPhone" placeholder="010-0000-0000" maxlength="13"><button type="button" id="lookupSearchBtn">조회</button></div>
+<div class="lookup-results" id="lookupResults"><div class="lookup-empty">내담자명과 연락처로 접수상담을 조회하세요.</div></div>
+</section>
+</div>
+
 <script>
-  // ===== Supabase 연결 설정 =====
-  const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
-  const TABLE_NAME = "db_sina_counsel";
-  let sb = null;
-  try {
-    if (!window.supabase) throw new Error("Supabase 라이브러리를 불러오지 못했습니다.");
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { storage: window.sessionStorage, persistSession: true, autoRefreshToken: true }
-    });
-  } catch (err) {
-    console.error("Supabase 초기화 실패:", err);
-  }
+(() => {
+const SUPABASE_URL="https://fafdxaifluftnertbpvr.supabase.co";
+const SUPABASE_KEY="sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+const BASIC_TABLE="DB_basic",PSYCH_TABLE="DB_psychological_counseling",CAREER_TABLE="DB_career_counseling";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true}});
+let currentEmployee=null,selectedReceipt=null,sexMap={},jobMap={},targetMap={},topicMap={},toolMap={};
+const $=id=>document.getElementById(id),form=$("consultForm"),statusMsg=$("statusMsg"),submitBtn=$("submitBtn"),modalBackdrop=$("lookupModalBackdrop"),lookupResults=$("lookupResults");
 
-  // ===== 0) 로그인 가드: 관리자 로그인 상태가 아니면 메인화면으로 돌려보냄 =====
-  async function guardLoginOrRedirect(){
-    if (!sb) return false; // 연결 자체가 안 되면 등록 시점에 별도로 에러 처리
-    const { data } = await sb.auth.getSession();
-    if (!data.session) {
-      alert("관리자 로그인이 필요한 화면입니다. 메인화면으로 이동합니다.");
-      window.location.href = "index.html";
-      return false;
-    }
-    return true;
-  }
+function showStatus(type,message){statusMsg.className="statusMsg show "+type;statusMsg.textContent=message;statusMsg.scrollIntoView({behavior:"smooth",block:"nearest"})}
+function hideStatus(){statusMsg.className="statusMsg";statusMsg.textContent=""}
+const digitsOnly=v=>String(v||"").replace(/\D/g,"");
+function formatPhone(v){const d=digitsOnly(v).slice(0,11);if(d.length<=3)return d;if(d.length<=7)return d.slice(0,3)+"-"+d.slice(3);return d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7)}
+function attachPhoneFormatter(el){el.addEventListener("input",()=>el.value=formatPhone(el.value))}
+attachPhoneFormatter($("clientPhone"));attachPhoneFormatter($("lookupPhone"));
 
-  // ===== 1) 연락처 자동 하이픈 포맷 (000-0000-0000) =====
-  const clientPhoneEl = document.getElementById("clientPhone");
-  clientPhoneEl.addEventListener("input", () => {
-    let digits = clientPhoneEl.value.replace(/\D/g, "").slice(0, 11);
-    let formatted = digits;
-    if (digits.length > 3 && digits.length <= 7) {
-      formatted = digits.slice(0, 3) + "-" + digits.slice(3);
-    } else if (digits.length > 7) {
-      formatted = digits.slice(0, 3) + "-" + digits.slice(3, 7) + "-" + digits.slice(7);
-    }
-    clientPhoneEl.value = formatted;
-  });
-  function isValidPhone(value){ return /^\d{3}-\d{3,4}-\d{4}$/.test(value); }
+function calcAge(birthDate){if(!birthDate)return"";const birth=new Date(birthDate+"T00:00:00");if(Number.isNaN(birth.getTime()))return"";const today=new Date();let age=today.getFullYear()-birth.getFullYear();const md=today.getMonth()-birth.getMonth();if(md<0||(md===0&&today.getDate()<birth.getDate()))age--;return age>=0?age+"세":""}
+function isoToLocalParts(iso){if(!iso)return{date:"",time:""};const d=new Date(iso);if(Number.isNaN(d.getTime()))return{date:"",time:""};const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(d);const map={};parts.forEach(p=>{if(p.type!=="literal")map[p.type]=p.value});return{date:`${map.year}-${map.month}-${map.day}`,time:`${map.hour}:${map.minute}`}}
+function formatKST(iso){if(!iso)return"-";const p=isoToLocalParts(iso);return p.date&&p.time?`${p.date} ${p.time}`:"-"}
+const selectedStatus=()=>document.querySelector('input[name="sessionStatus"]:checked')?.value||"진행";
+function combineDateTime(d,t){if(!d||!t)return null;return new Date(`${d}T${t}:00+09:00`)}
+function updateDuration(){const s=combineDateTime($("startDate").value,$("startTime").value),e=combineDateTime($("endDate").value,$("endTime").value);if(!s||!e||e<=s){$("duration").value="";return}$("duration").value=Math.round((e-s)/60000)+"분"}
+["startDate","startTime","endDate","endTime"].forEach(id=>$(id).addEventListener("change",updateDuration));
+$("sessionNo").addEventListener("change",()=>{const n=Number($("sessionNo").value);$("nextSessionNo").value=Number.isFinite(n)&&n>0&&n<10?`${n+1}회기`:""});
+$("counselDetail").addEventListener("input",()=>$("charCount").textContent=$("counselDetail").value.length);
 
-  // ===== 2) 생년월일 자동 하이픈 포맷 (YYYY-MM-DD) =====
-  const birthDateInput = document.getElementById('birthDate');
-  birthDateInput.addEventListener('input', () => {
-    let digits = birthDateInput.value.replace(/\D/g, "").slice(0, 8);
-    let formatted = digits;
-    if (digits.length > 4 && digits.length <= 6) {
-      formatted = digits.slice(0, 4) + "-" + digits.slice(4);
-    } else if (digits.length > 6) {
-      formatted = digits.slice(0, 4) + "-" + digits.slice(4, 6) + "-" + digits.slice(6);
-    }
-    birthDateInput.value = formatted;
-    ageInput.value = calcAge(birthDateInput.value.trim());
-  });
+async function loadCodeTable(tableName){const {data,error}=await sb.from(tableName).select("code,name,sort_order,active").eq("active",true).order("sort_order",{ascending:true});if(error)throw error;return data||[]}
+function fillSelect(el,rows){el.innerHTML='<option value="">선택</option>';rows.forEach(r=>{const o=document.createElement("option");o.value=r.code;o.textContent=r.name;el.appendChild(o)})}
+async function loadLookups(){try{const [s,j,t,tp,tools]=await Promise.all([loadCodeTable("sex_codes"),loadCodeTable("job_codes"),loadCodeTable("counsel_client_type"),loadCodeTable("counsel_topic"),loadCodeTable("inspection_tool_codes")]);sexMap=Object.fromEntries(s.map(r=>[r.code,r.name]));jobMap=Object.fromEntries(j.map(r=>[r.code,r.name]));targetMap=Object.fromEntries(t.map(r=>[r.code,r.name]));topicMap=Object.fromEntries(tp.map(r=>[r.code,r.name]));toolMap=Object.fromEntries(tools.map(r=>[r.code,r.name]));fillSelect($("consultationTopic"),tp);["testTool1","testTool2","testTool3","testTool4"].forEach(id=>fillSelect($(id),tools))}catch(err){console.error(err);showStatus("error","선택 목록을 불러오지 못했습니다. 로그인 상태 또는 DB 권한을 확인해주세요.")}}
 
-  function isValidBirthDate(value){
-    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!m) return false;
-    const year = parseInt(m[1],10), month = parseInt(m[2],10), day = parseInt(m[3],10);
-    if (month < 1 || month > 12) return false;
-    const daysInMonth = new Date(year, month, 0).getDate();
-    if (day < 1 || day > daysInMonth) return false;
-    return true;
-  }
+async function guardLogin(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){alert("로그인이 필요한 화면입니다. 메인화면으로 이동합니다.");location.href="index.html";return false}const {data:employee,error}=await sb.from("employee").select("name,position,permission,active").eq("auth_user_id",session.user.id).maybeSingle();if(error||!employee||!employee.active){alert("사용자 권한을 확인할 수 없습니다. 메인화면으로 이동합니다.");location.href="index.html";return false}currentEmployee=employee;if(employee.permission==="조회자"){submitBtn.disabled=true;submitBtn.title="조회자는 상담 등록 권한이 없습니다.";showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")}return true}
 
-  const ageInput = document.getElementById('age');
-  function calcAge(dateStr) {
-    if (!isValidBirthDate(dateStr)) return '';
-    const m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const birth = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
-    return age >= 0 ? age + '세' : '';
-  }
+function openLookup(){$("lookupName").value=$("clientName").value.trim();$("lookupPhone").value=$("clientPhone").value.trim();lookupResults.innerHTML='<div class="lookup-empty">내담자명과 연락처로 접수상담을 조회하세요.</div>';modalBackdrop.classList.add("show");modalBackdrop.setAttribute("aria-hidden","false");setTimeout(()=>$("lookupName").focus(),0)}
+function closeLookup(){modalBackdrop.classList.remove("show");modalBackdrop.setAttribute("aria-hidden","true")}
+$("lookupBtn").addEventListener("click",openLookup);$("lookupCloseBtn").addEventListener("click",closeLookup);modalBackdrop.addEventListener("click",e=>{if(e.target===modalBackdrop)closeLookup()});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLookup()});
 
-  // ===== 3) 날짜+시간 드롭다운 공통 유틸 =====
-  const DAY_KR = ["일", "월", "화", "수", "목", "금", "토"];
+async function getReceiptRows(client){const ps="id,client_id,receptionist_name,receptionist_phone,receptionist_relationship,receipt_at,visit_at,client_type_code,topic_code,application_content,session_no,record_active";const cs="id,client_id,receptionist_name,receptionist_phone,receptionist_relationship,receipt_at,appointment_at,client_type_code,topic_code,counseling_content,session_no,record_active";const [p,c]=await Promise.all([sb.from(PSYCH_TABLE).select(ps).eq("client_id",client.id).eq("record_active",true).order("receipt_at",{ascending:false,nullsFirst:false}),sb.from(CAREER_TABLE).select(cs).eq("client_id",client.id).eq("record_active",true).order("receipt_at",{ascending:false,nullsFirst:false})]);if(p.error)throw p.error;if(c.error)throw c.error;const rows=[];(p.data||[]).forEach(row=>rows.push({type:"PC",client,row}));(c.data||[]).forEach(row=>rows.push({type:"CC",client,row}));return rows.sort((a,b)=>new Date(b.row.receipt_at||0)-new Date(a.row.receipt_at||0))}
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
 
-  function buildTimeOptions(selectEl, startHour, endHour, stepMin){
-    for (let h = startHour; h <= endHour; h++) {
-      for (let m = 0; m < 60; m += stepMin) {
-        if (h === endHour && m > 0) continue;
-        const hh = String(h).padStart(2, "0");
-        const mm = String(m).padStart(2, "0");
-        const ampm = h < 12 ? "오전" : "오후";
-        const opt = document.createElement("option");
-        opt.value = `${hh}:${mm}`;
-        opt.textContent = `${hh}:${mm} (${ampm})`;
-        selectEl.appendChild(opt);
-      }
-    }
-  }
+async function searchReceipts(){const name=$("lookupName").value.trim(),phone=$("lookupPhone").value.trim();if(!name||!phone){lookupResults.innerHTML='<div class="lookup-empty">내담자명과 연락처를 모두 입력해주세요.</div>';return}lookupResults.innerHTML='<div class="lookup-empty">조회 중...</div>';try{const {data:clients,error}=await sb.from(BASIC_TABLE).select("id,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address").eq("client_name",name);if(error)throw error;const np=digitsOnly(phone),matched=(clients||[]).filter(c=>digitsOnly(c.client_phone)===np);if(!matched.length){lookupResults.innerHTML='<div class="lookup-empty">일치하는 내담자 기본정보가 없습니다.</div>';return}let candidates=[];for(const client of matched)candidates.push(...await getReceiptRows(client));if(!candidates.length){lookupResults.innerHTML='<div class="lookup-empty">일치하는 활성 접수상담 기록이 없습니다.</div>';return}lookupResults.innerHTML="";candidates.forEach(item=>{const typeLabel=item.type==="PC"?"심리상담":"진로상담",appt=item.type==="PC"?item.row.visit_at:item.row.appointment_at,card=document.createElement("div");card.className="lookup-card";card.innerHTML=`<div class="lookup-card-top"><strong>${escapeHtml(item.client.client_name)} · ${escapeHtml(formatPhone(item.client.client_phone))}</strong><span class="type-badge">${typeLabel}</span></div><p>접수일시 : ${escapeHtml(formatKST(item.row.receipt_at))}</p><p>예약일시 : ${escapeHtml(formatKST(appt))}</p><p>상담대상 : ${escapeHtml(targetMap[item.row.client_type_code]||item.row.client_type_code||"-")} · 상담주제 : ${escapeHtml(topicMap[item.row.topic_code]||item.row.topic_code||"-")}</p>`;card.addEventListener("click",()=>{selectedReceipt=item;populateFromReceipt(item);closeLookup()});lookupResults.appendChild(card)})}catch(err){console.error(err);lookupResults.innerHTML=`<div class="lookup-empty">조회 중 오류가 발생했습니다.<br>${escapeHtml(err.message||String(err))}</div>`}}
+$("lookupSearchBtn").addEventListener("click",searchReceipts);
 
-  function setupDateTimePair(dateId, timeId, previewId){
-    const dateEl = document.getElementById(dateId);
-    const timeEl = document.getElementById(timeId);
-    const previewEl = document.getElementById(previewId);
+function populateFromReceipt(item){const {client,row,type}=item,appt=isoToLocalParts(type==="PC"?row.visit_at:row.appointment_at);$("clientName").value=client.client_name||"";$("clientPhone").value=formatPhone(client.client_phone||"");$("gender").value=sexMap[client.sex_code]||client.sex_code||"";$("birthDate").value=client.birth_date||"";$("age").value=calcAge(client.birth_date);$("job").value=jobMap[client.job_code]||client.job_code||"";$("address").value=client.client_address||"";$("reservationDate").value=appt.date||"";$("reservationTime").value=appt.time||"";$("consultationTarget").value=targetMap[row.client_type_code]||row.client_type_code||"";$("consultationTopic").value=row.topic_code||"";const typeLabel=type==="PC"?"심리상담":"진로상담";$("receiptMeta").classList.add("show");$("receiptMeta").textContent=`${typeLabel} 접수 연결 · 접수일시 ${formatKST(row.receipt_at)} · 접수자 ${row.receptionist_name||"-"} · 접수내용 ${type==="PC"?(row.application_content||"-"):(row.counseling_content||"-")}`;const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());if(!$("startDate").value)$("startDate").value=today;hideStatus();showStatus("success",`${typeLabel} 접수기록을 상담등록 화면에 불러왔습니다.`)}
 
-    function updatePreview(){
-      const d = dateEl.value, t = timeEl.value;
-      if (!d || !t) { previewEl.textContent = "-"; return; }
-      const dObj = new Date(d + "T00:00:00");
-      const dayLabel = DAY_KR[dObj.getDay()];
-      const ampm = parseInt(t.split(":")[0], 10) < 12 ? "오전" : "오후";
-      previewEl.textContent = `${d}(${dayLabel}),${t}(${ampm})`;
-    }
-    dateEl.addEventListener("change", updatePreview);
-    timeEl.addEventListener("change", updatePreview);
+const markInvalid=(el,invalid)=>el.classList.toggle("invalid",!!invalid);
+const collectTools=()=>["testTool1","testTool2","testTool3","testTool4"].map(id=>$(id).value).filter(Boolean);
+async function duplicateSessionExists(tableName,clientId,sessionNo){const {data,error}=await sb.from(tableName).select("id").eq("client_id",clientId).eq("session_no",sessionNo).limit(1);if(error)throw error;return !!(data&&data.length)}
+function buildSessionPayload(){const type=selectedReceipt.type,row=selectedReceipt.row,sessionNo=Number($("sessionNo").value),tools=collectTools().join(", "),topicCode=$("consultationTopic").value||row.topic_code||null,topicName=topicMap[topicCode]||topicCode||null,sessionStatus=selectedStatus(),nextDate=$("nextReservationDate").value||null,startDate=$("startDate").value||null;if(type==="PC")return{session_no:sessionNo,visit_date:startDate,session_topic_1:topicName,assessment_tool:tools||null,session_content:$("counselDetail").value.trim()||null,next_session_date:nextDate,session_status:sessionStatus};return{counseling_date:startDate,session_no:sessionNo,career_topic_1:topicName,assessment_tool:tools||null,counseling_content:$("counselDetail").value.trim()||null,next_session_date:nextDate,session_status:sessionStatus}}
+function validateForm(){let ok=true;[$("clientName"),$("clientPhone"),$("sessionNo"),$("startDate"),$("startTime"),$("endDate"),$("endTime"),$("consultationTopic"),$("counselDetail")].forEach(el=>{const invalid=!String(el.value||"").trim();markInvalid(el,invalid);if(invalid)ok=false});const s=combineDateTime($("startDate").value,$("startTime").value),e=combineDateTime($("endDate").value,$("endTime").value);if(s&&e&&e<=s){markInvalid($("endDate"),true);markInvalid($("endTime"),true);ok=false;showStatus("error","실시일 종료는 시작보다 늦어야 합니다.")}if(!selectedReceipt){ok=false;showStatus("error","먼저 접수상담조회를 통해 등록할 접수기록을 선택해주세요.")}return ok}
 
-    function getISO(){
-      const d = dateEl.value, t = timeEl.value;
-      if (!d || !t) return null;
-      return new Date(`${d}T${t}:00+09:00`).toISOString();
-    }
+form.addEventListener("submit",async e=>{e.preventDefault();hideStatus();if(currentEmployee?.permission==="조회자"){showStatus("error","조회자는 상담을 등록할 수 없습니다.");return}if(!validateForm()){if(!statusMsg.classList.contains("show"))showStatus("error","필수 입력항목을 확인해주세요.");return}if(!confirm("입력한 상담내용을 등록하시겠습니까?"))return;submitBtn.disabled=true;const original=submitBtn.textContent;submitBtn.textContent="등록 중...";try{const type=selectedReceipt.type,tableName=type==="PC"?PSYCH_TABLE:CAREER_TABLE,sessionNo=Number($("sessionNo").value);if(await duplicateSessionExists(tableName,selectedReceipt.client.id,sessionNo))throw new Error(`이미 ${sessionNo}회기가 등록되어 있습니다.`);const sessionPayload=buildSessionPayload(),receiptRow=selectedReceipt.row;if(receiptRow.session_no==null){const {error}=await sb.from(tableName).update(sessionPayload).eq("id",receiptRow.id);if(error)throw error;selectedReceipt.row.session_no=sessionNo}else{let newRow;if(type==="PC"){newRow={client_id:selectedReceipt.client.id,receptionist_name:receiptRow.receptionist_name,receptionist_phone:receiptRow.receptionist_phone,receptionist_relationship:receiptRow.receptionist_relationship,receipt_at:receiptRow.receipt_at,visit_at:receiptRow.visit_at,client_type_code:receiptRow.client_type_code,topic_code:receiptRow.topic_code,application_content:receiptRow.application_content,record_active:false,...sessionPayload}}else{newRow={client_id:selectedReceipt.client.id,receptionist_name:receiptRow.receptionist_name,receptionist_phone:receiptRow.receptionist_phone,receptionist_relationship:receiptRow.receptionist_relationship,receipt_at:receiptRow.receipt_at,appointment_at:receiptRow.appointment_at,client_type_code:receiptRow.client_type_code,topic_code:receiptRow.topic_code,record_active:false,...sessionPayload}}const {error}=await sb.from(tableName).insert([newRow]);if(error)throw error}showStatus("success",`${type==="PC"?"심리상담":"진로상담"} ${sessionNo}회기가 정상적으로 등록되었습니다.`)}catch(err){console.error(err);showStatus("error","상담 등록 중 오류가 발생했습니다: "+(err.message||err))}finally{submitBtn.disabled=currentEmployee?.permission==="조회자";submitBtn.textContent=original}});
 
-    return { dateEl, timeEl, previewEl, getISO, updatePreview };
-  }
-
-  buildTimeOptions(document.getElementById("reservationTime"), 0, 23, 10);
-  buildTimeOptions(document.getElementById("startTime"), 0, 23, 10);
-  buildTimeOptions(document.getElementById("endTime"), 0, 23, 10);
-  buildTimeOptions(document.getElementById("nextReservationTime"), 0, 23, 10);
-
-  const reservationPair = setupDateTimePair("reservationDate", "reservationTime", "reservationPreview");
-  const startPair = setupDateTimePair("startDate", "startTime", "startPreview");
-  const endPair = setupDateTimePair("endDate", "endTime", "endPreview");
-  const nextReservationPair = setupDateTimePair("nextReservationDate", "nextReservationTime", "nextReservationPreview");
-
-  // 실시일 시작/종료 -> 상담시간 자동 계산 (분 단위)
-  const durationInput = document.getElementById('duration');
-  function calcDuration(){
-    const startISO = startPair.getISO();
-    const endISO = endPair.getISO();
-    if (!startISO || !endISO) { durationInput.value = ""; return; }
-    const start = new Date(startISO);
-    const end = new Date(endISO);
-    if (end <= start) { durationInput.value = ""; return; }
-    const diffMin = Math.round((end - start) / 60000);
-    durationInput.value = diffMin + "분";
-  }
-  ["startDate","startTime","endDate","endTime"].forEach(id => {
-    document.getElementById(id).addEventListener("change", calcDuration);
-  });
-
-  // ===== 4) 상세 상담내용 글자수 카운트 =====
-  const counselDetail = document.getElementById('counselDetail');
-  const charCount = document.getElementById('charCount');
-  counselDetail.addEventListener('input', () => {
-    charCount.textContent = counselDetail.value.length;
-  });
-
-  // ===== 5) lookup 테이블에서 옵션 동적 로딩 =====
-  async function loadLookupOptions(tableName, selectEl){
-    if (!sb) { selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`; return; }
-    const { data, error } = await sb.from(tableName).select("code, name, sort_order").eq("active", true).order("sort_order", { ascending: true });
-    if (error || !data || data.length === 0) {
-      console.error(tableName + " 로딩 실패:", error);
-      selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`;
-      return;
-    }
-    let html = `<option selected disabled value="">선택하세요</option>`;
-    data.forEach(row => { html += `<option value="${row.code}">${row.name}</option>`; });
-    selectEl.innerHTML = html;
-  }
-  (async function initPage(){
-    await guardLoginOrRedirect();
-    loadLookupOptions("sex_codes", document.getElementById("gender"));
-    loadLookupOptions("job_codes", document.getElementById("job"));
-    loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"));
-    loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"));
-    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool1"));
-    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool2"));
-    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool3"));
-    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool4"));
-  })();
-
-  // ===== 6) 상태 메시지 =====
-  const statusMsgEl = document.getElementById("statusMsg");
-  function showStatus(type, msg){
-    statusMsgEl.className = "statusMsg show " + type;
-    statusMsgEl.textContent = msg;
-    statusMsgEl.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-  function hideStatus(){ statusMsgEl.className = "statusMsg"; statusMsgEl.textContent = ""; }
-  function markInvalid(fieldEl, invalid){
-    if (invalid) fieldEl.classList.add("invalid"); else fieldEl.classList.remove("invalid");
-  }
-
-  // ===== 7) 접수상담조회 팝업 =====
-  const lookupOverlay = document.getElementById("lookupOverlay");
-  const lookupResultBox = document.getElementById("lookupResultBox");
-
-  function closeLookupModal(){ lookupOverlay.classList.remove("open"); }
-  lookupOverlay.addEventListener("click", (e) => { if (e.target === lookupOverlay) closeLookupModal(); });
-
-  document.getElementById("lookupBtn").addEventListener("click", async () => {
-    const name = document.getElementById("clientName").value.trim();
-    const phone = clientPhoneEl.value.trim();
-
-    if (!name || !phone) {
-      alert("내담자명과 연락처를 먼저 입력해주세요.");
-      return;
-    }
-    if (!sb) {
-      alert("조회 서버 연결에 실패했습니다.");
-      return;
-    }
-
-    lookupResultBox.innerHTML = `<div class="lookupEmpty">조회 중...</div>`;
-    lookupOverlay.classList.add("open");
-
-    const { data, error } = await sb
-      .from(TABLE_NAME)
-      .select("*")
-      .eq("client_name", name)
-      .eq("client_phone", phone)
-      .not("receptionist_name", "is", null)
-      .order("received_at", { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.error(error);
-      lookupResultBox.innerHTML = `<div class="lookupEmpty">조회 중 오류가 발생했습니다. (로그인 상태를 확인해주세요)</div>`;
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      lookupResultBox.innerHTML = `<div class="lookupEmpty">일치하는 접수 기록이 없습니다.</div>`;
-      return;
-    }
-
-    const row = data[0];
-    function formatDateTimeKR(iso){
-      if (!iso) return null;
-      const parts = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Asia/Seoul",
-        year: "numeric", month: "2-digit", day: "2-digit",
-        hour: "2-digit", minute: "2-digit", hour12: false
-      }).formatToParts(new Date(iso));
-      const map = {};
-      parts.forEach(p => map[p.type] = p.value);
-      const dateStr = `${map.year}-${map.month}-${map.day}`;
-      const dayLabel = DAY_KR[new Date(dateStr + "T00:00:00").getDay()];
-      const hour24 = parseInt(map.hour, 10);
-      const minute = parseInt(map.minute, 10);
-      const ampm = hour24 < 12 ? "오전" : "오후";
-      const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
-      const timeStr = minute > 0 ? `${hour12}시${minute}분` : `${hour12}시`;
-      return `${dateStr}(${dayLabel})_${timeStr}(${ampm})`;
-    }
-    const rows = [
-      ["접수일시", formatDateTimeKR(row.received_at)],
-      ["접수자명", row.receptionist_name],
-      ["접수자 연락처", row.receptionist_phone],
-      ["관계", row.relationship],
-      ["접수상담내용", row.receptionist_content],
-      ["예약일", formatDateTimeKR(row.appointment_at)],
-      ["생년월일", row.Birth_date],
-      ["직업", row.client_job],
-    ];
-    lookupResultBox.innerHTML = rows.map(([label, value]) => `
-      <div class="lookupRow"><b>${label}</b><span>${value ? value : "-"}</span></div>
-    `).join("");
-  });
-
-  // ===== 8) 등록(제출) 처리 =====
-  const form = document.getElementById("intakeForm");
-  const submitBtn = document.getElementById("submitBtn");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    hideStatus();
-
-    if (!sb) { showStatus("error", "저장 서버(Supabase) 연결에 실패했습니다."); return; }
-
-    const clientName = document.getElementById("clientName").value.trim();
-    const clientPhone = clientPhoneEl.value.trim();
-    const job = document.getElementById("job").value;
-    const gender = document.getElementById("gender").value;
-    const birthDateRaw = birthDateInput.value.trim();
-    const address = document.getElementById("address").value.trim();
-
-    const sessionNo = document.getElementById("sessionNo").value;
-    const testTool1 = document.getElementById("testTool1").value;
-    const testTool2 = document.getElementById("testTool2").value;
-    const testTool3 = document.getElementById("testTool3").value;
-    const testTool4 = document.getElementById("testTool4").value;
-    const nextSessionNo = document.getElementById("nextSessionNo").value;
-
-    const consultationTarget = document.getElementById("consultationTarget").value;
-    const consultationTopic = document.getElementById("consultationTopic").value;
-    const counselDetailVal = counselDetail.value.trim();
-
-    let hasError = false;
-
-    markInvalid(document.getElementById("clientName").parentElement, !clientName);
-    if (!clientName) hasError = true;
-
-    const phoneValid = isValidPhone(clientPhone);
-    markInvalid(clientPhoneEl.parentElement, !phoneValid);
-    if (!phoneValid) hasError = true;
-
-    markInvalid(document.getElementById("gender").parentElement, !gender);
-    if (!gender) hasError = true;
-
-    const birthValid = birthDateRaw === "" || isValidBirthDate(birthDateRaw);
-    markInvalid(birthDateInput.parentElement, !birthValid);
-    if (!birthValid) hasError = true;
-
-    markInvalid(document.getElementById("consultationTarget").parentElement, !consultationTarget);
-    if (!consultationTarget) hasError = true;
-
-    markInvalid(document.getElementById("consultationTopic").parentElement, !consultationTopic);
-    if (!consultationTopic) hasError = true;
-
-    const appointmentISO = reservationPair.getISO();
-    markInvalid(document.getElementById("reservationField"), !appointmentISO);
-    if (!appointmentISO) hasError = true;
-
-    const startISO = startPair.getISO();
-    const endISO = endPair.getISO();
-    if (startISO && endISO && new Date(endISO) <= new Date(startISO)) {
-      markInvalid(document.getElementById("endField"), true);
-      showStatus("error", "실시일 종료는 시작보다 늦어야 합니다.");
-      hasError = true;
-    } else {
-      markInvalid(document.getElementById("endField"), false);
-    }
-
-    const nextReservationISO = nextReservationPair.getISO();
-
-    if (hasError) {
-      if (statusMsgEl.textContent === "") showStatus("error", "입력값을 다시 확인해주세요. 빨간색으로 표시된 항목을 채워주세요.");
-      return;
-    }
-
-    // ---- 핵심 키(이름+전화번호+상담회기+실시일시작) 중복 사전 체크 ----
-    submitBtn.disabled = true;
-    submitBtn.textContent = "확인 중...";
-
-    const sessionNoInt = sessionNo ? parseInt(sessionNo, 10) : null;
-    if (sessionNoInt !== null && startISO) {
-      const { data: dupData, error: dupError } = await sb
-        .from(TABLE_NAME)
-        .select("id")
-        .eq("client_name", clientName)
-        .eq("client_phone", clientPhone)
-        .eq("Counseling_session", sessionNoInt)
-        .eq("Consultation_start_time", startISO)
-        .limit(1);
-
-      if (dupError) {
-        console.error(dupError);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="ti ti-device-floppy" aria-hidden="true"></i>등록';
-        showStatus("error", "중복 확인 중 오류가 발생했습니다: " + dupError.message);
-        return;
-      }
-
-      if (dupData && dupData.length > 0) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="ti ti-device-floppy" aria-hidden="true"></i>등록';
-        markInvalid(document.getElementById("sessionNo").parentElement, true);
-        markInvalid(document.getElementById("startField"), true);
-        showStatus("error", "이미 동일한 내담자·전화번호·회기·실시일시작으로 등록된 상담이 있습니다. (중복 등록 불가)");
-        return;
-      }
-    }
-
-    const payload = {
-      client_name: clientName,
-      client_phone: clientPhone,
-      client_job: job || null,
-      sex_code: gender,
-      Birth_date: birthValid && birthDateRaw ? birthDateRaw : null,
-      client_address: address || null,
-      Counseling_session: sessionNo ? parseInt(sessionNo, 10) : null,
-      appointment_at: appointmentISO,
-      Consultation_start_time: startISO,
-      Consultation_end_time: endISO,
-      Inspection_tool1: testTool1 || null,
-      Inspection_tool2: testTool2 || null,
-      Inspection_tool3: testTool3 || null,
-      Inspection_tool4: testTool4 || null,
-      next_session_no: nextSessionNo ? parseInt(nextSessionNo, 10) : null,
-      next_reservation_at: nextReservationISO,
-      counsel_client_type: consultationTarget,
-      counsel_topic: consultationTopic,
-      Details_of_consultation: counselDetailVal || null
-    };
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "등록 중...";
-
-    const { error } = await sb.from(TABLE_NAME).insert([payload]);
-
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="ti ti-device-floppy" aria-hidden="true"></i>등록';
-
-    if (error) {
-      console.error(error);
-      if (error.code === "23505") {
-        showStatus("error", "이미 동일한 내담자·전화번호·회기·실시일시작으로 등록된 상담이 있습니다. (중복 등록 불가)");
-      } else {
-        showStatus("error", "저장 중 오류가 발생했습니다: " + error.message);
-      }
-      return;
-    }
-
-    showStatus("success", "상담이 정상적으로 등록되었습니다.");
-    form.reset();
-    charCount.textContent = "0";
-    ageInput.value = "";
-    durationInput.value = "";
-    [reservationPair, startPair, endPair, nextReservationPair].forEach(p => p.updatePreview());
-  });
-
-  document.getElementById('homeBtn').addEventListener('click', () => {
-    window.location.href = 'index.html';
-  });
+form.addEventListener("reset",()=>setTimeout(()=>{selectedReceipt=null;$("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";$("receiptMeta").classList.remove("show");$("receiptMeta").textContent="";document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));hideStatus();if(currentEmployee?.permission==="조회자")showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")},0));
+$("backBtn").addEventListener("click",()=>{if(history.length>1)history.back();else location.href="index.html"});
+$("pdfSaveBtn").addEventListener("click",()=>{const originalTitle=document.title,name=$("clientName").value.trim()||"미입력",date=$("startDate").value||new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());document.title=`상담등록_${name}_${date}`;window.print();setTimeout(()=>document.title=originalTitle,700)});
+(async function init(){const ok=await guardLogin();if(ok)await loadLookups()})();
+})();
 </script>
-
 </body>
 </html>
