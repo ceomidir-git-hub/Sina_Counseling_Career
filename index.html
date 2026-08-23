@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>시나브로 Counselling & Career Plus Center - 2분할 Dashboard</title>
+  <title>마음:시나브로심리상담연구소 관제센타</title>
   <style>
     :root{
       --sidebar-w:210px;
@@ -37,27 +37,28 @@
       background:linear-gradient(180deg,var(--navy) 0%,#122038 100%);
       color:#fff;padding:10px 10px;height:100vh;overflow:hidden;
     }
-    .brand{height:82px;padding:4px 6px 10px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:10px}
-    .brand-title{font-size:16px;font-weight:900;line-height:1.25}
-    .brand-sub{font-size:10px;line-height:1.4;color:#b8c5d8;margin-top:5px}
+    .brand{height:96px;padding:5px 6px 12px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:10px}
+    .brand-title{font-size:17px;font-weight:900;line-height:1.22;letter-spacing:-1.0px}
+    .brand-title .brand-line{display:block;white-space:nowrap}
+    .brand-sub{display:none}
     .nav{display:grid;gap:4px}
     .nav-item{
-      height:38px;border-radius:8px;padding:0 10px;display:flex;align-items:center;gap:9px;
-      color:#d4deec;font-size:12px;font-weight:700;cursor:pointer;transition:.18s ease;
+      height:44px;border-radius:8px;padding:0 10px;display:flex;align-items:center;gap:9px;
+      color:#d4deec;font-size:13.5px;font-weight:700;cursor:pointer;transition:.18s ease;
     }
     .nav-item:hover{transform:translateX(3px);background:rgba(255,255,255,.09);color:#fff}
     .nav-item.active{background:linear-gradient(135deg,#7466ef,#5d58d8);color:#fff;box-shadow:0 6px 14px rgba(102,90,226,.25)}
-    .nav-icon{width:18px;text-align:center}
+    .nav-icon{width:20px;text-align:center;font-size:13.5px}
 
     /* ---------------- Main ---------------- */
-    .main{min-width:0;height:100vh;padding:8px 12px 10px;display:grid;grid-template-rows:42px minmax(0,1fr);gap:8px;overflow:hidden}
+    .main{min-width:0;height:100vh;padding:8px 12px 10px;display:grid;grid-template-rows:61px minmax(0,1fr);gap:8px;overflow:hidden}
 
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .headline h1{font-size:18px;margin:0;letter-spacing:-.4px}.headline h1 strong{color:var(--purple)}
-    .headline p{font-size:10px;color:var(--muted);margin:3px 0 0}
-    .date-control{height:30px;display:flex;align-items:center;border:1px solid var(--line);background:#fff;border-radius:9px;overflow:hidden}
-    .date-control button{width:30px;height:30px;border:0;background:#fff;color:#59667c;font-weight:900;cursor:pointer}
-    #dateLabel{width:128px;text-align:center;font-size:10.5px;font-weight:800}
+    .headline h1{font-size:20.25px;margin:0;letter-spacing:-.7px}.headline h1 strong{color:var(--purple)}
+    .headline p{display:none}
+    .date-control{height:36px;display:flex;align-items:center;border:1px solid var(--line);background:#fff;border-radius:9px;overflow:hidden}
+    .date-control button{width:36px;height:36px;border:0;background:#fff;color:#59667c;font-size:12px;font-weight:900;cursor:pointer}
+    #dateLabel{width:140px;text-align:center;font-size:11.8125px;font-weight:800}
 
     /* 핵심: 우측 화면 50 : 50 정확한 2분할 */
     .split-dashboard{
@@ -89,7 +90,7 @@
 
     /* 각 패널의 구조를 동일하게 유지: KPI 3개 → 분석 2개 → 하단 2개 */
     .kpi-grid{height:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-    .kpi-card{padding:10px;display:flex;align-items:center;gap:9px}
+    .kpi-card{padding:9px;display:flex;align-items:center;gap:9px}
     .kpi-icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:900;flex:0 0 36px;box-shadow:inset 0 0 0 4px rgba(255,255,255,.18)}
     .p{background:linear-gradient(135deg,#8a7df2,#6859e3)}
     .b{background:linear-gradient(135deg,#69a9ff,#407fe8)}
@@ -131,14 +132,1075 @@
       .kpi-icon{width:32px;height:32px;flex-basis:32px}
       .k-value{font-size:15px}
     }
+  
+    /* =========================================================
+       01. 상담 · 구직 Dashboard 전용
+       - 두 번째 첨부의 모바일 상담도우미 구조를 50% 데스크톱 패널로 재구성
+       - 오른쪽 02 Dashboard 클래스/구조에는 적용되지 않음
+       ========================================================= */
+    .counsel-pane{
+      grid-template-rows:38px 148px 112px minmax(0,1fr);
+      gap:8px;
+      padding:8px;
+      background:linear-gradient(180deg,#f4f8ff 0%,#f8fbff 100%);
+    }
+    .counsel-pane .counsel-pane-head h2{
+      font-size:14.625px; /* 19.5px × 0.75 */
+      letter-spacing:-.45px;
+    }
+    .counsel-pane .counsel-pane-head span{
+      font-size:10.125px; /* 13.5px × 0.75 */
+      font-weight:700;
+    }
+
+    .counsel-banner{
+      min-width:0;
+      display:grid;
+      grid-template-columns:54px minmax(0,1fr) auto;
+      align-items:center;
+      gap:12px;
+      padding:10px 13px;
+      border-radius:14px;
+      color:#fff;
+      background:linear-gradient(135deg,#073b86 0%,#0d63ce 100%);
+      box-shadow:0 8px 20px rgba(11,78,162,.18);
+    }
+    .counsel-banner-icon{
+      width:45px;height:45px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(145deg,#dff6ff,#60a5fa);
+      color:#0b4ea2;font-size:26px;font-weight:900;
+    }
+    .counsel-banner-copy{min-width:0;display:grid;gap:3px}
+    .counsel-banner-copy strong{font-size:15.75px;letter-spacing:-.4px}
+    .counsel-banner-copy span{font-size:11.25px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .counsel-status{
+      padding:8px 11px;border:1px solid rgba(255,255,255,.6);
+      border-radius:999px;background:rgba(255,255,255,.15);
+      font-size:10.5px;font-weight:900;white-space:nowrap;
+    }
+
+    .counsel-quick-grid{
+      min-height:0;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-rows:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .counsel-quick{
+      min-width:0;
+      display:grid;
+      grid-template-columns:46px minmax(0,1fr);
+      grid-template-rows:auto auto;
+      column-gap:10px;
+      align-content:center;
+      text-decoration:none;
+      color:var(--text);
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+      box-shadow:0 6px 18px rgba(15,23,42,.06);
+      transition:.18s ease;
+    }
+    .counsel-quick:hover{transform:translateY(-2px);border-color:#b9cff1;box-shadow:0 10px 24px rgba(15,23,42,.10)}
+    .counsel-quick-icon{
+      grid-row:1/3;
+      width:31px;height:31px;border-radius:10px;
+      display:grid;place-items:center;
+      background:#eef6ff;
+      font-size:17px;
+    }
+    .counsel-quick strong{
+      align-self:end;
+      font-size:13.5px; /* 18px × 0.75 */
+      letter-spacing:-.25px;
+      white-space:nowrap;
+    }
+    .counsel-quick span{
+      align-self:start;
+      margin-top:4px;
+      color:#7b8798;
+      font-size:11.1375px;
+      line-height:1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .counsel-summary-card,
+    .counsel-note-card,
+    .counsel-today-card{
+      min-height:0;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      box-shadow:0 6px 18px rgba(15,23,42,.06);
+    }
+    .counsel-summary-card{padding:10px 12px}
+    .counsel-section-title{
+      height:25px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:7px;
+    }
+    .counsel-section-title strong{font-size:12.375px} /* 11px × 1.5 */
+    .counsel-section-title span{font-size:9.375px;color:var(--muted);font-weight:800}
+    .counsel-summary-grid{
+      height:48px;
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:6px;
+    }
+    .counsel-stat{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      text-align:center;
+      padding:5px 3px;
+      border:1px solid #e5eaf2;border-radius:11px;background:#fbfdff;
+    }
+    .counsel-stat small{
+      align-self:center;
+      margin-top:0;
+      color:#64748b;
+      font-size:9.8px;
+      font-weight:850;
+      white-space:nowrap;
+    }
+    .counsel-stat strong{
+      font-size:17.5px;
+      color:#0b4ea2;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .counsel-stat span{
+      font-size:8.8px;
+      color:#7f8a9c;
+      white-space:nowrap;
+    }
+
+    .counsel-bottom-grid{
+      min-height:0;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+    .counsel-note-card,.counsel-today-card{
+      padding:11px 12px;
+      overflow:hidden;
+    }
+    .counsel-note-nav{
+      height:34px;
+      display:grid;
+      grid-template-columns:76px 1fr 76px;
+      align-items:center;
+      gap:6px;
+      margin-bottom:8px;
+    }
+    .counsel-note-nav b{text-align:center;font-size:11.55px;color:#0b4ea2}
+    .counsel-note-nav button{
+      height:32px;border:1px solid #dbe4f0;border-radius:999px;
+      background:#f8fafc;color:#334155;font-size:9.9px;font-weight:850;
+    }
+    .counsel-note-nav button:disabled{opacity:.4}
+    .counsel-note-body{
+      width:100%;
+      min-height:100px;
+      max-height:140px;
+      padding:11px 13px;
+      background:#f8fafc;
+      border:1px solid #eef1f6;
+      border-radius:11px;
+      font-size:13.86px;
+      line-height:1.52;
+      color:#475569;
+      overflow:auto;
+    }
+    .counsel-note-body p{margin:2px 0}
+    .counsel-note-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+    .counsel-note-actions button{
+      height:34px;border:0;border-radius:10px;background:#1565d8;
+      color:#fff;font-size:10.5px;font-weight:900;cursor:pointer;
+    }
+    .counsel-note-actions button.secondary{background:#f1f5f9;color:#0f172a;border:1px solid #dbe4f0}
+
+    .counsel-today-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:7px;
+    }
+    .counsel-today-grid div{
+      min-height:55px;
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:2px;
+      border:1px solid #e5eaf2;
+      border-radius:10px;
+      background:#fbfdff;
+    }
+    .counsel-today-grid small{font-size:9.75px;color:#64748b;font-weight:800}
+    .counsel-today-grid strong{font-size:15.75px;color:#0b4ea2}
+    .counsel-progress{margin-top:10px}
+    .counsel-progress-row{display:flex;justify-content:space-between;font-size:9.75px;font-weight:850}
+    .counsel-progress-track{height:8px;background:#e9eff7;border-radius:999px;overflow:hidden;margin-top:5px}
+    .counsel-progress-track i{display:block;height:100%;background:linear-gradient(90deg,#0b4ea2,#22c55e);border-radius:999px}
+    .counsel-mini-list{display:grid;gap:5px;margin-top:9px;font-size:9.75px;color:#64748b}
+    .counsel-mini-list span{display:flex;justify-content:space-between;gap:8px}
+    .counsel-mini-list b{color:#334155}
+
+    /* =========================================================
+       02 Dashboard 하단 운영현황 + 회원 LIST
+       - 전체 카드 프레임 크기는 그대로 유지
+       - 상단 회원카드 높이를 58px로 축소
+       - 선택 카드 아래에 10건 예시 LIST 표시
+       - DB 연동 후 데이터 증가 시 LIST 내부에만 가로/세로 스크롤
+       ========================================================= */
+    .job-operation-card{
+      display:grid;
+      grid-template-rows:25px 58px minmax(0,1fr);
+      row-gap:6px;
+      min-width:0;
+      min-height:0;
+    }
+    .job-operation-card .counsel-section-title{
+      height:25px;
+      margin-bottom:0;
+    }
+    .job-operation-grid{
+      height:58px;
+      min-height:58px;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:6px;
+    }
+    .job-operation-item{
+      min-width:0;
+      height:58px;
+      padding:5px 4px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      border:1px solid #dfe5ed;
+      border-radius:9px;
+      background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+      color:#334155;
+      font-family:inherit;
+      text-align:center;
+      cursor:pointer;
+      transition:transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .job-operation-item small{
+      color:#667085;
+      font-size:9.25px;
+      font-weight:850;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .job-operation-item strong{
+      color:#315da7;
+      font-size:15.5px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:-.30px;
+      white-space:nowrap;
+    }
+    .job-operation-item strong span{
+      margin-left:2px;
+      color:#6f7b8e;
+      font-size:8.6px;
+      font-weight:850;
+      letter-spacing:-.08px;
+    }
+    .job-operation-item:hover{
+      transform:translateY(-1px);
+      background:#fff;
+      border-color:#b9c8dc;
+      box-shadow:0 4px 10px rgba(32,48,76,.08);
+    }
+    .job-operation-item.active{
+      border-color:#8fb0dc;
+      background:#eef5ff;
+      box-shadow:inset 0 0 0 1px rgba(78,120,184,.08);
+    }
+    .job-operation-item.active small{color:#315d96}
+    .job-operation-item.active strong{color:#164f9e}
+    .job-operation-item:focus-visible{
+      outline:2px solid #7da4da;
+      outline-offset:1px;
+    }
+
+    .member-list-panel{
+      min-width:0;
+      min-height:0;
+      display:grid;
+      grid-template-rows:22px minmax(0,1fr);
+      overflow:hidden;
+      border:1px solid #dfe5ed;
+      border-radius:8px;
+      background:#fff;
+    }
+    .member-list-head{
+      min-width:0;
+      height:22px;
+      padding:0 7px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      border-bottom:1px solid #e2e7ee;
+      background:#f8fafc;
+    }
+    .member-list-head strong{
+      min-width:0;
+      color:#344154;
+      font-size:9.1px;
+      font-weight:900;
+      letter-spacing:-.12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .member-list-head span{
+      flex:0 0 auto;
+      color:#8490a2;
+      font-size:7.9px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .member-list-scroll{
+      min-width:0;
+      min-height:0;
+      width:100%;
+      height:100%;
+      overflow:scroll;
+      scrollbar-gutter:stable;
+      scrollbar-width:thin;
+      scrollbar-color:#b9c1cc #f6f7f9;
+      background:#fff;
+    }
+    .member-list-table{
+      border-collapse:separate;
+      border-spacing:0;
+      table-layout:fixed;
+      background:#fff;
+      color:#344154;
+      font-size:8.65px;
+      letter-spacing:-.10px;
+    }
+    .member-list-table.mode-company{width:455px;min-width:455px}
+    .member-list-table.mode-company col:nth-child(1){width:145px}
+    .member-list-table.mode-company col:nth-child(2){width:105px}
+    .member-list-table.mode-company col:nth-child(3){width:82px}
+    .member-list-table.mode-company col:nth-child(4){width:123px}
+
+    .member-list-table.mode-personal{width:610px;min-width:610px}
+    .member-list-table.mode-personal col:nth-child(1){width:72px}
+    .member-list-table.mode-personal col:nth-child(2){width:116px}
+    .member-list-table.mode-personal col:nth-child(3){width:54px}
+    .member-list-table.mode-personal col:nth-child(4){width:52px}
+    .member-list-table.mode-personal col:nth-child(5){width:136px}
+    .member-list-table.mode-personal col:nth-child(6){width:180px}
+
+    .member-list-table.mode-foreign{width:555px;min-width:555px}
+    .member-list-table.mode-foreign col:nth-child(1){width:78px}
+    .member-list-table.mode-foreign col:nth-child(2){width:72px}
+    .member-list-table.mode-foreign col:nth-child(3){width:118px}
+    .member-list-table.mode-foreign col:nth-child(4){width:54px}
+    .member-list-table.mode-foreign col:nth-child(5){width:98px}
+    .member-list-table.mode-foreign col:nth-child(6){width:135px}
+
+    .member-list-table th,
+    .member-list-table td{
+      height:24px;
+      padding:0 5px;
+      border-right:1px solid #e1e6ed;
+      border-bottom:1px solid #e6eaf0;
+      vertical-align:middle;
+      line-height:1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .member-list-table th:last-child,
+    .member-list-table td:last-child{border-right:0}
+    .member-list-table thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      height:25px;
+      background:#f1f4f8;
+      color:#475467;
+      font-size:8.6px;
+      font-weight:900;
+      text-align:center;
+      border-bottom:1px solid #cfd7e2;
+    }
+    .member-list-table tbody td{
+      background:#fff;
+      color:#465365;
+      font-weight:600;
+      text-align:center;
+    }
+    .member-list-table tbody tr:nth-child(even) td{background:#fbfcfd}
+    .member-list-table tbody td.member-left{
+      text-align:left;
+      padding-left:6px;
+      padding-right:6px;
+    }
+    .member-list-table tbody tr:hover td{
+      background:#eef5ff;
+      color:#223b5d;
+    }
+    .member-list-scroll::-webkit-scrollbar{width:8px;height:8px}
+    .member-list-scroll::-webkit-scrollbar-track{background:#f6f7f9}
+    .member-list-scroll::-webkit-scrollbar-thumb{
+      background:#b9c1cc;
+      border:2px solid #f6f7f9;
+      border-radius:7px;
+    }
+    .member-list-scroll::-webkit-scrollbar-thumb:hover{background:#919cab}
+
+    @media (max-height:820px){
+      .job-operation-card{grid-template-rows:23px 50px minmax(0,1fr);row-gap:5px}
+      .job-operation-card .counsel-section-title{height:23px}
+      .job-operation-grid{height:50px;min-height:50px;gap:5px}
+      .job-operation-item{height:50px;gap:4px;padding:4px 3px}
+      .job-operation-item small{font-size:8.7px}
+      .job-operation-item strong{font-size:14px}
+      .member-list-panel{grid-template-rows:20px minmax(0,1fr)}
+      .member-list-head{height:20px}
+      .member-list-table th,.member-list-table td{height:22px}
+      .member-list-table thead th{height:23px}
+    }
+
+    @media (max-height:820px){
+      .counsel-pane{grid-template-rows:34px 127px 104px minmax(0,1fr)}
+      .counsel-banner{padding:7px 11px}
+      .counsel-banner-icon{width:40px;height:40px}
+      .counsel-quick{padding:7px}
+      .counsel-quick-icon{width:32px;height:32px;font-size:18px}
+      .counsel-quick strong{font-size:12px}
+      .counsel-quick span{font-size:9.9px}
+      .counsel-note-body{min-height:78px;font-size:12.375px}
+      .counsel-today-grid div{min-height:44px}
+    }
+
+  
+    /* ===== 상단 심리상담, 진로상담 도우미 ===== */
+    .top-layout{
+      height:61px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      gap:12px;
+      align-items:stretch;
+    }
+    .top-helper{
+      min-width:0;
+      height:61px;
+      display:grid;
+      grid-template-columns:40px minmax(0,1fr);
+      align-items:center;
+      gap:8px;
+      padding:5px 14px 5px 10px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:13px;
+      color:#fff;
+      background:linear-gradient(135deg,#24385f 0%,#324f83 55%,#435f9f 100%);
+      box-shadow:0 7px 18px rgba(24,39,68,.18);
+    }
+    .top-helper-icon{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(145deg,#edf4ff,#a9c5ef);
+      color:#314f83;
+      font-size:21px;
+      font-weight:900;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.42);
+    }
+    .top-helper-copy{
+      min-width:0;
+      display:grid;
+      gap:4px;
+    }
+    .top-helper-copy.single-line{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:nowrap;
+      min-width:0;
+      white-space:nowrap;
+    }
+    .top-helper-copy strong{
+      flex:0 0 auto;
+      font-size:18px;
+      letter-spacing:-.35px;
+      white-space:nowrap;
+    }
+    .top-helper-copy span{
+      flex:1 1 auto;
+      min-width:0;
+      font-size:11.55px;
+      letter-spacing:-.22px;
+      opacity:.94;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    @media (max-height:820px){
+      .main{grid-template-rows:55px minmax(0,1fr)}
+      .top-layout{
+        height:55px;
+        grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+        gap:10px;
+      }
+      .top-helper{
+        height:55px;
+        padding:5px 11px;
+        grid-template-columns:38px minmax(0,1fr);
+        gap:8px;
+      }
+
+  
+    .counsel-stat{
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      cursor:default;
+    }
+    .counsel-stat:hover{
+      transform:translateY(-3px);
+      border-color:#b9c8e4;
+      box-shadow:0 8px 18px rgba(32,48,76,.12);
+      background:#ffffff;
+    }
+
+    .counsel-note-card,
+    .counsel-today-card{
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .counsel-note-card:hover,
+    .counsel-today-card:hover{
+      transform:translateY(-3px);
+      border-color:#b9c8e4;
+      box-shadow:0 10px 22px rgba(32,48,76,.13);
+    }
+    .counsel-today-grid div{
+      transition:transform .16s ease, background .16s ease, border-color .16s ease;
+    }
+    .counsel-today-grid div:hover{
+      transform:translateY(-2px);
+      background:#ffffff;
+      border-color:#c2cee2;
+    }
+
+  
+    /* 상담자 노트 / 오늘 상담 운영 : 동일 폭 · 동일 높이 */
+    .counsel-bottom-grid{
+      align-items:stretch;
+    }
+    .counsel-note-card,
+    .counsel-today-card{
+      width:100%;
+      height:100%;
+      min-width:0;
+      min-height:0;
+    }
+
+  
+    /* ===== TOP 실시간 날씨 바 ===== */
+    .top-weather-area{
+      min-width:0;
+      height:61px;
+      display:grid;
+      /* LIVE / 날짜 / 지역 / 아이콘 / 현재 / 최고최저 / 강수 / 습도 */
+      grid-template-columns:42px 122px 94px 42px 88px 122px 88px 76px;
+      justify-content:end;
+      align-items:center;
+      gap:3px;
+      padding:5px 7px;
+      background:linear-gradient(180deg,#ffffff 0%,#f7f9fd 100%);
+      border:1px solid #dce3ee;
+      border-radius:13px;
+      box-shadow:0 6px 16px rgba(32,48,76,.08);
+      overflow:hidden;
+    }
+
+    .weather-live{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      font-size:9.5px;
+      font-weight:900;
+      color:#45618d;
+      white-space:nowrap;
+    }
+    .weather-live span{
+      animation:weatherLiveText 1.25s ease-in-out infinite;
+    }
+    .weather-live i{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#22c55e;
+      transform-origin:center;
+      will-change:transform,background-color,box-shadow;
+      animation:weatherPulse 1.25s ease-in-out infinite;
+    }
+
+    .weather-item{
+      min-width:0;
+      height:48px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:1px 3px;
+      border-left:1px solid #e3e9f2;
+      white-space:nowrap;
+      overflow:hidden;
+    }
+    .weather-item small{
+      width:100%;
+      text-align:center;
+      font-size:11px;
+      font-weight:850;
+      color:#77849a;
+      line-height:1.05;
+      margin-bottom:7px;
+      letter-spacing:-.15px;
+    }
+    .weather-item strong{
+      width:100%;
+      text-align:center;
+      font-size:13.2px;
+      font-weight:900;
+      color:#1f314d;
+      line-height:1;
+      letter-spacing:-.25px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      animation:weatherFloat 4.2s ease-in-out infinite;
+    }
+    .weather-item:nth-of-type(3) strong{animation-delay:.35s}
+    .weather-item:nth-of-type(5) strong{animation-delay:.70s}
+    .weather-item:nth-of-type(6) strong{animation-delay:1.05s}
+    .weather-item:nth-of-type(7) strong{animation-delay:1.40s}
+    .weather-item:nth-of-type(8) strong{animation-delay:1.75s}
+
+    .weather-date strong{font-size:12.2px}
+    .weather-region strong{
+      font-size:12.4px;
+      letter-spacing:-.35px;
+    }
+
+    .weather-icon-wrap{
+      height:48px;
+      display:grid;
+      place-items:center;
+      border-left:1px solid #e8edf4;
+    }
+    .weather-icon-wrap span{
+      display:block;
+      font-size:26px;
+      line-height:1;
+      filter:drop-shadow(0 3px 5px rgba(32,48,76,.14));
+      animation:weatherIconFloat 3.2s ease-in-out infinite;
+    }
+
+    .top-weather-area.is-loading{
+      opacity:.88;
+    }
+    .top-weather-area.is-error .weather-live i{
+      background:#e6a23c;
+      animation:none;
+      box-shadow:none;
+      transform:none;
+    }
+    .top-weather-area.is-error .weather-live span{animation:none;color:#a16207}
+
+    @keyframes weatherPulse{
+      0%{
+        transform:translateY(1px) scale(.78);
+        background:#22c55e;
+        box-shadow:0 0 0 0 rgba(34,197,94,.48),0 0 5px rgba(34,197,94,.22);
+      }
+      33%{
+        transform:translateY(-2px) scale(1.55);
+        background:#06b6d4;
+        box-shadow:0 0 0 7px rgba(6,182,212,.10),0 0 10px rgba(6,182,212,.42);
+      }
+      66%{
+        transform:translateY(1px) scale(1.12);
+        background:#3b82f6;
+        box-shadow:0 0 0 11px rgba(59,130,246,0),0 0 8px rgba(59,130,246,.34);
+      }
+      100%{
+        transform:translateY(1px) scale(.78);
+        background:#22c55e;
+        box-shadow:0 0 0 0 rgba(34,197,94,0),0 0 5px rgba(34,197,94,.18);
+      }
+    }
+    @keyframes weatherLiveText{
+      0%,100%{color:#45618d;opacity:.82}
+      33%{color:#0f9db4;opacity:1}
+      66%{color:#2563eb;opacity:1}
+    }
+    @keyframes weatherFloat{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-1.5px)}
+    }
+    @keyframes weatherIconFloat{
+      0%,100%{transform:translateY(1px) scale(1)}
+      50%{transform:translateY(-2px) scale(1.04)}
+    }
+
+    @media (max-width:1599px){
+      .top-weather-area{
+        grid-template-columns:34px 108px 82px 36px 76px 106px 74px 64px;
+        gap:2px;
+        padding-left:4px;
+        padding-right:4px;
+      }
+      .weather-live{font-size:8.5px}
+      .weather-item{padding-left:2px;padding-right:2px}
+      .weather-item small{font-size:9.9px}
+      .weather-item strong{font-size:11.8px}
+      .weather-date strong{font-size:10.8px}
+      .weather-region strong{font-size:11px}
+      .weather-icon-wrap span{font-size:23px}
+    }
+
+    @media (max-height:820px){
+      .top-weather-area{
+        height:55px;
+      }
+      .weather-item,
+      .weather-icon-wrap{
+        height:44px;
+      }
+      .weather-item small{margin-bottom:5px}
+    }
+
+
+    /* =========================================================
+       02. 기업 · 매칭 · 취업 Dashboard 전용 : 구인공고 핵심 LIST
+       ---------------------------------------------------------
+       [v20 수치 최적화]
+       - 01 Dashboard / 전체 50:50 프레임: 변경 없음
+       - 사용 높이: 기존 148 + 8 + 112 = 268px 고정
+       - 제목 28px + LIST 240px
+       - 표 헤더 28px / DATA 행 28px
+       - 가상 DATA 10건: 28 + (28×10) = 308px → 세로 스크롤 필수
+       - 표 고정 최소폭 820px → 우측 패널보다 넓을 때 가로 스크롤
+       - DB 값이 길어도 칸/행은 증가시키지 않고 ... 처리
+       - 회사명·직무내용 등 원문은 title 속성으로 전체 확인 가능
+       ========================================================= */
+    .job-posting-document{
+      grid-row:2 / 4;
+      min-width:0;
+      min-height:0;
+      width:100%;
+      height:100%;
+      display:grid;
+      grid-template-rows:28px minmax(0,1fr);
+      background:#fff;
+      border:1px solid #cfd6e1;
+      border-radius:8px;
+      box-shadow:0 5px 14px rgba(15,23,42,.055);
+      overflow:hidden;
+    }
+
+    .job-posting-doc-title{
+      height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:0 9px 0 10px;
+      border-bottom:1px solid #d7dde6;
+      background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+      color:#1f2937;
+    }
+    .job-posting-doc-title strong{
+      font-size:10.8px;
+      font-weight:900;
+      letter-spacing:-.18px;
+      white-space:nowrap;
+    }
+    .job-posting-doc-title span{
+      font-size:8.9px;
+      color:#7a8596;
+      font-weight:750;
+      white-space:nowrap;
+    }
+
+    /* 구인/구직 전환 라디오 : 28px 제목 프레임 안에 고정 */
+    .job-type-switch{
+      min-width:0;
+      height:100%;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .job-type-option{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
+      color:#344154;
+      font-size:10.3px;
+      font-weight:850;
+      white-space:nowrap;
+      user-select:none;
+    }
+    .job-type-option input{
+      width:12px;
+      height:12px;
+      margin:0;
+      accent-color:#4e78b8;
+      cursor:pointer;
+    }
+    .job-type-option:has(input:checked){color:#1f5ca8}
+    .job-posting-doc-meta{
+      flex:0 0 auto;
+      font-size:8.9px;
+      color:#7a8596;
+      font-weight:750;
+      white-space:nowrap;
+    }
+
+    .job-posting-scroll{
+      min-width:0;
+      min-height:0;
+      width:100%;
+      height:100%;
+      overflow:scroll; /* DB 연동 후 가로/세로 스크롤 프레임 고정 */
+      scrollbar-gutter:stable;
+      scrollbar-width:thin;
+      scrollbar-color:#aeb7c4 #f4f6f8;
+      background:#fff;
+    }
+
+    .job-posting-table{
+      width:820px;
+      min-width:820px;
+      border-collapse:separate;
+      border-spacing:0;
+      table-layout:fixed;
+      background:#fff;
+      color:#263244;
+      font-size:10.2px;
+      letter-spacing:-.12px;
+    }
+
+    /*
+       열폭 820px = 76 + 116 + 64 + 64 + 96 + 86 + 252 + 66
+       - 날짜: YYYY-MM-DD 표시가 가능한 최소 실사용 폭
+       - 경력/학력/인원: 짧은 정형값이므로 가장 압축
+       - 회사명/임금/지역: 중간 폭
+       - 직무내용: 탐색 핵심 정보이므로 전체 폭의 30.7% 확보
+    */
+    /* 구인공고: 총 820px */
+    .job-posting-table.mode-employer{width:820px;min-width:820px}
+    .job-posting-table.mode-employer col:nth-child(1){width:76px}   /* 공고일 */
+    .job-posting-table.mode-employer col:nth-child(2){width:116px}  /* 회사명 */
+    .job-posting-table.mode-employer col:nth-child(3){width:64px}   /* 경력 */
+    .job-posting-table.mode-employer col:nth-child(4){width:64px}   /* 학력 */
+    .job-posting-table.mode-employer col:nth-child(5){width:96px}   /* 임금 */
+    .job-posting-table.mode-employer col:nth-child(6){width:86px}   /* 지역 */
+    .job-posting-table.mode-employer col:nth-child(7){width:252px}  /* 직무내용 */
+    .job-posting-table.mode-employer col:nth-child(8){width:66px}   /* 채용인원 */
+
+    /* 구직공고: 총 926px, 주소·직종 탐색을 위해 가로 스크롤 사용 */
+    .job-posting-table.mode-seeker{width:926px;min-width:926px}
+    .job-posting-table.mode-seeker col:nth-child(1){width:76px}   /* 접수일 */
+    .job-posting-table.mode-seeker col:nth-child(2){width:64px}   /* 이름 */
+    .job-posting-table.mode-seeker col:nth-child(3){width:96px}   /* 희망직종 1 */
+    .job-posting-table.mode-seeker col:nth-child(4){width:98px}   /* 희망임금 */
+    .job-posting-table.mode-seeker col:nth-child(5){width:90px}   /* 희망지역 */
+    .job-posting-table.mode-seeker col:nth-child(6){width:118px}  /* 희망직종 2 */
+    .job-posting-table.mode-seeker col:nth-child(7){width:72px}   /* 경력 */
+    .job-posting-table.mode-seeker col:nth-child(8){width:72px}   /* 국적 */
+    .job-posting-table.mode-seeker col:nth-child(9){width:240px}  /* 주소 */
+
+    .job-posting-table th,
+    .job-posting-table td{
+      height:28px;
+      padding:0 5px;
+      border-right:1px solid #dce2ea;
+      border-bottom:1px solid #e2e7ee;
+      vertical-align:middle;
+      font-size:10.2px;
+      line-height:1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .job-posting-table th:last-child,
+    .job-posting-table td:last-child{border-right:0}
+
+    .job-posting-table thead th{
+      position:sticky;
+      top:0;
+      z-index:3;
+      height:28px;
+      text-align:center;
+      font-size:10.25px;
+      font-weight:850;
+      color:#344154;
+      background:#f0f4f8;
+      border-bottom:1px solid #cbd4df;
+      box-shadow:0 1px 0 rgba(203,212,223,.45);
+    }
+
+    .job-posting-table tbody td{
+      background:#fff;
+      font-weight:600;
+      color:#3a4657;
+      text-align:center;
+    }
+    .job-posting-table tbody tr:nth-child(even) td{background:#fbfcfd}
+    .job-posting-table tbody td.cell-left{
+      text-align:left;
+      padding-left:7px;
+      padding-right:7px;
+    }
+    .job-posting-table tbody tr:hover td{
+      background:#eef5ff;
+      color:#1f3554;
+    }
+
+    /* 스크롤바: 정보 탐색용. 프레임 내부에 항상 확보 */
+    .job-posting-scroll::-webkit-scrollbar{width:9px;height:9px}
+    .job-posting-scroll::-webkit-scrollbar-track{
+      background:#f4f6f8;
+      border-left:1px solid #edf0f4;
+      border-top:1px solid #edf0f4;
+    }
+    .job-posting-scroll::-webkit-scrollbar-thumb{
+      background:#aeb7c4;
+      border:2px solid #f4f6f8;
+      border-radius:7px;
+    }
+    .job-posting-scroll::-webkit-scrollbar-thumb:hover{background:#8995a5}
+
+    /* =========================================================
+       02 구인/구직 문서 제목행 파일 변환 버튼
+       - "가상 DATA 10건 · DB 연동 예정" 문구 삭제
+       - 28px 제목행 안에 소형 버튼 배치
+       - CSV: 36×20px / PDF변환: 52×20px
+       - 전체 프레임 높이/폭 변화 없음
+       ========================================================= */
+    .job-doc-actions{
+      height:22px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:4px;
+      flex:0 0 auto;
+    }
+    .export-btn{
+      height:20px;
+      min-width:36px;
+      padding:0 7px;
+      border:1px solid #cfd7e3;
+      border-radius:5px;
+      background:#fff;
+      color:#334155;
+      font-size:8.8px;
+      font-weight:850;
+      line-height:18px;
+      letter-spacing:-.10px;
+      cursor:pointer;
+      box-shadow:none;
+      transition:background .15s ease,border-color .15s ease;
+      white-space:nowrap;
+    }
+    .export-btn:hover{
+      background:#f8fafc;
+      border-color:#aeb9c8;
+    }
+    .export-btn.csv{
+      color:#217346;
+      border-color:#bdd8c9;
+      background:#f7fbf8;
+    }
+    .export-btn.pdf{
+      min-width:52px;
+      color:#a63a3a;
+      border-color:#e1c6c6;
+      background:#fff9f9;
+    }
+    .export-btn:focus-visible{outline:2px solid #7da4da;outline-offset:1px}
+
+    /* =========================================================
+       02 Dashboard 제목행 : 매칭 바로가기 버튼
+       - 제목과 같은 38px 행의 우측 배치
+       - CSV/PDF 소형 버튼과 동일한 20px 높이 / 8.8px 문자 사양
+       - 텍스트 길이 때문에 폭만 64px로 확보
+       ========================================================= */
+    .pane-head-actions{
+      height:22px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:4px;
+      margin-left:auto;
+      flex:0 0 auto;
+    }
+    .match-nav-btn{
+      height:20px;
+      min-width:82px;
+      padding:0 7px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #cfd7e3;
+      border-radius:5px;
+      background:#fff;
+      color:#334155;
+      font-size:8.8px;
+      font-weight:850;
+      line-height:18px;
+      letter-spacing:-.15px;
+      text-decoration:none;
+      white-space:nowrap;
+      cursor:pointer;
+      transition:background .15s ease,border-color .15s ease,transform .15s ease;
+    }
+    .match-nav-btn:hover{
+      background:#f8fafc;
+      border-color:#aeb9c8;
+      transform:translateY(-1px);
+    }
+    .match-nav-btn.progress{color:#315f9d;border-color:#bfd0e6;background:#f7faff}
+    .match-nav-btn.complete{color:#2d7a50;border-color:#bfd9ca;background:#f7fbf8}
+    .match-nav-btn:focus-visible{outline:2px solid #7da4da;outline-offset:1px}
+    .match-nav-btn strong{font-size:8.8px;font-weight:900;margin-left:3px;color:inherit}
+
+    @media (prefers-reduced-motion: reduce){
+      .weather-live i,
+      .weather-live span{animation:none !important}
+      .weather-live i{transform:scale(1.15);background:#22c55e}
+    }
+
   </style>
 </head>
 <body>
 <div class="layout">
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-title">시나브로<br>Career Plus Center</div>
-      <div class="brand-sub">Counselling & Career Plus Center<br>상담 · 구인구직 · 취업연계 통합 시스템</div>
+      <div class="brand-title"><span class="brand-line">마음:시나브로심리상담</span><span class="brand-line">연구소 관제센타</span></div>
     </div>
     <nav class="nav">
       <div class="nav-item active"><span class="nav-icon">◫</span><span>대시보드</span></div>
@@ -155,143 +1217,250 @@
   </aside>
 
   <main class="main">
-    <header class="topbar">
-      <div class="headline">
-        <h1>시나브로 <strong>Counselling & Career Plus Center</strong></h1>
-        <p>좌측 메뉴는 유지하고, 업무 화면을 50 : 50의 동일 구조 2개 패널로 분리했습니다.</p>
+    <header class="topbar top-layout">
+      <div class="top-helper">
+        <div class="top-helper-icon">♥</div>
+        <div class="top-helper-copy single-line">
+          <strong>심리상담 · 진로상담 도우미</strong>
+          <span>접수 → 상담 → 조회 · 관리 업무를 한 화면에서 빠르게 실행합니다.</span>
+        </div>
       </div>
-      <div class="date-control">
-        <button id="prevDate" aria-label="이전 날짜">◀</button>
-        <div id="dateLabel"></div>
-        <button id="nextDate" aria-label="다음 날짜">▶</button>
+
+      <div class="top-weather-area" aria-label="오늘 날씨 정보">
+        <div class="weather-live" title="날씨 자동 갱신 중">
+          <i></i><span>LIVE</span>
+        </div>
+
+        <div class="weather-item weather-date">
+          <small>오늘날짜</small>
+          <strong id="weatherDate">-</strong>
+        </div>
+
+        <div class="weather-item weather-region">
+          <small>지역명</small>
+          <strong id="weatherRegion">위치 확인중</strong>
+        </div>
+
+        <div class="weather-icon-wrap" title="현재 날씨">
+          <span id="weatherIcon">🌤️</span>
+        </div>
+
+        <div class="weather-item">
+          <small>현재기온</small>
+          <strong id="weatherTemp">--.-℃</strong>
+        </div>
+
+        <div class="weather-item">
+          <small>최고 / 최저</small>
+          <strong id="weatherHighLow">--℃ / --℃</strong>
+        </div>
+
+        <div class="weather-item">
+          <small>강수확률</small>
+          <strong id="weatherRain">--%</strong>
+        </div>
+
+        <div class="weather-item">
+          <small>습도</small>
+          <strong id="weatherHumidity">--%</strong>
+        </div>
       </div>
     </header>
 
     <div class="split-dashboard">
-      <!-- ================= LEFT PANE ================= -->
-      <section class="dashboard-pane">
-        <div class="pane-head">
-          <h2>01. 상담 · 구직 Dashboard</h2>
-          <span>좌측 50%</span>
+      <!-- ================= LEFT PANE : 상담도우미형 ================= -->
+      <section class="dashboard-pane counsel-pane">
+        <div class="pane-head counsel-pane-head">
+          <h2>01. 상담 · 구직상담 Dashboard</h2>
+          <span>상담 업무 바로가기 · 당월 운영 현황</span>
         </div>
 
-        <div class="kpi-grid">
-          <div class="card kpi-card"><div class="kpi-icon p">상</div><div><div class="k-label">상담 신청자</div><div class="k-value">1,263명</div><div class="k-sub">전일 대비 <span class="up">▲ 48명</span></div></div></div>
-          <div class="card kpi-card"><div class="kpi-icon b">진</div><div><div class="k-label">상담 진행 중</div><div class="k-value">342명</div><div class="k-sub">전일 대비 <span class="up">▲ 23명</span></div></div></div>
-          <div class="card kpi-card"><div class="kpi-icon r">심</div><div><div class="k-label">심리 안정도</div><div class="k-value">4.2/5.0</div><div class="k-sub">전일 대비 <span class="up">▲ 0.3</span></div></div></div>
+        <div class="counsel-quick-grid">
+          <a class="counsel-quick" href="consult_receipt_register.html">
+            <div class="counsel-quick-icon">🔎</div>
+            <strong>접수등록</strong>
+            <span>신규 상담 접수</span>
+          </a>
+          <a class="counsel-quick" href="Consultation_registration.html">
+            <div class="counsel-quick-icon">✨</div>
+            <strong>상담등록</strong>
+            <span>상담 내용 입력</span>
+          </a>
+          <a class="counsel-quick" href="consultation_edit_save.html">
+            <div class="counsel-quick-icon">📋</div>
+            <strong>조회/저장</strong>
+            <span>기존 상담 조회</span>
+          </a>
+          <a class="counsel-quick" href="dashboard.html">
+            <div class="counsel-quick-icon">📊</div>
+            <strong>통계</strong>
+            <span>상담 실적 분석</span>
+          </a>
+          <a class="counsel-quick" href="consult_list.html">
+            <div class="counsel-quick-icon">👤</div>
+            <strong>상담List</strong>
+            <span>상담 대상자 목록</span>
+          </a>
+          <a class="counsel-quick" href="schedule.html">
+            <div class="counsel-quick-icon">🗓️</div>
+            <strong>스케줄</strong>
+            <span>상담 일정 확인</span>
+          </a>
         </div>
 
-        <div class="analysis-grid">
-          <div class="card panel">
-            <div class="panel-title">연령·대상별 현황</div>
-            <div class="donut-area">
-              <div class="donut"></div>
-              <div class="legend">
-                <div class="legend-row"><span class="dot" style="background:var(--purple)"></span><span>청년층 42% (530명)</span></div>
-                <div class="legend-row"><span class="dot" style="background:var(--blue)"></span><span>경력단절 31% (391명)</span></div>
-                <div class="legend-row"><span class="dot" style="background:var(--green)"></span><span>중장년 27% (342명)</span></div>
-              </div>
-            </div>
+        <div class="counsel-summary-card">
+          <div class="counsel-section-title">
+            <strong>📌 오늘 요약</strong>
+            <span>2026년 8월 기준</span>
           </div>
-          <div class="card panel">
-            <div class="panel-title">상담 단계별 진행 현황</div>
-            <div class="flow">
-              <div class="flow-step"><div class="flow-icon">1</div><b>신청</b><strong>1,263</strong></div>
-              <div class="flow-step"><div class="flow-icon">2</div><b>초기</b><strong>692</strong></div>
-              <div class="flow-step"><div class="flow-icon">3</div><b>심층</b><strong>342</strong></div>
-              <div class="flow-step"><div class="flow-icon">4</div><b>매칭</b><strong>198</strong></div>
-              <div class="flow-step"><div class="flow-icon">5</div><b>취업</b><strong>356</strong></div>
-              <div class="success-rate">전체 취업 성공률 <strong>28.2%</strong></div>
-            </div>
+          <div class="counsel-summary-grid">
+            <div class="counsel-stat"><small>년전체</small><strong>1,263</strong><span>건</span></div>
+            <div class="counsel-stat"><small>당월전체</small><strong>342</strong><span>건</span></div>
+            <div class="counsel-stat"><small>심리진행중</small><strong>38</strong><span>건</span></div>
+            <div class="counsel-stat"><small>진로진행중</small><strong>-</strong><span>건</span></div>
+            <div class="counsel-stat"><small>완료</small><strong>921</strong><span>건</span></div>
           </div>
         </div>
 
-        <div class="bottom-grid">
-          <div class="card panel">
-            <div class="panel-title">상담 유형별 현황</div>
-            <div class="bars">
-              <div class="bar-row"><span>진로탐색</span><div class="bar"><i style="width:88%"></i></div><span>28% / 354</span></div>
-              <div class="bar-row"><span>역량강화</span><div class="bar"><i style="width:80%"></i></div><span>26% / 328</span></div>
-              <div class="bar-row"><span>이력서·면접</span><div class="bar"><i style="width:64%"></i></div><span>20% / 253</span></div>
-              <div class="bar-row"><span>경력설계</span><div class="bar"><i style="width:48%"></i></div><span>14% / 177</span></div>
-              <div class="bar-row"><span>심리·정서</span><div class="bar"><i style="width:40%"></i></div><span>12% / 151</span></div>
+        <div class="counsel-bottom-grid">
+          <div class="counsel-note-card">
+            <div class="counsel-section-title">
+              <strong>📝 상담자 노트</strong>
+              <span id="counselTodayLabel">오늘</span>
+            </div>
+            <div class="counsel-note-nav">
+              <button type="button">◀ 이전</button>
+              <b>2026-08-23 (일)</b>
+              <button type="button" disabled>다음 ▶</button>
+            </div>
+            <div class="counsel-note-body">
+              <p>· 초기 상담 예약 대상 확인</p>
+              <p>· 심층 상담 예정자 사전 자료 검토</p>
+              <p>· 미배정 상담 건 담당자 지정</p>
+            </div>
+            <div class="counsel-note-actions">
+              <button type="button" class="secondary">작성</button>
+              <button type="button">저장</button>
             </div>
           </div>
-          <div class="card panel">
-            <div class="panel-title">오늘의 상담 운영</div>
-            <div class="mini-stat">
-              <div><small>신규 상담</small><strong>38</strong></div>
-              <div><small>상담 완료</small><strong>31</strong></div>
-              <div><small>미배정</small><strong>7</strong></div>
-              <div><small>사후상담</small><strong>9</strong></div>
+
+          <div class="counsel-today-card">
+            <div class="counsel-section-title">
+              <strong>오늘 상담 운영</strong>
+              <span>실시간 확인</span>
             </div>
-            <div class="note-list">· 초기 상담 예약 14건<br>· 심층 상담 예정 11건<br>· 상담사 확인 대기 5건</div>
+            <div class="counsel-today-grid">
+              <div><small>신규상담</small><strong>38</strong></div>
+              <div><small>심리상담</small><strong>31</strong></div>
+              <div><small>진로상담</small><strong>7</strong></div>
+              <div><small>외국인상담</small><strong>9</strong></div>
+            </div>
+            <div class="counsel-progress">
+              <div class="counsel-progress-row"><span>오늘 완료율</span><b>81.6%</b></div>
+              <div class="counsel-progress-track"><i style="width:81.6%"></i></div>
+            </div>
+            <div class="counsel-mini-list">
+              <span>초기 상담 예약 <b>14건</b></span>
+              <span>심층 상담 예정 <b>11건</b></span>
+              <span>확인 대기 <b>5건</b></span>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- ================= RIGHT PANE ================= -->
-      <section class="dashboard-pane">
-        <div class="pane-head">
+      <!-- ================= RIGHT PANE : 01과 동일 구조 ================= -->
+      <section class="dashboard-pane counsel-pane">
+        <div class="pane-head counsel-pane-head">
           <h2>02. 기업 · 매칭 · 취업 Dashboard</h2>
-          <span>우측 50%</span>
-        </div>
-
-        <div class="kpi-grid">
-          <div class="card kpi-card"><div class="kpi-icon g">매</div><div><div class="k-label">매칭 진행 중</div><div class="k-value">198명</div><div class="k-sub">전일 대비 <span class="up">▲ 18명</span></div></div></div>
-          <div class="card kpi-card"><div class="kpi-icon o">취</div><div><div class="k-label">취업 성공 누계</div><div class="k-value">356명</div><div class="k-sub">전일 대비 <span class="up">▲ 15명</span></div></div></div>
-          <div class="card kpi-card"><div class="kpi-icon b">기</div><div><div class="k-label">협력 기업</div><div class="k-value">87개사</div><div class="k-sub">당월 신규 <span class="up">▲ 6개사</span></div></div></div>
-        </div>
-
-        <div class="analysis-grid">
-          <div class="card panel">
-            <div class="panel-title">매칭 · 면접 · 취업 현황</div>
-            <div class="mini-stat" style="grid-template-columns:repeat(2,1fr);flex:1;align-content:center">
-              <div><small>매칭 시도</small><strong>512</strong></div>
-              <div><small>매칭 성사</small><strong>198</strong></div>
-              <div><small>면접 진행</small><strong>124</strong></div>
-              <div><small>최종 합격</small><strong>356</strong></div>
-            </div>
-          </div>
-          <div class="card panel">
-            <div class="panel-title">만족도 & 안정도 추이</div>
-            <div class="chart-wrap">
-              <svg viewBox="0 0 360 170" aria-label="상담 만족도 추이">
-                <line class="axis" x1="28" y1="25" x2="340" y2="25"/><line class="axis" x1="28" y1="62" x2="340" y2="62"/><line class="axis" x1="28" y1="99" x2="340" y2="99"/><line class="axis" x1="28" y1="136" x2="340" y2="136"/>
-                <polyline class="line-a" points="32,62 80,50 128,62 176,59 224,48 272,45 330,54"/>
-                <polyline class="line-b" points="32,106 80,88 128,103 176,90 224,81 272,81 330,81"/>
-                <g><circle class="pt-a" cx="32" cy="62" r="3"/><circle class="pt-a" cx="80" cy="50" r="3"/><circle class="pt-a" cx="128" cy="62" r="3"/><circle class="pt-a" cx="176" cy="59" r="3"/><circle class="pt-a" cx="224" cy="48" r="3"/><circle class="pt-a" cx="272" cy="45" r="3"/><circle class="pt-a" cx="330" cy="54" r="3"/>
-                <circle class="pt-b" cx="32" cy="106" r="3"/><circle class="pt-b" cx="80" cy="88" r="3"/><circle class="pt-b" cx="128" cy="103" r="3"/><circle class="pt-b" cx="176" cy="90" r="3"/><circle class="pt-b" cx="224" cy="81" r="3"/><circle class="pt-b" cx="272" cy="81" r="3"/><circle class="pt-b" cx="330" cy="81" r="3"/></g>
-                <text class="svg-text" x="23" y="158">08/11</text><text class="svg-text" x="71" y="158">08/12</text><text class="svg-text" x="119" y="158">08/13</text><text class="svg-text" x="167" y="158">08/14</text><text class="svg-text" x="215" y="158">08/15</text><text class="svg-text" x="263" y="158">08/16</text><text class="svg-text" x="317" y="158">08/17</text>
-              </svg>
-            </div>
+          <div class="pane-head-actions" aria-label="매칭 화면 바로가기">
+            <!-- 실제 파일명이 다르면 href만 변경하면 됩니다. -->
+            <a class="match-nav-btn progress" href="matching_in_progress.html" title="매칭 진행중 10건 화면으로 이동">매칭진행중 <strong id="matchingProgressCount">10건</strong></a>
+            <a class="match-nav-btn complete" href="matching_completed.html" title="매칭 완료 10건 화면으로 이동">매칭완료 <strong id="matchingCompleteCount">10건</strong></a>
           </div>
         </div>
 
-        <div class="bottom-grid">
-          <div class="card panel">
-            <div class="panel-title">오늘의 기업 · 매칭 운영</div>
-            <div class="mini-stat">
-              <div><small>기업 제안</small><strong>22</strong></div>
-              <div><small>면접 예정</small><strong>17</strong></div>
-              <div><small>회신 대기</small><strong>12</strong></div>
-              <div><small>채용 확정</small><strong>9</strong></div>
+        <div class="job-posting-document" aria-label="구인 및 구직 공고 문서형 목록">
+          <div class="job-posting-doc-title">
+            <div class="job-type-switch" role="radiogroup" aria-label="공고 유형 선택">
+              <label class="job-type-option">
+                <input type="radio" name="postingType" value="employer" checked>
+                <span>구인공고</span>
+              </label>
+              <label class="job-type-option">
+                <input type="radio" name="postingType" value="seeker">
+                <span>구직공고</span>
+              </label>
             </div>
-            <div class="note-list">· 신규 채용공고 8건<br>· 구직자 추천 21건<br>· 기업 검토 중 13건</div>
+            <div class="job-doc-actions" aria-label="현재 공고 파일 변환">
+              <button type="button" class="export-btn csv" id="csvExportBtn" title="현재 선택된 공고 전체를 CSV로 저장">CSV</button>
+              <button type="button" class="export-btn pdf" id="pdfExportBtn" title="현재 선택된 공고 전체를 A4 가로 PDF로 변환">PDF변환</button>
+            </div>
           </div>
-          <div class="card panel">
-            <div class="panel-title">최근 매칭 및 취업 사례</div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>구직자</th><th>기업</th><th>직무</th><th>상태</th><th>일자</th></tr></thead>
-                <tbody>
-                  <tr><td>김○○</td><td>(주)디지털이노베이션</td><td>마케팅</td><td><span class="badge bg-green">취업성공</span></td><td>08.17</td></tr>
-                  <tr><td>이○○</td><td>(주)행복케어</td><td>인사관리</td><td><span class="badge bg-blue">면접진행</span></td><td>08.16</td></tr>
-                  <tr><td>박○○</td><td>(주)스마트물류</td><td>물류관리</td><td><span class="badge bg-orange">기업검토</span></td><td>08.15</td></tr>
-                  <tr><td>최○○</td><td>(주)브랜드랩</td><td>디자인</td><td><span class="badge bg-green">취업성공</span></td><td>08.14</td></tr>
-                  <tr><td>정○○</td><td>(주)세움테크</td><td>품질관리</td><td><span class="badge bg-blue">면접예정</span></td><td>08.13</td></tr>
-                </tbody>
-              </table>
+
+          <div class="job-posting-scroll" id="postingScroll" role="region" aria-label="구인·구직 공고 가로 세로 스크롤 영역" tabindex="0">
+            <table class="job-posting-table mode-employer" id="postingTable">
+              <colgroup id="postingCols"></colgroup>
+              <thead id="postingHead"></thead>
+              <tbody id="postingBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="counsel-bottom-grid">
+          <div class="counsel-note-card">
+            <div class="counsel-section-title">
+              <strong>📝 상담자 노트</strong>
+              <span id="jobTodayLabel">오늘</span>
+            </div>
+            <div class="counsel-note-nav">
+              <button type="button">◀ 이전</button>
+              <b>2026-08-23 (일)</b>
+              <button type="button" disabled>다음 ▶</button>
+            </div>
+            <div class="counsel-note-body">
+              <p>· 초기 상담 예약 대상 확인</p>
+              <p>· 심층 상담 예정자 사전 자료 검토</p>
+              <p>· 미배정 상담 건 담당자 지정</p>
+            </div>
+            <div class="counsel-note-actions">
+              <button type="button" class="secondary">작성</button>
+              <button type="button">저장</button>
+            </div>
+          </div>
+
+          <div class="counsel-today-card job-operation-card">
+            <div class="counsel-section-title">
+              <strong>📊 운영현황</strong>
+              <span>카드 클릭 → 회원 LIST</span>
+            </div>
+
+            <div class="job-operation-grid" aria-label="회원 유형별 운영현황">
+              <button type="button" class="job-operation-item active" data-member-type="company" aria-pressed="true">
+                <small>기업회원</small>
+                <strong>100<span>개사</span></strong>
+              </button>
+              <button type="button" class="job-operation-item" data-member-type="personal" aria-pressed="false">
+                <small>개인회원</small>
+                <strong>100<span>명</span></strong>
+              </button>
+              <button type="button" class="job-operation-item" data-member-type="foreign" aria-pressed="false">
+                <small>외국인</small>
+                <strong>100<span>명</span></strong>
+              </button>
+            </div>
+
+            <div class="member-list-panel" aria-label="선택 회원 목록">
+              <div class="member-list-head">
+                <strong id="memberListTitle">기업회원 LIST</strong>
+                <span id="memberListCount">예시 10건</span>
+              </div>
+              <div class="member-list-scroll" id="memberListScroll" role="region" aria-label="회원 목록 가로 세로 스크롤 영역" tabindex="0">
+                <table class="member-list-table mode-company" id="memberListTable">
+                  <colgroup id="memberListCols"></colgroup>
+                  <thead id="memberListHead"></thead>
+                  <tbody id="memberListBody"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -301,19 +1470,561 @@
 </div>
 
 <script>
-  let selectedDate = new Date(2026,7,21);
-  function formatKoreanDate(d){
-    const y=d.getFullYear();
-    const m=String(d.getMonth()+1).padStart(2,"0");
-    const day=String(d.getDate()).padStart(2,"0");
-    const week=["일","월","화","수","목","금","토"][d.getDay()];
-    return `${y}.${m}.${day} (${week})`;
+  /* =========================================================
+     TOP 오늘 날짜 + 실시간 날씨
+     - 날짜 이동 없음: 항상 오늘 날짜만 표시
+     - 브라우저 위치 권한 허용 시 현재 위치 기준
+     - 브라우저 GPS 우선, 실패 시 IP 기반 현재 지역을 재시도
+     - GPS/IP 모두 실패할 때만 창원 기본 위치 사용
+     - Open-Meteo 날씨 API 사용
+     - 10분마다 자동 갱신
+     ========================================================= */
+
+  const DEFAULT_WEATHER_LOCATION = {
+    name: "창원",
+    latitude: 35.2279,
+    longitude: 128.6811
+  };
+
+  const weatherEls = {
+    area: document.querySelector(".top-weather-area"),
+    liveText: document.querySelector(".weather-live span"),
+    date: document.getElementById("weatherDate"),
+    region: document.getElementById("weatherRegion"),
+    icon: document.getElementById("weatherIcon"),
+    temp: document.getElementById("weatherTemp"),
+    highLow: document.getElementById("weatherHighLow"),
+    rain: document.getElementById("weatherRain"),
+    humidity: document.getElementById("weatherHumidity")
+  };
+
+  function formatTodayKorean(){
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      weekday: "short"
+    }).formatToParts(now);
+
+    const map = {};
+    parts.forEach(p => { if (p.type !== "literal") map[p.type] = p.value; });
+
+    return `${map.year}.${map.month}.${map.day} (${map.weekday})`;
   }
-  function updateDate(){document.getElementById("dateLabel").textContent=formatKoreanDate(selectedDate)}
-  document.getElementById("prevDate").addEventListener("click",()=>{selectedDate.setDate(selectedDate.getDate()-1);updateDate()});
-  document.getElementById("nextDate").addEventListener("click",()=>{selectedDate.setDate(selectedDate.getDate()+1);updateDate()});
-  document.querySelectorAll(".nav-item").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));item.classList.add("active")}));
-  updateDate();
+
+  function weatherIconFromCode(code){
+    if (code === 0) return "☀️";
+    if ([1,2].includes(code)) return "🌤️";
+    if (code === 3) return "☁️";
+    if ([45,48].includes(code)) return "🌫️";
+    if ([51,53,55,56,57].includes(code)) return "🌦️";
+    if ([61,63,65,66,67,80,81,82].includes(code)) return "🌧️";
+    if ([71,73,75,77,85,86].includes(code)) return "🌨️";
+    if ([95,96,99].includes(code)) return "⛈️";
+    return "🌤️";
+  }
+
+  function roundWeather(value, digits=0){
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "--";
+    return digits ? n.toFixed(digits) : Math.round(n);
+  }
+
+  async function reverseGeocode(latitude, longitude){
+    try{
+      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&localityLanguage=ko`;
+      const res = await fetch(url, { cache:"no-store" });
+      if (!res.ok) throw new Error("reverse geocode failed");
+      const data = await res.json();
+
+      return (
+        data.locality ||
+        data.city ||
+        data.principalSubdivision ||
+        data.countryName ||
+        "현재위치"
+      );
+    }catch(err){
+      console.warn("지역명 조회 실패:", err);
+      return "현재위치";
+    }
+  }
+
+  async function getIpBasedLocation(){
+    try{
+      const res = await fetch("https://ipapi.co/json/", { cache:"no-store" });
+      if (!res.ok) throw new Error("IP location failed");
+      const data = await res.json();
+      const latitude = Number(data.latitude);
+      const longitude = Number(data.longitude);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        throw new Error("IP location coordinates missing");
+      }
+      const name = await reverseGeocode(latitude, longitude);
+      return { name, latitude, longitude };
+    }catch(err){
+      console.warn("IP 기반 위치 조회 실패:", err);
+      return DEFAULT_WEATHER_LOCATION;
+    }
+  }
+
+  function getBrowserLocation(){
+    return new Promise(resolve => {
+      if (!navigator.geolocation){
+        getIpBasedLocation().then(resolve);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async pos => {
+          const latitude = pos.coords.latitude;
+          const longitude = pos.coords.longitude;
+          const name = await reverseGeocode(latitude, longitude);
+          resolve({ name, latitude, longitude });
+        },
+        async () => resolve(await getIpBasedLocation()),
+        {
+          enableHighAccuracy:true,
+          timeout:8000,
+          maximumAge:10 * 60 * 1000
+        }
+      );
+    });
+  }
+
+  async function loadWeather(){
+    weatherEls.date.textContent = formatTodayKorean();
+    weatherEls.area?.classList.add("is-loading");
+    weatherEls.area?.classList.remove("is-error");
+    if (weatherEls.liveText) weatherEls.liveText.textContent = "LIVE";
+
+    try{
+      const location = await getBrowserLocation();
+      weatherEls.region.textContent = location.name;
+
+      const params = new URLSearchParams({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        current: "temperature_2m,relative_humidity_2m,weather_code",
+        daily: "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+        timezone: "Asia/Seoul",
+        forecast_days: "1"
+      });
+
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
+        cache:"no-store"
+      });
+      if (!res.ok) throw new Error(`Weather HTTP ${res.status}`);
+
+      const data = await res.json();
+      const current = data.current || {};
+      const daily = data.daily || {};
+
+      weatherEls.icon.textContent = weatherIconFromCode(Number(current.weather_code));
+      weatherEls.temp.textContent = `${roundWeather(current.temperature_2m, 1)}℃`;
+      weatherEls.highLow.textContent =
+        `${roundWeather(daily.temperature_2m_max?.[0])}℃ / ${roundWeather(daily.temperature_2m_min?.[0])}℃`;
+      weatherEls.rain.textContent =
+        `${roundWeather(daily.precipitation_probability_max?.[0])}%`;
+      weatherEls.humidity.textContent =
+        `${roundWeather(current.relative_humidity_2m)}%`;
+
+    }catch(err){
+      console.error("날씨 정보 조회 실패:", err);
+      weatherEls.area?.classList.add("is-error");
+      if (weatherEls.liveText) weatherEls.liveText.textContent = "대기";
+      weatherEls.region.textContent = "날씨 확인";
+    }finally{
+      weatherEls.area?.classList.remove("is-loading");
+    }
+  }
+
+  /* =========================================================
+     02 Dashboard 운영현황 회원 LIST
+     ---------------------------------------------------------
+     - 기업회원 / 개인회원 / 외국인 카드를 클릭하면 하단 LIST 전환
+     - 현재는 각 유형별 가상 DATA 10건
+     - 추후 Supabase 조회 결과를 renderMemberList(type, rows)에 전달하면 됨
+     - 전체 Dashboard 프레임은 고정, LIST 내부에만 가로/세로 스크롤 발생
+     ========================================================= */
+  const memberConfigs = {
+    company: {
+      label:"기업회원",
+      tableClass:"mode-company",
+      columns:[
+        {key:"company", label:"회사명", left:true},
+        {key:"industry", label:"업종", left:true},
+        {key:"manager", label:"담당자"},
+        {key:"phone", label:"전화번호"}
+      ]
+    },
+    personal: {
+      label:"개인회원",
+      tableClass:"mode-personal",
+      columns:[
+        {key:"name", label:"이름"},
+        {key:"phone", label:"전화번호"},
+        {key:"gender", label:"성별"},
+        {key:"age", label:"나이"},
+        {key:"address", label:"주소", left:true},
+        {key:"desiredJob", label:"희망직종", left:true}
+      ]
+    },
+    foreign: {
+      label:"외국인",
+      tableClass:"mode-foreign",
+      columns:[
+        {key:"nationality", label:"국적"},
+        {key:"name", label:"이름"},
+        {key:"phone", label:"전화번호"},
+        {key:"gender", label:"성별"},
+        {key:"visa", label:"비자"},
+        {key:"entryDate", label:"입국일"}
+      ]
+    }
+  };
+
+  const companyMemberData = [
+    {company:"(주)한빛정밀", industry:"정밀가공", manager:"김성우", phone:"02-856-2101"},
+    {company:"에이치테크(주)", industry:"자동화설비", manager:"박민호", phone:"031-443-7721"},
+    {company:"(주)미래솔루션", industry:"IT서비스", manager:"이서현", phone:"02-6677-1204"},
+    {company:"세움물류서비스", industry:"물류·운송", manager:"정도현", phone:"032-812-4408"},
+    {company:"(주)대성산업", industry:"기계부품", manager:"최재원", phone:"031-498-9033"},
+    {company:"가온테크", industry:"CNC가공", manager:"오지훈", phone:"031-455-6180"},
+    {company:"(주)신성모빌리티", industry:"자동차부품", manager:"한유진", phone:"031-366-2755"},
+    {company:"동우전자", industry:"전자부품", manager:"서준혁", phone:"032-525-1730"},
+    {company:"(주)케이원시스템", industry:"ERP·전산", manager:"윤지수", phone:"02-2634-8192"},
+    {company:"한성케미칼(주)", industry:"화학·소재", manager:"조민석", phone:"031-491-2206"}
+  ];
+
+  const personalMemberData = [
+    {name:"김○○", phone:"010-32**-1180", gender:"남", age:"42", address:"서울 금천구", desiredJob:"생산설비 운영"},
+    {name:"이○○", phone:"010-48**-7312", gender:"여", age:"36", address:"경기 안양시", desiredJob:"품질관리·검사"},
+    {name:"박○○", phone:"010-55**-2046", gender:"여", age:"29", address:"서울 구로구", desiredJob:"사무·고객관리"},
+    {name:"최○○", phone:"010-61**-4920", gender:"남", age:"51", address:"경기 시흥시", desiredJob:"설비보전"},
+    {name:"정○○", phone:"010-27**-8851", gender:"남", age:"44", address:"경기 군포시", desiredJob:"CNC 가공"},
+    {name:"윤○○", phone:"010-73**-1029", gender:"여", age:"33", address:"인천 부평구", desiredJob:"전자부품 조립"},
+    {name:"강○○", phone:"010-19**-6744", gender:"남", age:"38", address:"서울 영등포구", desiredJob:"ERP 운영지원"},
+    {name:"임○○", phone:"010-84**-3105", gender:"여", age:"47", address:"경기 광명시", desiredJob:"물류·재고관리"},
+    {name:"송○○", phone:"010-41**-9928", gender:"남", age:"31", address:"경기 안산시", desiredJob:"생산관리"},
+    {name:"배○○", phone:"010-68**-5572", gender:"여", age:"40", address:"서울 양천구", desiredJob:"회계·총무"}
+  ];
+
+  const foreignMemberData = [
+    {nationality:"베트남", name:"NGUYEN A", phone:"010-92**-1184", gender:"남", visa:"E-9", entryDate:"2024-03-18"},
+    {nationality:"베트남", name:"TRAN B", phone:"010-37**-5502", gender:"여", visa:"F-6", entryDate:"2021-09-02"},
+    {nationality:"중국", name:"LI C", phone:"010-64**-7813", gender:"남", visa:"F-4", entryDate:"2022-11-21"},
+    {nationality:"네팔", name:"RAJ D", phone:"010-28**-3435", gender:"남", visa:"E-9", entryDate:"2025-01-09"},
+    {nationality:"태국", name:"SOM E", phone:"010-75**-2208", gender:"여", visa:"E-9", entryDate:"2024-07-14"},
+    {nationality:"우즈베키스탄", name:"ALI F", phone:"010-53**-6191", gender:"남", visa:"E-7", entryDate:"2023-05-30"},
+    {nationality:"필리핀", name:"MARIA G", phone:"010-86**-4017", gender:"여", visa:"F-6", entryDate:"2020-12-11"},
+    {nationality:"몽골", name:"BAT H", phone:"010-31**-9786", gender:"남", visa:"E-9", entryDate:"2024-10-23"},
+    {nationality:"캄보디아", name:"SOK I", phone:"010-69**-1440", gender:"남", visa:"E-9", entryDate:"2025-02-17"},
+    {nationality:"인도네시아", name:"DEWI J", phone:"010-47**-7326", gender:"여", visa:"E-7", entryDate:"2023-08-05"}
+  ];
+
+  const memberDataMap = {
+    company:companyMemberData,
+    personal:personalMemberData,
+    foreign:foreignMemberData
+  };
+
+  const memberListTitle = document.getElementById("memberListTitle");
+  const memberListCount = document.getElementById("memberListCount");
+  const memberListScroll = document.getElementById("memberListScroll");
+  const memberListTable = document.getElementById("memberListTable");
+  const memberListCols = document.getElementById("memberListCols");
+  const memberListHead = document.getElementById("memberListHead");
+  const memberListBody = document.getElementById("memberListBody");
+
+  function memberEscape(value){
+    return String(value ?? "").replace(/[&<>\"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"}[ch]));
+  }
+
+  function renderMemberList(type, rows){
+    const config = memberConfigs[type] || memberConfigs.company;
+    const safeRows = Array.isArray(rows) ? rows : [];
+
+    memberListTitle.textContent = `${config.label} LIST`;
+    memberListCount.textContent = `예시 ${safeRows.length}건`;
+
+    memberListTable.classList.remove("mode-company","mode-personal","mode-foreign");
+    memberListTable.classList.add(config.tableClass);
+    memberListCols.innerHTML = config.columns.map(() => "<col>").join("");
+    memberListHead.innerHTML = `<tr>${config.columns.map(col => `<th>${memberEscape(col.label)}</th>`).join("")}</tr>`;
+    memberListBody.innerHTML = safeRows.map(row => `
+      <tr>
+        ${config.columns.map(col => {
+          const value = row[col.key] ?? "-";
+          const cls = col.left ? ' class="member-left"' : "";
+          return `<td${cls} title="${memberEscape(value)}">${memberEscape(value)}</td>`;
+        }).join("")}
+      </tr>`).join("");
+
+    if (memberListScroll){
+      memberListScroll.scrollTop = 0;
+      memberListScroll.scrollLeft = 0;
+    }
+  }
+
+  document.querySelectorAll(".job-operation-item[data-member-type]").forEach(button => {
+    button.addEventListener("click", () => {
+      const type = button.dataset.memberType || "company";
+      document.querySelectorAll(".job-operation-item[data-member-type]").forEach(item => {
+        const active = item === button;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      renderMemberList(type, memberDataMap[type] || []);
+    });
+  });
+
+  // 최초 화면은 기업회원 10건
+  renderMemberList("company", companyMemberData);
+
+  /* =========================================================
+     02 Dashboard 구인공고 / 구직공고 전환
+     ---------------------------------------------------------
+     - 현재는 가상 DATA 10건으로 화면 구조 검증
+     - 추후 Supabase 연동 시 employerPostingData / seekerPostingData 대신
+       DB 조회 결과를 renderPostingTable(type, rows)에 전달하면 됨
+     - 프레임 크기 고정, 표 내부에만 가로/세로 스크롤 발생
+     ========================================================= */
+  const employerColumns = [
+    { key:"date", label:"공고일" },
+    { key:"company", label:"회사명", left:true },
+    { key:"career", label:"경력" },
+    { key:"education", label:"학력" },
+    { key:"salary", label:"임금" },
+    { key:"region", label:"지역" },
+    { key:"job", label:"직무내용", left:true },
+    { key:"count", label:"채용인원" }
+  ];
+
+  const seekerColumns = [
+    { key:"receiptDate", label:"접수일" },
+    { key:"name", label:"이름" },
+    { key:"desiredJob1", label:"희망직종", left:true },
+    { key:"desiredSalary", label:"희망임금" },
+    { key:"desiredRegion", label:"희망지역" },
+    { key:"desiredJob2", label:"희망직종", left:true },
+    { key:"career", label:"경력" },
+    { key:"nationality", label:"국적" },
+    { key:"address", label:"주소", left:true }
+  ];
+
+  const employerPostingData = [
+    {date:"2026-08-23",company:"(주)한빛정밀",career:"경력무관",education:"고졸이상",salary:"월 280만원",region:"서울 금천구",job:"생산설비 조작 및 제품 품질검사, 작업일보 작성",count:"2명"},
+    {date:"2026-08-22",company:"에이치테크(주)",career:"3년이상",education:"전문대졸",salary:"연 3,800만원",region:"경기 안양시",job:"품질관리 및 고객사 품질 대응, 검사성적서 관리",count:"1명"},
+    {date:"2026-08-21",company:"(주)미래솔루션",career:"신입",education:"대졸",salary:"연 3,200만원",region:"서울 구로구",job:"기업 고객관리, 구인기업 상담 및 채용 진행 지원",count:"2명"},
+    {date:"2026-08-20",company:"세움물류서비스",career:"경력무관",education:"학력무관",salary:"시급 12,500원",region:"인천 남동구",job:"입출고 자재관리, 재고 확인 및 물류 전산등록 업무",count:"3명"},
+    {date:"2026-08-19",company:"(주)대성산업",career:"5년이상",education:"고졸이상",salary:"연 4,500만원",region:"경기 시흥시",job:"설비보전, 예방정비 계획수립 및 생산설비 유지관리",count:"1명"},
+    {date:"2026-08-18",company:"가온테크",career:"2년이상",education:"고졸이상",salary:"월 310만원",region:"경기 군포시",job:"CNC 가공설비 운영 및 공정검사, 생산실적 입력",count:"2명"},
+    {date:"2026-08-17",company:"(주)신성모빌리티",career:"신입가능",education:"전문대졸",salary:"연 3,400만원",region:"경기 화성시",job:"자동차부품 생산계획 수립, 납기 및 공정 진도관리",count:"1명"},
+    {date:"2026-08-16",company:"동우전자",career:"경력무관",education:"고졸이상",salary:"월 265만원",region:"인천 부평구",job:"전자부품 조립, 외관검사 및 포장 공정 업무",count:"4명"},
+    {date:"2026-08-15",company:"(주)케이원시스템",career:"4년이상",education:"대졸",salary:"연 4,200만원",region:"서울 영등포구",job:"기업 ERP 운영, 데이터 관리 및 사용자 지원",count:"1명"},
+    {date:"2026-08-14",company:"한성케미칼(주)",career:"1년이상",education:"전문대졸",salary:"연 3,600만원",region:"경기 안산시",job:"화학제품 품질시험, 시험성적서 작성 및 계측기 관리",count:"2명"}
+  ];
+
+  const seekerPostingData = [
+    {receiptDate:"2026-08-23",name:"김○○",desiredJob1:"생산직",desiredSalary:"월 280만원",desiredRegion:"서울·경기",desiredJob2:"생산설비 운영",career:"3년",nationality:"한국",address:"서울특별시 금천구 독산동"},
+    {receiptDate:"2026-08-22",name:"이○○",desiredJob1:"품질관리",desiredSalary:"연 3,800만원",desiredRegion:"경기 안양",desiredJob2:"품질검사·QA",career:"5년",nationality:"한국",address:"경기도 안양시 동안구 호계동"},
+    {receiptDate:"2026-08-21",name:"박○○",desiredJob1:"사무직",desiredSalary:"연 3,200만원",desiredRegion:"서울 구로",desiredJob2:"기업고객 관리",career:"신입",nationality:"한국",address:"서울특별시 구로구 구로동"},
+    {receiptDate:"2026-08-20",name:"TRAN A",desiredJob1:"물류직",desiredSalary:"월 270만원",desiredRegion:"인천",desiredJob2:"입출고·재고관리",career:"2년",nationality:"베트남",address:"인천광역시 남동구 논현동"},
+    {receiptDate:"2026-08-19",name:"최○○",desiredJob1:"설비보전",desiredSalary:"연 4,500만원",desiredRegion:"경기 시흥",desiredJob2:"전기·기계 정비",career:"7년",nationality:"한국",address:"경기도 시흥시 정왕동"},
+    {receiptDate:"2026-08-18",name:"정○○",desiredJob1:"가공직",desiredSalary:"월 310만원",desiredRegion:"경기 군포",desiredJob2:"CNC 가공",career:"4년",nationality:"한국",address:"경기도 군포시 당정동"},
+    {receiptDate:"2026-08-17",name:"NGUYEN B",desiredJob1:"생산관리",desiredSalary:"연 3,500만원",desiredRegion:"경기 화성",desiredJob2:"자동차부품 생산",career:"3년",nationality:"베트남",address:"경기도 화성시 향남읍"},
+    {receiptDate:"2026-08-16",name:"윤○○",desiredJob1:"조립직",desiredSalary:"월 265만원",desiredRegion:"인천 부평",desiredJob2:"전자부품 조립",career:"1년",nationality:"한국",address:"인천광역시 부평구 청천동"},
+    {receiptDate:"2026-08-15",name:"강○○",desiredJob1:"전산직",desiredSalary:"연 4,100만원",desiredRegion:"서울 영등포",desiredJob2:"ERP 운영지원",career:"4년",nationality:"한국",address:"서울특별시 영등포구 문래동"},
+    {receiptDate:"2026-08-14",name:"LI C",desiredJob1:"검사직",desiredSalary:"연 3,400만원",desiredRegion:"경기 안산",desiredJob2:"시험·계측 관리",career:"2년",nationality:"중국",address:"경기도 안산시 단원구 원곡동"}
+  ];
+
+  const postingTable = document.getElementById("postingTable");
+  const postingCols = document.getElementById("postingCols");
+  const postingHead = document.getElementById("postingHead");
+  const postingBody = document.getElementById("postingBody");
+  const postingScroll = document.getElementById("postingScroll");
+  const csvExportBtn = document.getElementById("csvExportBtn");
+  const pdfExportBtn = document.getElementById("pdfExportBtn");
+
+  // 현재 화면 선택값. 추후 DB 조회 결과를 renderPostingTable(type, rows)에 넘기면
+  // CSV/PDF도 같은 rows를 그대로 사용한다.
+  let currentPostingType = "employer";
+  let currentPostingRows = employerPostingData;
+
+  function getPostingConfig(type){
+    const isSeeker = type === "seeker";
+    return {
+      label: isSeeker ? "구직공고" : "구인공고",
+      columns: isSeeker ? seekerColumns : employerColumns,
+      // A4 가로 인쇄용 비율. 합계는 각각 100%.
+      printWidths: isSeeker
+        ? [9,7,11,11,10,13,8,8,23]
+        : [10,15,8,8,12,10,29,8]
+    };
+  }
+
+  function getKoreaDateString(){
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone:"Asia/Seoul", year:"numeric", month:"2-digit", day:"2-digit"
+    }).formatToParts(new Date());
+    const map = {};
+    parts.forEach(p => { if (p.type !== "literal") map[p.type] = p.value; });
+    return `${map.year}-${map.month}-${map.day}`;
+  }
+
+  function csvCell(value){
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  function exportCurrentPostingCSV(){
+    const config = getPostingConfig(currentPostingType);
+    const header = config.columns.map(col => csvCell(col.label)).join(",");
+    const body = currentPostingRows.map(row =>
+      config.columns.map(col => csvCell(row[col.key] ?? "")).join(",")
+    ).join("\r\n");
+
+    // UTF-8 BOM 포함: Excel에서 한글이 깨지지 않도록 함.
+    const csv = "\uFEFF" + header + "\r\n" + body;
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${config.label}_${getKoreaDateString()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportCurrentPostingPDF(){
+    const config = getPostingConfig(currentPostingType);
+    const fileBase = `${config.label}_${getKoreaDateString()}`;
+    const printWindow = window.open("", "_blank", "width=1200,height=800");
+
+    if (!printWindow){
+      alert("PDF 변환 창을 열 수 없습니다. 브라우저의 팝업 차단을 허용해 주세요.");
+      return;
+    }
+
+    const colgroup = `<colgroup>${config.printWidths.map(w => `<col style="width:${w}%">`).join("")}</colgroup>`;
+    const head = `<tr>${config.columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join("")}</tr>`;
+    const rows = currentPostingRows.map(row => `
+      <tr>
+        ${config.columns.map(col => `<td>${escapeHtml(row[col.key] ?? "-")}</td>`).join("")}
+      </tr>`).join("");
+
+    // 브라우저 인쇄 엔진 사용: 문자/표 선은 이미지가 아닌 벡터 방식으로 PDF 저장 가능.
+    // @page A4 landscape를 지정하여 297×210mm 가로 출력.
+    const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(fileBase)}</title>
+<style>
+  @page{size:A4 landscape;margin:9mm 9mm 10mm}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#fff;color:#1f2937;font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif}
+  .pdf-head{height:15mm;display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1.2pt solid #5f6b7a;padding:0 0 3mm;margin-bottom:3mm}
+  .pdf-head h1{margin:0;font-size:16pt;letter-spacing:-.5pt}
+  .pdf-meta{font-size:8pt;color:#667085;text-align:right;line-height:1.45}
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8.4pt}
+  thead{display:table-header-group}
+  tr{break-inside:avoid;page-break-inside:avoid}
+  th,td{border:.55pt solid #c9d1db;padding:3.2px 4px;vertical-align:middle;line-height:1.35;word-break:break-word;overflow-wrap:anywhere}
+  th{background:#eef2f6;color:#253247;text-align:center;font-weight:700;white-space:nowrap}
+  td{text-align:center}
+  td:nth-child(2),td:nth-child(${currentPostingType === "seeker" ? 3 : 7}),td:last-child{text-align:left}
+  tbody tr:nth-child(even) td{background:#fafbfc}
+  .pdf-foot{margin-top:2.5mm;font-size:7.5pt;color:#7a8493;text-align:right}
+</style>
+</head>
+<body>
+  <div class="pdf-head">
+    <h1>${escapeHtml(config.label)}</h1>
+    <div class="pdf-meta">A4 가로 · 전체 ${currentPostingRows.length}건<br>${escapeHtml(getKoreaDateString())} 출력</div>
+  </div>
+  <table>${colgroup}<thead>${head}</thead><tbody>${rows}</tbody></table>
+  <div class="pdf-foot">마음:시나브로심리상담연구소 관제센타</div>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+
+    const runPrint = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
+
+    if (printWindow.document.readyState === "complete"){
+      setTimeout(runPrint, 150);
+    }else{
+      printWindow.addEventListener("load", () => setTimeout(runPrint, 150), {once:true});
+    }
+  }
+
+  function escapeHtml(value){
+    return String(value ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+  }
+
+  function renderPostingTable(type, rows){
+    const isSeeker = type === "seeker";
+    const columns = isSeeker ? seekerColumns : employerColumns;
+
+    currentPostingType = type;
+    currentPostingRows = Array.isArray(rows) ? rows : [];
+
+    postingTable.classList.toggle("mode-employer", !isSeeker);
+    postingTable.classList.toggle("mode-seeker", isSeeker);
+
+    postingCols.innerHTML = columns.map(() => "<col>").join("");
+    postingHead.innerHTML = `<tr>${columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join("")}</tr>`;
+    postingBody.innerHTML = rows.map(row => `
+      <tr>
+        ${columns.map(col => {
+          const value = row[col.key] ?? "-";
+          const leftClass = col.left ? " cell-left" : "";
+          return `<td class="${leftClass.trim()}" title="${escapeHtml(value)}">${escapeHtml(value)}</td>`;
+        }).join("")}
+      </tr>`).join("");
+
+    postingScroll.scrollTop = 0;
+    postingScroll.scrollLeft = 0;
+  }
+
+  csvExportBtn?.addEventListener("click", exportCurrentPostingCSV);
+  pdfExportBtn?.addEventListener("click", exportCurrentPostingPDF);
+
+  document.querySelectorAll('input[name="postingType"]').forEach(radio => {
+    radio.addEventListener("change", event => {
+      const type = event.target.value;
+      renderPostingTable(type, type === "seeker" ? seekerPostingData : employerPostingData);
+    });
+  });
+
+  // 최초 화면은 구인공고
+  renderPostingTable("employer", employerPostingData);
+
+  // 날짜는 매분 갱신하여 자정 이후에도 오늘 날짜가 자동 변경되도록 함.
+  setInterval(() => {
+    weatherEls.date.textContent = formatTodayKorean();
+  }, 60 * 1000);
+
+  // 날씨는 10분마다 자동 갱신.
+  loadWeather();
+  setInterval(loadWeather, 10 * 60 * 1000);
+
+  document.querySelectorAll(".nav-item").forEach(item =>
+    item.addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
+      item.classList.add("active");
+    })
+  );
 </script>
 </body>
 </html>
