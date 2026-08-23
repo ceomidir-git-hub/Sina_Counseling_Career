@@ -48,7 +48,67 @@
     }
     .nav-item:hover{transform:translateX(3px);background:rgba(255,255,255,.09);color:#fff}
     .nav-item.active{background:linear-gradient(135deg,#7466ef,#5d58d8);color:#fff;box-shadow:0 6px 14px rgba(102,90,226,.25)}
-    .nav-icon{width:20px;text-align:center;font-size:13.5px}
+    
+.nav-icon{width:20px;text-align:center;font-size:13.5px}
+
+/* 시스템 설정 하위메뉴
+   - 좌측 프레임 폭/높이는 변경하지 않음
+   - 사용자등록은 관리자에게만 표시 */
+.nav-item.has-submenu{
+  position:relative;
+  padding-right:30px;
+}
+.nav-menu-arrow{
+  position:absolute;
+  right:11px;
+  top:50%;
+  transform:translateY(-50%) rotate(0deg);
+  color:#9fb0c8;
+  font-size:10px;
+  transition:transform .18s ease,color .18s ease;
+}
+.nav-item.has-submenu.open .nav-menu-arrow{
+  transform:translateY(-50%) rotate(180deg);
+  color:#fff;
+}
+.nav-submenu{
+  display:none;
+  margin:2px 0 4px 29px;
+  padding:3px 4px;
+  border-left:1px solid rgba(255,255,255,.16);
+}
+.nav-submenu.open{display:block}
+.nav-subitem{
+  height:32px;
+  padding:0 8px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  border-radius:7px;
+  color:#cbd7e7;
+  text-decoration:none;
+  font-size:11.5px;
+  font-weight:750;
+  white-space:nowrap;
+  transition:.16s ease;
+}
+.nav-subitem:hover{
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  transform:translateX(2px);
+}
+.nav-subitem.active{
+  background:rgba(116,102,239,.25);
+  color:#fff;
+}
+.nav-subitem[hidden]{display:none !important}
+.nav-subicon{
+  width:13px;
+  text-align:center;
+  color:#8fa6c6;
+  font-size:10px;
+}
+
 
     /* ---------------- Main ---------------- */
     .main{min-width:0;height:100vh;padding:8px 12px 10px;display:grid;grid-template-rows:61px minmax(0,1fr);gap:8px;overflow:hidden}
@@ -1690,7 +1750,17 @@
       <div class="nav-item"><span class="nav-icon">▥</span><span>통계 분석</span></div>
       <div class="nav-item"><span class="nav-icon">●</span><span>알림 관리</span></div>
       <div class="nav-item"><span class="nav-icon">≡</span><span>공지사항 관리</span></div>
-      <div class="nav-item"><span class="nav-icon">⚙</span><span>시스템 설정</span></div>
+      <div class="nav-item has-submenu" id="systemSettingsNav" aria-expanded="false">
+        <span class="nav-icon">⚙</span>
+        <span>시스템 설정</span>
+        <span class="nav-menu-arrow">▼</span>
+      </div>
+      <div class="nav-submenu" id="systemSettingsSubmenu" aria-label="시스템 설정 하위메뉴">
+        <a class="nav-subitem" id="employeeRegisterMenu" href="system_edit_employee.html">
+          <span class="nav-subicon">└</span>
+          <span>사용자등록</span>
+        </a>
+      </div>
     </nav>
 
     <div class="sina-user-box">
@@ -2516,6 +2586,37 @@
       item.classList.add("active");
     })
   );
+
+  /* 시스템 설정 → 사용자등록 하위메뉴 */
+  const systemSettingsNav = document.getElementById("systemSettingsNav");
+  const systemSettingsSubmenu = document.getElementById("systemSettingsSubmenu");
+  const employeeRegisterMenu = document.getElementById("employeeRegisterMenu");
+
+  function setSystemSettingsOpen(open){
+    if (!systemSettingsNav || !systemSettingsSubmenu) return;
+    systemSettingsNav.classList.toggle("open", Boolean(open));
+    systemSettingsSubmenu.classList.toggle("open", Boolean(open));
+    systemSettingsNav.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function applySystemSettingsPermission(employee){
+    if (!employeeRegisterMenu) return;
+    const admin = employee?.permission === "관리자";
+    employeeRegisterMenu.hidden = !admin;
+
+    // 조회자에게는 하위메뉴를 열지 않음.
+    if (!admin) setSystemSettingsOpen(false);
+  }
+
+  systemSettingsNav?.addEventListener("click", () => {
+    const canOpen = employeeRegisterMenu && !employeeRegisterMenu.hidden;
+    if (!canOpen) return;
+    setSystemSettingsOpen(!systemSettingsSubmenu.classList.contains("open"));
+  });
+
+  employeeRegisterMenu?.addEventListener("click", () => {
+    employeeRegisterMenu.classList.add("active");
+  });
 </script>
 
 <script>
@@ -2715,6 +2816,9 @@
     stopUsageTimeCounter();
     loginShell?.classList.remove("is-password-mode");
     appView.classList.remove("is-authenticated");
+    if (typeof setSystemSettingsOpen === "function") {
+      setSystemSettingsOpen(false);
+    }
     loginLayer.classList.remove("is-hidden");
     loginView.classList.add("active");
     passwordView.classList.remove("active");
@@ -2755,6 +2859,11 @@
 
     loginLayer.classList.add("is-hidden");
     appView.classList.add("is-authenticated");
+
+    // 시스템 설정의 '사용자등록' 하위메뉴는 관리자에게만 표시.
+    if (typeof applySystemSettingsPermission === "function") {
+      applySystemSettingsPermission(employee);
+    }
 
     isAuthenticatedInApp = true;
     startUsageTimeCounter();
