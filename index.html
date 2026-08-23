@@ -1260,7 +1260,7 @@
 <style>
   /* =========================================================
      통합 로그인 / 인증 레이어
-     - index.html 하나에서 로그인 → 관제센터 전환
+     - main.html 하나에서 로그인 → 관제센터 전환
      - 별도 메인 파일로 이동하지 않음
      ========================================================= */
   #sinaLoginLayer{
@@ -3165,7 +3165,7 @@
     resetRequestBtn.textContent = "메일 발송 중...";
 
     try {
-      // 현재 index.html 자체로 돌아오도록 고정.
+      // 현재 main.html 자체로 돌아오도록 고정.
       // GitHub Pages의 현재 실제 URL을 그대로 사용하므로 별도 main/reset 파일 필요 없음.
       const redirectUrl = new URL(location.href);
       redirectUrl.search = "";
@@ -3180,7 +3180,7 @@
 
       showMessage(
         loginMessage,
-        "비밀번호 설정 메일을 발송했습니다. 메일의 링크를 클릭하면 이 index.html에서 새 비밀번호 설정 화면이 열립니다.",
+        "비밀번호 설정 메일을 발송했습니다. 메일의 링크를 클릭하면 이 main.html에서 새 비밀번호 설정 화면이 열립니다.",
         "success"
       );
     } catch (err) {
