@@ -1695,7 +1695,8 @@
 
     <div class="sina-user-box">
       <div class="sina-user-info" id="sinaUserInfo">
-        <strong>사용자 확인 중</strong>
+        <strong>사용자 확인 중</strong><br>
+        <span id="sinaUsageTime">사용시간 : 00:00:00</span>
       </div>
       <button type="button" class="sina-logout-btn" id="sinaLogoutBtn">로그아웃</button>
     </div>
@@ -2519,7 +2520,7 @@
 
 <script>
 (() => {
-  // AUTH FLOW VERSION: 2026-08-23-v6-login-logout-idle10
+  // AUTH FLOW VERSION: 2026-08-23-v8-usage-time-no-frame-change
   const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 
@@ -2560,6 +2561,7 @@
 
   const resetRequestBtn = document.getElementById("sinaResetRequestBtn");
   const userInfo = document.getElementById("sinaUserInfo");
+  let usageTimeEl = document.getElementById("sinaUsageTime");
 
   // =========================================================
   // 로그인 상태 및 미사용 자동 로그아웃
@@ -2572,6 +2574,23 @@
   let idleLogoutTimer = null;
   let lastActivityAt = 0;
   let lastMouseActivityAt = 0;
+
+  // =========================================================
+  // 로그인 후 누적 사용시간
+  // - 프레임 크기는 변경하지 않음
+  // - Date.now() 차이로 계산하여 setInterval 지연 오차 최소화
+  // - 표시 형식 HH:MM:SS
+  // =========================================================
+  let loginStartedAt = 0;
+  let usageTimeTimer = null;
+
+  // 창/탭 종료 시 서버 로그아웃 요청에 사용할 현재 access token.
+  // persistSession:false이므로 브라우저 저장소에는 영구 보관하지 않는다.
+  let currentAccessToken = null;
+
+  // 내부 HTML 화면 이동 여부.
+  // 내부 업무 화면 이동은 로그아웃하지 않고, 창/탭 종료·새로고침 등은 로그아웃 처리한다.
+  let isInternalNavigation = false;
 
   const initialHash = new URLSearchParams(location.hash.replace(/^#/, ""));
   const initialSearch = new URLSearchParams(location.search);
@@ -2690,7 +2709,9 @@
   function showLogin() {
     recoveryMode = false;
     isAuthenticatedInApp = false;
+    currentAccessToken = null;
     clearIdleLogoutTimer();
+    stopUsageTimeCounter();
     loginShell?.classList.remove("is-password-mode");
     appView.classList.remove("is-authenticated");
     loginLayer.classList.remove("is-hidden");
@@ -2706,6 +2727,7 @@
     recoveryMode = true;
     isAuthenticatedInApp = false;
     clearIdleLogoutTimer();
+    stopUsageTimeCounter();
     loginShell?.classList.add("is-password-mode");
     appView.classList.remove("is-authenticated");
     loginLayer.classList.remove("is-hidden");
@@ -2723,15 +2745,68 @@
 
     if (userInfo) {
       userInfo.innerHTML =
-        `<strong>${employee.name || "-"} ${employee.position || ""}</strong><br>` +
-        `${employee.permission || "-"} · ${employee.employee_code || "-"}`;
+        `<strong>${employee.name || "-"} ${employee.position || ""} · ${employee.permission || "-"} · ${employee.employee_code || "-"}</strong><br>` +
+        `<span id="sinaUsageTime">사용시간 : 00:00:00</span>`;
     }
+
+    // innerHTML 갱신 후 사용시간 DOM 참조 재연결
+    usageTimeEl = document.getElementById("sinaUsageTime");
 
     loginLayer.classList.add("is-hidden");
     appView.classList.add("is-authenticated");
 
     isAuthenticatedInApp = true;
+    startUsageTimeCounter();
     startOrResetIdleTimer();
+  }
+
+  function formatUsageTime(elapsedMs) {
+    const totalSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return [
+      String(hours).padStart(2, "0"),
+      String(minutes).padStart(2, "0"),
+      String(seconds).padStart(2, "0")
+    ].join(":");
+  }
+
+  function updateUsageTimeDisplay() {
+    if (!usageTimeEl) return;
+
+    if (!loginStartedAt || !isAuthenticatedInApp) {
+      usageTimeEl.textContent = "사용시간 : 00:00:00";
+      return;
+    }
+
+    const elapsedMs = Date.now() - loginStartedAt;
+    usageTimeEl.textContent = `사용시간 : ${formatUsageTime(elapsedMs)}`;
+  }
+
+  function stopUsageTimeCounter() {
+    if (usageTimeTimer !== null) {
+      clearInterval(usageTimeTimer);
+      usageTimeTimer = null;
+    }
+
+    loginStartedAt = 0;
+    updateUsageTimeDisplay();
+  }
+
+  function startUsageTimeCounter() {
+    if (usageTimeTimer !== null) {
+      clearInterval(usageTimeTimer);
+      usageTimeTimer = null;
+    }
+
+    loginStartedAt = Date.now();
+    updateUsageTimeDisplay();
+
+    usageTimeTimer = setInterval(() => {
+      updateUsageTimeDisplay();
+    }, 1000);
   }
 
   function clearIdleLogoutTimer() {
@@ -2757,6 +2832,8 @@
     }
 
     isAuthenticatedInApp = false;
+    currentAccessToken = null;
+    stopUsageTimeCounter();
     sessionStorage.removeItem("sina_employee");
     passwordEl.value = "";
     showLogin();
@@ -2811,6 +2888,80 @@
   // 사용자 활동으로 인정: 마우스 클릭/이동, 키보드, 터치, 스크롤
   ["mousedown", "mousemove", "keydown", "touchstart", "scroll"].forEach(eventName => {
     window.addEventListener(eventName, recordUserActivity, { passive: true });
+  });
+
+  // ---------------------------------------------------------
+  // 내부 업무 화면 이동과 실제 창/탭 종료를 구분
+  // ---------------------------------------------------------
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a[href]");
+    if (!link) return;
+
+    const href = link.getAttribute("href") || "";
+
+    // hash/javascript/mailto/tel은 실제 HTML 페이지 이탈이 아니므로 제외
+    if (
+      !href ||
+      href.startsWith("#") ||
+      href.startsWith("javascript:") ||
+      href.startsWith("mailto:") ||
+      href.startsWith("tel:")
+    ) {
+      return;
+    }
+
+    try {
+      const targetUrl = new URL(link.href, window.location.href);
+
+      // 같은 GitHub Pages 사이트 안의 내부 업무 화면 이동은 로그아웃하지 않음.
+      if (targetUrl.origin === window.location.origin) {
+        isInternalNavigation = true;
+      }
+    } catch (err) {
+      console.warn("내부 링크 판별 오류:", err);
+    }
+  }, true);
+
+  function requestLogoutOnPageExit() {
+    if (!isAuthenticatedInApp) return;
+    if (isInternalNavigation) return;
+    if (!currentAccessToken) return;
+
+    // 브라우저가 닫히는 순간 일반 async signOut()은 취소될 수 있으므로
+    // fetch keepalive로 Supabase Auth logout endpoint에 직접 요청.
+    const logoutUrl = `${SUPABASE_URL}/auth/v1/logout?scope=local`;
+
+    try {
+      fetch(logoutUrl, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Authorization": `Bearer ${currentAccessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: "{}",
+        keepalive: true
+      }).catch(() => {
+        // 페이지 종료 중에는 응답을 받을 수 없는 경우가 정상적으로 발생할 수 있음.
+      });
+    } catch (err) {
+      // 페이지 종료 시점이므로 별도 사용자 메시지는 표시하지 않음.
+    }
+
+    // 앱 메모리 상태는 즉시 로그아웃 상태로 전환.
+    isAuthenticatedInApp = false;
+    currentAccessToken = null;
+    clearIdleLogoutTimer();
+    stopUsageTimeCounter();
+  }
+
+  // pagehide: 탭/창 닫기, 새로고침, 뒤로가기 등 페이지 이탈 시 발생.
+  // 일반 내부 링크 클릭은 isInternalNavigation=true로 제외한다.
+  window.addEventListener("pagehide", requestLogoutOnPageExit);
+
+  // BFCache에서 다시 복원되는 경우 내부 이동 플래그 초기화.
+  window.addEventListener("pageshow", () => {
+    isInternalNavigation = false;
   });
 
   async function getEmployee(userId) {
@@ -2875,6 +3026,9 @@
       }
 
       const employee = await getEmployee(data.user.id);
+
+      // 창/탭 종료 시 서버 로그아웃 요청을 위해 현재 세션 토큰만 메모리에 보관.
+      currentAccessToken = data.session?.access_token || null;
 
       // 로그인 성공: 별도 성공 문구 없이 즉시 메인화면 표시
       showApp(employee);
@@ -3069,6 +3223,7 @@
   });
 
   document.getElementById("sinaLogoutBtn").addEventListener("click", async () => {
+    isInternalNavigation = false;
     await performLogout({ askConfirmation: true });
   });
 
