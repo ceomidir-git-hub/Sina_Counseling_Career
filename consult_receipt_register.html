@@ -531,9 +531,39 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const editModeBadgeEl = document.getElementById("editModeBadge");
     const lookupSelectionAreaEl = document.getElementById("lookupSelectionArea");
     let currentSession = null;
+    let currentEmployee = null;
 
     function isLoggedIn() {
       return !!currentSession;
+    }
+
+    function currentPermission() {
+      return currentEmployee?.permission || null;
+    }
+
+    function canRead() {
+      return ["관리자", "사용자", "조회자"].includes(currentPermission());
+    }
+
+    function canWrite() {
+      return ["관리자", "사용자"].includes(currentPermission());
+    }
+
+    async function loadCurrentEmployee() {
+      currentEmployee = null;
+      if (!sb || !currentSession?.user?.id) return;
+
+      const { data, error } = await sb
+        .from("employee")
+        .select("id, employee_code, name, permission, active, auth_user_id")
+        .eq("auth_user_id", currentSession.user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("employee 권한 조회 실패:", error);
+        return;
+      }
+      if (data?.active === true) currentEmployee = data;
     }
 
     function setMode(newMode) {
@@ -557,16 +587,17 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     }
 
     function updateLoginGate() {
-      const loggedIn = isLoggedIn();
+      const readable = isLoggedIn() && canRead();
+      const writable = isLoggedIn() && canWrite();
 
-      // 기존 자료 조회 후에는 신규 등록을 막고 수정(저장)만 가능하게 한다.
-      submitBtn.disabled = mode === "loaded" ? true : !loggedIn;
+      // 관리자/사용자: 신규 등록 가능. 조회로 기존 기록을 불러온 동안에는 신규 등록 차단.
+      submitBtn.disabled = mode === "loaded" ? true : !writable;
 
-      // 조회 버튼은 로그인 상태이면 항상 사용 가능
-      lookupSaveBtn.disabled = !loggedIn;
+      // 관리자/사용자/조회자: 조회 가능
+      lookupSaveBtn.disabled = !readable;
 
-      // 수정(저장) 버튼은 조회한 기존 기록이 있을 때만 자동 활성화
-      editSaveBtn.disabled = !loggedIn || mode !== "loaded" || !loadedRecordId;
+      // 관리자/사용자: 조회한 기존 기록 수정(저장) 가능. 조회자는 저장 불가.
+      editSaveBtn.disabled = !writable || mode !== "loaded" || !loadedRecordId;
     }
 
     function resetFormToNewMode(options = {}) {
@@ -798,15 +829,18 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function initAuth() {
       if (!sb) {
         currentSession = null;
+        currentEmployee = null;
         updateLoginGate();
         return;
       }
       const { data } = await sb.auth.getSession();
       currentSession = data.session;
+      await loadCurrentEmployee();
       updateLoginGate();
 
-      sb.auth.onAuthStateChange((_event, session) => {
+      sb.auth.onAuthStateChange(async (_event, session) => {
         currentSession = session;
+        await loadCurrentEmployee();
         updateLoginGate();
       });
     }
@@ -991,6 +1025,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       }
       if (!isLoggedIn()) {
         showStatus("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
+        updateLoginGate();
+        return;
+      }
+      if (!canWrite()) {
+        showStatus("error", "현재 권한은 조회 전용입니다. 관리자 또는 사용자 권한에서만 등록할 수 있습니다.");
         updateLoginGate();
         return;
       }
@@ -1195,6 +1234,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         showLookupMsg("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
         return;
       }
+      if (!canRead()) {
+        showLookupMsg("error", "현재 계정에 상담 조회 권한이 없습니다.");
+        return;
+      }
 
       const name = document.getElementById("clientName").value.trim();
       const phone = clientPhoneEl.value.trim();
@@ -1258,6 +1301,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       }
       if (!isLoggedIn()) {
         showStatus("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
+        return;
+      }
+      if (!canWrite()) {
+        showStatus("error", "현재 권한은 조회 전용입니다. 관리자 또는 사용자 권한에서만 수정·저장할 수 있습니다.");
         return;
       }
       if (!loadedRecordId || !loadedClientId || !loadedRecordType) {
