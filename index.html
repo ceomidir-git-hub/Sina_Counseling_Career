@@ -24,10 +24,10 @@
 
     *{box-sizing:border-box}
     html,body{margin:0;width:100%;height:100%;font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif}
-    body{background:var(--bg);color:var(--text);min-width:1440px;overflow:hidden}
+    body{background:var(--bg);color:var(--text);min-width:0;overflow:hidden}
 
     .layout{
-      width:100vw;height:100vh;display:grid;
+      width:100vw;height:100vh;min-width:1440px;display:grid;
       grid-template-columns:var(--sidebar-w) minmax(0,1fr);
       overflow:hidden;
     }
@@ -1209,7 +1209,8 @@
     z-index:99999;
     display:grid;
     place-items:center;
-    padding:28px;
+    padding:20px;
+    overflow:auto;
     background:
       radial-gradient(circle at 18% 12%,rgba(108,99,232,.14),transparent 34%),
       radial-gradient(circle at 85% 78%,rgba(78,144,248,.13),transparent 34%),
@@ -1218,8 +1219,9 @@
   #sinaLoginLayer.is-hidden{display:none}
 
   .sina-login-shell{
-    width:940px;
+    width:min(940px,calc(100vw - 40px));
     height:590px;
+    max-height:calc(100vh - 40px);
     display:grid;
     grid-template-columns:1.05fr .95fr;
     border-radius:24px;
@@ -1291,11 +1293,13 @@
   .sina-login-flow small{font-size:9.5px;color:#bfcce0}
 
   .sina-login-form-panel{
+    min-width:0;
     padding:42px 58px 32px;
     display:flex;
     flex-direction:column;
     justify-content:center;
     background:#fff;
+    overflow:hidden;
   }
   .sina-login-title small{
     display:block;
@@ -1475,11 +1479,74 @@
   .sina-logout-btn:hover{background:rgba(255,255,255,.13)}
   .sidebar{position:relative}
 
+  /* 비밀번호 설정 화면: 내용 증가를 수치적으로 흡수 */
+  .sina-login-shell.is-password-mode{
+    height:min(720px,calc(100vh - 32px));
+    max-height:calc(100vh - 32px);
+  }
+  .sina-login-shell.is-password-mode .sina-login-form-panel{
+    padding:28px 48px 22px;
+    justify-content:flex-start;
+    overflow-y:auto;
+    scrollbar-gutter:stable;
+  }
+  .sina-login-shell.is-password-mode .sina-auth-view{margin-top:18px}
+  .sina-login-shell.is-password-mode .sina-auth-form{gap:11px}
+  .sina-login-shell.is-password-mode .sina-login-title h2{font-size:24px}
+  .sina-login-shell.is-password-mode .sina-login-title p{margin-top:6px}
+  .sina-login-shell.is-password-mode .sina-password-rule{
+    padding:10px 11px;
+    border:1px solid #e7ecf3;
+    border-radius:9px;
+    background:#fafbfe;
+  }
+  .sina-login-shell.is-password-mode #sinaPasswordChecks{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    column-gap:12px;
+    row-gap:3px;
+  }
+  .sina-login-shell.is-password-mode .sina-message{
+    min-height:34px;
+    padding:7px 9px;
+    font-size:10.8px;
+    line-height:1.4;
+    word-break:keep-all;
+  }
+
+  /* 980px 미만에서는 좌측 소개패널을 숨겨 clipping을 원천 차단 */
+  @media(max-width:980px){
+    #sinaLoginLayer{padding:16px}
+    .sina-login-shell,
+    .sina-login-shell.is-password-mode{
+      width:min(720px,calc(100vw - 32px));
+      grid-template-columns:minmax(0,1fr);
+    }
+    .sina-login-visual{display:none}
+    .sina-login-form-panel{padding:38px 54px 30px}
+    .sina-login-shell.is-password-mode .sina-login-form-panel{padding:26px 46px 20px}
+  }
+
+  @media(max-width:640px){
+    #sinaLoginLayer{padding:10px}
+    .sina-login-shell,
+    .sina-login-shell.is-password-mode{
+      width:calc(100vw - 20px);
+      max-height:calc(100vh - 20px);
+      border-radius:18px;
+    }
+    .sina-login-form-panel,
+    .sina-login-shell.is-password-mode .sina-login-form-panel{padding:24px 24px 18px}
+    .sina-login-shell.is-password-mode #sinaPasswordChecks{grid-template-columns:1fr}
+    .sina-login-title h2{font-size:23px}
+  }
+
   @media(max-height:700px){
-    .sina-login-shell{height:540px}
+    .sina-login-shell:not(.is-password-mode){height:min(540px,calc(100vh - 24px))}
     .sina-login-copy{margin-top:58px}
     .sina-login-flow{bottom:28px}
     .sina-login-form-panel{padding-top:30px;padding-bottom:24px}
+    .sina-login-shell.is-password-mode{height:calc(100vh - 20px);max-height:calc(100vh - 20px)}
+    .sina-login-shell.is-password-mode .sina-login-form-panel{padding-top:20px;padding-bottom:16px}
   }
 </style>
 
@@ -1487,7 +1554,7 @@
 <body>
 
 <div id="sinaLoginLayer">
-  <section class="sina-login-shell">
+  <section class="sina-login-shell" id="sinaLoginShell">
     <div class="sina-login-visual">
       <div class="sina-login-badge"><i></i> Sina Counseling & Career</div>
 
@@ -2452,7 +2519,7 @@
 
 <script>
 (() => {
-  // AUTH FLOW VERSION: 2026-08-23-v4-same-password-handling
+  // AUTH FLOW VERSION: 2026-08-23-v6-login-logout-idle10
   const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 
@@ -2473,6 +2540,7 @@
   window.sinaSupabase = client;
 
   const loginLayer = document.getElementById("sinaLoginLayer");
+  const loginShell = document.getElementById("sinaLoginShell");
   const appView = document.getElementById("sinaAppView");
   const loginView = document.getElementById("sinaLoginView");
   const passwordView = document.getElementById("sinaPasswordView");
@@ -2492,6 +2560,18 @@
 
   const resetRequestBtn = document.getElementById("sinaResetRequestBtn");
   const userInfo = document.getElementById("sinaUserInfo");
+
+  // =========================================================
+  // 로그인 상태 및 미사용 자동 로그아웃
+  // 10분 = 10 × 60초 × 1,000ms = 600,000ms
+  // =========================================================
+  const IDLE_LOGOUT_MS = 10 * 60 * 1000;
+  const MOUSE_ACTIVITY_THROTTLE_MS = 1000;
+
+  let isAuthenticatedInApp = false;
+  let idleLogoutTimer = null;
+  let lastActivityAt = 0;
+  let lastMouseActivityAt = 0;
 
   const initialHash = new URLSearchParams(location.hash.replace(/^#/, ""));
   const initialSearch = new URLSearchParams(location.search);
@@ -2609,6 +2689,9 @@
 
   function showLogin() {
     recoveryMode = false;
+    isAuthenticatedInApp = false;
+    clearIdleLogoutTimer();
+    loginShell?.classList.remove("is-password-mode");
     appView.classList.remove("is-authenticated");
     loginLayer.classList.remove("is-hidden");
     loginView.classList.add("active");
@@ -2621,6 +2704,9 @@
 
   function showPasswordSetting() {
     recoveryMode = true;
+    isAuthenticatedInApp = false;
+    clearIdleLogoutTimer();
+    loginShell?.classList.add("is-password-mode");
     appView.classList.remove("is-authenticated");
     loginLayer.classList.remove("is-hidden");
     loginView.classList.remove("active");
@@ -2632,6 +2718,7 @@
   }
 
   function showApp(employee) {
+    loginShell?.classList.remove("is-password-mode");
     sessionStorage.setItem("sina_employee", JSON.stringify(employee));
 
     if (userInfo) {
@@ -2642,7 +2729,89 @@
 
     loginLayer.classList.add("is-hidden");
     appView.classList.add("is-authenticated");
+
+    isAuthenticatedInApp = true;
+    startOrResetIdleTimer();
   }
+
+  function clearIdleLogoutTimer() {
+    if (idleLogoutTimer !== null) {
+      clearTimeout(idleLogoutTimer);
+      idleLogoutTimer = null;
+    }
+  }
+
+  async function performLogout({ askConfirmation = false } = {}) {
+    if (askConfirmation) {
+      const confirmed = window.confirm("로그아웃 하시겠습니까?");
+      if (!confirmed) return false;
+    }
+
+    clearIdleLogoutTimer();
+
+    try {
+      await client.auth.signOut({ scope: "local" });
+    } catch (err) {
+      // 네트워크 오류가 있어도 현재 화면의 로그인 상태는 종료
+      console.warn("로그아웃 처리 중 경고:", err);
+    }
+
+    isAuthenticatedInApp = false;
+    sessionStorage.removeItem("sina_employee");
+    passwordEl.value = "";
+    showLogin();
+    return true;
+  }
+
+  function startOrResetIdleTimer() {
+    clearIdleLogoutTimer();
+
+    if (!isAuthenticatedInApp) return;
+
+    lastActivityAt = Date.now();
+
+    idleLogoutTimer = setTimeout(async () => {
+      if (!isAuthenticatedInApp) return;
+
+      const inactiveMs = Date.now() - lastActivityAt;
+
+      // 실제 미사용 시간이 600,000ms 이상인지 마지막으로 재검증
+      if (inactiveMs < IDLE_LOGOUT_MS) {
+        const remainingMs = IDLE_LOGOUT_MS - inactiveMs;
+
+        clearIdleLogoutTimer();
+
+        idleLogoutTimer = setTimeout(async () => {
+          if (isAuthenticatedInApp) {
+            await performLogout({ askConfirmation: false });
+          }
+        }, remainingMs);
+
+        return;
+      }
+
+      // 10분 미사용 자동 로그아웃은 확인창 없이 실행
+      await performLogout({ askConfirmation: false });
+    }, IDLE_LOGOUT_MS);
+  }
+
+  function recordUserActivity(event) {
+    if (!isAuthenticatedInApp) return;
+
+    // mousemove는 초당 많은 이벤트가 발생하므로 최대 1초에 한 번만 타이머 갱신
+    if (event && event.type === "mousemove") {
+      const now = Date.now();
+      if ((now - lastMouseActivityAt) < MOUSE_ACTIVITY_THROTTLE_MS) return;
+      lastMouseActivityAt = now;
+    }
+
+    startOrResetIdleTimer();
+  }
+
+  // 사용자 활동으로 인정: 마우스 클릭/이동, 키보드, 터치, 스크롤
+  ["mousedown", "mousemove", "keydown", "touchstart", "scroll"].forEach(eventName => {
+    window.addEventListener(eventName, recordUserActivity, { passive: true });
+  });
 
   async function getEmployee(userId) {
     const { data, error } = await client
@@ -2707,14 +2876,8 @@
 
       const employee = await getEmployee(data.user.id);
 
-      showMessage(
-        loginMessage,
-        `${employee.name} ${employee.position}님 로그인되었습니다.`,
-        "success"
-      );
-
-      // ★ 다른 HTML로 이동하지 않고 같은 index.html에서 메인화면 표시
-      setTimeout(() => showApp(employee), 250);
+      // 로그인 성공: 별도 성공 문구 없이 즉시 메인화면 표시
+      showApp(employee);
 
     } catch (err) {
       await client.auth.signOut({ scope: "local" });
@@ -2906,10 +3069,7 @@
   });
 
   document.getElementById("sinaLogoutBtn").addEventListener("click", async () => {
-    await client.auth.signOut({ scope: "local" });
-    sessionStorage.removeItem("sina_employee");
-    passwordEl.value = "";
-    showLogin();
+    await performLogout({ askConfirmation: true });
   });
 
   // 초기 진입
