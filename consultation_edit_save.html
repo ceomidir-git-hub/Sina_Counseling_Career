@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조회/수정</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px;
+    background: #f4f5f7;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #222;
+  }
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e0e2e7;
+    border-radius: 10px;
+    padding: 32px 40px 40px;
+  }
+  h1 {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: #14171f;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h1 i { font-size: 30px; color: #1a56db; }
+  .section {
+    border: 1px solid #e0e2e7;
+    border-radius: 8px;
+    padding: 20px 24px 24px;
+    margin-bottom: 20px;
+  }
+  .section h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a56db;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section h2 i { font-size: 17px; }
+  .sectionHeadRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .sectionHeadRow h2{ margin:0; }
+  .lookupBtn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#eef2ff;
+    border:1px solid #c7d2fe;
+    color:#3730a3;
+    font-size:13px;
+    font-weight:800;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .lookupBtn:hover{ background:#e0e7ff; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 24px;
+  }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid.session-row {
+    grid-template-columns: 0.7fr 1.3fr 1.3fr 1.3fr 0.7fr;
+  }
+  .grid.next-session-row {
+    grid-template-columns: 0.7fr 1.3fr;
+    max-width: 480px;
+  }
+  .field { display: flex; flex-direction: column; }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    background: #ffffff;
+    font-family: inherit;
+  }
+  select { cursor: pointer; }
+  input[readonly],
+  select[disabled],
+  textarea[readonly] {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #1a56db;
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+  }
+  textarea {
+    height: 110px;
+    padding: 10px 12px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .char-count {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-top: 4px;
+  }
+  .test-tools-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .test-tools-row select { font-size: 14px; }
+  .dtRow{
+    display:flex;
+    gap:6px;
+  }
+  .dtRow input[type="date"]{ flex:1.2; font-size:14px; }
+  .dtRow select{ flex:1; font-size:14px; padding:0 6px; }
+  .dtPreview{
+    font-size:13px;
+    font-weight:700;
+    color:#1a56db;
+    background:#eef4ff;
+    border:1px solid #d7e6ff;
+    border-radius:6px;
+    padding:5px 8px;
+    margin-top:5px;
+  }
+  .field.invalid input, .field.invalid select{
+    border-color:#dc2626 !important;
+    box-shadow:0 0 0 3px rgba(220,38,38,.10);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(6px, 1.2vw, 10px);
+    margin-top: 24px;
+  }
+  .btn {
+    flex: 0 1 clamp(90px, 20vw, 150px);
+    height: 44px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: clamp(12px, 1.6vw, 13px);
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    padding: 0 10px;
+  }
+  .btn:hover { background: #f9fafb; }
+  .btn:disabled { opacity:.6; cursor:not-allowed; }
+  .btn.primary {
+    background: #1a56db;
+    border-color: #1a56db;
+    color: #ffffff;
+  }
+  .btn.primary:hover { background: #1747b8; }
+  .btn.summary {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #3730a3;
+  }
+  .btn.summary:hover { background: #e0e7ff; }
+  .statusMsg{
+    display:none;
+    border-radius:8px;
+    padding:10px 14px;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:16px;
+  }
+  .statusMsg.show{ display:block; }
+  .statusMsg.success{ background:#ecfdf3; border:1px solid #bbf7d0; color:#16a34a; }
+  .statusMsg.error{ background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+
+  /* 조회 팝업 (전화번호 선택 -> 회기 선택 2단계) */
+  .lookupOverlay{
+    position:fixed; inset:0;
+    background:rgba(15,23,42,.55);
+    display:none; align-items:center; justify-content:center;
+    z-index:999; padding:20px;
+  }
+  .lookupOverlay.open{ display:flex; }
+  .lookupModal{
+    width:100%; max-width:480px;
+    max-height:80vh;
+    overflow-y:auto;
+    background:#fff;
+    border-radius:14px;
+    padding:22px 22px 20px;
+    box-shadow:0 24px 60px rgba(15,23,42,.35);
+    position:relative;
+  }
+  .lookupModal h3{ margin:0 0 4px; font-size:17px; color:#1a56db; }
+  .lookupModal p.sub{ margin:0 0 16px; font-size:11px; color:#6b7280; }
+  .lookupClose{
+    position:absolute; right:14px; top:14px;
+    width:28px; height:28px; border:0;
+    background:#f1f5f9; border-radius:50%;
+    color:#475569; font-size:15px; cursor:pointer;
+  }
+  .lookupRow{
+    display:flex; justify-content:space-between;
+    font-size:14px; padding:10px 4px;
+    border-bottom:1px solid #f1f5f9;
+  }
+  .lookupRow b{ color:#374151; font-weight:800; }
+  .lookupRow span{ color:#111827; text-align:right; max-width:60%; }
+  .lookupRow.clickable{ cursor:pointer; border-radius:8px; }
+  .lookupRow.clickable:hover{ background:#f8fafc; }
+  .lookupEmpty{ font-size:14px; color:#6b7280; padding:14px 0; text-align:center; }
+
+  /* ===== 상담 써머리 모달 (조회 팝업과 동일 패턴, 파란 톤 통일) ===== */
+  .summaryModal{
+    max-width:560px;
+  }
+  .summaryModal .mockTag{
+    display:inline-block;
+    background:#7c3aed;
+    color:#fff;
+    font-size:10px;
+    font-weight:800;
+    padding:2px 8px;
+    border-radius:999px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  .sumSection{
+    background:#f8fafc;
+    border:1px solid #eef1f6;
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:8px;
+  }
+  .sumSection:last-child{ margin-bottom:0; }
+  .sumSection h5{
+    margin:0 0 6px;
+    font-size:12.5px;
+    font-weight:800;
+    color:#1a56db;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .sumSection h5 .num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:17px;
+    height:17px;
+    border-radius:50%;
+    background:#1a56db;
+    color:#fff;
+    font-size:10px;
+    font-weight:800;
+  }
+  .sumSection p{
+    margin:0;
+    font-size:12.5px;
+    color:#475569;
+    line-height:1.55;
+  }
+  .sumSection .quote{
+    font-size:12.5px;
+    color:#334155;
+    line-height:1.6;
+    background:#fff;
+    border-left:3px solid #93c5fd;
+    padding:6px 9px;
+    border-radius:6px;
+  }
+  .sumChips{ display:flex; gap:5px; flex-wrap:wrap; }
+  .sumChip{
+    font-size:11px; font-weight:700;
+    padding:4px 8px; border-radius:999px;
+    background:#eef2ff; color:#3730a3;
+  }
+  .sumTimeline{ display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; }
+  .sumTimeline .tstep{ flex:0 0 auto; text-align:center; font-size:10px; color:#64748b; }
+  .sumTimeline .tstep .dot{ width:9px; height:9px; border-radius:50%; background:#1a56db; margin:0 auto 4px; }
+  .sumTimeline .tstep b{ display:block; font-size:10px; color:#334155; margin-top:2px; white-space:nowrap; }
+  .sumCheck{
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:12.5px; padding:5px 0; border-bottom:1px dashed #e2e8f0;
+  }
+  .sumCheck:last-child{ border-bottom:0; }
+  .sumCheck .found{ color:#16a34a; font-weight:800; }
+  .sumCheck .missing{ color:#94a3b8; font-weight:700; }
+  .sumStats{ display:flex; gap:8px; }
+  .sumStats div{ flex:1; background:#fff; border:1px solid #eef1f6; border-radius:8px; text-align:center; padding:8px 4px; }
+  .sumStats small{ display:block; font-size:10px; color:#64748b; font-weight:700; }
+  .sumStats strong{ font-size:14px; color:#1a56db; }
+  .sumPending{
+    font-size:11px; color:#b45309; background:#fffbeb;
+    border:1px dashed #fcd34d; border-radius:8px; padding:7px 9px; line-height:1.5;
+  }
+
+  @media (max-width: 1024px) {
+    .grid,
+    .grid.cols-3,
+    .grid.cols-4,
+    .grid.session-row,
+    .grid.next-session-row,
+    .test-tools-row {
+      grid-template-columns: 1fr;
+    }
+    .grid.next-session-row { max-width: 100%; }
+    .container { padding: 22px 20px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1><i class="ti ti-clipboard-heart" aria-hidden="true"></i>조회/수정</h1>
+
+  <div class="statusMsg" id="statusMsg"></div>
+
+  <form id="intakeForm">
+
+    <!-- 1. 내담자 정보 -->
+    <div class="section">
+      <div class="sectionHeadRow">
+        <h2><i class="ti ti-user" aria-hidden="true"></i>1. 내담자 정보</h2>
+        <button type="button" class="lookupBtn" id="lookupBtn"><i class="ti ti-search" aria-hidden="true"></i>조회</button>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label for="clientName">내담자명 <span style="font-weight:400;color:#9ca3af;">(조회용, 여기서 수정해도 저장되지 않음)</span></label>
+          <input type="text" id="clientName" placeholder="내담자명을 입력하세요">
+        </div>
+        <div class="field">
+          <label for="clientPhone">연락처</label>
+          <input type="text" id="clientPhone" placeholder="010-0000-0000" maxlength="13" inputmode="numeric" readonly>
+        </div>
+        <div class="field">
+          <label for="job">직업</label>
+          <select id="job">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="gender">성별</label>
+          <select id="gender">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="birthDate">생년월일</label>
+          <input type="text" id="birthDate" placeholder="YYYY-MM-DD" maxlength="10" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="age">나이</label>
+          <input type="text" id="age" placeholder="자동 계산" readonly>
+        </div>
+        <div class="field full">
+          <label for="address">주소</label>
+          <input type="text" id="address" placeholder="주소를 입력하세요">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 예약 및 진행 정보 -->
+    <div class="section">
+      <h2><i class="ti ti-calendar-time" aria-hidden="true"></i>2. 예약 및 진행 정보</h2>
+      <div class="grid session-row">
+        <div class="field">
+          <label for="sessionNo">금회 회기</label>
+          <select id="sessionNo">
+            <option value="">선택</option>
+            <option value="1">1회기</option>
+            <option value="2">2회기</option>
+            <option value="3">3회기</option>
+            <option value="4">4회기</option>
+            <option value="5">5회기</option>
+            <option value="6">6회기</option>
+            <option value="7">7회기</option>
+            <option value="8">8회기</option>
+            <option value="9">9회기</option>
+            <option value="10">10회기</option>
+          </select>
+        </div>
+        <div class="field" id="reservationField">
+          <label>예상일시</label>
+          <div class="dtRow">
+            <input type="date" id="reservationDate">
+            <select id="reservationTime"><option value="" selected disabled>시간</option></select>
+          </div>
+          <div class="dtPreview" id="reservationPreview">-</div>
+        </div>
+        <div class="field" id="startField">
+          <label>실시일 시작</label>
+          <div class="dtRow">
+            <input type="date" id="startDate">
+            <select id="startTime"><option value="" selected disabled>시간</option></select>
+          </div>
+          <div class="dtPreview" id="startPreview">-</div>
+        </div>
+        <div class="field" id="endField">
+          <label>실시일 종료</label>
+          <div class="dtRow">
+            <input type="date" id="endDate">
+            <select id="endTime"><option value="" selected disabled>시간</option></select>
+          </div>
+          <div class="dtPreview" id="endPreview">-</div>
+        </div>
+        <div class="field">
+          <label for="duration">상담시간</label>
+          <input type="text" id="duration" placeholder="자동" readonly>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px;">
+        <label>검사도구</label>
+        <div class="test-tools-row">
+          <select id="testTool1">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+          <select id="testTool2">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+          <select id="testTool3">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+          <select id="testTool4">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 상담내용 -->
+    <div class="section">
+      <h2><i class="ti ti-notes" aria-hidden="true"></i>3. 상담내용</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="consultationTarget">상담대상</label>
+          <select id="consultationTarget">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="consultationTopic">상담주제</label>
+          <select id="consultationTopic">
+            <option selected disabled value="">불러오는 중...</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="counselDetail">상세 상담내용</label>
+          <textarea id="counselDetail" maxlength="1000" placeholder="상담에 대해 자세히 작성해주세요."></textarea>
+          <div class="char-count"><span id="charCount">0</span> / 1000</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 차기 회기 정보 -->
+    <div class="section">
+      <h2><i class="ti ti-calendar-plus" aria-hidden="true"></i>4. 차기 회기 정보</h2>
+      <div class="grid next-session-row">
+        <div class="field">
+          <label for="nextSessionNo">차기 회기</label>
+          <select id="nextSessionNo">
+            <option value="">선택</option>
+            <option value="1">1회기</option>
+            <option value="2">2회기</option>
+            <option value="3">3회기</option>
+            <option value="4">4회기</option>
+            <option value="5">5회기</option>
+            <option value="6">6회기</option>
+            <option value="7">7회기</option>
+            <option value="8">8회기</option>
+            <option value="9">9회기</option>
+            <option value="10">10회기</option>
+          </select>
+        </div>
+        <div class="field" id="nextResField">
+          <label>차기 예약일</label>
+          <div class="dtRow">
+            <input type="date" id="nextReservationDate">
+            <select id="nextReservationTime"><option value="" selected disabled>시간</option></select>
+          </div>
+          <div class="dtPreview" id="nextReservationPreview">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn primary" id="saveBtn"><i class="ti ti-device-floppy" aria-hidden="true"></i>수정/저장</button>
+      <button type="reset" class="btn" id="resetBtn"><i class="ti ti-refresh" aria-hidden="true"></i>초기화</button>
+      <button type="button" class="btn summary" id="summaryBtn"><i class="ti ti-report-analytics" aria-hidden="true"></i>요약</button>
+      <button type="button" class="btn" id="homeBtn"><i class="ti ti-home" aria-hidden="true"></i>메인화면</button>
+    </div>
+
+  </form>
+</div>
+
+<!-- 조회 팝업 -->
+<div class="lookupOverlay" id="lookupOverlay">
+  <div class="lookupModal">
+    <button class="lookupClose" type="button" onclick="closeLookupModal()">✕</button>
+    <h3 id="lookupTitle">전화번호 선택</h3>
+    <p class="sub" id="lookupSub">내담자명을 입력한 뒤 조회해주세요.</p>
+    <div id="lookupResultBox">
+      <div class="lookupEmpty">내담자명을 입력한 뒤 조회해주세요.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 상담 써머리 모달 -->
+<div class="lookupOverlay" id="summaryOverlay">
+  <div class="lookupModal summaryModal">
+    <button class="lookupClose" type="button" onclick="closeSummaryModal()">✕</button>
+    <h3>상담 써머리</h3>
+    <p class="sub">같은 내담자(이름+연락처)의 전체 회기를 기준으로 자동 계산됩니다.</p>
+
+    <div class="sumSection">
+      <h5><span class="num">1</span>기본 상담정보</h5>
+      <div class="sumStats" id="sum1Stats"><div><small>-</small><strong>-</strong></div></div>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">2</span>최근 회기 핵심 (원문 발췌)</h5>
+      <p class="quote" id="sum2Quote">-</p>
+      <p style="margin-top:6px;color:#94a3b8;" id="sum2Note">※ AI 요약이 아닌 최신 회기 상담기록 원문 발췌입니다.</p>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">3</span>반복된 주요 주제 (전체 회기 빈도)</h5>
+      <div class="sumChips" id="sum3Chips"></div>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">4</span>변화의 흐름 (회기별 주제 타임라인)</h5>
+      <div class="sumTimeline" id="sum4Timeline"></div>
+      <p style="margin-top:6px;color:#94a3b8;">※ 호전/악화 판단이 아닌, 회기별 기록된 주제코드 나열입니다.</p>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">5</span>현재 상담 위치 (구조적 수치)</h5>
+      <div class="sumStats" id="sum5Stats"><div><small>-</small><strong>-</strong></div></div>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">6</span>이번 회기 확인 포인트</h5>
+      <div id="sum6Checks"></div>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">7</span>이전 과제 및 미완료 내용</h5>
+      <div id="sum7Content"><p>-</p></div>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">8</span>상담목표 진행 흐름</h5>
+      <p class="sumPending">⚠ 상담목표를 저장하는 구조화된 필드가 아직 없어 이 항목은 표시할 수 없습니다. (별도 필드 설계 필요)</p>
+    </div>
+
+    <div class="sumSection">
+      <h5><span class="num">9</span>근거 회기</h5>
+      <div class="sumChips" id="sum9Chips"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ===== Supabase 연결 설정 (상담등록 화면과 동일) =====
+  const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+  const TABLE_NAME = "db_sina_counsel";
+  let sb = null;
+  try {
+    if (!window.supabase) throw new Error("Supabase 라이브러리를 불러오지 못했습니다.");
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storage: window.sessionStorage, persistSession: true, autoRefreshToken: true }
+    });
+  } catch (err) {
+    console.error("Supabase 초기화 실패:", err);
+  }
+
+  // ===== 0) 로그인 가드 =====
+  async function guardLoginOrRedirect(){
+    if (!sb) return false;
+    const { data } = await sb.auth.getSession();
+    if (!data.session) {
+      alert("관리자 로그인이 필요한 화면입니다. 메인화면으로 이동합니다.");
+      window.location.href = "index.html";
+      return false;
+    }
+    return true;
+  }
+
+  // ===== 1) 연락처 자동 하이픈 포맷 =====
+  const clientPhoneEl = document.getElementById("clientPhone");
+  clientPhoneEl.addEventListener("input", () => {
+    let digits = clientPhoneEl.value.replace(/\D/g, "").slice(0, 11);
+    let formatted = digits;
+    if (digits.length > 3 && digits.length <= 7) {
+      formatted = digits.slice(0, 3) + "-" + digits.slice(3);
+    } else if (digits.length > 7) {
+      formatted = digits.slice(0, 3) + "-" + digits.slice(3, 7) + "-" + digits.slice(7);
+    }
+    clientPhoneEl.value = formatted;
+  });
+  function isValidPhone(value){ return /^\d{3}-\d{3,4}-\d{4}$/.test(value); }
+
+  // ===== 2) 생년월일 자동 하이픈 포맷 + 나이 자동 계산 =====
+  const birthDateInput = document.getElementById('birthDate');
+  const ageInput = document.getElementById('age');
+  birthDateInput.addEventListener('input', () => {
+    let digits = birthDateInput.value.replace(/\D/g, "").slice(0, 8);
+    let formatted = digits;
+    if (digits.length > 4 && digits.length <= 6) {
+      formatted = digits.slice(0, 4) + "-" + digits.slice(4);
+    } else if (digits.length > 6) {
+      formatted = digits.slice(0, 4) + "-" + digits.slice(4, 6) + "-" + digits.slice(6);
+    }
+    birthDateInput.value = formatted;
+    ageInput.value = calcAge(birthDateInput.value.trim());
+  });
+  function isValidBirthDate(value){
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return false;
+    const year = parseInt(m[1],10), month = parseInt(m[2],10), day = parseInt(m[3],10);
+    if (month < 1 || month > 12) return false;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    if (day < 1 || day > daysInMonth) return false;
+    return true;
+  }
+  function calcAge(dateStr) {
+    if (!isValidBirthDate(dateStr)) return '';
+    const m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const birth = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+    return age >= 0 ? age + '세' : '';
+  }
+
+  // ===== 3) KST 날짜/시간 표시 포맷 (조회 팝업의 회기 목록 등에 사용) =====
+  function formatKST(iso){
+    if (!iso) return '';
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false
+    }).formatToParts(new Date(iso));
+    const map = {};
+    parts.forEach(p => map[p.type] = p.value);
+    return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}`;
+  }
+
+  // ISO(UTC) -> KST 기준 {date:'YYYY-MM-DD', time:'HH:MM'} 로 분리 (드롭다운 값 세팅용)
+  function isoToKSTParts(iso){
+    if (!iso) return { date: '', time: '' };
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false
+    }).formatToParts(new Date(iso));
+    const map = {};
+    parts.forEach(p => map[p.type] = p.value);
+    return { date: `${map.year}-${map.month}-${map.day}`, time: `${map.hour}:${map.minute}` };
+  }
+
+  // ===== 4) 날짜+시간 드롭다운 공통 유틸 (등록 화면과 동일) =====
+  const DAY_KR = ["일", "월", "화", "수", "목", "금", "토"];
+
+  function buildTimeOptions(selectEl, startHour, endHour, stepMin){
+    for (let h = startHour; h <= endHour; h++) {
+      for (let m = 0; m < 60; m += stepMin) {
+        if (h === endHour && m > 0) continue;
+        const hh = String(h).padStart(2, "0");
+        const mm = String(m).padStart(2, "0");
+        const ampm = h < 12 ? "오전" : "오후";
+        const opt = document.createElement("option");
+        opt.value = `${hh}:${mm}`;
+        opt.textContent = `${hh}:${mm} (${ampm})`;
+        selectEl.appendChild(opt);
+      }
+    }
+  }
+
+  function setupDateTimePair(dateId, timeId, previewId){
+    const dateEl = document.getElementById(dateId);
+    const timeEl = document.getElementById(timeId);
+    const previewEl = document.getElementById(previewId);
+
+    function updatePreview(){
+      const d = dateEl.value, t = timeEl.value;
+      if (!d || !t) { previewEl.textContent = "-"; return; }
+      const dObj = new Date(d + "T00:00:00");
+      const dayLabel = DAY_KR[dObj.getDay()];
+      const ampm = parseInt(t.split(":")[0], 10) < 12 ? "오전" : "오후";
+      previewEl.textContent = `${d}(${dayLabel}),${t}(${ampm})`;
+    }
+    dateEl.addEventListener("change", updatePreview);
+    timeEl.addEventListener("change", updatePreview);
+
+    function getISO(){
+      const d = dateEl.value, t = timeEl.value;
+      if (!d || !t) return null;
+      return new Date(`${d}T${t}:00+09:00`).toISOString();
+    }
+
+    function setFromISO(iso){
+      const parts = isoToKSTParts(iso);
+      dateEl.value = parts.date;
+      timeEl.value = parts.time;
+      updatePreview();
+    }
+
+    return { dateEl, timeEl, previewEl, getISO, updatePreview, setFromISO };
+  }
+
+  buildTimeOptions(document.getElementById("reservationTime"), 0, 23, 10);
+  buildTimeOptions(document.getElementById("startTime"), 0, 23, 10);
+  buildTimeOptions(document.getElementById("endTime"), 0, 23, 10);
+  buildTimeOptions(document.getElementById("nextReservationTime"), 0, 23, 10);
+
+  const reservationPair = setupDateTimePair("reservationDate", "reservationTime", "reservationPreview");
+  const startPair = setupDateTimePair("startDate", "startTime", "startPreview");
+  const endPair = setupDateTimePair("endDate", "endTime", "endPreview");
+  const nextReservationPair = setupDateTimePair("nextReservationDate", "nextReservationTime", "nextReservationPreview");
+
+  // ===== 5) 실시일 시작/종료 -> 상담시간 자동 계산 (분 단위) =====
+  const durationInput = document.getElementById('duration');
+  function calcDuration(){
+    const startISO = startPair.getISO();
+    const endISO = endPair.getISO();
+    if (!startISO || !endISO) { durationInput.value = ""; return; }
+    const start = new Date(startISO);
+    const end = new Date(endISO);
+    if (end <= start) { durationInput.value = ""; return; }
+    const diffMin = Math.round((end - start) / 60000);
+    durationInput.value = diffMin + "분";
+  }
+  ["startDate","startTime","endDate","endTime"].forEach(id => {
+    document.getElementById(id).addEventListener("change", calcDuration);
+  });
+
+  // ===== 6) 상세 상담내용 글자수 카운트 =====
+  const counselDetail = document.getElementById('counselDetail');
+  const charCount = document.getElementById('charCount');
+
+  // ===== 7) lookup 테이블에서 옵션 동적 로딩 (상담등록 화면과 동일) =====
+  async function loadLookupOptions(tableName, selectEl){
+    if (!sb) { selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`; return; }
+    const { data, error } = await sb.from(tableName).select("code, name, sort_order").eq("active", true).order("sort_order", { ascending: true });
+    if (error || !data || data.length === 0) {
+      console.error(tableName + " 로딩 실패:", error);
+      selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`;
+      return;
+    }
+    let html = `<option value="">선택하세요</option>`;
+    data.forEach(row => { html += `<option value="${row.code}">${row.name}</option>`; });
+    selectEl.innerHTML = html;
+  }
+
+  // ===== 8) 상태 메시지 =====
+  const statusMsgEl = document.getElementById("statusMsg");
+  function showStatus(type, msg){
+    statusMsgEl.className = "statusMsg show " + type;
+    statusMsgEl.textContent = msg;
+    statusMsgEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function hideStatus(){ statusMsgEl.className = "statusMsg"; statusMsgEl.textContent = ""; }
+  function markInvalid(fieldEl, invalid){
+    if (invalid) fieldEl.classList.add("invalid"); else fieldEl.classList.remove("invalid");
+  }
+
+  // ===== 9) 조회 팝업: 1단계(전화번호 선택) -> 2단계(회기 선택) =====
+  const lookupOverlay = document.getElementById("lookupOverlay");
+  const lookupResultBox = document.getElementById("lookupResultBox");
+  const lookupTitleEl = document.getElementById("lookupTitle");
+  const lookupSubEl = document.getElementById("lookupSub");
+  let searchResults = [];
+  let currentRecordId = null;
+
+  function closeLookupModal(){ lookupOverlay.classList.remove("open"); }
+  lookupOverlay.addEventListener("click", (e) => { if (e.target === lookupOverlay) closeLookupModal(); });
+
+  document.getElementById("lookupBtn").addEventListener("click", async () => {
+    const name = document.getElementById("clientName").value.trim();
+    if (!name) { alert("내담자명을 입력해주세요."); return; }
+    if (!sb) { alert("조회 서버 연결에 실패했습니다."); return; }
+
+    lookupTitleEl.textContent = "전화번호 선택";
+    lookupSubEl.textContent = "동일한 이름으로 등록된 연락처입니다. 하나를 선택해주세요.";
+    lookupResultBox.innerHTML = `<div class="lookupEmpty">조회 중...</div>`;
+    lookupOverlay.classList.add("open");
+
+    const { data, error } = await sb
+      .from(TABLE_NAME)
+      .select("id, client_name, client_phone, Counseling_session, Consultation_start_time")
+      .eq("client_name", name)
+      .order("Consultation_start_time", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      lookupResultBox.innerHTML = `<div class="lookupEmpty">조회 중 오류가 발생했습니다. (로그인 상태를 확인해주세요)</div>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      lookupResultBox.innerHTML = `<div class="lookupEmpty">일치하는 내담자가 없습니다.</div>`;
+      return;
+    }
+
+    searchResults = data;
+    renderPhoneStep();
+  });
+
+  function renderPhoneStep(){
+    lookupTitleEl.textContent = "전화번호 선택";
+    lookupSubEl.textContent = "동일한 이름으로 등록된 연락처입니다. 하나를 선택해주세요.";
+    const phones = [...new Set(searchResults.map(r => r.client_phone))];
+    lookupResultBox.innerHTML = phones.map(p => `
+      <div class="lookupRow clickable" data-phone="${p}"><b>연락처</b><span>${p}</span></div>
+    `).join("");
+    lookupResultBox.querySelectorAll(".lookupRow[data-phone]").forEach(el => {
+      el.addEventListener("click", () => renderSessionStep(el.dataset.phone));
+    });
+  }
+
+  function renderSessionStep(phone){
+    lookupTitleEl.textContent = "회기 선택";
+    lookupSubEl.textContent = phone + " — 상담 회기를 선택해주세요.";
+    const rows = searchResults.filter(r => r.client_phone === phone);
+    const backHtml = `<div class="lookupRow clickable" id="backToPhone"><b>‹ 뒤로</b><span>전화번호 다시 선택</span></div>`;
+    lookupResultBox.innerHTML = backHtml + rows.map(r => `
+      <div class="lookupRow clickable" data-id="${r.id}">
+        <b>${r.Counseling_session ? r.Counseling_session + '회기' : '회기 미지정'}</b>
+        <span>${formatKST(r.Consultation_start_time) || '일정 미정'}</span>
+      </div>
+    `).join("");
+    document.getElementById("backToPhone").addEventListener("click", renderPhoneStep);
+    lookupResultBox.querySelectorAll(".lookupRow[data-id]").forEach(el => {
+      el.addEventListener("click", () => selectRecord(el.dataset.id));
+    });
+  }
+
+  async function selectRecord(id){
+    lookupResultBox.innerHTML = `<div class="lookupEmpty">불러오는 중...</div>`;
+    const { data, error } = await sb.from(TABLE_NAME).select("*").eq("id", id).single();
+    if (error || !data) {
+      console.error(error);
+      lookupResultBox.innerHTML = `<div class="lookupEmpty">불러오기 중 오류가 발생했습니다.</div>`;
+      return;
+    }
+    populateForm(data);
+    closeLookupModal();
+  }
+
+  // ===== 9-1) id 직접조회: consult_list.html 등에서 ?id=123 형태로 진입했을 때 3단계 조회 없이 바로 로드 =====
+  async function loadRecordById(id){
+    if (!sb) { showStatus("error", "데이터베이스 연결에 실패했습니다."); return; }
+
+    hideStatus();
+    showStatus("success", "내담자 정보를 불러오는 중입니다...");
+
+    const { data, error } = await sb.from(TABLE_NAME).select("*").eq("id", id).single();
+
+    if (error || !data) {
+      console.error("id 직접조회 실패:", error);
+      showStatus("error", "해당 상담 기록을 찾을 수 없습니다. (id: " + id + ")");
+      return;
+    }
+
+    populateForm(data);
+    hideStatus();
+  }
+
+  function populateForm(record){
+    currentRecordId = record.id;
+    hideStatus();
+
+    document.getElementById("clientName").value = record.client_name || '';
+    clientPhoneEl.value = record.client_phone || '';
+    document.getElementById("job").value = record.client_job || '';
+    document.getElementById("gender").value = record.sex_code || '';
+    birthDateInput.value = record.Birth_date || '';
+    ageInput.value = calcAge(birthDateInput.value.trim());
+    document.getElementById("address").value = record.client_address || '';
+
+    document.getElementById("sessionNo").value = record.Counseling_session ? String(record.Counseling_session) : '';
+    reservationPair.setFromISO(record.appointment_at);
+    startPair.setFromISO(record.Consultation_start_time);
+    endPair.setFromISO(record.Consultation_end_time);
+    calcDuration();
+
+    document.getElementById("testTool1").value = record.Inspection_tool1 || '';
+    document.getElementById("testTool2").value = record.Inspection_tool2 || '';
+    document.getElementById("testTool3").value = record.Inspection_tool3 || '';
+    document.getElementById("testTool4").value = record.Inspection_tool4 || '';
+
+    document.getElementById("consultationTarget").value = record.counsel_client_type || '';
+    document.getElementById("consultationTopic").value = record.counsel_topic || '';
+    counselDetail.value = record.Details_of_consultation || '';
+    charCount.textContent = counselDetail.value.length;
+
+    document.getElementById("nextSessionNo").value = record.next_session_no ? String(record.next_session_no) : '';
+    nextReservationPair.setFromISO(record.next_reservation_at);
+
+    ["job","gender","consultationTarget","consultationTopic"].forEach(id => markInvalid(document.getElementById(id).parentElement, false));
+    markInvalid(document.getElementById("birthDate").parentElement, false);
+  }
+
+  // ===== 10) 저장(수정) - client_name / client_phone 제외 전 항목 UPDATE =====
+  const saveBtn = document.getElementById("saveBtn");
+  saveBtn.addEventListener("click", async () => {
+    hideStatus();
+
+    if (!currentRecordId) { showStatus("error", "먼저 내담자를 조회해주세요."); return; }
+    if (!sb) { showStatus("error", "저장 서버(Supabase) 연결에 실패했습니다."); return; }
+
+    const loggedIn = await guardLoginOrRedirect();
+    if (!loggedIn) return;
+
+    const job = document.getElementById("job").value;
+    const gender = document.getElementById("gender").value;
+    const birthDateRaw = birthDateInput.value.trim();
+    const address = document.getElementById("address").value.trim();
+
+    const sessionNo = document.getElementById("sessionNo").value;
+    const testTool1 = document.getElementById("testTool1").value;
+    const testTool2 = document.getElementById("testTool2").value;
+    const testTool3 = document.getElementById("testTool3").value;
+    const testTool4 = document.getElementById("testTool4").value;
+    const nextSessionNo = document.getElementById("nextSessionNo").value;
+
+    const consultationTarget = document.getElementById("consultationTarget").value;
+    const consultationTopic = document.getElementById("consultationTopic").value;
+    const counselDetailVal = counselDetail.value.trim();
+
+    let hasError = false;
+
+    markInvalid(document.getElementById("gender").parentElement, !gender);
+    if (!gender) hasError = true;
+
+    const birthValid = birthDateRaw === "" || isValidBirthDate(birthDateRaw);
+    markInvalid(birthDateInput.parentElement, !birthValid);
+    if (!birthValid) hasError = true;
+
+    markInvalid(document.getElementById("consultationTarget").parentElement, !consultationTarget);
+    if (!consultationTarget) hasError = true;
+
+    markInvalid(document.getElementById("consultationTopic").parentElement, !consultationTopic);
+    if (!consultationTopic) hasError = true;
+
+    const appointmentISO = reservationPair.getISO();
+    markInvalid(document.getElementById("reservationField"), !appointmentISO);
+    if (!appointmentISO) hasError = true;
+
+    const startISO = startPair.getISO();
+    const endISO = endPair.getISO();
+    if (startISO && endISO && new Date(endISO) <= new Date(startISO)) {
+      markInvalid(document.getElementById("endField"), true);
+      showStatus("error", "실시일 종료는 시작보다 늦어야 합니다.");
+      hasError = true;
+    } else {
+      markInvalid(document.getElementById("endField"), false);
+    }
+
+    if (hasError) {
+      if (statusMsgEl.textContent === "") showStatus("error", "입력값을 다시 확인해주세요. 빨간색으로 표시된 항목을 채워주세요.");
+      return;
+    }
+
+    // ---- 저장 전 재확인 (되돌릴 수 없음 안내) ----
+    const confirmed = window.confirm(
+      "수정한 내용을 저장하시겠습니까?\n\n⚠ 저장하면 되돌릴 수 없습니다.\n(이전 내용으로 복구할 수 없으니, 저장 전 다시 한번 확인해주세요.)"
+    );
+    if (!confirmed) return;
+
+    const payload = {
+      client_job: job || null,
+      sex_code: gender,
+      Birth_date: birthValid && birthDateRaw ? birthDateRaw : null,
+      client_address: address || null,
+      Counseling_session: sessionNo ? parseInt(sessionNo, 10) : null,
+      appointment_at: appointmentISO,
+      Consultation_start_time: startISO,
+      Consultation_end_time: endISO,
+      Inspection_tool1: testTool1 || null,
+      Inspection_tool2: testTool2 || null,
+      Inspection_tool3: testTool3 || null,
+      Inspection_tool4: testTool4 || null,
+      next_session_no: nextSessionNo ? parseInt(nextSessionNo, 10) : null,
+      next_reservation_at: nextReservationPair.getISO(),
+      counsel_client_type: consultationTarget,
+      counsel_topic: consultationTopic,
+      Details_of_consultation: counselDetailVal || null
+    };
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "저장 중...";
+
+    const { error } = await sb
+      .from(TABLE_NAME)
+      .update(payload)
+      .eq("id", currentRecordId);
+
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="ti ti-device-floppy" aria-hidden="true"></i>수정/저장';
+
+    if (error) {
+      console.error(error);
+      showStatus("error", "저장 중 오류가 발생했습니다: " + error.message);
+      return;
+    }
+
+    showStatus("success", "내용이 정상적으로 저장되었습니다. (내담자명/연락처는 변경되지 않았습니다)");
+  });
+
+  // ===== 11) 초기화 =====
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    currentRecordId = null;
+    hideStatus();
+    setTimeout(() => {
+      charCount.textContent = "0";
+      ageInput.value = "";
+      durationInput.value = "";
+      [reservationPair, startPair, endPair, nextReservationPair].forEach(p => p.updatePreview());
+      ["job","gender","birthDate","address","sessionNo","testTool1","testTool2","testTool3","testTool4","consultationTarget","consultationTopic","nextSessionNo"]
+        .forEach(id => markInvalid(document.getElementById(id).parentElement, false));
+      ["reservationField","startField","endField","nextResField"]
+        .forEach(id => markInvalid(document.getElementById(id), false));
+    }, 0);
+  });
+
+  document.getElementById('homeBtn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  // ===== 11-1) 상담 써머리 (규칙 기반 자동 계산) =====
+  const summaryOverlay = document.getElementById("summaryOverlay");
+
+  const GOAL_KEYWORDS = ['목표', '목적', '지향'];
+  const TASK_KEYWORDS = ['과제', '숙제', '다음까지', '해보기로', '실천하기로', '연습하기로'];
+  const NEXT_PLAN_KEYWORDS = ['다음 회기', '차기 회기', '다음 상담', '다음 시간'];
+
+  function containsAny(text, keywords){
+    if (!text) return false;
+    return keywords.some(k => text.includes(k));
+  }
+
+  function extractSentenceWithKeyword(text, keywords){
+    if (!text) return '';
+    const sentences = text.split(/(?<=[.!?])\s+|\n+/);
+    for (const s of sentences) {
+      if (keywords.some(k => s.includes(k))) return s.trim();
+    }
+    return '';
+  }
+
+  function kstDateOnly(iso){
+    if (!iso) return null;
+    const parts = isoToKSTParts(iso);
+    return parts.date ? new Date(parts.date + 'T00:00:00Z') : null;
+  }
+
+  function kstDayDiffFromToday(iso){
+    const d1 = kstDateOnly(iso);
+    if (!d1) return null;
+    const d2 = kstDateOnly(new Date().toISOString());
+    return Math.round((d2 - d1) / 86400000);
+  }
+
+  let topicNameMap = null;
+  async function loadTopicNameMap(){
+    if (topicNameMap) return topicNameMap;
+    topicNameMap = {};
+    const { data, error } = await sb.from('counsel_topic').select('code, name');
+    if (!error && data) data.forEach(r => { topicNameMap[r.code] = r.name; });
+    return topicNameMap;
+  }
+
+  function checkLineHtml(label, found){
+    return `<div class="sumCheck"><span>${label}</span><span class="${found ? 'found' : 'missing'}">${found ? '✅ 발견' : '– 미기재'}</span></div>`;
+  }
+
+  function escapeHtml(s){
+    return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function buildSummary(){
+    const clientName = document.getElementById('clientName').value.trim();
+    const clientPhone = clientPhoneEl.value.trim();
+    const currentSessionNo = document.getElementById('sessionNo').value ? parseInt(document.getElementById('sessionNo').value, 10) : null;
+    const currentDetailText = counselDetail.value || '';
+
+    // 로딩 상태 표시
+    document.getElementById('sum1Stats').innerHTML = `<div><small>불러오는 중...</small><strong>-</strong></div>`;
+    document.getElementById('sum2Quote').textContent = '불러오는 중...';
+    document.getElementById('sum3Chips').innerHTML = '';
+    document.getElementById('sum4Timeline').innerHTML = '';
+    document.getElementById('sum5Stats').innerHTML = `<div><small>불러오는 중...</small><strong>-</strong></div>`;
+    document.getElementById('sum6Checks').innerHTML = '';
+    document.getElementById('sum7Content').innerHTML = '<p>-</p>';
+    document.getElementById('sum9Chips').innerHTML = '';
+
+    if (!sb || !clientName || !clientPhone) {
+      document.getElementById('sum2Quote').textContent = '내담자 정보가 부족해 계산할 수 없습니다.';
+      return;
+    }
+
+    await loadTopicNameMap();
+
+    const { data, error } = await sb
+      .from(TABLE_NAME)
+      .select('id, Counseling_session, counsel_topic, Details_of_consultation, Consultation_start_time, appointment_at')
+      .eq('client_name', clientName)
+      .eq('client_phone', clientPhone);
+
+    if (error) {
+      console.error('상담 써머리 조회 실패:', error);
+      document.getElementById('sum2Quote').textContent = '데이터를 불러오지 못했습니다.';
+      return;
+    }
+
+    const sorted = (data || []).slice().sort((a, b) => (a.Counseling_session || 0) - (b.Counseling_session || 0));
+
+    // ① 기본 상담정보
+    const genderLabel = (document.getElementById('gender').selectedOptions[0] && document.getElementById('gender').selectedOptions[0].value)
+      ? document.getElementById('gender').selectedOptions[0].text : '-';
+    document.getElementById('sum1Stats').innerHTML = `
+      <div><small>내담자</small><strong style="font-size:13px;">${escapeHtml(clientName)}</strong></div>
+      <div><small>성별/나이</small><strong style="font-size:13px;">${genderLabel} · ${ageInput.value || '-'}</strong></div>
+      <div><small>회기차수</small><strong style="font-size:13px;">${currentSessionNo ? currentSessionNo + '회기' : '-'}</strong></div>
+    `;
+
+    // ② 최근 회기 핵심 (원문 발췌)
+    const latest = sorted[sorted.length - 1];
+    if (latest) {
+      const latestText = (latest.Details_of_consultation || '').trim();
+      const excerpt = latestText ? (latestText.length > 140 ? latestText.slice(0, 140) + '…' : latestText) : '작성된 상담내용이 없습니다.';
+      document.getElementById('sum2Quote').textContent = latestText ? `"${excerpt}"` : excerpt;
+      document.getElementById('sum2Note').textContent = `※ AI 요약이 아닌 ${latest.Counseling_session ? latest.Counseling_session + '회기' : '최신'} 상담기록 원문 발췌입니다.`;
+    } else {
+      document.getElementById('sum2Quote').textContent = '조회된 회기 기록이 없습니다.';
+    }
+
+    // ③ 반복된 주요 주제 (전체 회기 빈도)
+    const freq = {};
+    sorted.forEach(r => { if (r.counsel_topic) freq[r.counsel_topic] = (freq[r.counsel_topic] || 0) + 1; });
+    const freqEntries = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+    document.getElementById('sum3Chips').innerHTML = freqEntries.length
+      ? freqEntries.map(([code, count]) => `<span class="sumChip">${escapeHtml(topicNameMap[code] || code)} · ${count}회</span>`).join('')
+      : `<span style="color:#94a3b8;font-size:12px;">기록된 주제가 없습니다.</span>`;
+
+    // ④ 변화의 흐름 (회기별 주제 타임라인)
+    document.getElementById('sum4Timeline').innerHTML = sorted.length
+      ? sorted.map(r => {
+          const label = r.Counseling_session ? `${r.Counseling_session}회기` : '회기미지정';
+          const topic = r.counsel_topic ? escapeHtml(topicNameMap[r.counsel_topic] || r.counsel_topic) : '-';
+          return `<div class="tstep"><div class="dot"></div>${label}<b>${topic}</b></div>`;
+        }).join('')
+      : `<span style="color:#94a3b8;font-size:12px;">데이터가 없습니다.</span>`;
+
+    // ⑤ 현재 상담 위치 (구조적 수치)
+    const firstIso = sorted[0] ? (sorted[0].Consultation_start_time || sorted[0].appointment_at) : null;
+    const latestIso = latest ? (latest.Consultation_start_time || latest.appointment_at) : null;
+    const firstDiff = kstDayDiffFromToday(firstIso);
+    const latestDiff = kstDayDiffFromToday(latestIso);
+    document.getElementById('sum5Stats').innerHTML = `
+      <div><small>진행 회기</small><strong>${sorted.length}회기</strong></div>
+      <div><small>최초상담 경과</small><strong>${firstDiff === null ? '-' : firstDiff + '일'}</strong></div>
+      <div><small>최근회기 경과</small><strong>${latestDiff === null ? '-' : latestDiff + '일'}</strong></div>
+    `;
+
+    // ⑥ 이번 회기 확인 포인트 (현재 조회된 회기 기준)
+    document.getElementById('sum6Checks').innerHTML =
+      checkLineHtml('상담목표 언급', containsAny(currentDetailText, GOAL_KEYWORDS)) +
+      checkLineHtml('과제 부여 여부', containsAny(currentDetailText, TASK_KEYWORDS)) +
+      checkLineHtml('다음 회기 계획', containsAny(currentDetailText, NEXT_PLAN_KEYWORDS));
+
+    // ⑦ 이전 과제 및 미완료 내용
+    let sum7Html;
+    if (!currentSessionNo || currentSessionNo <= 1) {
+      sum7Html = `<p style="color:#94a3b8;">이전 회기 없음</p>`;
+    } else {
+      const prevRecord = sorted.find(r => r.Counseling_session === currentSessionNo - 1);
+      if (!prevRecord) {
+        sum7Html = `<p style="color:#94a3b8;">이전 회기 없음</p>`;
+      } else {
+        const taskSentence = extractSentenceWithKeyword(prevRecord.Details_of_consultation || '', TASK_KEYWORDS);
+        if (!taskSentence) {
+          sum7Html = `<p>이전 회기(${currentSessionNo - 1}회기)에 기록된 과제 언급이 없습니다.</p>`;
+        } else {
+          const foundAgain = containsAny(currentDetailText, TASK_KEYWORDS);
+          sum7Html = `<p>${currentSessionNo - 1}회기에 기록된 과제: <b>"${escapeHtml(taskSentence)}"</b>이(가) 이번 회기 기록에 다시 언급되었는지: <span class="${foundAgain ? 'found' : 'missing'}">${foundAgain ? '✅ 발견' : '– 미확인(기록 없음)'}</span></p>`;
+        }
+      }
+    }
+    document.getElementById('sum7Content').innerHTML = sum7Html;
+
+    // ⑨ 근거 회기
+    document.getElementById('sum9Chips').innerHTML = sorted.length
+      ? sorted.map(r => `<span class="sumChip">${r.Counseling_session ? r.Counseling_session + '회기' : '미지정'}</span>`).join('')
+      : `<span style="color:#94a3b8;font-size:12px;">-</span>`;
+  }
+
+  document.getElementById("summaryBtn").addEventListener("click", async () => {
+    if (!currentRecordId) { alert("먼저 내담자를 조회해주세요."); return; }
+    summaryOverlay.classList.add("open");
+    await buildSummary();
+  });
+  function closeSummaryModal(){ summaryOverlay.classList.remove("open"); }
+  summaryOverlay.addEventListener("click", (e) => { if (e.target === summaryOverlay) closeSummaryModal(); });
+
+  // ===== 12) 초기화(페이지 로드) =====
+  (async function initPage(){
+    const ok = await guardLoginOrRedirect();
+    if (!ok) return;
+
+    loadLookupOptions("sex_codes", document.getElementById("gender"));
+    loadLookupOptions("job_codes", document.getElementById("job"));
+    loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"));
+    loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"));
+    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool1"));
+    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool2"));
+    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool3"));
+    loadLookupOptions("inspection_tool_codes", document.getElementById("testTool4"));
+
+    // consult_list.html 등에서 ?id=123 형태로 들어온 경우, 이름/전화번호/회기 선택 3단계를 건너뛰고 바로 조회
+    const urlParams = new URLSearchParams(window.location.search);
+    const directId = urlParams.get('id');
+    if (directId) {
+      await loadRecordById(directId);
+    }
+  })();
+</script>
+
+</body>
+</html>
