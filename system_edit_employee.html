@@ -3,184 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사용자등록 | 시나브로 Counselling & Career Plus Center</title>
+<title>사용자 등록 | 시나브로 Counselling & Career Plus Center</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --bg:#f4f6f9;
-  --card:#ffffff;
-  --line:#cfd6e1;
-  --text:#1f2937;
-  --muted:#667085;
-  --blue:#1857c9;
-  --blue2:#0e3f9d;
-  --green:#078b5b;
-  --red:#d92d45;
-  --orange:#d97706;
-  --yellow:#fffbe8;
-  --shadow:0 3px 12px rgba(15,23,42,.06);
-  --radius:9px;
+  --blue:#1457a6;--blue-dark:#123f78;--blue-soft:#eef6ff;--line:#b9cce3;
+  --text:#172033;--muted:#6b7788;--paper:#fff;--bg:#eef1f5;--yellow:#fffdf2;
+  --green:#178a4b;--red:#c63c3c;--orange:#c77716;--field-h:36px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:var(--bg);color:var(--text)}
+html,body{margin:0;min-height:100%;font-family:"Malgun Gothic","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:var(--bg)}
 html.auth-pending body{visibility:hidden}
 button,input,select{font:inherit}
-button{cursor:pointer}
-button:disabled{cursor:not-allowed;opacity:.45}
-.page{width:100%;padding:10px 12px}
-.title-frame{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-.title-area h1{margin:0;color:var(--blue2);font-size:22px;line-height:1.2}
-.file-name{margin-left:6px;color:#667085;font-size:11px;font-weight:400}
-.subtitle{margin-top:4px;color:#5f6b7a;font-size:11px}
-.main-button{min-width:104px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:12px;font-weight:700;box-shadow:var(--shadow)}
-
-.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:8px}
-.summary-card{min-height:68px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
-.summary-label{font-size:11px;color:#667085;font-weight:700}
-.summary-value{margin-top:4px;font-size:23px;line-height:1;font-weight:900;color:#173b78}
-.summary-note{margin-top:4px;font-size:10px;color:#7b8798}
-
-.search-frame{display:grid;grid-template-columns:145px 160px 160px minmax(220px,1fr) auto;align-items:end;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
-.field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.field label{color:#445267;font-size:11px;font-weight:800}
-.field input,.field select{width:100%;min-height:34px;padding:6px 8px;border:1px solid #c7d0dc;border-radius:7px;background:#fff;font-size:12px;outline:none}
-.field input:focus,.field select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.field input[readonly]{background:#f8fafc;color:#475569}
-.required{background:var(--yellow)!important}
-.search-buttons,.action-buttons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.btn{min-height:34px;padding:6px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:12px;font-weight:800;white-space:nowrap}
-.btn-blue{border-color:var(--blue);background:var(--blue);color:#fff}
-.btn-green{border-color:var(--green);background:var(--green);color:#fff}
-.btn-red{border-color:var(--red);background:var(--red);color:#fff}
-.btn-orange{border-color:var(--orange);background:var(--orange);color:#fff}
-
-.action-frame{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 6px}
-.guide-group{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
-.guide-text{color:#617087;font-size:11px}
-.access-badge{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:1px solid #cbd5e1;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
-.access-badge.admin{border-color:#86efac;background:#ecfdf5;color:#047857}
-.access-badge.viewer{border-color:#cbd5e1;background:#f8fafc;color:#475569}
-.notice{display:none;margin-bottom:8px;padding:9px 11px;border-radius:7px;font-size:12px;line-height:1.45}
-.notice.show{display:block}
-.notice.success{background:#ecfdf5;color:#047857}
-.notice.error{background:#fff1f2;color:#be123c}
-.notice.info{background:#eff6ff;color:#1d4ed8}
-
-.editor-frame{display:none;margin-bottom:8px;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
-.editor-frame.show{display:block}
-.editor-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
-.editor-head h2{margin:0;color:var(--blue2);font-size:15px}
-.mode-badge{padding:5px 10px;border-radius:999px;background:#e9eef7;color:#45556d;font-size:11px;font-weight:800}
-.mode-badge.new{background:#e6f7ef;color:#047857}
-.mode-badge.edit{background:#fff3df;color:#a35405}
-.editor-grid{display:grid;grid-template-columns:150px 170px 170px minmax(260px,1fr) 160px 165px;gap:8px;align-items:end}
-.switch-box{min-height:34px;display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid #c7d0dc;border-radius:7px;background:#fff}
-.switch-box input{width:17px;height:17px;min-height:auto;margin:0}
-.switch-box label{font-size:12px;font-weight:700;color:#334155}
-.helper-line{grid-column:1/-1;padding:8px 10px;border:1px solid #bfdbfe;border-radius:7px;background:#f8fbff;color:#53647b;font-size:10px;line-height:1.45}
-
-.list-frame{padding:10px 12px 11px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
-.list-title{margin:0 0 8px;color:var(--blue2);font-size:17px;text-align:center}
-.table-wrap{width:100%;min-height:330px;max-height:calc(100vh - 360px);overflow-y:auto;overflow-x:hidden;border:1px solid #cbd5e1;background:#fff}
-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:11px}
-thead th{position:sticky;top:0;z-index:3;padding:8px 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;line-height:1.2}
-tbody td,tfoot td{padding:7px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;text-align:center;line-height:1.25;vertical-align:middle;overflow-wrap:anywhere}
-tbody tr{cursor:pointer}
-tbody tr:hover{background:#f5f8fd}
-tbody tr.selected{background:#e8f0ff;outline:2px solid rgba(31,94,219,.28);outline-offset:-2px}
-.text-left{text-align:left!important;overflow:hidden;text-overflow:ellipsis}
-.mail-on,.role-admin,.auth-on{color:#047857;font-weight:800}
-.mail-off,.auth-off{color:#64748b}
-.role-viewer{color:#475569;font-weight:800}
-tfoot td{position:sticky;bottom:0;z-index:2;background:#edf2ff;color:var(--blue2);font-weight:800}
-.empty{height:130px;color:#64748b;text-align:center!important}
-.list-footer{display:flex;justify-content:space-between;gap:10px;padding-top:7px;color:#475569;font-size:11px;font-weight:700}
-.rls-note{font-weight:400;color:#7c8796}
-.loading{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(15,23,42,.42)}
-.loading.show{display:flex}
-.loading-box{padding:17px 22px;border-radius:12px;background:#fff;box-shadow:0 10px 30px rgba(15,23,42,.18);font-weight:800}
-
-/* 컬럼 폭 합계 100% */
-thead th:nth-child(1),tbody td:nth-child(1){width:5%}
-thead th:nth-child(2),tbody td:nth-child(2){width:11%}
-thead th:nth-child(3),tbody td:nth-child(3){width:11%}
-thead th:nth-child(4),tbody td:nth-child(4){width:12%}
-thead th:nth-child(5),tbody td:nth-child(5){width:25%}
-thead th:nth-child(6),tbody td:nth-child(6){width:10%}
-thead th:nth-child(7),tbody td:nth-child(7){width:10%}
-thead th:nth-child(8),tbody td:nth-child(8){width:9%}
-thead th:nth-child(9),tbody td:nth-child(9){width:7%}
-
-@media(max-width:1200px){
-  .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .search-frame{grid-template-columns:1fr 1fr}
-  .search-buttons{grid-column:1/-1}
-  .editor-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .table-wrap{max-height:520px}
-}
+button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
+.page-wrap{min-height:100vh;padding:18px 0 30px;display:flex;justify-content:center;align-items:flex-start}
+.a4-page{width:210mm;min-height:297mm;max-width:calc(100vw - 24px);background:var(--paper);box-shadow:0 10px 30px rgba(15,23,42,.14);padding:10mm 9mm 8mm}
+.top-row{min-height:17mm;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--blue-dark);padding:0 2mm 4mm;margin-bottom:6mm}
+.top-title h1{margin:0;color:var(--blue-dark);font-size:29px;font-weight:950;letter-spacing:-1.3px;line-height:1}
+.top-title .subtitle{margin-top:7px;color:#657286;font-size:11.5px;font-weight:650}
+.top-actions{display:flex;align-items:center;gap:8px}.main-button{height:36px;padding:0 14px;border:1px solid var(--blue);border-radius:7px;background:#fff;color:var(--blue-dark);font-weight:900;font-size:12px}
+.main-button:hover{background:var(--blue-soft)}
+.section{border:1px solid #6fa3dc;border-radius:6px;overflow:hidden;margin-bottom:5mm;break-inside:avoid;page-break-inside:avoid;background:#fff}
+.section-head{min-height:12mm;padding:0 4mm;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%);border-bottom:1px solid #a8c6e7}
+.section-head h2{margin:0;color:var(--blue);font-size:17px;font-weight:950;letter-spacing:-.5px}.section-body{padding:4mm 4mm 4.5mm;background:#fff}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3mm}
+.summary-card{min-height:20mm;padding:3mm 3.5mm;border:1px solid #cad8e7;border-radius:5px;background:#fbfdff}
+.summary-label{font-size:11px;color:#66758a;font-weight:850}.summary-value{margin-top:4px;color:var(--blue-dark);font-size:24px;line-height:1;font-weight:950}.summary-note{margin-top:5px;color:#7a8798;font-size:9.5px;line-height:1.25}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3.2mm 7mm}
+.form-pair{min-width:0;display:grid;grid-template-columns:30mm minmax(0,1fr);align-items:center;gap:2.5mm}.form-pair.full{grid-column:1/-1;grid-template-columns:30mm minmax(0,1fr)}
+.form-pair label,.field label{font-size:12.5px;font-weight:850;color:#252b34;white-space:nowrap}
+.form-pair input,.form-pair select,.field input,.field select{width:100%;min-width:0;height:var(--field-h);padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);color:#161b22;outline:none;font-size:12.5px;font-weight:650}
+.form-pair input:focus,.form-pair select:focus,.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(20,87,166,.11)}
+.form-pair input[readonly],.field input[readonly]{background:#f3f6f9;color:#4b596c}.required{background:var(--yellow)!important}
+.search-buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:4mm}.btn{height:38px;padding:0 15px;border-radius:6px;border:1px solid var(--blue);background:#fff;color:var(--blue-dark);font-size:12px;font-weight:900;white-space:nowrap}
+.btn-blue{background:#1461bd;color:#fff;border-color:#1461bd}.btn-green{background:#16834b;color:#fff;border-color:#16834b}.btn-red{background:#c63c3c;color:#fff;border-color:#c63c3c}.btn-orange{background:#c77716;color:#fff;border-color:#c77716}
+.action-frame{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4mm;margin:0 0 5mm;padding:3mm 4mm;border:1px solid #cad8e7;border-radius:6px;background:#f8fbff}
+.guide-group{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}.guide-text{color:#5f6e82;font-size:11px;line-height:1.4}.access-badge{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:1px solid #cbd5e1;border-radius:999px;font-size:10.5px;font-weight:900;white-space:nowrap}
+.access-badge.admin{border-color:#9bd5b3;background:#effaf3;color:#08713f}.access-badge.viewer{border-color:#cbd5e1;background:#f8fafc;color:#475569}.action-buttons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.notice{display:none;margin:0 0 4mm;padding:9px 11px;border-radius:7px;font-size:12px;font-weight:800;line-height:1.45}.notice.show{display:block}.notice.success{background:#effaf3;border:1px solid #bfe6cd;color:var(--green)}.notice.error{background:#fff1f1;border:1px solid #efc4c4;color:var(--red)}.notice.info{background:#eff6ff;border:1px solid #bfd6f5;color:#1d4f91}
+.editor-frame{display:none}.editor-frame.show{display:block}.mode-badge{padding:5px 10px;border-radius:999px;background:#e9eef7;color:#45556d;font-size:10.5px;font-weight:900}.mode-badge.new{background:#e7f7ef;color:#08713f}.mode-badge.edit{background:#fff3df;color:#9a560a}
+.switch-box{height:var(--field-h);display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow)}.switch-box input{width:17px;height:17px;margin:0;accent-color:var(--blue)}.switch-box label{font-size:12px;font-weight:850;color:#334155}
+.helper-line{grid-column:1/-1;margin-top:1mm;padding:9px 10px;border:1px solid #c8dbef;border-radius:5px;background:#f8fbff;color:#53647b;font-size:10.5px;line-height:1.5}
+.list-frame{margin-bottom:0}.table-wrap{width:100%;min-height:250px;max-height:330px;overflow:auto;border:1px solid #cbd5e1;background:#fff}table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:10.5px}
+thead th{position:sticky;top:0;z-index:3;padding:8px 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;line-height:1.2}tbody td,tfoot td{padding:7px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;text-align:center;line-height:1.25;vertical-align:middle;overflow-wrap:anywhere}tbody tr{cursor:pointer}tbody tr:hover{background:#f5f8fd}tbody tr.selected{background:#e8f0ff;outline:2px solid rgba(31,94,219,.28);outline-offset:-2px}.text-left{text-align:left!important;overflow:hidden;text-overflow:ellipsis}.mail-on,.role-admin,.auth-on{color:#047857;font-weight:900}.mail-off,.auth-off{color:#64748b}.role-viewer{color:#475569;font-weight:900}tfoot td{position:sticky;bottom:0;z-index:2;background:#edf2ff;color:var(--blue-dark);font-weight:900}.empty{height:110px;color:#64748b;text-align:center!important}
+.list-footer{display:flex;justify-content:space-between;gap:10px;padding-top:7px;color:#475569;font-size:10px;font-weight:800}.rls-note{font-weight:500;color:#7c8796}
+.loading{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(15,23,42,.42)}.loading.show{display:flex}.loading-box{padding:17px 22px;border-radius:12px;background:#fff;box-shadow:0 10px 30px rgba(15,23,42,.18);font-weight:850}
+thead th:nth-child(1),tbody td:nth-child(1){width:5%}thead th:nth-child(2),tbody td:nth-child(2){width:11%}thead th:nth-child(3),tbody td:nth-child(3){width:11%}thead th:nth-child(4),tbody td:nth-child(4){width:12%}thead th:nth-child(5),tbody td:nth-child(5){width:25%}thead th:nth-child(6),tbody td:nth-child(6){width:10%}thead th:nth-child(7),tbody td:nth-child(7){width:10%}thead th:nth-child(8),tbody td:nth-child(8){width:9%}thead th:nth-child(9),tbody td:nth-child(9){width:7%}
+@media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.top-row{align-items:flex-start;margin-bottom:16px}.grid-2{grid-template-columns:1fr}.form-pair.full{grid-column:auto}.form-pair,.form-pair.full{grid-template-columns:100px minmax(0,1fr)}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.action-frame{grid-template-columns:1fr}.action-buttons{justify-content:flex-start}.list-footer{flex-direction:column}.table-wrap{overflow-x:auto}table{min-width:760px}}
+@page{size:A4 portrait;margin:8mm}
+@media print{html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page-wrap{padding:0!important;min-height:auto!important}.a4-page{width:100%!important;min-height:auto!important;max-width:none!important;padding:0!important;box-shadow:none!important}.top-row{margin-bottom:5mm!important}.main-button,.action-frame,.search-buttons{display:none!important}.section{margin-bottom:4mm!important}.section-body{padding:3mm 4mm 3.5mm!important}.section-head{min-height:10mm!important}.table-wrap{max-height:none!important;overflow:visible!important}.list-footer{font-size:9px!important}}
 </style>
 </head>
 <body>
-<main class="page">
-  <section class="title-frame">
-    <div class="title-area">
-      <h1>사용자 등록 <span class="file-name">_system_edit_employee.html</span></h1>
-      <div class="subtitle">시나브로 Counselling & Career Plus Center · 사용자 기본정보 · 권한 · 이메일 등록 관리</div>
+<div class="page-wrap">
+<main class="a4-page">
+  <header class="top-row">
+    <div class="top-title">
+      <h1>사용자 등록</h1>
+      <div class="subtitle">시나브로 Counselling &amp; Career Plus Center · 사용자 기본정보 · 권한 · 이메일 등록 관리</div>
     </div>
-    <button class="main-button" type="button" onclick="goMain()">⌂ 메인화면</button>
-  </section>
+    <div class="top-actions"><button class="main-button" type="button" onclick="goMain()">← 메인화면</button></div>
+  </header>
 
-  <section class="summary-grid">
-    <div class="summary-card">
-      <div class="summary-label">전체 사용자</div>
-      <div id="sumTotal" class="summary-value">0</div>
-      <div class="summary-note">employee 등록 건수</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">메일 등록</div>
-      <div id="sumMail" class="summary-value">0</div>
-      <div class="summary-note">email 값이 등록된 사용자</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">메일 미등록</div>
-      <div id="sumNoMail" class="summary-value">0</div>
-      <div class="summary-note">email 값이 없는 사용자</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">관리자</div>
-      <div id="sumAdmin" class="summary-value">0</div>
-      <div class="summary-note">permission = 관리자</div>
+  <section class="section">
+    <div class="section-head"><h2>1. 사용자 관리 현황</h2></div>
+    <div class="section-body">
+      <div class="summary-grid">
+        <div class="summary-card"><div class="summary-label">전체 사용자</div><div id="sumTotal" class="summary-value">0</div><div class="summary-note">employee 등록 건수</div></div>
+        <div class="summary-card"><div class="summary-label">메일 등록</div><div id="sumMail" class="summary-value">0</div><div class="summary-note">email 값이 등록된 사용자</div></div>
+        <div class="summary-card"><div class="summary-label">메일 미등록</div><div id="sumNoMail" class="summary-value">0</div><div class="summary-note">email 값이 없는 사용자</div></div>
+        <div class="summary-card"><div class="summary-label">관리자</div><div id="sumAdmin" class="summary-value">0</div><div class="summary-note">permission = 관리자</div></div>
+      </div>
     </div>
   </section>
 
-  <section class="search-frame">
-    <div class="field">
-      <label for="searchCode">사용자코드</label>
-      <input id="searchCode" maxlength="5" placeholder="전체">
-    </div>
-    <div class="field">
-      <label for="searchPosition">직위</label>
-      <input id="searchPosition" maxlength="50" placeholder="전체">
-    </div>
-    <div class="field">
-      <label for="searchName">이름</label>
-      <input id="searchName" maxlength="50" placeholder="전체">
-    </div>
-    <div class="field">
-      <label for="searchEmail">이메일</label>
-      <input id="searchEmail" maxlength="254" placeholder="전체">
-    </div>
-    <div class="search-buttons">
-      <button class="btn btn-blue" type="button" onclick="searchRows()">🔍 조회</button>
-      <button class="btn" type="button" onclick="resetSearch()">초기화</button>
+  <section class="section">
+    <div class="section-head"><h2>2. 사용자 조회</h2></div>
+    <div class="section-body">
+      <div class="grid-2">
+        <div class="form-pair"><label for="searchCode">사용자코드</label><input id="searchCode" maxlength="5" placeholder="전체"></div>
+        <div class="form-pair"><label for="searchPosition">직위</label><input id="searchPosition" maxlength="50" placeholder="전체"></div>
+        <div class="form-pair"><label for="searchName">이름</label><input id="searchName" maxlength="50" placeholder="전체"></div>
+        <div class="form-pair"><label for="searchEmail">이메일</label><input id="searchEmail" maxlength="254" placeholder="전체"></div>
+      </div>
+      <div class="search-buttons"><button class="btn btn-blue" type="button" onclick="searchRows()">🔍 조회</button><button class="btn" type="button" onclick="resetSearch()">↻ 초기화</button></div>
     </div>
   </section>
 
   <section class="action-frame">
-    <div class="guide-group">
-      <div id="guideText" class="guide-text">사용자 정보를 확인하는 중입니다.</div>
-      <div id="accessBadge" class="access-badge viewer">권한 확인 중</div>
-    </div>
+    <div class="guide-group"><div id="guideText" class="guide-text">사용자 정보를 확인하는 중입니다.</div><div id="accessBadge" class="access-badge viewer">권한 확인 중</div></div>
     <div class="action-buttons">
       <button id="btnNew" class="btn btn-green" type="button" onclick="startNew()">＋ 신규등록</button>
       <button id="btnEdit" class="btn btn-blue" type="button" onclick="startEdit()" disabled>✎ 수정</button>
@@ -192,99 +103,42 @@ thead th:nth-child(9),tbody td:nth-child(9){width:7%}
 
   <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
-  <section id="editorFrame" class="editor-frame">
-    <div class="editor-head">
-      <h2>사용자정보 입력</h2>
-      <span id="modeBadge" class="mode-badge">대기</span>
+  <section id="editorFrame" class="section editor-frame">
+    <div class="section-head"><h2>3. 사용자 정보 입력</h2><span id="modeBadge" class="mode-badge">대기</span></div>
+    <div class="section-body">
+      <form id="employeeForm" onsubmit="return false;" autocomplete="off">
+        <div class="grid-2">
+          <div class="form-pair"><label for="employeeCode">사용자코드 *</label><input id="employeeCode" class="required" maxlength="5" placeholder="A-001" disabled></div>
+          <div class="form-pair"><label for="position">직위 *</label><input id="position" class="required" maxlength="50" placeholder="대표 / 이사 / 상담사" disabled></div>
+          <div class="form-pair"><label for="employeeName">이름 *</label><input id="employeeName" class="required" maxlength="50" disabled></div>
+          <div class="form-pair"><label for="email">이메일 주소</label><input id="email" type="email" maxlength="254" placeholder="example@gmail.com" disabled></div>
+          <div class="form-pair"><label for="permission">권한 *</label><select id="permission" class="required" disabled><option value="관리자">관리자</option><option value="조회자">조회자</option></select></div>
+          <div class="form-pair"><label for="active">사용상태</label><div class="switch-box"><input id="active" type="checkbox" checked disabled><label for="active">사용</label></div></div>
+          <div class="form-pair"><label for="authStatus">Auth 연결상태</label><input id="authStatus" value="미연결" readonly></div>
+          <div class="form-pair"><label for="authUserId">Auth User ID</label><input id="authUserId" readonly></div>
+          <div class="helper-line">이메일은 <b>사용자 연락 및 메일 등록 관리</b>에 사용합니다. 현재 employee 테이블에는 비밀번호를 저장하지 않으며, 로그인 계정 연결값은 <b>auth_user_id</b>로 관리됩니다. 사용자코드는 DB 제약조건에 따라 반드시 <b>A-001</b> 형식으로 입력합니다. 권한값은 현재 DB에서 허용하는 <b>관리자 / 조회자</b> 두 종류만 사용합니다.</div>
+        </div>
+      </form>
     </div>
-    <form id="employeeForm" onsubmit="return false;">
-      <div class="editor-grid">
-        <div class="field">
-          <label for="employeeCode">사용자코드 *</label>
-          <input id="employeeCode" class="required" maxlength="5" placeholder="A-001" disabled>
-        </div>
-        <div class="field">
-          <label for="position">직위 *</label>
-          <input id="position" class="required" maxlength="50" placeholder="대표 / 이사 / 상담사" disabled>
-        </div>
-        <div class="field">
-          <label for="employeeName">이름 *</label>
-          <input id="employeeName" class="required" maxlength="50" disabled>
-        </div>
-        <div class="field">
-          <label for="email">이메일 주소</label>
-          <input id="email" type="email" maxlength="254" placeholder="example@gmail.com" disabled>
-        </div>
-        <div class="field">
-          <label for="permission">권한 *</label>
-          <select id="permission" class="required" disabled>
-            <option value="관리자">관리자</option>
-            <option value="조회자">조회자</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>사용상태</label>
-          <div class="switch-box">
-            <input id="active" type="checkbox" checked disabled>
-            <label for="active">사용</label>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="authStatus">Auth 연결상태</label>
-          <input id="authStatus" value="미연결" readonly>
-        </div>
-        <div class="field" style="grid-column:span 2">
-          <label for="authUserId">Auth User ID</label>
-          <input id="authUserId" readonly>
-        </div>
-        <div class="helper-line">
-          이메일은 <b>사용자 연락 및 메일 등록 관리</b>에 사용합니다. 현재 employee 테이블에는 비밀번호를 저장하지 않으며,
-          로그인 계정 연결값은 <b>auth_user_id</b>로 관리됩니다. 사용자코드는 DB 제약조건에 따라 반드시 <b>A-001</b> 형식으로 입력합니다.
-          권한값은 현재 DB에서 허용하는 <b>관리자 / 조회자</b> 두 종류만 사용합니다.
-        </div>
-      </div>
-    </form>
   </section>
 
-  <section class="list-frame">
-    <h2 class="list-title">사용자 등록 현황</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>NO</th>
-            <th>사용자코드</th>
-            <th>직위</th>
-            <th>이름</th>
-            <th>이메일</th>
-            <th>메일등록</th>
-            <th>권한</th>
-            <th>Auth 연결</th>
-            <th>상태</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td class="empty" colspan="9">데이터를 불러오는 중입니다.</td></tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="4">합계</td>
-            <td id="totalCount" colspan="5">0건</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <div class="list-footer">
-      <span id="countLabel">총 0건</span>
-      <span class="rls-note">※ 현재 Supabase RLS 정책에 따라 화면에서 조회·등록·수정 가능한 범위가 제한될 수 있습니다.</span>
+  <section class="section list-frame">
+    <div class="section-head"><h2>4. 사용자 등록 현황</h2></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>NO</th><th>사용자코드</th><th>직위</th><th>이름</th><th>이메일</th><th>메일등록</th><th>권한</th><th>Auth 연결</th><th>상태</th></tr></thead>
+          <tbody id="tableBody"><tr><td class="empty" colspan="9">데이터를 불러오는 중입니다.</td></tr></tbody>
+          <tfoot><tr><td colspan="4">합계</td><td id="totalCount" colspan="5">0건</td></tr></tfoot>
+        </table>
+      </div>
+      <div class="list-footer"><span id="countLabel">총 0건</span><span class="rls-note">※ 현재 Supabase RLS 정책에 따라 화면에서 조회·등록·수정 가능한 범위가 제한될 수 있습니다.</span></div>
     </div>
   </section>
 </main>
-
-<div id="loadingOverlay" class="loading">
-  <div id="loadingText" class="loading-box">처리 중입니다...</div>
 </div>
+
+<div id="loadingOverlay" class="loading"><div id="loadingText" class="loading-box">처리 중입니다...</div></div>
 
 <script>
 "use strict";
