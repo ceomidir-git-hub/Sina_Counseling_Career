@@ -2353,6 +2353,86 @@
   <table>${colgroup}<thead>${head}</thead><tbody>${rows}</tbody></table>
   <div class="pdf-foot">마음:시나브로심리상담연구소 관제센타</div>
 
+
+
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+
+    const runPrint = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
+
+    if (printWindow.document.readyState === "complete"){
+      setTimeout(runPrint, 150);
+    }else{
+      printWindow.addEventListener("load", () => setTimeout(runPrint, 150), {once:true});
+    }
+  }
+
+  function escapeHtml(value){
+    return String(value ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+  }
+
+  function renderPostingTable(type, rows){
+    const isSeeker = type === "seeker";
+    const columns = isSeeker ? seekerColumns : employerColumns;
+
+    currentPostingType = type;
+    currentPostingRows = Array.isArray(rows) ? rows : [];
+
+    postingTable.classList.toggle("mode-employer", !isSeeker);
+    postingTable.classList.toggle("mode-seeker", isSeeker);
+
+    postingCols.innerHTML = columns.map(() => "<col>").join("");
+    postingHead.innerHTML = `<tr>${columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join("")}</tr>`;
+    postingBody.innerHTML = rows.map(row => `
+      <tr>
+        ${columns.map(col => {
+          const value = row[col.key] ?? "-";
+          const leftClass = col.left ? " cell-left" : "";
+          return `<td class="${leftClass.trim()}" title="${escapeHtml(value)}">${escapeHtml(value)}</td>`;
+        }).join("")}
+      </tr>`).join("");
+
+    postingScroll.scrollTop = 0;
+    postingScroll.scrollLeft = 0;
+  }
+
+  csvExportBtn?.addEventListener("click", exportCurrentPostingCSV);
+  pdfExportBtn?.addEventListener("click", exportCurrentPostingPDF);
+
+  document.querySelectorAll('input[name="postingType"]').forEach(radio => {
+    radio.addEventListener("change", event => {
+      const type = event.target.value;
+      renderPostingTable(type, type === "seeker" ? seekerPostingData : employerPostingData);
+    });
+  });
+
+  // 최초 화면은 구인공고
+  renderPostingTable("employer", employerPostingData);
+
+  // 날짜는 매분 갱신하여 자정 이후에도 오늘 날짜가 자동 변경되도록 함.
+  setInterval(() => {
+    weatherEls.date.textContent = formatTodayKorean();
+  }, 60 * 1000);
+
+  // 날씨는 10분마다 자동 갱신.
+  loadWeather();
+  setInterval(loadWeather, 10 * 60 * 1000);
+
+  document.querySelectorAll(".nav-item").forEach(item =>
+    item.addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
+      item.classList.add("active");
+    })
+  );
+</script>
+
 <script>
 (() => {
   const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
@@ -2695,84 +2775,6 @@
     }
   })();
 })();
-</script>
-
-</body>
-</html>`;
-
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
-
-    const runPrint = () => {
-      printWindow.focus();
-      printWindow.print();
-    };
-
-    if (printWindow.document.readyState === "complete"){
-      setTimeout(runPrint, 150);
-    }else{
-      printWindow.addEventListener("load", () => setTimeout(runPrint, 150), {once:true});
-    }
-  }
-
-  function escapeHtml(value){
-    return String(value ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
-  }
-
-  function renderPostingTable(type, rows){
-    const isSeeker = type === "seeker";
-    const columns = isSeeker ? seekerColumns : employerColumns;
-
-    currentPostingType = type;
-    currentPostingRows = Array.isArray(rows) ? rows : [];
-
-    postingTable.classList.toggle("mode-employer", !isSeeker);
-    postingTable.classList.toggle("mode-seeker", isSeeker);
-
-    postingCols.innerHTML = columns.map(() => "<col>").join("");
-    postingHead.innerHTML = `<tr>${columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join("")}</tr>`;
-    postingBody.innerHTML = rows.map(row => `
-      <tr>
-        ${columns.map(col => {
-          const value = row[col.key] ?? "-";
-          const leftClass = col.left ? " cell-left" : "";
-          return `<td class="${leftClass.trim()}" title="${escapeHtml(value)}">${escapeHtml(value)}</td>`;
-        }).join("")}
-      </tr>`).join("");
-
-    postingScroll.scrollTop = 0;
-    postingScroll.scrollLeft = 0;
-  }
-
-  csvExportBtn?.addEventListener("click", exportCurrentPostingCSV);
-  pdfExportBtn?.addEventListener("click", exportCurrentPostingPDF);
-
-  document.querySelectorAll('input[name="postingType"]').forEach(radio => {
-    radio.addEventListener("change", event => {
-      const type = event.target.value;
-      renderPostingTable(type, type === "seeker" ? seekerPostingData : employerPostingData);
-    });
-  });
-
-  // 최초 화면은 구인공고
-  renderPostingTable("employer", employerPostingData);
-
-  // 날짜는 매분 갱신하여 자정 이후에도 오늘 날짜가 자동 변경되도록 함.
-  setInterval(() => {
-    weatherEls.date.textContent = formatTodayKorean();
-  }, 60 * 1000);
-
-  // 날씨는 10분마다 자동 갱신.
-  loadWeather();
-  setInterval(loadWeather, 10 * 60 * 1000);
-
-  document.querySelectorAll(".nav-item").forEach(item =>
-    item.addEventListener("click", () => {
-      document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
-      item.classList.add("active");
-    })
-  );
 </script>
 </body>
 </html>
