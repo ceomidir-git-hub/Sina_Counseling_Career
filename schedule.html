@@ -23,7 +23,7 @@
   --muted:#6b7280;
   --shadow:0 8px 22px rgba(15,23,42,.07);
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;font-weight:400!important}
 html,body,button,input,select,textarea{font-weight:400;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:geometricPrecision}
 strong,b,h1,h2,h3,h4,h5,h6{font-weight:400!important}
 html,body{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;margin:0;width:100%;min-width:1280px;height:100%;font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--text);background:var(--bg)}
@@ -52,8 +52,8 @@ button{font:inherit}
 /* ===== LEFT : CALENDAR ===== */
 .calendar-card{display:grid;grid-template-rows:70px minmax(0,1fr) 110px 28px;overflow:hidden}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border-bottom:1px solid var(--line2)}
-.calendar-title{font-size:18px;font-weight:950;letter-spacing:-.4px;white-space:nowrap}
-.legend{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:11px;color:#475569;font-weight:400;white-space:nowrap}
+.calendar-title-wrap{display:flex;align-items:center;gap:10px;flex:0 0 auto}.calendar-title{font-size:18px;font-weight:400;letter-spacing:-.4px;white-space:nowrap}.calendar-back-btn{height:32px;padding:0 11px;border:1px solid #d6dfeb;border-radius:7px;background:#fff;color:#3c4a5f;font-size:11px;font-weight:400;cursor:pointer;white-space:nowrap}.calendar-back-btn:hover{background:#f7f9fc}
+.legend{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:13.2px;color:#475569;font-weight:400;white-space:nowrap}
 .legend span{display:flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .dot.planned{background:var(--blue)}.dot.progress{background:var(--orange)}.dot.done{background:var(--green)}.dot.missed{background:#9ca3af}.dot.next{background:var(--violet)}
 .month-tools{display:flex;align-items:center;gap:8px;white-space:nowrap}
@@ -77,14 +77,14 @@ button{font:inherit}
 .day-cell.other .day-event{opacity:.45}.more-event{margin-left:10px;color:#2563eb;font-size:10px;font-weight:850;white-space:nowrap}
 
 .status-summary{border-top:1px solid var(--line2);padding:10px 14px 12px;display:grid;grid-template-rows:22px minmax(0,1fr);gap:6px}
-.summary-title{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:400}.summary-title small{font-size:10px;color:var(--muted);font-weight:750}
+.summary-title{display:flex;align-items:center;gap:10px;font-size:13.2px;font-weight:400}.summary-title small{font-size:11px;color:var(--muted);font-weight:400}
 .summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
 .summary-box{border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;align-content:center;gap:3px;background:#fbfcfe}
-.summary-box small{font-size:10px;font-weight:850}.summary-box strong{font-size:17px;line-height:1;font-weight:950}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.progress small,.summary-box.progress strong{color:#d65d0b}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
+.summary-box small{font-size:11px;font-weight:400}.summary-box strong{font-size:18.7px;line-height:1;font-weight:400}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.progress small,.summary-box.progress strong{color:#d65d0b}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
 .calendar-foot{display:flex;align-items:center;padding:0 14px;color:#6b7280;font-size:9.5px;font-weight:750;border-top:1px solid #f0f3f7;background:#fbfcfe}
 
 /* ===== RIGHT : DAY TIMELINE ===== */
-.timeline-card{display:grid;grid-template-rows:60px minmax(0,1fr) 122px 66px;overflow:hidden}
+.timeline-card{display:grid;grid-template-rows:60px minmax(0,1fr) 122px;overflow:hidden}
 .timeline-head{display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line2)}
 .timeline-head h2{font-size:16px;margin:0;font-weight:950;letter-spacing:-.35px}.total-badge{border:1px solid #b9d2fa;background:#f3f7ff;color:#245fd0;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:400}
 .timeline-scroll{min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#aeb7c4 #f5f7fa;padding:0 14px 14px 17px;scroll-behavior:smooth;position:relative}
@@ -92,8 +92,8 @@ button{font:inherit}
 .empty{height:100%;display:grid;place-items:center;text-align:center;color:#8a94a4;font-size:12px;line-height:1.7;padding:30px}
 .timeline-month-list{display:grid;gap:0}
 .timeline-date-group{position:relative;padding:0 0 8px}
-.timeline-date-group + .timeline-date-group{border-top:1px solid #eef2f6}
-.timeline-date-label{position:sticky;top:0;z-index:4;height:32px;display:flex;align-items:center;justify-content:space-between;margin:0 -2px 6px;padding:0 7px;background:rgba(255,255,255,.96);backdrop-filter:blur(5px);border-bottom:1px dashed #d9e0ea;color:#516074;font-size:11px;font-weight:400}
+.timeline-date-group + .timeline-date-group{border-top:0}
+.timeline-date-label{position:sticky;top:0;z-index:4;height:32px;display:flex;align-items:center;justify-content:space-between;margin:0 -2px 6px;padding:0 7px;background:rgba(255,255,255,.96);backdrop-filter:blur(5px);border-bottom:0;color:#516074;font-size:11px;font-weight:400}
 .timeline-date-label strong{font-size:12px;color:#26364d}
 .timeline-date-label span{font-size:10px;color:#8290a3;font-weight:400}
 .timeline-date-empty{height:54px;display:flex;align-items:center;padding-left:88px;color:#98a2b3;font-size:10px;font-weight:750}
@@ -106,7 +106,6 @@ button{font:inherit}
 .t-meta{display:flex;flex-wrap:wrap;gap:8px 11px;margin-top:8px;color:#58667a;font-size:12px;font-weight:750}.t-meta span{white-space:nowrap}.t-phone{margin-top:6px;color:#78869a;font-size:12px;font-weight:400}
 .type-summary{border-top:1px solid var(--line2);padding:11px 14px;background:#fff}
 .type-summary h3{font-size:12px;margin:0 0 8px;font-weight:950}.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.type-row{border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10.5px}.type-row strong{font-size:11px}.type-row b{color:#245fd0;font-size:12px}
-.timeline-actions{border-top:1px solid var(--line2);display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px}.action-btn{border:1px solid #d7dfeb;border-radius:8px;background:#fff;font-size:11px;font-weight:400;color:#3c4a5f;cursor:pointer}.action-btn.primary{background:#0d63ce;border-color:#0d63ce;color:#fff}
 
 .loading-cover{position:fixed;inset:72px 0 0;z-index:50;background:rgba(244,247,251,.72);display:none;place-items:center;backdrop-filter:blur(1px)}.loading-cover.show{display:grid}.loading-box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 20px;box-shadow:var(--shadow);font-size:12px;font-weight:850;color:#42526a}
 .toast{position:fixed;right:20px;bottom:18px;z-index:1000;max-width:390px;padding:11px 14px;border-radius:9px;background:#1f2937;color:#fff;font-size:11px;font-weight:750;box-shadow:0 10px 26px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateY(0)}
@@ -118,7 +117,7 @@ button{font:inherit}
 @media print{
   @page{size:A4 landscape;margin:7mm}
   html,body{min-width:0;height:auto;overflow:visible;background:#fff}
-  .app{height:auto;display:block}.topbar{height:50px;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}.logout-btn{display:none}.workspace{height:690px;padding:8px;grid-template-columns:2fr 1fr}.card{box-shadow:none}.timeline-actions{display:none}.timeline-card{grid-template-rows:54px minmax(0,1fr) 105px}.calendar-card{grid-template-rows:62px minmax(0,1fr) 95px 24px}.timeline-scroll{overflow:hidden}.loading-cover,.toast{display:none!important}
+  .app{height:auto;display:block}.topbar{height:50px;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}.logout-btn{display:none}.workspace{height:690px;padding:8px;grid-template-columns:2fr 1fr}.card{box-shadow:none}.timeline-card{grid-template-rows:54px minmax(0,1fr) 105px}.calendar-card{grid-template-rows:62px minmax(0,1fr) 95px 24px}.timeline-scroll{overflow:hidden}.loading-cover,.toast{display:none!important}
 }
 </style>
 </head>
@@ -141,7 +140,10 @@ button{font:inherit}
   <main class="workspace">
     <section class="card calendar-card">
       <div class="calendar-head">
-        <div class="calendar-title">상담 스케줄 달력</div>
+        <div class="calendar-title-wrap">
+          <div class="calendar-title">상담 스케줄 달력</div>
+          <button class="calendar-back-btn" id="backBtn" type="button">← 이전화면</button>
+        </div>
         <div class="legend" aria-label="일정 상태 범례">
           <span><i class="dot planned"></i>예정</span>
           <span><i class="dot progress"></i>진행중</span>
@@ -163,7 +165,7 @@ button{font:inherit}
       </div>
 
       <div class="status-summary">
-        <div class="summary-title">선택일 상태 요약 <small id="summaryDate">-</small></div>
+        <div class="summary-title">당월 상담 일정 요약 <small id="summaryDate">-</small></div>
         <div class="summary-grid">
           <div class="summary-box planned"><small>예정</small><strong id="sumPlanned">0건</strong></div>
           <div class="summary-box progress"><small>진행중</small><strong id="sumProgress">0건</strong></div>
@@ -190,10 +192,6 @@ button{font:inherit}
           <div class="type-row"><strong>심리상담</strong><b id="psychCount">0건</b></div>
           <div class="type-row"><strong>진로상담</strong><b id="careerCount">0건</b></div>
         </div>
-      </div>
-      <div class="timeline-actions">
-        <button class="action-btn primary" id="printBtn" type="button">🖨 인쇄(PDF)</button>
-        <button class="action-btn" id="backBtn" type="button">← 이전화면</button>
       </div>
     </aside>
   </main>
@@ -471,13 +469,32 @@ button{font:inherit}
   }
 
   function renderSummary(){
-    const items=state.byDate.get(state.selectedDate)||[]; const c=countStatuses(items);
-    els.summaryDate.textContent=formatKoreanDate(state.selectedDate);
+    // 하단 KPI = 현재 달력에 표시 중인 "월 전체" 일정 기준
+    const monthlyItems=[];
+    for(const dateKey of monthDayKeys(state.viewYear,state.viewMonth)){
+      const dayItems=state.byDate.get(dateKey)||[];
+      monthlyItems.push(...dayItems);
+    }
+    const monthCount=countStatuses(monthlyItems);
+
+    els.summaryDate.textContent=`${state.viewYear}년 ${state.viewMonth}월`;
+    els.sumPlanned.textContent=`${monthCount.planned}건`;
+    els.sumProgress.textContent=`${monthCount.progress}건`;
+    els.sumDone.textContent=`${monthCount.done}건`;
+    els.sumMissed.textContent=`${monthCount.missed}건`;
+    els.sumNext.textContent=`${monthCount.next}건`;
+    els.sumTotal.textContent=`${monthCount.total}건`;
+
+    // 우측 타임라인 = 현재 선택된 날짜 기준
+    const selectedItems=state.byDate.get(state.selectedDate)||[];
+    const selectedCount=countStatuses(selectedItems);
     els.timelineDate.textContent=formatKoreanDate(state.selectedDate);
-    els.sumPlanned.textContent=`${c.planned}건`; els.sumProgress.textContent=`${c.progress}건`; els.sumDone.textContent=`${c.done}건`; els.sumMissed.textContent=`${c.missed}건`; els.sumNext.textContent=`${c.next}건`; els.sumTotal.textContent=`${c.total}건`;
-    els.timelineTotal.textContent=`총 ${c.total}건`;
-    const psych=items.filter(x=>x.source==='psych').length, career=items.filter(x=>x.source==='career').length;
-    els.psychCount.textContent=`${psych}건`; els.careerCount.textContent=`${career}건`;
+    els.timelineTotal.textContent=`총 ${selectedCount.total}건`;
+
+    const psych=selectedItems.filter(x=>x.source==='psych').length;
+    const career=selectedItems.filter(x=>x.source==='career').length;
+    els.psychCount.textContent=`${psych}건`;
+    els.careerCount.textContent=`${career}건`;
   }
 
   function renderCalendarSelectionOnly(){
@@ -630,7 +647,6 @@ button{font:inherit}
   document.getElementById('prevBtn').addEventListener('click',()=>goMonth(-1));
   document.getElementById('nextBtn').addEventListener('click',()=>goMonth(1));
   document.getElementById('todayBtn').addEventListener('click',()=>{ const t=kstNowDate(); state.viewYear=t.getUTCFullYear(); state.viewMonth=t.getUTCMonth()+1; state.selectedDate=todayYmd(); loadMonth(state.viewYear,state.viewMonth); });
-  document.getElementById('printBtn').addEventListener('click',()=>window.print());
   document.getElementById('backBtn').addEventListener('click',()=>history.length>1?history.back():location.assign('index.html'));
   document.getElementById('logoutBtn').addEventListener('click',async()=>{ if(!confirm('로그아웃 하시겠습니까?')) return; await sb.auth.signOut(); location.href='index.html'; });
 
