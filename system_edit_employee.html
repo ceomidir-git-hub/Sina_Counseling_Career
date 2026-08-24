@@ -94,6 +94,7 @@ thead th:nth-child(1),tbody td:nth-child(1){width:5%}thead th:nth-child(2),tbody
     <div class="guide-group"><div id="guideText" class="guide-text">사용자 정보를 확인하는 중입니다.</div><div id="accessBadge" class="access-badge viewer">권한 확인 중</div></div>
     <div class="action-buttons">
       <button id="btnNew" class="btn btn-green" type="button" onclick="startNew()">＋ 신규등록</button>
+      <button id="btnAuthUser" class="btn btn-blue" type="button" onclick="createAuthUser()" disabled>✉ 신규 사용자</button>
       <button id="btnEdit" class="btn btn-blue" type="button" onclick="startEdit()" disabled>✎ 수정</button>
       <button id="btnClearMail" class="btn btn-orange" type="button" onclick="clearMail()" disabled>메일삭제</button>
       <button id="btnDelete" class="btn btn-red" type="button" onclick="deleteSelected()" disabled>▣ 삭제</button>
@@ -173,6 +174,19 @@ function escapeHtml(v){
 function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 function isAdmin(){ return currentEmployee?.permission === "관리자"; }
 function selectedRow(){ return allRows.find(r => r.id === selectedId) || null; }
+function canCreateAuthUser(){
+  const row=selectedRow();
+  const email=normalizeText(row?.email).toLowerCase();
+  return Boolean(
+    isAdmin() &&
+    mode==="view" &&
+    row &&
+    row.active !== false &&
+    !row.auth_user_id &&
+    email &&
+    isValidEmail(email)
+  );
+}
 
 function showLoading(show,text="처리 중입니다..."){
   document.getElementById("loadingText").textContent = text;
@@ -236,6 +250,8 @@ function applyPermissionUI(){
     badge.textContent="● 조회자 · 조회 전용";
   }
   document.getElementById("btnNew").disabled=!isAdmin() || mode!=="view";
+  const authBtn=document.getElementById("btnAuthUser");
+  if(authBtn) authBtn.disabled=!canCreateAuthUser();
 }
 
 function setMode(nextMode){
@@ -244,6 +260,8 @@ function setMode(nextMode){
   editableIds.forEach(id=>document.getElementById(id).disabled=!editing);
 
   document.getElementById("btnNew").disabled=!isAdmin() || mode!=="view";
+  const authBtn=document.getElementById("btnAuthUser");
+  if(authBtn) authBtn.disabled=!canCreateAuthUser();
   document.getElementById("btnEdit").disabled=!isAdmin() || !selectedId || mode!=="view";
   document.getElementById("btnClearMail").disabled=!isAdmin() || !selectedId || mode!=="edit";
   document.getElementById("btnDelete").disabled=!isAdmin() || !selectedId || mode!=="view";
@@ -364,6 +382,58 @@ function startNew(){
   clearNotice(); clearForm(); setMode("new");
   document.getElementById("guideText").textContent="신규 사용자 정보와 이메일 주소를 입력한 후 저장하세요.";
   document.getElementById("employeeCode").focus();
+}
+
+async function createAuthUser(){
+  if(!isAdmin()){ showNotice("관리자만 신규 Auth 사용자를 생성할 수 있습니다.","error"); return; }
+  if(mode!=="view"){ showNotice("저장 또는 수정을 먼저 완료해 주세요.","error"); return; }
+
+  const row=selectedRow();
+  if(!row){ showNotice("신규 사용자로 등록할 사용자를 목록에서 선택해 주세요.","error"); return; }
+  if(row.active===false){ showNotice("사용 중지 상태의 사용자는 신규 Auth 사용자로 등록할 수 없습니다.","error"); return; }
+  if(row.auth_user_id){ showNotice("이미 Auth 계정이 연결된 사용자입니다.","info"); return; }
+
+  const email=normalizeText(row.email).toLowerCase();
+  if(!email || !isValidEmail(email)){ showNotice("선택한 사용자에게 유효한 이메일 주소가 등록되어 있어야 합니다.","error"); return; }
+
+  const confirmed=confirm(
+    `${row.employee_code || ""} ${row.name || ""} (${email})를 신규 로그인 사용자로 등록하고\n비밀번호 설정 메일을 발송하시겠습니까?`
+  );
+  if(!confirmed) return;
+
+  showLoading(true,"신규 로그인 계정 생성 및 비밀번호 설정 메일을 발송하는 중입니다...");
+  try{
+    const {data:{session},error:sessionError}=await sb.auth.getSession();
+    if(sessionError || !session?.access_token){
+      throw new Error("로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.");
+    }
+
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/create-employee-auth-user`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":SUPABASE_KEY,
+        "Authorization":`Bearer ${session.access_token}`
+      },
+      body:JSON.stringify({employee_id:row.id})
+    });
+
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok || result?.ok!==true){
+      throw new Error(result?.error || result?.message || `신규 사용자 등록 실패 (HTTP ${response.status})`);
+    }
+
+    await loadRows({preserveNotice:true});
+    showNotice(
+      result.message || `${email}로 비밀번호 설정 메일을 발송하고 Auth 계정을 연결했습니다.`,
+      "success"
+    );
+  }catch(error){
+    console.error("신규 Auth 사용자 등록 오류:",error);
+    showNotice("신규 사용자 등록 실패: "+(error?.message || String(error)),"error");
+  }finally{
+    showLoading(false);
+  }
 }
 
 function startEdit(){
