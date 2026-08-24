@@ -62,7 +62,7 @@ thead th:nth-child(1),tbody td:nth-child(1){width:5%}thead th:nth-child(2),tbody
       <h1>사용자 등록</h1>
       <div class="subtitle">시나브로 Counselling &amp; Career Plus Center · 사용자 기본정보 · 권한 · 이메일 등록 관리</div>
     </div>
-    <div class="top-actions"><button class="main-button" type="button" onclick="goMain()">← 메인화면</button></div>
+    <div class="top-actions"><button class="main-button" type="button" onclick="goBack()">← 이전화면</button></div>
   </header>
 
   <section class="section">
@@ -452,7 +452,13 @@ function resetSearch(){
   applySearch();
   document.getElementById("guideText").textContent="조회조건을 초기화했습니다.";
 }
-function goMain(){ window.location.href=MAIN_PAGE_URL; }
+function goBack(){
+  if(window.history.length > 1){
+    window.history.back();
+  }else{
+    window.location.href=MAIN_PAGE_URL;
+  }
+}
 
 sb.auth.onAuthStateChange(event=>{ if(event==="SIGNED_OUT") window.location.replace(LOGIN_PAGE_URL); });
 
