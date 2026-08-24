@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상담 리스트</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --blue:#1a56db;
+  --blue-dark:#1747b8;
+  --bg:#f4f5f7;
+  --card:#ffffff;
+  --line:#d9dee8;
+  --line-soft:#edf0f4;
+  --text:#202632;
+  --muted:#778196;
+  --yellow:#fffdf2;
+  --green:#16784b;
+  --orange:#9b5f00;
+  --red:#b42318;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{
+  padding:28px 18px;
+  font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:geometricPrecision;
+}
+button,input{font:inherit}
+.container{
+  width:min(1180px,100%);
+  margin:0 auto;
+  background:#fff;
+  border:1px solid #e0e2e7;
+  border-radius:10px;
+  padding:28px 34px 30px;
+  box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+.page-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:16px;
+}
+.page-title{margin:0;color:#14171f;font-size:28px;font-weight:600;letter-spacing:-.7px}
+.page-sub{margin:5px 0 0;color:var(--muted);font-size:12px;font-weight:400}
+.result-count{font-size:13px;color:#536075;white-space:nowrap}
+.result-count span{color:var(--blue);font-size:17px;font-weight:600}
+
+.section{
+  border:1px solid #e0e2e7;
+  border-radius:8px;
+  padding:18px 20px 20px;
+  margin-bottom:16px;
+}
+.section-title{
+  margin:0 0 14px;
+  color:var(--blue);
+  font-size:16px;
+  font-weight:600;
+  letter-spacing:-.3px;
+}
+.search-grid{
+  display:grid;
+  grid-template-columns:1.15fr 1.15fr 1fr 1.25fr 1.75fr 86px;
+  gap:10px;
+  align-items:end;
+}
+.field{min-width:0}
+.field label,.radio-label{
+  display:block;
+  margin:0 0 6px;
+  color:#374151;
+  font-size:13px;
+  font-weight:500;
+}
+.field input{
+  width:100%;
+  height:40px;
+  padding:0 11px;
+  border:1px solid #d1d5db;
+  border-radius:6px;
+  background:#fff;
+  color:#111827;
+  font-size:13px;
+  font-weight:400;
+  outline:none;
+}
+.field input:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(26,86,219,.10);
+}
+.period-start:after{content:""}
+.radio-wrap{
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:0 10px;
+  border:1px solid #d1d5db;
+  border-radius:6px;
+  background:#fff;
+  white-space:nowrap;
+}
+.radio-option{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  color:#364152;
+  font-size:12px;
+  font-weight:400;
+  cursor:pointer;
+}
+.radio-option input{
+  width:15px;height:15px;margin:0;accent-color:var(--blue);
+}
+.search-btn{
+  height:40px;
+  border:1px solid var(--blue);
+  border-radius:6px;
+  background:var(--blue);
+  color:#fff;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+}
+.search-btn:hover{background:var(--blue-dark)}
+.search-note{
+  margin:10px 0 0;
+  color:#7d8798;
+  font-size:11px;
+  line-height:1.45;
+}
+.status{
+  display:none;
+  margin-bottom:12px;
+  padding:9px 12px;
+  border-radius:7px;
+  font-size:12px;
+}
+.status.show{display:block}
+.status.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e4f9a}
+.status.error{background:#fff1f2;border:1px solid #fecdd3;color:#a61b2b}
+
+.table-box{
+  border:1px solid #d9dee8;
+  border-radius:8px;
+  overflow:hidden;
+  background:#fff;
+}
+.table-scroll{
+  max-height:510px;
+  overflow:auto;
+  scrollbar-width:thin;
+  scrollbar-color:#b5bdc9 #f4f6f8;
+}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
+  font-size:13px;
+}
+col.no{width:58px}
+col.name{width:112px}
+col.phone{width:150px}
+col.sex{width:72px}
+col.age{width:72px}
+col.type{width:185px}
+col.status-col{width:190px}
+col.session{width:190px}
+thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  height:42px;
+  padding:0 8px;
+  border-right:1px solid #d9dee8;
+  border-bottom:1px solid #cfd5df;
+  background:#f3f6fa;
+  color:#344054;
+  text-align:center;
+  font-size:12.5px;
+  font-weight:600;
+}
+tbody td{
+  height:42px;
+  padding:7px 8px;
+  border-right:1px solid #e5e8ed;
+  border-bottom:1px solid #e9ecf1;
+  background:#fff;
+  color:#303846;
+  text-align:center;
+  font-weight:400;
+  line-height:1.3;
+}
+thead th:last-child,tbody td:last-child{border-right:0}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) td{background:#fffdf6}
+tbody tr:hover td{background:#f6f9ff}
+td.left{text-align:left;padding-left:12px}
+.empty-row td{
+  height:120px;
+  color:#8a94a5;
+  background:#fff!important;
+}
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:500;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.badge.progress{background:#eaf3ff;color:#275ea9}
+.badge.done{background:#eaf8ef;color:#197047}
+.badge.unknown{background:#f2f4f7;color:#667085}
+
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+}
+.btn{
+  min-width:160px;
+  height:44px;
+  border:1px solid #cfd5df;
+  border-radius:6px;
+  background:#fff;
+  color:#374151;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+}
+.btn:hover{background:#f8fafc}
+.btn.pdf{border-color:#d8b5b5;color:#9d3838;background:#fffafa}
+.btn.pdf:hover{background:#fff3f3}
+
+.print-meta{display:none}
+.loading{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  place-items:center;
+  background:rgba(255,255,255,.70);
+  backdrop-filter:blur(2px);
+}
+.loading.show{display:grid}
+.loading-box{
+  min-width:220px;
+  padding:18px 22px;
+  border:1px solid #dbe1e9;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 12px 34px rgba(15,23,42,.14);
+  text-align:center;
+  color:#455066;
+  font-size:13px;
+}
+
+@media(max-width:1000px){
+  .search-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .radio-wrap{flex-wrap:wrap}
+}
+@media(max-width:680px){
+  body{padding:0;background:#fff}
+  .container{border:0;border-radius:0;padding:18px 12px;box-shadow:none}
+  .search-grid{grid-template-columns:1fr 1fr}
+  .page-head{align-items:flex-start;flex-direction:column}
+  .table-scroll{overflow:auto}
+  table{min-width:980px}
+  .actions{flex-wrap:wrap}
+  .btn{flex:1;min-width:130px}
+}
+
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  html,body{background:#fff!important}
+  body{padding:0!important}
+  .container{
+    width:100%!important;
+    max-width:none!important;
+    border:0!important;
+    box-shadow:none!important;
+    padding:0!important;
+  }
+  .search-section,.actions,.status,.page-sub,.result-count{display:none!important}
+  .page-head{margin:0 0 6mm;display:block}
+  .page-title{font-size:18pt;text-align:center;font-weight:600}
+  .print-meta{
+    display:block;
+    margin:0 0 4mm;
+    font-size:9pt;
+    color:#4b5563;
+    text-align:right;
+  }
+  .section.result-section{border:0;padding:0;margin:0}
+  .section.result-section .section-title{display:none}
+  .table-box{border:1px solid #777;border-radius:0;overflow:visible}
+  .table-scroll{max-height:none;overflow:visible}
+  table{font-size:8.7pt}
+  thead{display:table-header-group}
+  thead th{
+    position:static;
+    height:8mm;
+    border-color:#888;
+    background:#f2f2f2!important;
+    color:#111;
+    font-size:8.5pt;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  tbody td{
+    height:8mm;
+    padding:1.5mm 1.2mm;
+    border-color:#bbb;
+    color:#111;
+    background:#fff!important;
+    font-size:8.5pt;
+  }
+  .badge{padding:0;background:none!important;color:#111!important;font-size:8.5pt;font-weight:400}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">상담 리스트</h1>
+      <p class="page-sub">상담 대상자별 현재 진행상태와 최종회기를 조회합니다.</p>
+    </div>
+    <div class="result-count">조회 <span id="resultCount">0</span>명</div>
+  </div>
+
+  <div class="status" id="statusBox"></div>
+
+  <section class="section search-section">
+    <h2 class="section-title">1. 검색조건</h2>
+    <div class="search-grid">
+      <div class="field">
+        <label for="dateFrom">기간</label>
+        <input type="date" id="dateFrom">
+      </div>
+      <div class="field">
+        <label for="dateTo">기간</label>
+        <input type="date" id="dateTo">
+      </div>
+      <div class="field">
+        <label for="nameQuery">이름</label>
+        <input type="text" id="nameQuery" placeholder="내담자명">
+      </div>
+      <div class="field">
+        <label for="phoneQuery">전화번호</label>
+        <input type="text" id="phoneQuery" placeholder="010-0000-0000" inputmode="numeric" maxlength="13">
+      </div>
+      <div>
+        <span class="radio-label">상담종류</span>
+        <div class="radio-wrap">
+          <label class="radio-option"><input type="radio" name="counselType" value="ALL" checked>전체</label>
+          <label class="radio-option"><input type="radio" name="counselType" value="PC">심리상담</label>
+          <label class="radio-option"><input type="radio" name="counselType" value="CC">진로상담</label>
+        </div>
+      </div>
+      <button type="button" class="search-btn" id="searchBtn">조회</button>
+    </div>
+    <p class="search-note">
+      기간·이름·전화번호·상담종류는 각각 단독 조회하거나 서로 조합하여 조회할 수 있습니다.
+      기간은 실제 상담 시작일을 우선 적용하고, 시작일이 없으면 상담일/예약일을 기준으로 판정합니다.
+    </p>
+  </section>
+
+  <section class="section result-section">
+    <h2 class="section-title">2. 상담 대상자 LIST</h2>
+    <div class="print-meta" id="printMeta"></div>
+    <div class="table-box">
+      <div class="table-scroll">
+        <table aria-label="상담 대상자 목록">
+          <colgroup>
+            <col class="no"><col class="name"><col class="phone"><col class="sex">
+            <col class="age"><col class="type"><col class="status-col"><col class="session">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>NO</th>
+              <th>이름</th>
+              <th>전화번호</th>
+              <th>성별</th>
+              <th>나이</th>
+              <th>상담종류</th>
+              <th>진행상태</th>
+              <th>최종회기</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody">
+            <tr class="empty-row"><td colspan="8">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button type="button" class="btn" id="backBtn">이전화면</button>
+    <button type="button" class="btn pdf" id="pdfBtn">PDF 저장</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">
+  <div class="loading-box" id="loadingText">조회 중입니다.</div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+  const BASIC_TABLE = "DB_basic";
+  const PSYCH_TABLE = "DB_psychological_counseling";
+  const CAREER_TABLE = "DB_career_counseling";
+  const PAGE_SIZE = 1000;
+  const IDLE_LIMIT_MS = 10 * 60 * 1000;
+
+  const $ = id => document.getElementById(id);
+  const els = {
+    dateFrom:$("dateFrom"), dateTo:$("dateTo"), name:$("nameQuery"), phone:$("phoneQuery"),
+    searchBtn:$("searchBtn"), body:$("resultBody"), resultCount:$("resultCount"),
+    status:$("statusBox"), loading:$("loading"), loadingText:$("loadingText"),
+    backBtn:$("backBtn"), pdfBtn:$("pdfBtn"), printMeta:$("printMeta")
+  };
+
+  let sb = null;
+  let idleTimer = null;
+  let lastRows = [];
+
+  try {
+    if (!window.supabase) throw new Error("Supabase 라이브러리를 불러오지 못했습니다.");
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth:{
+        storage:window.sessionStorage,
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    showStatus("error","Supabase 연결을 초기화하지 못했습니다.");
+  }
+
+  function showStatus(type,msg){
+    els.status.className = "status show " + type;
+    els.status.textContent = msg;
+  }
+  function clearStatus(){
+    els.status.className = "status";
+    els.status.textContent = "";
+  }
+  function setLoading(show,msg){
+    els.loading.classList.toggle("show",show);
+    if (msg) els.loadingText.textContent = msg;
+  }
+  function escapeHTML(value){
+    return String(value ?? "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+  function normalizePhone(value){
+    return String(value || "").replace(/\D/g,"");
+  }
+  function formatPhoneInput(el){
+    let d = normalizePhone(el.value).slice(0,11);
+    if (d.length <= 3) el.value = d;
+    else if (d.length <= 7) el.value = d.slice(0,3) + "-" + d.slice(3);
+    else el.value = d.slice(0,3) + "-" + d.slice(3,7) + "-" + d.slice(7);
+  }
+  function getCounselType(){
+    return document.querySelector('input[name="counselType"]:checked')?.value || "ALL";
+  }
+  function dateOnlyKST(value){
+    if (!value) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value);
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    const parts = new Intl.DateTimeFormat("en-CA",{
+      timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(d);
+    const map = {};
+    parts.forEach(p => map[p.type] = p.value);
+    return `${map.year}-${map.month}-${map.day}`;
+  }
+  function effectivePsychDate(row){
+    return dateOnlyKST(row.session_start_at) ||
+           row.visit_date ||
+           dateOnlyKST(row.visit_at) ||
+           row.receipt_date ||
+           dateOnlyKST(row.receipt_at) || "";
+  }
+  function effectiveCareerDate(row){
+    return dateOnlyKST(row.session_start_at) ||
+           row.counseling_date ||
+           dateOnlyKST(row.appointment_at) ||
+           dateOnlyKST(row.receipt_at) || "";
+  }
+  function inPeriod(date,from,to){
+    if (!from && !to) return true;
+    if (!date) return false;
+    if (from && date < from) return false;
+    if (to && date > to) return false;
+    return true;
+  }
+  function calcAge(birth){
+    if (!birth) return "";
+    const m = String(birth).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return "";
+    const today = new Date();
+    let age = today.getFullYear() - Number(m[1]);
+    const md = (today.getMonth()+1) * 100 + today.getDate();
+    const bmd = Number(m[2]) * 100 + Number(m[3]);
+    if (md < bmd) age--;
+    return age >= 0 ? `${age}세` : "";
+  }
+  function newestRow(rows,dateFn){
+    if (!rows.length) return null;
+    return rows.slice().sort((a,b) => {
+      const da = dateFn(a) || "0000-00-00";
+      const db = dateFn(b) || "0000-00-00";
+      if (da !== db) return db.localeCompare(da);
+      return String(b.updated_at||b.created_at||"").localeCompare(String(a.updated_at||a.created_at||""));
+    })[0];
+  }
+  function maxSession(rows){
+    const nums = rows.map(r => Number(r.session_no)).filter(n => Number.isFinite(n) && n > 0);
+    return nums.length ? Math.max(...nums) : null;
+  }
+  function statusText(psychRows,careerRows,type){
+    const parts = [];
+    if (type !== "CC" && psychRows.length){
+      const row = newestRow(psychRows,effectivePsychDate);
+      parts.push({label:"심리",value:row?.session_status || "미정"});
+    }
+    if (type !== "PC" && careerRows.length){
+      const row = newestRow(careerRows,effectiveCareerDate);
+      parts.push({label:"진로",value:row?.session_status || "미정"});
+    }
+    if (!parts.length) return "미정";
+    if (parts.length === 1) return parts[0].value;
+    if (parts[0].value === parts[1].value) return parts[0].value;
+    return parts.map(p => `${p.label} ${p.value}`).join(" · ");
+  }
+  function sessionText(psychRows,careerRows,type){
+    const parts = [];
+    if (type !== "CC" && psychRows.length){
+      const n = maxSession(psychRows);
+      parts.push(type === "ALL" && careerRows.length ? `심리 ${n ? n+"회" : "-"}` : (n ? `${n}회기` : "-"));
+    }
+    if (type !== "PC" && careerRows.length){
+      const n = maxSession(careerRows);
+      parts.push(type === "ALL" && psychRows.length ? `진로 ${n ? n+"회" : "-"}` : (n ? `${n}회기` : "-"));
+    }
+    return parts.length ? parts.join(" · ") : "-";
+  }
+  function typeText(psychRows,careerRows,type){
+    if (type === "PC") return "심리상담";
+    if (type === "CC") return "진로상담";
+    if (psychRows.length && careerRows.length) return "심리상담 · 진로상담";
+    if (psychRows.length) return "심리상담";
+    if (careerRows.length) return "진로상담";
+    return "-";
+  }
+  function badgeClass(text){
+    if (text.includes("종결") && !text.includes("진행")) return "done";
+    if (text.includes("진행")) return "progress";
+    return "unknown";
+  }
+
+  async function fetchPaged(table,columns){
+    const all = [];
+    for (let from=0; ; from += PAGE_SIZE){
+      const {data,error} = await sb.from(table).select(columns).range(from,from+PAGE_SIZE-1);
+      if (error) throw error;
+      const batch = data || [];
+      all.push(...batch);
+      if (batch.length < PAGE_SIZE) break;
+    }
+    return all;
+  }
+
+  async function guardLogin(){
+    if (!sb) return false;
+    const {data,error} = await sb.auth.getSession();
+    if (error || !data.session){
+      alert("로그인이 필요한 화면입니다.");
+      location.href = "index.html";
+      return false;
+    }
+    return true;
+  }
+
+  function resetIdleTimer(){
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(async () => {
+      try{ await sb?.auth.signOut(); }catch(_){}
+      alert("10분 동안 사용이 없어 자동 로그아웃되었습니다.");
+      location.href = "index.html";
+    },IDLE_LIMIT_MS);
+  }
+  ["click","keydown","mousemove","scroll","touchstart"].forEach(evt => {
+    window.addEventListener(evt,resetIdleTimer,{passive:true});
+  });
+
+  function validatePeriod(){
+    const from = els.dateFrom.value;
+    const to = els.dateTo.value;
+    if (from && to && from > to){
+      showStatus("error","시작 기간은 종료 기간보다 늦을 수 없습니다.");
+      return false;
+    }
+    return true;
+  }
+
+  async function search(){
+    clearStatus();
+    if (!validatePeriod()) return;
+    if (!sb){
+      showStatus("error","Supabase 연결을 사용할 수 없습니다.");
+      return;
+    }
+
+    const from = els.dateFrom.value;
+    const to = els.dateTo.value;
+    const nameQ = els.name.value.trim().toLowerCase();
+    const phoneQ = normalizePhone(els.phone.value);
+    const type = getCounselType();
+
+    setLoading(true,"상담 리스트를 조회하는 중입니다.");
+
+    try{
+      const [basicRows,psychRows,careerRows,sexRows] = await Promise.all([
+        fetchPaged(BASIC_TABLE,"id,client_name,client_phone,sex_code,birth_date,counsel_type"),
+        fetchPaged(PSYCH_TABLE,"id,client_id,visit_at,visit_date,receipt_at,receipt_date,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
+        fetchPaged(CAREER_TABLE,"id,client_id,counseling_date,appointment_at,receipt_at,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
+        fetchPaged("sex_codes","code,name,active")
+      ]);
+
+      const sexMap = new Map((sexRows||[]).filter(r => r.active !== false).map(r => [r.code,r.name]));
+      const psychByClient = new Map();
+      const careerByClient = new Map();
+
+      psychRows.filter(r => r.record_active !== false).forEach(r => {
+        if (!psychByClient.has(r.client_id)) psychByClient.set(r.client_id,[]);
+        psychByClient.get(r.client_id).push(r);
+      });
+      careerRows.filter(r => r.record_active !== false).forEach(r => {
+        if (!careerByClient.has(r.client_id)) careerByClient.set(r.client_id,[]);
+        careerByClient.get(r.client_id).push(r);
+      });
+
+      const out = [];
+
+      for (const client of basicRows){
+        const name = String(client.client_name || "");
+        const phone = String(client.client_phone || "");
+
+        if (nameQ && !name.toLowerCase().includes(nameQ)) continue;
+        if (phoneQ && !normalizePhone(phone).includes(phoneQ)) continue;
+
+        const allPsych = psychByClient.get(client.id) || [];
+        const allCareer = careerByClient.get(client.id) || [];
+
+        const matchPsych = allPsych.filter(r => inPeriod(effectivePsychDate(r),from,to));
+        const matchCareer = allCareer.filter(r => inPeriod(effectiveCareerDate(r),from,to));
+
+        let included = false;
+        if (type === "PC") included = matchPsych.length > 0;
+        else if (type === "CC") included = matchCareer.length > 0;
+        else included = matchPsych.length > 0 || matchCareer.length > 0;
+
+        if (!included) continue;
+
+        out.push({
+          id:client.id,
+          name:name || "-",
+          phone:phone || "-",
+          sex:sexMap.get(client.sex_code) || client.sex_code || "-",
+          age:calcAge(client.birth_date) || "-",
+          counselType:typeText(allPsych,allCareer,type),
+          status:statusText(allPsych,allCareer,type),
+          session:sessionText(allPsych,allCareer,type)
+        });
+      }
+
+      out.sort((a,b) => a.name.localeCompare(b.name,"ko") || a.phone.localeCompare(b.phone));
+      lastRows = out;
+      renderRows(out);
+
+      const cond = [];
+      if (from || to) cond.push(`기간 ${from || "처음"} ~ ${to || "현재"}`);
+      if (els.name.value.trim()) cond.push(`이름 ${els.name.value.trim()}`);
+      if (els.phone.value.trim()) cond.push(`전화번호 ${els.phone.value.trim()}`);
+      cond.push(`상담종류 ${type==="PC"?"심리상담":type==="CC"?"진로상담":"전체"}`);
+      els.printMeta.textContent = `검색조건: ${cond.join(" / ")} · 출력일: ${new Date().toLocaleDateString("ko-KR")}`;
+
+      showStatus("info",out.length ? `${out.length}명의 상담 대상자가 조회되었습니다.` : "조회 조건에 해당하는 상담 대상자가 없습니다.");
+    }catch(err){
+      console.error(err);
+      lastRows = [];
+      renderRows([]);
+      showStatus("error","조회 중 오류가 발생했습니다: " + (err?.message || String(err)));
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  function renderRows(rows){
+    els.resultCount.textContent = String(rows.length);
+    if (!rows.length){
+      els.body.innerHTML = '<tr class="empty-row"><td colspan="8">조회 결과가 없습니다.</td></tr>';
+      return;
+    }
+    els.body.innerHTML = rows.map((r,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td class="left">${escapeHTML(r.name)}</td>
+        <td>${escapeHTML(r.phone)}</td>
+        <td>${escapeHTML(r.sex)}</td>
+        <td>${escapeHTML(r.age)}</td>
+        <td>${escapeHTML(r.counselType)}</td>
+        <td><span class="badge ${badgeClass(r.status)}">${escapeHTML(r.status)}</span></td>
+        <td>${escapeHTML(r.session)}</td>
+      </tr>
+    `).join("");
+  }
+
+  els.phone.addEventListener("input",() => formatPhoneInput(els.phone));
+  els.searchBtn.addEventListener("click",search);
+  [els.dateFrom,els.dateTo,els.name,els.phone].forEach(el => {
+    el.addEventListener("keydown",e => {
+      if (e.key === "Enter"){
+        e.preventDefault();
+        search();
+      }
+    });
+  });
+
+  els.backBtn.addEventListener("click",() => {
+    if (history.length > 1) history.back();
+    else location.href = "index.html";
+  });
+
+  els.pdfBtn.addEventListener("click",() => {
+    if (!lastRows.length){
+      alert("PDF로 저장할 조회 결과가 없습니다.");
+      return;
+    }
+    const oldTitle = document.title;
+    const today = new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+    document.title = `상담LIST_${today}`;
+    window.print();
+    setTimeout(() => { document.title = oldTitle; },800);
+  });
+
+  (async function init(){
+    const ok = await guardLogin();
+    if (!ok) return;
+    resetIdleTimer();
+  })();
+})();
+</script>
+</body>
+</html>
