@@ -1461,8 +1461,9 @@
   .sina-main-btn:disabled{opacity:.58;cursor:not-allowed}
   .sina-sub-actions{
     display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:8px;
+    /* 331px 실사용폭 기준: 92 + 6 + 135 + 6 + 92 = 331px */
+    grid-template-columns:92px minmax(135px,1fr) 92px;
+    gap:6px;
     margin-top:4px;
   }
   .sina-sub-btn{
@@ -1474,6 +1475,8 @@
     font-size:10.5px;
     font-weight:850;
     cursor:pointer;
+    white-space:nowrap;
+    word-break:keep-all;
   }
   .sina-help{
     margin-top:14px;
@@ -3173,37 +3176,36 @@
     }
 
     newUserBtn.disabled = true;
-    newUserBtn.textContent = "신규 등록 확인 중...";
+    newUserBtn.textContent = "처리 중...";
 
     try {
-      /*
-       * 관리자 화면의 '신규 사용자' 처리로 Supabase Auth 계정이 생성·연결된 뒤
-       * 이 버튼을 사용합니다. 보안상 index.html에서는 Auth 계정을 직접 생성하지 않고,
-       * 해당 이메일의 최초 비밀번호 설정 메일만 요청합니다.
-       */
-      const { error } = await client.auth.resetPasswordForEmail(
-        email,
-        { redirectTo: getPasswordSettingRedirectUrl() }
-      );
+      // employee에 등록된 활성 이메일만 서버에서 확인한 뒤
+      // Auth 계정 생성/연결 → 최초 비밀번호 설정 메일까지 한 번에 처리한다.
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/register-employee-auth-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_PUBLISHABLE_KEY
+        },
+        body: JSON.stringify({
+          email,
+          redirectTo: getPasswordSettingRedirectUrl()
+        })
+      });
 
-      if (error) throw error;
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.ok) {
+        throw new Error(result?.error || "신규 사용자 등록 요청을 처리하지 못했습니다.");
+      }
 
       showMessage(
         loginMessage,
-        "신규 사용자 비밀번호 설정 메일을 요청했습니다. 메일의 링크를 클릭해 새 비밀번호를 등록해 주세요. 메일이 오지 않으면 관리자에게 Auth 연결 상태를 확인해 주세요.",
+        result.message || "신규 사용자 등록을 확인했습니다. 이메일의 링크를 클릭해 새 비밀번호를 등록해 주세요.",
         "success"
       );
     } catch (err) {
-      console.error("신규 사용자 비밀번호 설정 메일 오류:", {
-        code: err?.code,
-        status: err?.status,
-        message: err?.message
-      });
-
-      showMessage(
-        loginMessage,
-        getAuthErrorMessage(err, "reset")
-      );
+      console.error("신규 사용자 등록 오류:", err);
+      showMessage(loginMessage, err?.message || "신규 사용자 등록 중 오류가 발생했습니다.");
     } finally {
       newUserBtn.disabled = false;
       newUserBtn.textContent = "신규 사용자";
