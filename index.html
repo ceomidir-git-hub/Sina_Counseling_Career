@@ -2624,7 +2624,7 @@
 
 <script>
 (() => {
-  // AUTH FLOW VERSION: 2026-08-23-v8-usage-time-no-frame-change
+  // AUTH FLOW VERSION: 2026-08-24-v9-mail-reliability-no-frame-change
   const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 
@@ -2741,7 +2741,9 @@
       over_email_send_rate_limit:
         "비밀번호 설정 메일을 너무 자주 요청했습니다. 잠시 후 다시 시도해 주세요.",
       over_request_rate_limit:
-        "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요."
+        "요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+      email_address_not_authorized:
+        "현재 메일 발송 설정으로는 이 이메일 주소에 인증 메일을 보낼 수 없습니다. 관리자에게 Custom SMTP 설정을 요청해 주세요."
     };
 
     if (map[code]) return map[code];
@@ -3165,80 +3167,180 @@
     return redirectUrl.href;
   }
 
-  newUserBtn?.addEventListener("click", async () => {
-    clearMessage(loginMessage);
-    const email = emailEl.value.trim();
+  // =========================================================
+  // 신규 사용자 / 비밀번호 재설정 메일 요청 공통 처리
+  // - 두 버튼 모두 employee(active=true) 검증을 Edge Function에서 수행
+  // - 실제 수신 완료가 아니라 "메일 발송 요청 접수"까지만 성공으로 표시
+  // - Supabase recovery 요청 과다 호출 방지를 위해 성공 후 60초 재요청 제한
+  // =========================================================
+  const MAIL_REQUEST_COOLDOWN_MS = 60 * 1000;
+  const mailCooldownUntil = new WeakMap();
+  const mailCooldownTimers = new WeakMap();
 
-    if (!email) {
-      showMessage(loginMessage, "신규 사용자로 등록된 이메일 주소를 먼저 입력해 주세요.");
-      emailEl.focus();
-      return;
+  function normalizeEmailInput() {
+    const email = emailEl.value.trim().toLowerCase();
+    emailEl.value = email;
+    return email;
+  }
+
+  function isValidEmailInput(email) {
+    return Boolean(email) && emailEl.checkValidity();
+  }
+
+  function stopMailCooldown(button) {
+    const timer = mailCooldownTimers.get(button);
+    if (timer) clearInterval(timer);
+    mailCooldownTimers.delete(button);
+    mailCooldownUntil.delete(button);
+  }
+
+  function startMailCooldown(button, defaultText) {
+    stopMailCooldown(button);
+
+    const until = Date.now() + MAIL_REQUEST_COOLDOWN_MS;
+    mailCooldownUntil.set(button, until);
+
+    const render = () => {
+      const remain = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+
+      if (remain <= 0) {
+        stopMailCooldown(button);
+        button.disabled = false;
+        button.textContent = defaultText;
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = `재요청 ${remain}초`;
+    };
+
+    render();
+    mailCooldownTimers.set(button, setInterval(render, 1000));
+  }
+
+  function restoreMailButtonIfReady(button, defaultText) {
+    const until = mailCooldownUntil.get(button) || 0;
+    if (Date.now() >= until) {
+      button.disabled = false;
+      button.textContent = defaultText;
     }
+  }
 
-    newUserBtn.disabled = true;
-    newUserBtn.textContent = "처리 중...";
+  async function requestEmployeePasswordMail(action, email) {
+    let response;
 
     try {
-      // employee에 등록된 활성 이메일만 서버에서 확인한 뒤
-      // Auth 계정 생성/연결 → 최초 비밀번호 설정 메일까지 한 번에 처리한다.
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/register-employee-auth-user`, {
+      response = await fetch(`${SUPABASE_URL}/functions/v1/register-employee-auth-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_PUBLISHABLE_KEY
         },
         body: JSON.stringify({
+          action,
           email,
           redirectTo: getPasswordSettingRedirectUrl()
         })
       });
+    } catch (networkError) {
+      const error = new Error("인증 서버에 연결하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.");
+      error.cause = networkError;
+      throw error;
+    }
 
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result?.ok) {
-        throw new Error(result?.error || "신규 사용자 등록 요청을 처리하지 못했습니다.");
-      }
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok || !result?.ok) {
+      const error = new Error(
+        result?.error ||
+        (response.status === 429
+          ? "메일 요청 횟수가 제한되었습니다. 60초 후 다시 시도해 주세요."
+          : "메일 발송 요청을 처리하지 못했습니다.")
+      );
+      error.status = response.status;
+      error.code = result?.code || "";
+      throw error;
+    }
+
+    return result;
+  }
+
+  // recovery 링크 클릭 직후 URL 세션 파싱이 아주 짧게 늦어지는 경우를 흡수한다.
+  async function waitForRecoverySession(timeoutMs = 2200) {
+    const startedAt = Date.now();
+
+    while ((Date.now() - startedAt) <= timeoutMs) {
+      const { data: { session }, error } = await client.auth.getSession();
+      if (error) throw error;
+      if (session) return session;
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
+
+    return null;
+  }
+
+  newUserBtn?.addEventListener("click", async () => {
+    clearMessage(loginMessage);
+    const email = normalizeEmailInput();
+
+    if (!isValidEmailInput(email)) {
+      showMessage(loginMessage, "신규 사용자로 등록된 올바른 이메일 주소를 먼저 입력해 주세요.");
+      emailEl.focus();
+      return;
+    }
+
+    newUserBtn.disabled = true;
+    newUserBtn.textContent = "등록 확인 중...";
+
+    try {
+      const result = await requestEmployeePasswordMail("new", email);
 
       showMessage(
         loginMessage,
-        result.message || "신규 사용자 등록을 확인했습니다. 이메일의 링크를 클릭해 새 비밀번호를 등록해 주세요.",
+        result.message ||
+          "신규 사용자 확인 및 비밀번호 설정 메일 발송 요청이 접수되었습니다. 받은편지함과 스팸함을 확인해 주세요.",
         "success"
       );
+
+      // 같은 주소로 연속 요청하여 Auth 메일 제한에 걸리는 것을 방지한다.
+      startMailCooldown(newUserBtn, "신규 사용자");
     } catch (err) {
-      console.error("신규 사용자 등록 오류:", err);
+      console.error("신규 사용자 등록 오류:", {
+        code: err?.code,
+        status: err?.status,
+        message: err?.message
+      });
       showMessage(loginMessage, err?.message || "신규 사용자 등록 중 오류가 발생했습니다.");
     } finally {
-      newUserBtn.disabled = false;
-      newUserBtn.textContent = "신규 사용자";
+      restoreMailButtonIfReady(newUserBtn, "신규 사용자");
     }
   });
 
   resetRequestBtn.addEventListener("click", async () => {
     clearMessage(loginMessage);
-    const email = emailEl.value.trim();
+    const email = normalizeEmailInput();
 
-    if (!email) {
-      showMessage(loginMessage, "먼저 이메일 주소를 입력해 주세요.");
+    if (!isValidEmailInput(email)) {
+      showMessage(loginMessage, "등록된 올바른 이메일 주소를 먼저 입력해 주세요.");
       emailEl.focus();
       return;
     }
 
     resetRequestBtn.disabled = true;
-    resetRequestBtn.textContent = "메일 발송 중...";
+    resetRequestBtn.textContent = "등록 확인 중...";
 
     try {
-      // 현재 index.html 자체로 돌아오도록 고정.
-      const { error } = await client.auth.resetPasswordForEmail(
-        email,
-        { redirectTo: getPasswordSettingRedirectUrl() }
-      );
-
-      if (error) throw error;
+      // 재설정도 서버에서 employee(active=true) + Auth 연결 여부를 먼저 확인한다.
+      const result = await requestEmployeePasswordMail("reset", email);
 
       showMessage(
         loginMessage,
-        "비밀번호 설정 메일을 발송했습니다. 메일의 링크를 클릭하면 이 index.html에서 새 비밀번호 설정 화면이 열립니다.",
+        result.message ||
+          "비밀번호 설정/재설정 메일 발송 요청이 접수되었습니다. 받은편지함과 스팸함을 확인해 주세요.",
         "success"
       );
+
+      startMailCooldown(resetRequestBtn, "비밀번호 설정 / 재설정");
     } catch (err) {
       console.error("비밀번호 설정 메일 오류:", {
         code: err?.code,
@@ -3248,11 +3350,10 @@
 
       showMessage(
         loginMessage,
-        getAuthErrorMessage(err, "reset")
+        err?.message || getAuthErrorMessage(err, "reset")
       );
     } finally {
-      resetRequestBtn.disabled = false;
-      resetRequestBtn.textContent = "비밀번호 설정 / 재설정";
+      restoreMailButtonIfReady(resetRequestBtn, "비밀번호 설정 / 재설정");
     }
   });
 
@@ -3289,10 +3390,10 @@
     savePasswordBtn.textContent = "저장 중...";
 
     try {
-      const { data: { session } } = await client.auth.getSession();
+      const session = await waitForRecoverySession();
 
       if (!session) {
-        throw new Error("비밀번호 설정 인증정보가 없습니다. 비밀번호 설정 메일을 다시 요청해 주세요.");
+        throw new Error("비밀번호 설정 인증정보를 확인하지 못했습니다. 메일의 최신 비밀번호 설정 링크로 다시 접속해 주세요.");
       }
 
       const { error } = await client.auth.updateUser({
