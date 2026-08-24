@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>마음:시나브로심리상담연구소 - 상담 스케줄 조회</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#073b86;
+  --navy2:#0d63ce;
+  --blue:#2563eb;
+  --orange:#f97316;
+  --green:#16a34a;
+  --gray:#6b7280;
+  --violet:#7c3aed;
+  --red:#dc2626;
+  --bg:#f4f7fb;
+  --card:#fff;
+  --line:#dce4ef;
+  --line2:#e8edf4;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --shadow:0 8px 22px rgba(15,23,42,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-width:1280px;height:100%;font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--text);background:var(--bg)}
+body{overflow:hidden}
+button{font:inherit}
+.app{height:100vh;display:grid;grid-template-rows:72px minmax(0,1fr)}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;color:#fff;background:linear-gradient(135deg,#063a82 0%,#07539f 55%,#063f83 100%);
+  box-shadow:0 2px 12px rgba(2,32,74,.16)
+}
+.brand{display:flex;align-items:center;gap:18px;min-width:0}
+.brand-mark{font-size:31px;line-height:1}
+.brand-name{font-size:22px;font-weight:900;letter-spacing:-.65px;white-space:nowrap}
+.brand-divider{width:1px;height:31px;background:rgba(255,255,255,.34)}
+.brand-page{font-size:19px;font-weight:850;letter-spacing:-.4px;white-space:nowrap}
+.userbox{display:flex;align-items:center;gap:12px;font-size:13px}
+.user-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#55708f;font-size:20px}
+.user-meta{display:grid;gap:2px;text-align:right}
+.user-meta strong{font-size:13px}.user-meta span{font-size:10px;opacity:.8}
+.logout-btn{height:30px;padding:0 11px;border:1px solid rgba(255,255,255,.45);border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font-size:11px;font-weight:800;cursor:pointer}
+
+.workspace{min-height:0;padding:14px 18px 16px;display:grid;grid-template-columns:minmax(0,2.08fr) minmax(360px,.92fr);gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:0;min-height:0}
+
+/* ===== LEFT : CALENDAR ===== */
+.calendar-card{display:grid;grid-template-rows:70px minmax(0,1fr) 110px 28px;overflow:hidden}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border-bottom:1px solid var(--line2)}
+.calendar-title{font-size:18px;font-weight:950;letter-spacing:-.4px;white-space:nowrap}
+.legend{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:11px;color:#475569;font-weight:800;white-space:nowrap}
+.legend span{display:flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.dot.planned{background:var(--blue)}.dot.progress{background:var(--orange)}.dot.done{background:var(--green)}.dot.missed{background:#9ca3af}.dot.next{background:var(--violet)}
+.month-tools{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.month-btn,.today-btn{height:34px;border:1px solid #d6dfeb;background:#fff;border-radius:7px;color:#475569;font-weight:900;cursor:pointer}
+.month-btn{width:34px;font-size:18px}.today-btn{padding:0 12px;font-size:11px;color:#245fae}
+.month-label{min-width:112px;text-align:center;font-size:17px;font-weight:950;color:#111827}
+
+.calendar-body{min-height:0;padding:0 10px 6px;display:grid;grid-template-rows:42px minmax(0,1fr)}
+.week-head{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--line2);border-top:1px solid var(--line2)}
+.week-head div{display:grid;place-items:center;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);font-size:11px;font-weight:900;background:#fafbfd}
+.week-head .sun{color:var(--red)}.week-head .sat{color:#0b63df}
+.cal-grid{min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,minmax(0,1fr));border-left:1px solid var(--line2)}
+.day-cell{position:relative;min-width:0;min-height:0;padding:7px 8px 5px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);background:#fff;overflow:hidden;cursor:pointer;transition:.12s ease}
+.day-cell:hover{background:#f8fbff}.day-cell.other{background:#fafbfc;color:#b2bac7}.day-cell.selected{background:#f8fbff;box-shadow:inset 0 0 0 2px var(--blue);z-index:1}
+.day-num{font-size:13px;font-weight:950;line-height:1.05;margin-bottom:6px}.day-cell.sun .day-num{color:var(--red)}.day-cell.sat .day-num{color:#0b63df}.day-cell.other .day-num{color:#b2bac7}.day-cell.today .day-num{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;margin-top:-2px}
+.day-events{display:grid;gap:4px;min-width:0}
+.day-event{display:grid;grid-template-columns:6px 37px minmax(0,1fr);align-items:center;gap:4px;font-size:10.5px;line-height:1.05;min-width:0}
+.day-event i{width:6px;height:6px;border-radius:50%}.day-event .time{font-weight:850;color:#334155}.day-event .name{font-weight:750;color:#4b5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-cell.other .day-event{opacity:.45}.more-event{margin-left:10px;color:#2563eb;font-size:10px;font-weight:850;white-space:nowrap}
+
+.status-summary{border-top:1px solid var(--line2);padding:10px 14px 12px;display:grid;grid-template-rows:22px minmax(0,1fr);gap:6px}
+.summary-title{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:900}.summary-title small{font-size:10px;color:var(--muted);font-weight:750}
+.summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.summary-box{border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;align-content:center;gap:3px;background:#fbfcfe}
+.summary-box small{font-size:10px;font-weight:850}.summary-box strong{font-size:17px;line-height:1;font-weight:950}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.progress small,.summary-box.progress strong{color:#d65d0b}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
+.calendar-foot{display:flex;align-items:center;padding:0 14px;color:#6b7280;font-size:9.5px;font-weight:750;border-top:1px solid #f0f3f7;background:#fbfcfe}
+
+/* ===== RIGHT : DAY TIMELINE ===== */
+.timeline-card{display:grid;grid-template-rows:60px minmax(0,1fr) 122px 66px;overflow:hidden}
+.timeline-head{display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line2)}
+.timeline-head h2{font-size:16px;margin:0;font-weight:950;letter-spacing:-.35px}.total-badge{border:1px solid #b9d2fa;background:#f3f7ff;color:#245fd0;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:900}
+.timeline-scroll{min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#aeb7c4 #f5f7fa;padding:12px 14px 14px 17px}
+.timeline-scroll::-webkit-scrollbar{width:8px}.timeline-scroll::-webkit-scrollbar-track{background:#f5f7fa}.timeline-scroll::-webkit-scrollbar-thumb{background:#aeb7c4;border-radius:10px;border:2px solid #f5f7fa}
+.empty{height:100%;display:grid;place-items:center;text-align:center;color:#8a94a4;font-size:12px;line-height:1.7;padding:30px}
+.timeline-list{position:relative;display:grid;gap:8px;padding-left:88px}
+.timeline-list:before{content:"";position:absolute;left:67px;top:18px;bottom:18px;width:1px;background:#cbd5e1}
+.t-item{position:relative;min-height:80px;border:1px solid #e3e8ef;border-radius:9px;background:#fff;padding:10px 12px;box-shadow:0 2px 6px rgba(15,23,42,.03)}
+.t-item:before{content:"";position:absolute;left:-26px;top:22px;width:10px;height:10px;border-radius:50%;background:var(--status-color);box-shadow:0 0 0 3px #fff}
+.t-time{position:absolute;left:-88px;top:18px;width:58px;text-align:right;font-size:12px;font-weight:950;color:var(--status-color)}
+.t-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.t-name{font-size:13.5px;font-weight:950;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.status-pill{flex:0 0 auto;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:900;background:color-mix(in srgb,var(--status-color) 11%, white);color:var(--status-color)}
+.t-meta{display:flex;flex-wrap:wrap;gap:8px 11px;margin-top:8px;color:#58667a;font-size:10.5px;font-weight:750}.t-meta span{white-space:nowrap}.t-phone{margin-top:6px;color:#78869a;font-size:10px;font-weight:700}
+.type-summary{border-top:1px solid var(--line2);padding:11px 14px;background:#fff}
+.type-summary h3{font-size:12px;margin:0 0 8px;font-weight:950}.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.type-row{border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10.5px}.type-row strong{font-size:11px}.type-row b{color:#245fd0;font-size:12px}
+.timeline-actions{border-top:1px solid var(--line2);display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px}.action-btn{border:1px solid #d7dfeb;border-radius:8px;background:#fff;font-size:11px;font-weight:900;color:#3c4a5f;cursor:pointer}.action-btn.primary{background:#0d63ce;border-color:#0d63ce;color:#fff}
+
+.loading-cover{position:fixed;inset:72px 0 0;z-index:50;background:rgba(244,247,251,.72);display:none;place-items:center;backdrop-filter:blur(1px)}.loading-cover.show{display:grid}.loading-box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 20px;box-shadow:var(--shadow);font-size:12px;font-weight:850;color:#42526a}
+.toast{position:fixed;right:20px;bottom:18px;z-index:1000;max-width:390px;padding:11px 14px;border-radius:9px;background:#1f2937;color:#fff;font-size:11px;font-weight:750;box-shadow:0 10px 26px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:1450px){
+  html,body{min-width:1180px}.workspace{grid-template-columns:minmax(0,1.9fr) minmax(340px,.9fr);padding-left:12px;padding-right:12px}.legend{gap:8px}.calendar-head{padding-left:12px;padding-right:12px}.day-cell{padding-left:6px;padding-right:6px}.day-event{font-size:9.8px;grid-template-columns:5px 33px minmax(0,1fr)}
+}
+
+@media print{
+  @page{size:A4 landscape;margin:7mm}
+  html,body{min-width:0;height:auto;overflow:visible;background:#fff}
+  .app{height:auto;display:block}.topbar{height:50px;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}.logout-btn{display:none}.workspace{height:690px;padding:8px;grid-template-columns:2fr 1fr}.card{box-shadow:none}.timeline-actions{display:none}.timeline-card{grid-template-rows:54px minmax(0,1fr) 105px}.calendar-card{grid-template-rows:62px minmax(0,1fr) 95px 24px}.timeline-scroll{overflow:hidden}.loading-cover,.toast{display:none!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">🌳</div>
+      <div class="brand-name">마음:시나브로심리상담연구소</div>
+      <div class="brand-divider"></div>
+      <div class="brand-page">상담 스케줄 조회</div>
+    </div>
+    <div class="userbox">
+      <div class="user-meta"><strong id="userName">사용자 확인중</strong><span id="userRole">-</span></div>
+      <div class="user-avatar">👤</div>
+      <button class="logout-btn" id="logoutBtn" type="button">로그아웃</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="card calendar-card">
+      <div class="calendar-head">
+        <div class="calendar-title">상담 스케줄 달력</div>
+        <div class="legend" aria-label="일정 상태 범례">
+          <span><i class="dot planned"></i>예정</span>
+          <span><i class="dot progress"></i>진행중</span>
+          <span><i class="dot done"></i>완료</span>
+          <span><i class="dot missed"></i>미실시</span>
+          <span><i class="dot next"></i>차기예약</span>
+        </div>
+        <div class="month-tools">
+          <button class="today-btn" id="todayBtn" type="button">오늘</button>
+          <button class="month-btn" id="prevBtn" type="button" aria-label="이전 달">‹</button>
+          <div class="month-label" id="monthLabel">-</div>
+          <button class="month-btn" id="nextBtn" type="button" aria-label="다음 달">›</button>
+        </div>
+      </div>
+
+      <div class="calendar-body">
+        <div class="week-head"><div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div></div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div class="status-summary">
+        <div class="summary-title">선택일 상태 요약 <small id="summaryDate">-</small></div>
+        <div class="summary-grid">
+          <div class="summary-box planned"><small>예정</small><strong id="sumPlanned">0건</strong></div>
+          <div class="summary-box progress"><small>진행중</small><strong id="sumProgress">0건</strong></div>
+          <div class="summary-box done"><small>완료</small><strong id="sumDone">0건</strong></div>
+          <div class="summary-box missed"><small>미실시</small><strong id="sumMissed">0건</strong></div>
+          <div class="summary-box next"><small>차기예약</small><strong id="sumNext">0건</strong></div>
+          <div class="summary-box total"><small>총 일정</small><strong id="sumTotal">0건</strong></div>
+        </div>
+      </div>
+      <div class="calendar-foot">ⓘ 날짜 칸에는 시간순으로 최대 3건까지 표시하고, 초과 일정은 “+N건 더보기”로 계산해 표시합니다.</div>
+    </section>
+
+    <aside class="card timeline-card">
+      <div class="timeline-head">
+        <h2 id="timelineDate">선택일 일정</h2>
+        <span class="total-badge" id="timelineTotal">총 0건</span>
+      </div>
+      <div class="timeline-scroll" id="timelineScroll">
+        <div class="empty">날짜를 선택하면 해당 날짜의 상담 일정이 시간순으로 표시됩니다.</div>
+      </div>
+      <div class="type-summary">
+        <h3>상담유형 일정 요약 (선택일)</h3>
+        <div class="type-grid">
+          <div class="type-row"><strong>심리상담</strong><b id="psychCount">0건</b></div>
+          <div class="type-row"><strong>진로상담</strong><b id="careerCount">0건</b></div>
+        </div>
+      </div>
+      <div class="timeline-actions">
+        <button class="action-btn primary" id="printBtn" type="button">🖨 인쇄(PDF)</button>
+        <button class="action-btn" id="backBtn" type="button">← 이전화면</button>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="loading-cover" id="loadingCover"><div class="loading-box">스케줄을 불러오는 중입니다...</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/*
+  [DB 설계 원칙 - 조회 전용 스케줄]
+  1) 별도 schedule 테이블을 만들지 않는다.
+  2) 기본정보는 DB_basic.id = 각 상담 테이블.client_id 로 조회한다.
+  3) 심리상담 일정: DB_psychological_counseling.visit_at
+     - 실제 상담 시작/종료: session_start_at / session_end_at
+     - 차기예약: next_session_at 우선, 없으면 next_session_date
+  4) 진로상담 일정: DB_career_counseling.appointment_at
+     - 실제 상담 시작/종료: session_start_at / session_end_at
+     - 차기예약: next_session_at 우선, 없으면 next_session_date
+  5) 화면 표시 대상은 record_active=true 또는 이미 완료(session_end_at 존재)된 기록이다.
+     - 비활성 + 미실시 기록은 상담구분 변경 과정에서 생긴 중복 접수 가능성이 있어 제외한다.
+     - 비활성이라도 실제 완료된 과거 상담은 일정 이력으로 보존해 표시한다.
+  6) receipt_at은 '접수일'이지 상담 일정이 아니므로 달력에서 제외한다.
+  7) 이 화면은 SELECT 전용이다. INSERT/UPDATE/DELETE를 하지 않는다.
+*/
+
+(() => {
+  'use strict';
+
+  const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      storage: window.sessionStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+
+  const IDLE_MS = 10 * 60 * 1000;
+  const MAX_CELL_ITEMS = 3;
+  const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+  const els = {
+    userName: document.getElementById('userName'), userRole: document.getElementById('userRole'),
+    monthLabel: document.getElementById('monthLabel'), calGrid: document.getElementById('calGrid'),
+    summaryDate: document.getElementById('summaryDate'), timelineDate: document.getElementById('timelineDate'),
+    timelineTotal: document.getElementById('timelineTotal'), timelineScroll: document.getElementById('timelineScroll'),
+    loading: document.getElementById('loadingCover'), toast: document.getElementById('toast'),
+    psychCount: document.getElementById('psychCount'), careerCount: document.getElementById('careerCount'),
+    sumPlanned: document.getElementById('sumPlanned'), sumProgress: document.getElementById('sumProgress'),
+    sumDone: document.getElementById('sumDone'), sumMissed: document.getElementById('sumMissed'),
+    sumNext: document.getElementById('sumNext'), sumTotal: document.getElementById('sumTotal')
+  };
+
+  const state = {
+    user: null,
+    employee: null,
+    viewYear: 0,
+    viewMonth: 0,
+    selectedDate: '',
+    events: [],
+    byDate: new Map(),
+    idleTimer: null
+  };
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function ymd(y,m,d){ return `${y}-${pad2(m)}-${pad2(d)}`; }
+  function kstNowDate(){ return new Date(Date.now() + KST_OFFSET_MS); }
+  function todayYmd(){ const d=kstNowDate(); return ymd(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()); }
+  function dateOnlyParts(dateStr){ const [y,m,d]=String(dateStr||'').split('-').map(Number); return {y,m,d}; }
+  function formatKoreanDate(dateStr){ const {y,m,d}=dateOnlyParts(dateStr); if(!y) return '-'; const wd=['일','월','화','수','목','금','토'][new Date(Date.UTC(y,m-1,d)).getUTCDay()]; return `${y}년 ${m}월 ${d}일 (${wd})`; }
+  function monthDateBounds(y,m){ const start=ymd(y,m,1); const endDate = m===12 ? ymd(y+1,1,1) : ymd(y,m+1,1); return {start,end:endDate}; }
+  function monthUtcBounds(y,m){ const start=new Date(Date.UTC(y,m-1,1)-KST_OFFSET_MS).toISOString(); const end=new Date(Date.UTC(m===12?y+1:y,m===12?0:m,1)-KST_OFFSET_MS).toISOString(); return {start,end}; }
+  function isoToKstParts(iso){
+    if(!iso) return null;
+    const d=new Date(iso); if(Number.isNaN(d.getTime())) return null;
+    const k=new Date(d.getTime()+KST_OFFSET_MS);
+    return {y:k.getUTCFullYear(),m:k.getUTCMonth()+1,d:k.getUTCDate(),hh:k.getUTCHours(),mm:k.getUTCMinutes(),ms:d.getTime()};
+  }
+  function isoToDateKey(iso){ const p=isoToKstParts(iso); return p?ymd(p.y,p.m,p.d):''; }
+  function isoToTime(iso){ const p=isoToKstParts(iso); return p?`${pad2(p.hh)}:${pad2(p.mm)}`:'--:--'; }
+  function escapeText(v){ return v==null?'':String(v); }
+  function showLoading(show){ els.loading.classList.toggle('show',!!show); }
+  let toastTimer=null;
+  function toast(msg){ clearTimeout(toastTimer); els.toast.textContent=msg; els.toast.classList.add('show'); toastTimer=setTimeout(()=>els.toast.classList.remove('show'),2600); }
+
+  function statusMeta(status){
+    return {
+      planned:{label:'예정',color:'#2563eb',cls:'planned'},
+      progress:{label:'진행중',color:'#f97316',cls:'progress'},
+      done:{label:'완료',color:'#16a34a',cls:'done'},
+      missed:{label:'미실시',color:'#8a94a4',cls:'missed'},
+      next:{label:'차기예약',color:'#7c3aed',cls:'next'}
+    }[status] || {label:'예정',color:'#2563eb',cls:'planned'};
+  }
+
+  function primaryStatus(row, scheduledIso){
+    const start=row.session_start_at ? new Date(row.session_start_at).getTime() : NaN;
+    const end=row.session_end_at ? new Date(row.session_end_at).getTime() : NaN;
+    const now=Date.now();
+    if(Number.isFinite(end)) return 'done';
+    if(Number.isFinite(start) && start<=now) return 'progress';
+    const scheduled=scheduledIso ? new Date(scheduledIso).getTime() : NaN;
+    if(Number.isFinite(scheduled) && scheduled<now) return 'missed';
+    return 'planned';
+  }
+
+  function buildPrimaryEvent(source,row,basic,scheduledIso){
+    if(!scheduledIso) return null;
+    const key=isoToDateKey(scheduledIso); if(!key) return null;
+    return {
+      uid:`${source}:${row.id}:primary`, source, kind:'primary', date:key,
+      time:isoToTime(scheduledIso), sortMs:new Date(scheduledIso).getTime(),
+      status:primaryStatus(row,scheduledIso),
+      clientId:row.client_id, name:basic?.client_name || '이름없음', phone:basic?.client_phone || '-',
+      birthDate:basic?.birth_date || null,
+      sessionNo:row.session_no || null,
+      location:row.counseling_location || '-',
+      sessionStatus:row.session_status || '-',
+      counselLabel:source==='psych'?'심리상담':'진로상담'
+    };
+  }
+
+  function buildNextEvent(source,row,basic){
+    let date='',time='--:--',sortMs=Number.MAX_SAFE_INTEGER;
+    if(row.next_session_at){
+      date=isoToDateKey(row.next_session_at); time=isoToTime(row.next_session_at); sortMs=new Date(row.next_session_at).getTime();
+    } else if(row.next_session_date){
+      date=String(row.next_session_date).slice(0,10);
+      const {y,m,d}=dateOnlyParts(date); sortMs=Date.UTC(y,m-1,d)-KST_OFFSET_MS;
+    }
+    if(!date) return null;
+    return {
+      uid:`${source}:${row.id}:next`,source,kind:'next',date,time,sortMs,status:'next',
+      clientId:row.client_id,name:basic?.client_name || '이름없음',phone:basic?.client_phone || '-',birthDate:basic?.birth_date || null,
+      sessionNo:row.session_no ? Number(row.session_no)+1 : null,
+      location:row.counseling_location || '-',sessionStatus:row.session_status || '-',
+      counselLabel:source==='psych'?'심리상담':'진로상담'
+    };
+  }
+
+  async function getEmployee(){
+    const {data:{session},error}=await sb.auth.getSession();
+    if(error || !session?.user){
+      alert('로그인이 필요합니다.'); location.href='index.html'; return false;
+    }
+    state.user=session.user;
+    const {data,error:empErr}=await sb.from('employee').select('id,employee_code,position,name,permission,active').eq('auth_user_id',session.user.id).maybeSingle();
+    if(empErr || !data || !data.active){
+      alert('사용자 권한을 확인할 수 없습니다.'); await sb.auth.signOut(); location.href='index.html'; return false;
+    }
+    state.employee=data;
+    els.userName.textContent=`${data.name} ${data.position||''}`.trim();
+    els.userRole.textContent=`${data.permission} · ${data.employee_code}`;
+    return true;
+  }
+
+  async function loadBasicMap(clientIds){
+    const ids=[...new Set(clientIds.filter(Boolean))];
+    if(!ids.length) return new Map();
+    const {data,error}=await sb.from('DB_basic').select('id,client_name,client_phone,birth_date,counsel_type').in('id',ids);
+    if(error) throw error;
+    return new Map((data||[]).map(x=>[x.id,x]));
+  }
+
+  async function queryPsych(y,m){
+    const u=monthUtcBounds(y,m), d=monthDateBounds(y,m);
+    const orFilter=[
+      `and(visit_at.gte.${u.start},visit_at.lt.${u.end})`,
+      `and(visit_at.is.null,session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
+      `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
+      `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
+    ].join(',');
+    const {data,error}=await sb.from('DB_psychological_counseling')
+      .select('id,client_id,visit_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
+      .or(orFilter);
+    if(error) throw error; return data||[];
+  }
+
+  async function queryCareer(y,m){
+    const u=monthUtcBounds(y,m), d=monthDateBounds(y,m);
+    const orFilter=[
+      `and(appointment_at.gte.${u.start},appointment_at.lt.${u.end})`,
+      `and(appointment_at.is.null,session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
+      `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
+      `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
+    ].join(',');
+    const {data,error}=await sb.from('DB_career_counseling')
+      .select('id,client_id,appointment_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
+      .or(orFilter);
+    if(error) throw error; return data||[];
+  }
+
+  async function loadMonth(y,m){
+    showLoading(true);
+    try{
+      const [psych,career]=await Promise.all([queryPsych(y,m),queryCareer(y,m)]);
+      const basics=await loadBasicMap([...psych.map(x=>x.client_id),...career.map(x=>x.client_id)]);
+      const monthStart=ymd(y,m,1), monthEnd=monthDateBounds(y,m).end;
+      const events=[];
+      for(const r of psych){
+        if(r.record_active !== true && !r.session_end_at) continue;
+        const b=basics.get(r.client_id);
+        const primary=buildPrimaryEvent('psych',r,b,r.visit_at || r.session_start_at);
+        const next=buildNextEvent('psych',r,b);
+        if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
+        if(next && next.date>=monthStart && next.date<monthEnd) events.push(next);
+      }
+      for(const r of career){
+        if(r.record_active !== true && !r.session_end_at) continue;
+        const b=basics.get(r.client_id);
+        const primary=buildPrimaryEvent('career',r,b,r.appointment_at || r.session_start_at);
+        const next=buildNextEvent('career',r,b);
+        if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
+        if(next && next.date>=monthStart && next.date<monthEnd) events.push(next);
+      }
+      events.sort((a,b)=>a.date.localeCompare(b.date)||a.sortMs-b.sortMs||a.name.localeCompare(b.name,'ko'));
+      state.events=events;
+      state.byDate=new Map();
+      for(const ev of events){ if(!state.byDate.has(ev.date)) state.byDate.set(ev.date,[]); state.byDate.get(ev.date).push(ev); }
+      renderAll();
+    }catch(err){
+      console.error('스케줄 조회 오류:',err);
+      state.events=[]; state.byDate=new Map(); renderAll();
+      toast('스케줄 조회 중 오류가 발생했습니다. RLS와 DB 연결을 확인해 주세요.');
+    }finally{ showLoading(false); }
+  }
+
+  function sixWeekCells(y,m){
+    const first=new Date(Date.UTC(y,m-1,1));
+    const firstWeekday=first.getUTCDay();
+    const gridStart=new Date(Date.UTC(y,m-1,1-firstWeekday));
+    const cells=[];
+    for(let i=0;i<42;i++){
+      const d=new Date(gridStart.getTime()+i*86400000);
+      const yy=d.getUTCFullYear(), mm=d.getUTCMonth()+1, dd=d.getUTCDate();
+      cells.push({y:yy,m:mm,d:dd,key:ymd(yy,mm,dd),other:mm!==m,weekday:d.getUTCDay()});
+    }
+    return cells;
+  }
+
+  function renderCalendar(){
+    els.monthLabel.textContent=`${state.viewYear}년 ${state.viewMonth}월`;
+    els.calGrid.textContent='';
+    const today=todayYmd();
+    for(const c of sixWeekCells(state.viewYear,state.viewMonth)){
+      const cell=document.createElement('div');
+      cell.className=`day-cell${c.other?' other':''}${c.weekday===0?' sun':''}${c.weekday===6?' sat':''}${c.key===today?' today':''}${c.key===state.selectedDate?' selected':''}`;
+      const num=document.createElement('div'); num.className='day-num'; num.textContent=c.d; cell.appendChild(num);
+      const holder=document.createElement('div'); holder.className='day-events';
+      const events=(state.byDate.get(c.key)||[]).slice().sort((a,b)=>a.sortMs-b.sortMs);
+      events.slice(0,MAX_CELL_ITEMS).forEach(ev=>{
+        const meta=statusMeta(ev.status); const row=document.createElement('div'); row.className='day-event';
+        const dot=document.createElement('i'); dot.style.background=meta.color;
+        const time=document.createElement('span'); time.className='time'; time.textContent=ev.time;
+        const name=document.createElement('span'); name.className='name'; name.textContent=ev.name;
+        row.append(dot,time,name); holder.appendChild(row);
+      });
+      if(events.length>MAX_CELL_ITEMS){ const more=document.createElement('div'); more.className='more-event'; more.textContent=`+${events.length-MAX_CELL_ITEMS}건 더보기`; holder.appendChild(more); }
+      cell.appendChild(holder);
+      cell.addEventListener('click',()=>selectDate(c.key,c.y,c.m));
+      els.calGrid.appendChild(cell);
+    }
+  }
+
+  function countStatuses(items){
+    const c={planned:0,progress:0,done:0,missed:0,next:0,total:items.length};
+    items.forEach(x=>{ if(Object.prototype.hasOwnProperty.call(c,x.status)) c[x.status]++; });
+    return c;
+  }
+
+  function renderSummary(){
+    const items=state.byDate.get(state.selectedDate)||[]; const c=countStatuses(items);
+    els.summaryDate.textContent=formatKoreanDate(state.selectedDate);
+    els.sumPlanned.textContent=`${c.planned}건`; els.sumProgress.textContent=`${c.progress}건`; els.sumDone.textContent=`${c.done}건`; els.sumMissed.textContent=`${c.missed}건`; els.sumNext.textContent=`${c.next}건`; els.sumTotal.textContent=`${c.total}건`;
+    els.timelineTotal.textContent=`총 ${c.total}건`;
+    const psych=items.filter(x=>x.source==='psych').length, career=items.filter(x=>x.source==='career').length;
+    els.psychCount.textContent=`${psych}건`; els.careerCount.textContent=`${career}건`;
+  }
+
+  function calculateAge(birthDate,refDate){
+    if(!birthDate||!refDate) return null; const b=dateOnlyParts(birthDate), r=dateOnlyParts(refDate); if(!b.y||!r.y) return null;
+    let age=r.y-b.y; if(r.m<b.m || (r.m===b.m && r.d<b.d)) age--; return age>=0?age:null;
+  }
+
+  function renderTimeline(){
+    const items=(state.byDate.get(state.selectedDate)||[]).slice().sort((a,b)=>a.sortMs-b.sortMs||a.name.localeCompare(b.name,'ko'));
+    els.timelineDate.textContent=formatKoreanDate(state.selectedDate);
+    els.timelineScroll.textContent='';
+    if(!items.length){ const empty=document.createElement('div'); empty.className='empty'; empty.textContent='선택한 날짜에 등록된 상담 일정이 없습니다.'; els.timelineScroll.appendChild(empty); return; }
+    const list=document.createElement('div'); list.className='timeline-list';
+    items.forEach(ev=>{
+      const meta=statusMeta(ev.status), age=calculateAge(ev.birthDate,state.selectedDate);
+      const item=document.createElement('div'); item.className='t-item'; item.style.setProperty('--status-color',meta.color);
+      const time=document.createElement('div'); time.className='t-time'; time.textContent=ev.time;
+      const top=document.createElement('div'); top.className='t-top';
+      const name=document.createElement('div'); name.className='t-name'; name.textContent=age==null?ev.name:`${ev.name} (${age}세)`;
+      const pill=document.createElement('span'); pill.className='status-pill'; pill.textContent=meta.label; top.append(name,pill);
+      const metaRow=document.createElement('div'); metaRow.className='t-meta';
+      const fields=[`◉ ${ev.counselLabel}`, ev.sessionNo?`│ ${ev.sessionNo}회기`:'│ 회기 미지정', `⌖ ${ev.location||'-'}`];
+      fields.forEach(v=>{ const s=document.createElement('span'); s.textContent=v; metaRow.appendChild(s); });
+      const phone=document.createElement('div'); phone.className='t-phone'; phone.textContent=`연락처 ${ev.phone||'-'}`;
+      item.append(time,top,metaRow,phone); list.appendChild(item);
+    });
+    els.timelineScroll.appendChild(list);
+    els.timelineScroll.scrollTop=0;
+  }
+
+  function renderAll(){ renderCalendar(); renderSummary(); renderTimeline(); }
+
+  function selectDate(date,y,m){
+    if(y!==state.viewYear || m!==state.viewMonth){ state.viewYear=y; state.viewMonth=m; state.selectedDate=date; loadMonth(y,m); return; }
+    state.selectedDate=date; renderAll();
+  }
+
+  function goMonth(delta){
+    let y=state.viewYear,m=state.viewMonth+delta; if(m<1){y--;m=12}else if(m>12){y++;m=1}
+    state.viewYear=y; state.viewMonth=m;
+    const today=todayYmd(), t=dateOnlyParts(today);
+    state.selectedDate=(t.y===y&&t.m===m)?today:ymd(y,m,1);
+    loadMonth(y,m);
+  }
+
+  function resetIdle(){ clearTimeout(state.idleTimer); state.idleTimer=setTimeout(async()=>{ try{await sb.auth.signOut();}catch{} alert('10분 동안 사용이 없어 자동 로그아웃되었습니다.'); location.href='index.html'; },IDLE_MS); }
+  ['click','keydown','mousemove','scroll','touchstart'].forEach(evt=>document.addEventListener(evt,resetIdle,{passive:true}));
+
+  document.getElementById('prevBtn').addEventListener('click',()=>goMonth(-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goMonth(1));
+  document.getElementById('todayBtn').addEventListener('click',()=>{ const t=kstNowDate(); state.viewYear=t.getUTCFullYear(); state.viewMonth=t.getUTCMonth()+1; state.selectedDate=todayYmd(); loadMonth(state.viewYear,state.viewMonth); });
+  document.getElementById('printBtn').addEventListener('click',()=>window.print());
+  document.getElementById('backBtn').addEventListener('click',()=>history.length>1?history.back():location.assign('index.html'));
+  document.getElementById('logoutBtn').addEventListener('click',async()=>{ if(!confirm('로그아웃 하시겠습니까?')) return; await sb.auth.signOut(); location.href='index.html'; });
+
+  async function init(){
+    const ok=await getEmployee(); if(!ok) return;
+    const t=kstNowDate(); state.viewYear=t.getUTCFullYear(); state.viewMonth=t.getUTCMonth()+1; state.selectedDate=todayYmd(); resetIdle(); await loadMonth(state.viewYear,state.viewMonth);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
