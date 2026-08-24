@@ -1461,7 +1461,7 @@
   .sina-main-btn:disabled{opacity:.58;cursor:not-allowed}
   .sina-sub-actions{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(3,minmax(0,1fr));
     gap:8px;
     margin-top:4px;
   }
@@ -1666,14 +1666,16 @@
           <button class="sina-main-btn" id="sinaLoginBtn" type="submit">LOG IN</button>
 
           <div class="sina-sub-actions">
+            <button type="button" class="sina-sub-btn" id="sinaNewUserBtn">신규 사용자</button>
             <button type="button" class="sina-sub-btn" id="sinaResetRequestBtn">비밀번호 설정 / 재설정</button>
             <button type="button" class="sina-sub-btn" id="sinaClearBtn">입력 초기화</button>
           </div>
         </form>
 
         <div class="sina-help">
-          처음 로그인하거나 비밀번호를 모르는 경우 이메일을 입력한 뒤
-          <b>비밀번호 설정 / 재설정</b>을 누르세요.
+          관리자가 사용자등록에서 신규 Auth 연결을 완료한 직원은 이메일을 입력한 뒤
+          <b>신규 사용자</b>를 누르세요. 기존 사용자가 비밀번호를 잊은 경우에는
+          <b>비밀번호 설정 / 재설정</b>을 사용합니다.
         </div>
       </div>
 
@@ -2659,6 +2661,7 @@
   const passwordMessage = document.getElementById("sinaPasswordMessage");
   const savePasswordBtn = document.getElementById("sinaSavePasswordBtn");
 
+  const newUserBtn = document.getElementById("sinaNewUserBtn");
   const resetRequestBtn = document.getElementById("sinaResetRequestBtn");
   const userInfo = document.getElementById("sinaUserInfo");
   let usageTimeEl = document.getElementById("sinaUsageTime");
@@ -3151,6 +3154,62 @@
     }
   });
 
+
+  function getPasswordSettingRedirectUrl() {
+    const redirectUrl = new URL(location.href);
+    redirectUrl.search = "";
+    redirectUrl.hash = "";
+    return redirectUrl.href;
+  }
+
+  newUserBtn?.addEventListener("click", async () => {
+    clearMessage(loginMessage);
+    const email = emailEl.value.trim();
+
+    if (!email) {
+      showMessage(loginMessage, "신규 사용자로 등록된 이메일 주소를 먼저 입력해 주세요.");
+      emailEl.focus();
+      return;
+    }
+
+    newUserBtn.disabled = true;
+    newUserBtn.textContent = "신규 등록 확인 중...";
+
+    try {
+      /*
+       * 관리자 화면의 '신규 사용자' 처리로 Supabase Auth 계정이 생성·연결된 뒤
+       * 이 버튼을 사용합니다. 보안상 index.html에서는 Auth 계정을 직접 생성하지 않고,
+       * 해당 이메일의 최초 비밀번호 설정 메일만 요청합니다.
+       */
+      const { error } = await client.auth.resetPasswordForEmail(
+        email,
+        { redirectTo: getPasswordSettingRedirectUrl() }
+      );
+
+      if (error) throw error;
+
+      showMessage(
+        loginMessage,
+        "신규 사용자 비밀번호 설정 메일을 요청했습니다. 메일의 링크를 클릭해 새 비밀번호를 등록해 주세요. 메일이 오지 않으면 관리자에게 Auth 연결 상태를 확인해 주세요.",
+        "success"
+      );
+    } catch (err) {
+      console.error("신규 사용자 비밀번호 설정 메일 오류:", {
+        code: err?.code,
+        status: err?.status,
+        message: err?.message
+      });
+
+      showMessage(
+        loginMessage,
+        getAuthErrorMessage(err, "reset")
+      );
+    } finally {
+      newUserBtn.disabled = false;
+      newUserBtn.textContent = "신규 사용자";
+    }
+  });
+
   resetRequestBtn.addEventListener("click", async () => {
     clearMessage(loginMessage);
     const email = emailEl.value.trim();
@@ -3165,22 +3224,17 @@
     resetRequestBtn.textContent = "메일 발송 중...";
 
     try {
-      // 현재 main.html 자체로 돌아오도록 고정.
-      // GitHub Pages의 현재 실제 URL을 그대로 사용하므로 별도 main/reset 파일 필요 없음.
-      const redirectUrl = new URL(location.href);
-      redirectUrl.search = "";
-      redirectUrl.hash = "";
-
+      // 현재 index.html 자체로 돌아오도록 고정.
       const { error } = await client.auth.resetPasswordForEmail(
         email,
-        { redirectTo: redirectUrl.href }
+        { redirectTo: getPasswordSettingRedirectUrl() }
       );
 
       if (error) throw error;
 
       showMessage(
         loginMessage,
-        "비밀번호 설정 메일을 발송했습니다. 메일의 링크를 클릭하면 이 main.html에서 새 비밀번호 설정 화면이 열립니다.",
+        "비밀번호 설정 메일을 발송했습니다. 메일의 링크를 클릭하면 이 index.html에서 새 비밀번호 설정 화면이 열립니다.",
         "success"
       );
     } catch (err) {
