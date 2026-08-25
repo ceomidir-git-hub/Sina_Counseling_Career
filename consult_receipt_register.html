@@ -31,11 +31,17 @@ h1{margin:0;color:var(--blue-dark);font-size:29px;font-weight:950;letter-spacing
 .section{border:1px solid #6fa3dc;border-radius:6px;overflow:hidden;margin-bottom:6mm;break-inside:avoid;page-break-inside:avoid}
 .section-head{min-height:12mm;padding:0 4mm;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%);border-bottom:1px solid #a8c6e7}
 .section-head h2{margin:0;color:var(--blue);font-size:17px;font-weight:950;letter-spacing:-.5px}
+.section-consult-type{display:flex;align-items:center;justify-content:flex-end;gap:10px;white-space:nowrap}
+.section-consult-label{font-size:12px;font-weight:950;color:#25364c}
+.section-head .consult-type-group{gap:12px}
+.section-head .consult-type-option{font-size:12px}
 .section-body{padding:4mm 4mm 4.5mm;background:#fff}
 .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3.2mm 7mm}
 .form-pair{min-width:0;display:grid;grid-template-columns:30mm minmax(0,1fr);align-items:center;gap:2.5mm}
 .form-pair.full{grid-column:1/-1;grid-template-columns:30mm minmax(0,1fr)}
 .form-pair label,.detail-label{font-size:12.5px;font-weight:850;color:#252b34;white-space:nowrap}
+.required-mark{color:var(--red);font-weight:950;margin-left:2px}
+.auto-sync-note{margin-left:5px;color:#64748b;font-size:10px;font-weight:750}
 .field,input[type="text"],input[type="tel"],input[type="date"],select,textarea{width:100%;min-width:0;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);color:#161b22;outline:none;font-size:12.5px;font-weight:650}
 .field,input[type="text"],input[type="tel"],input[type="date"],select{height:var(--field-h);padding:0 10px}
 input[readonly]{background:#f8fafc;color:#384557}
@@ -63,16 +69,58 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 .receipt-preview-hidden{display:none!important}
 .modal-backdrop{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:20px}.modal-backdrop.show{display:flex}
 .foreign-modal{width:min(720px,96vw);background:#fff;border-radius:12px;box-shadow:0 26px 70px rgba(15,23,42,.3);border:1px solid #d7e1ec;overflow:hidden}.foreign-modal-head{height:52px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e4eaf1;background:#f7fbff}.foreign-modal-title{margin:0;color:var(--blue-dark);font-size:17px;font-weight:950}.modal-x{width:32px;height:32px;border:0;border-radius:7px;background:#eef2f6;color:#475569;font-size:20px;cursor:pointer}.foreign-modal-body{padding:16px 18px}.foreign-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}.foreign-field{display:grid;grid-template-columns:27mm minmax(0,1fr);align-items:center;gap:2.5mm}.foreign-field label{font-size:12px;font-weight:850}.foreign-modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 18px 18px}.modal-btn{min-width:90px;height:36px;border-radius:6px;border:1px solid var(--blue);background:#fff;color:var(--blue-dark);font-size:12px;font-weight:900;cursor:pointer}.modal-btn.primary{background:var(--blue);color:#fff}
-@media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.top-row{margin-bottom:16px;align-items:flex-start}.top-actions{align-items:flex-end}.grid-2{grid-template-columns:1fr}.form-pair.full{grid-column:auto}.form-pair,.form-pair.full{grid-template-columns:100px minmax(0,1fr)}.actions{grid-template-columns:repeat(2,1fr);gap:8px}.foreign-grid{grid-template-columns:1fr}}
-@page{size:A4 portrait;margin:8mm}
+@media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.top-row{margin-bottom:16px;align-items:flex-start}.top-actions{align-items:flex-end}.section-head{align-items:flex-start;flex-direction:column;padding-top:8px;padding-bottom:8px}.section-consult-type{width:100%;justify-content:flex-start}.grid-2{grid-template-columns:1fr}.form-pair.full{grid-column:auto}.form-pair,.form-pair.full{grid-template-columns:100px minmax(0,1fr)}.actions{grid-template-columns:repeat(2,1fr);gap:8px}.foreign-grid{grid-template-columns:1fr}}
+/* ===== PDF 문서 출력 보안 표준 (Final 2026-08-25) ===== */
+.pdf-watermark,.pdf-footer{display:none}
+.pdf-doc-subtitle{display:none}
+
+@page{size:210mm 297mm;margin:18mm 7mm 12mm}
 @media print{
   html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .page-wrap{padding:0!important;min-height:auto!important}.a4-page{width:100%!important;min-height:auto!important;max-width:none!important;padding:0!important;box-shadow:none!important}
-  .top-row{margin-bottom:5mm!important}.pdf-btn,.actions,.bottom-hint,.modal-backdrop{display:none!important}
-  .section{margin-bottom:4mm!important}.section-body{padding:3mm 4mm 3.5mm!important}.section-head{min-height:10mm!important}
-  textarea{height:38mm!important;min-height:38mm!important;max-height:38mm!important}
+  body{position:relative!important}
+  .page-wrap{padding:0!important;min-height:auto!important;background:#fff!important}
+  .a4-page{position:relative!important;z-index:1!important;width:100%!important;min-height:auto!important;max-width:none!important;padding:0!important;box-shadow:none!important;background:transparent!important}
+
+  /* 머릿글: 문서 제목 + 부제 + 하단 실선 */
+  .top-row{min-height:17mm!important;margin:0 0 5mm!important;padding:0 0 3mm!important;border-bottom:1.2pt solid var(--blue-dark)!important;align-items:flex-end!important}
+  .title-block{display:flex!important;flex-direction:column!important;gap:2mm!important}
+  .top-row h1{font-size:23pt!important;line-height:1!important;letter-spacing:-1px!important}
+  .pdf-doc-subtitle{display:block!important;margin:0!important;color:#5f6b7a!important;font-size:8.5pt!important;font-weight:700!important;letter-spacing:-.2px!important;white-space:nowrap!important}
+
+  /* 화면 전용 기능은 PDF에서 제외 */
+  .pdf-btn,.actions,.bottom-hint,.modal-backdrop,.statusMsg,.edit-mode-badge,.lookup-selection{display:none!important}
+
+  /* 본문: 번호 프레임 간격 5mm */
+  .section{margin-bottom:5mm!important;background:#fff!important}
+  .section-body{padding:3mm 4mm 3.5mm!important;background:#fff!important}
+  .section-head{min-height:10mm!important}
+  textarea{height:35mm!important;min-height:35mm!important;max-height:35mm!important}
   .date-inline-picker{display:none!important}.date-inline-wrap::after{display:none!important}.date-inline-display{padding-right:9px!important;background:#fff!important}
   input,select,textarea,.radio-panel{background:#fff!important;box-shadow:none!important}
+
+  /* 워터마크: 65pt / 중앙 / -32deg / 7.5% / scaleX(.72) */
+  .pdf-watermark{
+    display:block!important;position:fixed!important;left:50%!important;top:50%!important;
+    transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;
+    transform-origin:center!important;z-index:9998!important;pointer-events:none!important;user-select:none!important;
+    white-space:nowrap!important;font-size:65pt!important;font-weight:900!important;line-height:1!important;
+    color:#b91c1c!important;opacity:.075!important;letter-spacing:-2px!important;
+  }
+
+  /* 바닥글: 하단 4mm / 권리문구 15pt / 구분선 1.2pt / 회사명 30pt */
+  .pdf-footer{
+    display:block!important;position:fixed!important;left:0!important;right:0!important;bottom:4mm!important;
+    z-index:9999!important;background:#fff!important;pointer-events:none!important;
+  }
+  .footer-rights{
+    margin:0 0 1.5mm!important;text-align:left!important;color:#6b7280!important;
+    font-size:15pt!important;font-weight:500!important;line-height:1.25!important;
+  }
+  .footer-divider{height:0!important;border:0!important;border-top:1.2pt solid var(--blue)!important;margin:0!important}
+  .footer-company{
+    margin:3mm 0 0!important;text-align:center!important;color:var(--blue-dark)!important;
+    font-size:30pt!important;font-weight:900!important;line-height:1!important;letter-spacing:-1px!important;
+  }
 }
 </style>
 </head>
@@ -81,9 +129,12 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 <div class="page-wrap">
 <main class="a4-page">
   <header class="top-row">
-    <h1>접수 상담 등록</h1>
+    <div class="title-block">
+      <h1>접수 상담 등록</h1>
+      <p class="pdf-doc-subtitle">시나브로 Counselling &amp; Career Plus Center · 접수정보 · 내담자정보 · 상담신청내용</p>
+    </div>
     <div class="top-actions">
-      <button type="button" class="pdf-btn" id="pdfSaveBtn">▤ PDF 저장</button>
+      <button type="button" class="pdf-btn" id="pdfSaveBtn" title="A4 세로 · 배율 100% · 배경 그래픽 ON · 브라우저 머리글/바닥글 OFF">▤ PDF 저장</button>
     </div>
   </header>
 
@@ -94,14 +145,23 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
   <form id="consultForm" autocomplete="off">
     <section class="section">
-      <div class="section-head"><h2>1. 접수 정보</h2></div>
+      <div class="section-head">
+        <h2>1. 접수 정보</h2>
+        <div class="section-consult-type">
+          <span class="section-consult-label">상담구분<span class="required-mark">*</span></span>
+          <div class="consult-type-group" role="radiogroup" aria-label="상담 구분">
+            <label class="consult-type-option"><input type="radio" name="consultType" value="심리상담" checked> 심리상담</label>
+            <label class="consult-type-option"><input type="radio" name="consultType" value="진로상담"> 진로상담</label>
+          </div>
+        </div>
+      </div>
       <div class="section-body">
         <div class="grid-2">
-          <div class="form-pair"><label for="receptionistName">접수자명</label><input id="receptionistName" class="field" type="text" placeholder="접수자명"></div>
-          <div class="form-pair"><label for="receptionistPhone">접수자 연락처</label><input id="receptionistPhone" class="field" type="tel" placeholder="010-0000-0000" maxlength="13" inputmode="numeric"></div>
-          <div class="form-pair"><label for="relationship">내담자와의 관계</label><select id="relationship"><option selected>본인</option><option>부모</option><option>배우자</option><option>자녀</option><option>기타</option></select></div>
-          <div class="form-pair"><label>상담구분</label><div class="radio-panel" role="radiogroup" aria-label="상담 구분"><label><input type="radio" name="consultType" value="심리상담" checked> 심리상담</label><label><input type="radio" name="consultType" value="진로상담"> 진로상담</label></div></div>
-          <div class="form-pair"><label for="receivedDate">접수일시</label><div class="date-time"><div class="date-inline-wrap"><input id="receivedDateDisplay" class="field date-inline-display" type="text" placeholder="날짜 선택" readonly tabindex="-1"><input id="receivedDate" class="date-inline-picker" type="date" aria-label="접수날짜 선택"></div><input id="receivedTime" class="field time-number-input" type="text" inputmode="numeric" maxlength="5" placeholder="숫자입력" autocomplete="off"></div></div>
+          <div class="form-pair"><label for="receptionistName">접수자명<span class="required-mark">*</span></label><input id="receptionistName" class="field" type="text" placeholder="접수자명" aria-required="true"></div>
+          <div class="form-pair"><label for="receptionistPhone">접수자 연락처<span class="required-mark">*</span></label><input id="receptionistPhone" class="field" type="tel" placeholder="010-0000-0000" maxlength="13" inputmode="numeric" aria-required="true"></div>
+          <div class="form-pair"><label for="relationship">내담자와의 관계<span class="required-mark">*</span></label><select id="relationship" aria-required="true" title="본인을 선택하면 접수자명과 연락처가 내담자 정보에 자동 입력됩니다."><option selected>본인</option><option>부모</option><option>배우자</option><option>자녀</option><option>기타</option></select></div>
+          <div class="form-pair"><label for="contactMethod">접수방법<span class="required-mark">*</span></label><select id="contactMethod" aria-required="true"><option selected disabled value="">불러오는 중...</option></select></div>
+          <div class="form-pair"><label for="receivedDate">접수일시<span class="required-mark">*</span></label><div class="date-time"><div class="date-inline-wrap"><input id="receivedDateDisplay" class="field date-inline-display" type="text" placeholder="날짜 선택" readonly tabindex="-1"><input id="receivedDate" class="date-inline-picker" type="date" aria-label="접수날짜 선택"></div><input id="receivedTime" class="field time-number-input" type="text" inputmode="numeric" maxlength="5" placeholder="숫자입력" autocomplete="off"></div></div>
           <div class="form-pair"><label for="reservationDate">방문일시</label><div class="date-time"><div class="date-inline-wrap"><input id="reservationDateDisplay" class="field date-inline-display" type="text" placeholder="날짜 선택" readonly tabindex="-1"><input id="reservationDate" class="date-inline-picker" type="date" aria-label="방문날짜 선택"></div><input id="reservationTime" class="field time-number-input" type="text" inputmode="numeric" maxlength="5" placeholder="숫자입력" autocomplete="off"></div></div>
         </div>
         <span class="receipt-preview-hidden" id="receivedPreview"></span><span class="receipt-preview-hidden" id="reservationPreview"></span>
@@ -145,6 +205,14 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   </form>
 </main>
 </div>
+
+<!-- PDF 출력 전용 보안 요소: 화면에서는 숨김 -->
+<div class="pdf-watermark" aria-hidden="true">중요 보안 문서 유출 금지</div>
+<footer class="pdf-footer" aria-hidden="true">
+  <p class="footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</p>
+  <hr class="footer-divider">
+  <p class="footer-company">마음:시나브로심리상담연구소</p>
+</footer>
 
 <div class="modal-backdrop" id="foreignModalBackdrop" aria-hidden="true">
   <div class="foreign-modal" role="dialog" aria-modal="true" aria-labelledby="foreignModalTitle">
@@ -373,6 +441,46 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const clientPhoneEl = document.getElementById("clientPhone");
     attachPhoneFormatter(receptionistPhoneEl);
     attachPhoneFormatter(clientPhoneEl);
+
+    // 2-1) 접수자가 본인일 때 접수자명/연락처를 내담자 정보로 자동 동기화
+    const receptionistNameEl = document.getElementById("receptionistName");
+    const relationshipEl = document.getElementById("relationship");
+    const clientNameEl = document.getElementById("clientName");
+
+    function isSelfReception() {
+      return relationshipEl.value === "본인";
+    }
+
+    function syncReceptionistToClient() {
+      if (!isSelfReception()) return;
+      clientNameEl.value = receptionistNameEl.value;
+      clientPhoneEl.value = receptionistPhoneEl.value;
+      markInvalid(clientNameEl, false);
+      markInvalid(clientPhoneEl, false);
+    }
+
+    receptionistNameEl.addEventListener("input", () => {
+      if (isSelfReception()) {
+        clientNameEl.value = receptionistNameEl.value;
+        markInvalid(clientNameEl, false);
+      }
+    });
+
+    receptionistPhoneEl.addEventListener("input", () => {
+      if (isSelfReception()) {
+        // attachPhoneFormatter가 먼저 실행된 뒤 포맷된 번호를 그대로 복사
+        clientPhoneEl.value = receptionistPhoneEl.value;
+        markInvalid(clientPhoneEl, false);
+      }
+    });
+
+    relationshipEl.addEventListener("change", () => {
+      if (isSelfReception()) {
+        syncReceptionistToClient();
+      }
+      // 본인이 아닌 관계로 변경할 때는 기존 내담자 값을 지우지 않는다.
+      markInvalid(relationshipEl, !relationshipEl.value);
+    });
 
     function isValidPhone(value) {
       return /^\d{3}-\d{3,4}-\d{4}$/.test(value);
@@ -629,6 +737,9 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       });
       openForeignModalBtn.textContent = "외국인";
 
+      // form.reset() 후 관계 기본값은 '본인'. 접수자/내담자 값은 모두 빈값으로 일치시킨다.
+      if (relationshipEl?.value === "본인") syncReceptionistToClient();
+
       setMode("new");
     }
 
@@ -637,7 +748,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         const ok = window.confirm("입력 중인 내용이 모두 초기화됩니다. 계속하시겠습니까?");
         if (!ok) return;
       }
-      resetFormToNewMode({ clearReceived: true });
+      // 접수일시는 필수값이므로 초기화 후에도 현재 KST 일시를 다시 입력한다.
+      resetFormToNewMode({ clearReceived: false });
     });
 
     const backBtn = document.getElementById("backBtn");
@@ -794,6 +906,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const jobMap = {};
     const targetMap = {};
     const topicMap = {};
+    const contactMethodMap = {};
 
     async function loadLookupOptions(tableName, selectEl, mapObj) {
       if (!sb) {
@@ -825,6 +938,59 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"), targetMap);
     loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"), topicMap);
 
+    // 방법1(접수방법): DB에 등록된 contact_method 값을 우선 반영하고,
+    // 테스트 DB가 비어 있는 경우 엑셀 방법1의 6개 항목을 기본 목록으로 표시합니다.
+    // DB 구조는 변경하지 않습니다.
+    const DEFAULT_CONTACT_METHODS = [
+      "전화문의",
+      "전화예약",
+      "전화상담",
+      "방문문의",
+      "방문예약",
+      "방문상담"
+    ];
+
+    async function loadContactMethodOptions() {
+      const selectEl = document.getElementById("contactMethod");
+      if (!selectEl) return;
+
+      let dbMethods = [];
+      if (sb) {
+        const { data, error } = await sb
+          .from(PSYCH_TABLE)
+          .select("contact_method")
+          .not("contact_method", "is", null)
+          .limit(500);
+
+        if (error) {
+          console.warn("접수방법 DB 조회 실패 - 기본 목록 사용:", error);
+        } else {
+          dbMethods = [...new Set(
+            (data || [])
+              .map(row => String(row.contact_method || "").trim())
+              .filter(Boolean)
+          )];
+        }
+      }
+
+      // 기본 6항목의 순서를 유지하면서 DB에만 존재하는 추가 항목도 뒤에 반영
+      const methods = [
+        ...DEFAULT_CONTACT_METHODS,
+        ...dbMethods.filter(name => !DEFAULT_CONTACT_METHODS.includes(name))
+      ];
+
+      selectEl.innerHTML = `<option selected disabled value="">선택하세요</option>`;
+      methods.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        selectEl.appendChild(option);
+        contactMethodMap[name] = name;
+      });
+    }
+
+    loadContactMethodOptions();
+
     // ===== 7-2) 로그인 상태 초기화 및 실시간 반영 =====
     async function initAuth() {
       if (!sb) {
@@ -853,6 +1019,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const receptionistName = document.getElementById("receptionistName").value.trim();
       const receptionistPhone = receptionistPhoneEl.value.trim();
       const relationship = document.getElementById("relationship").value;
+      const contactMethod = document.getElementById("contactMethod").value;
       const clientName = document.getElementById("clientName").value.trim();
       const gender = document.getElementById("gender").value;
       const clientPhone = clientPhoneEl.value.trim();
@@ -872,6 +1039,21 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
       let hasError = false;
 
+      // ----- 1. 접수 정보: 방문일시를 제외한 접수 항목 필수 -----
+      markInvalid(receptionistNameEl, !receptionistName);
+      if (!receptionistName) hasError = true;
+
+      const receptionistPhoneValid = isValidPhone(receptionistPhone);
+      markInvalid(receptionistPhoneEl, !receptionistPhoneValid);
+      if (!receptionistPhoneValid) hasError = true;
+
+      markInvalid(relationshipEl, !relationship);
+      if (!relationship) hasError = true;
+
+      const contactMethodEl = document.getElementById("contactMethod");
+      markInvalid(contactMethodEl, !contactMethod);
+      if (!contactMethod) hasError = true;
+
       markInvalid(document.getElementById("clientName"), !clientName);
       if (!clientName) hasError = true;
 
@@ -881,10 +1063,6 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const phoneValid = isValidPhone(clientPhone);
       markInvalid(clientPhoneEl, !phoneValid);
       if (!phoneValid) hasError = true;
-
-      const receptionistPhoneValid = receptionistPhone === "" || isValidPhone(receptionistPhone);
-      markInvalid(receptionistPhoneEl, !receptionistPhoneValid);
-      if (!receptionistPhoneValid) hasError = true;
 
       const birthValid = isValidBirthDate(birthDateRaw);
       markInvalid(birthDateEl, !birthValid);
@@ -899,10 +1077,16 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       markInvalid(document.getElementById("consultationTopic"), !consultationTopic);
       if (!consultationTopic) hasError = true;
 
+      // 방문일시는 선택 입력이다. 날짜와 시간을 모두 비우면 정상 처리한다.
+      // 단, 둘 중 하나만 입력한 경우에는 불완전한 방문일시이므로 오류 처리한다.
+      const reservationDateValue = reservationDateEl.value.trim();
+      const reservationTimeValue = reservationTimeEl.value.trim();
+      const hasReservationInput = !!reservationDateValue || !!reservationTimeValue;
       const appointmentISO = getAppointmentISO();
-      markInvalid(reservationDateEl, !appointmentISO);
-      markInvalid(reservationTimeEl, !appointmentISO);
-      if (!appointmentISO) hasError = true;
+      const reservationInvalid = hasReservationInput && !appointmentISO;
+      markInvalid(reservationDateEl, reservationInvalid);
+      markInvalid(reservationTimeEl, reservationInvalid);
+      if (reservationInvalid) hasError = true;
 
       const receivedISO = getReceivedISO();
       markInvalid(receivedDateEl, !receivedISO);
@@ -927,9 +1111,9 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       };
 
       const commonSessionPayload = {
-        receptionist_name: emptyToNull(receptionistName),
-        receptionist_phone: emptyToNull(receptionistPhone),
-        receptionist_relationship: emptyToNull(relationship),
+        receptionist_name: receptionistName,
+        receptionist_phone: receptionistPhone,
+        receptionist_relationship: relationship,
         receipt_at: receivedISO,
         client_type_code: consultationTarget,
         topic_code: consultationTopic,
@@ -939,11 +1123,12 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const sessionPayload = counselType === "PC"
         ? {
             ...commonSessionPayload,
+            contact_method: emptyToNull(contactMethod),
             receipt_date: receivedDateEl.value,
             application_topic_1: consultationTopic,
             application_date: receivedDateEl.value,
             application_content: emptyToNull(detailsVal),
-            visit_date: reservationDateEl.value,
+            visit_date: emptyToNull(reservationDateEl.value),
             visit_at: appointmentISO,
             session_status: "진행"
           }
@@ -1036,7 +1221,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
       const { hasError, counselType, basicPayload, sessionPayload } = collectAndValidateFormData();
       if (hasError) {
-        showStatus("error", "입력값을 다시 확인해주세요. 빨간색으로 표시된 항목을 채워주세요.");
+        showStatus("error", "접수 정보와 필수 입력값을 확인해주세요. 방문일시를 입력했다면 날짜와 시간을 모두 입력해주세요.");
         return;
       }
 
@@ -1078,7 +1263,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const tableName = getSessionTable(typeCode);
       const timeColumn = getSessionTimeColumn(typeCode);
 
-      const psychFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, receipt_at, visit_at, client_type_code, topic_code, application_content";
+      const psychFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, contact_method, receipt_at, visit_at, client_type_code, topic_code, application_content";
       const careerFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, receipt_at, appointment_at, client_type_code, topic_code, counseling_content";
 
       const { data, error } = await sb
@@ -1114,6 +1299,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       if (apptParts) {
         reservationDateEl.value = apptParts.date;
         setTimeSelectValue(reservationTimeEl, apptParts.time);
+      } else {
+        // 방문일시는 선택항목이므로 DB 값이 없을 때 이전 조회값이 남지 않도록 명시적으로 비운다.
+        reservationDateEl.value = "";
+        reservationTimeEl.value = "";
+        reservationDateDisplayEl.value = "";
       }
       updateReceivedDateDisplay();
       updateReservationDateDisplay();
@@ -1123,6 +1313,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       document.getElementById("receptionistName").value = row.receptionist_name || "";
       receptionistPhoneEl.value = row.receptionist_phone || "";
       document.getElementById("relationship").value = row.receptionist_relationship || "본인";
+      document.getElementById("contactMethod").value = typeCode === "PC" ? (row.contact_method || "") : "";
 
       document.getElementById("clientName").value = client.client_name || "";
       clientPhoneEl.value = client.client_phone || "";
@@ -1314,7 +1505,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
       const { hasError, counselType, basicPayload, sessionPayload } = collectAndValidateFormData();
       if (hasError) {
-        showStatus("error", "입력값을 다시 확인해주세요. 빨간색으로 표시된 항목을 채워주세요.");
+        showStatus("error", "접수 정보와 필수 입력값을 확인해주세요. 방문일시를 입력했다면 날짜와 시간을 모두 입력해주세요.");
         return;
       }
       const typeChanged = counselType !== loadedRecordType;
