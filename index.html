@@ -53,7 +53,8 @@
 
 /* 시스템 설정 하위메뉴
    - 좌측 프레임 폭/높이는 변경하지 않음
-   - 사용자등록은 관리자에게만 표시 */
+   - 사용자등록은 관리자에게만 표시
+   - 상담항목등록은 관리자/사용자/조회자에게 표시 */
 .nav-item.has-submenu{
   position:relative;
   padding-right:30px;
@@ -1855,8 +1856,12 @@
       </div>
       <div class="nav-submenu" id="systemSettingsSubmenu" aria-label="시스템 설정 하위메뉴">
         <a class="nav-subitem" id="employeeRegisterMenu" href="system_edit_employee.html">
-          <span class="nav-subicon">└</span>
+          <span class="nav-subicon">├</span>
           <span>사용자등록</span>
+        </a>
+        <a class="nav-subitem" id="consultationItemsMenu" href="system_edit_consultation_Items.html">
+          <span class="nav-subicon">└</span>
+          <span>상담항목등록</span>
         </a>
       </div>
     </nav>
@@ -2685,10 +2690,11 @@
     })
   );
 
-  /* 시스템 설정 → 사용자등록 하위메뉴 */
+  /* 시스템 설정 → 사용자등록 / 상담항목등록 하위메뉴 */
   const systemSettingsNav = document.getElementById("systemSettingsNav");
   const systemSettingsSubmenu = document.getElementById("systemSettingsSubmenu");
   const employeeRegisterMenu = document.getElementById("employeeRegisterMenu");
+  const consultationItemsMenu = document.getElementById("consultationItemsMenu");
 
   function setSystemSettingsOpen(open){
     if (!systemSettingsNav || !systemSettingsSubmenu) return;
@@ -2698,22 +2704,54 @@
   }
 
   function applySystemSettingsPermission(employee){
-    if (!employeeRegisterMenu) return;
-    const admin = employee?.permission === "관리자";
-    employeeRegisterMenu.hidden = !admin;
+    const permission = employee?.permission || "";
+    const admin = permission === "관리자";
+    const canViewConsultationItems =
+      permission === "관리자" ||
+      permission === "사용자" ||
+      permission === "조회자";
 
-    // 조회자에게는 하위메뉴를 열지 않음.
-    if (!admin) setSystemSettingsOpen(false);
+    // 사용자등록: 관리자만 표시
+    if (employeeRegisterMenu) {
+      employeeRegisterMenu.hidden = !admin;
+    }
+
+    // 상담항목등록:
+    // 관리자 = 등록/조회/수정/삭제
+    // 사용자 = 등록/조회/수정
+    // 조회자 = 조회
+    if (consultationItemsMenu) {
+      consultationItemsMenu.hidden = !canViewConsultationItems;
+    }
+
+    // 표시 가능한 하위메뉴가 하나도 없을 때만 닫음.
+    const canOpen =
+      (employeeRegisterMenu && !employeeRegisterMenu.hidden) ||
+      (consultationItemsMenu && !consultationItemsMenu.hidden);
+
+    if (!canOpen) setSystemSettingsOpen(false);
   }
 
   systemSettingsNav?.addEventListener("click", () => {
-    const canOpen = employeeRegisterMenu && !employeeRegisterMenu.hidden;
+    const canOpen =
+      (employeeRegisterMenu && !employeeRegisterMenu.hidden) ||
+      (consultationItemsMenu && !consultationItemsMenu.hidden);
+
     if (!canOpen) return;
-    setSystemSettingsOpen(!systemSettingsSubmenu.classList.contains("open"));
+
+    setSystemSettingsOpen(
+      !systemSettingsSubmenu.classList.contains("open")
+    );
   });
 
   employeeRegisterMenu?.addEventListener("click", () => {
     employeeRegisterMenu.classList.add("active");
+    consultationItemsMenu?.classList.remove("active");
+  });
+
+  consultationItemsMenu?.addEventListener("click", () => {
+    consultationItemsMenu.classList.add("active");
+    employeeRegisterMenu?.classList.remove("active");
   });
 </script>
 
