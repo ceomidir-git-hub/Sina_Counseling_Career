@@ -211,6 +211,77 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   .counter{font-size:8.5pt!important;right:2mm!important;bottom:1.5mm!important}
 }
 
+
+/* ===== FINAL 2026-08-26 : 심리/진로 동적 접수상담등록 ===== */
+.info-hidden{display:none!important}
+
+.section label,
+.section input,
+.section select,
+.section textarea,
+.section .subgroup-note,
+.section .inline-note,
+.section .auto-sync-note,
+.section .counter{font-size:12px!important}
+
+/* 접수정보: 1행 4항목, 2행 2항목 */
+.receipt-row-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3mm;margin-bottom:3mm}
+.receipt-row-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4mm}
+.receipt-pair{min-width:0;display:grid;align-items:center}
+.receipt-row-4 .receipt-pair{grid-template-columns:15mm minmax(0,1fr);gap:1mm}
+.receipt-row-2 .receipt-pair{grid-template-columns:18mm minmax(0,1fr);gap:1mm}
+.receipt-pair label{font-weight:850;color:#252b34;white-space:nowrap}
+.receipt-pair input,.receipt-pair select{padding-left:7px!important;padding-right:7px!important}
+.receipt-date-time{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(68px,.72fr);gap:5px;min-width:0}
+.receipt-date-time .time-number-input{text-align:center}
+
+/* 진로정보 */
+.career-subgroup{border:1px solid #dbe6f2;border-radius:6px;overflow:hidden;margin-bottom:3.2mm;background:#fff}
+.career-subgroup:last-child{margin-bottom:0}
+.career-subgroup-head{min-height:8mm;padding:0 3mm;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f8fbff;border-bottom:1px solid #e2ebf4}
+.career-subgroup-head h3{margin:0;font-size:12.5px;font-weight:950;color:#294663}
+.career-subgroup-body{padding:3mm}
+.career-foreign{border-color:#9fc5ef;background:#fbfdff}
+.career-foreign .career-subgroup-head{background:#eef6ff}
+.subgroup-note{color:#6b7788;font-weight:700}
+.inline-note{margin-top:2.3mm;padding:6px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;color:#64748b;font-weight:700}
+
+.personal-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3mm 4mm;margin-bottom:3mm}
+.personal-row-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3mm 4mm}
+.company-row-3,.foreign-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3mm 4mm}
+.compact-pair{min-width:0;display:grid;grid-template-columns:16mm minmax(0,1fr);align-items:center;gap:.4mm}
+.compact-pair label{font-weight:850;color:#252b34;white-space:nowrap}
+.compact-pair input,.compact-pair select{height:var(--field-h);padding:0 7px}
+.personal-row-2 .compact-pair:last-child{grid-template-columns:10mm minmax(0,1fr);gap:.1mm}
+
+@media(max-width:760px){
+  .receipt-row-4,.receipt-row-2,.personal-row-3,.personal-row-2,.company-row-3,.foreign-row-3{grid-template-columns:1fr}
+  .receipt-row-4 .receipt-pair,.receipt-row-2 .receipt-pair,.compact-pair,.personal-row-2 .compact-pair:last-child{grid-template-columns:90px minmax(0,1fr);gap:2px}
+}
+
+@media print{
+  .info-hidden{display:none!important}
+  .receipt-row-4{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:2mm!important;margin-bottom:2mm!important}
+  .receipt-row-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:3mm!important}
+  .receipt-row-4 .receipt-pair{grid-template-columns:13mm minmax(0,1fr)!important;gap:.6mm!important}
+  .receipt-row-2 .receipt-pair{grid-template-columns:16mm minmax(0,1fr)!important;gap:.6mm!important}
+  .receipt-date-time{grid-template-columns:minmax(0,1.5fr) minmax(52px,.65fr)!important;gap:1mm!important}
+
+  body.career-mode .career-info .section-body{padding:2mm 3mm!important}
+  body.career-mode .career-subgroup{margin-bottom:1.8mm!important}
+  body.career-mode .career-subgroup-head{min-height:6.5mm!important;height:6.5mm!important;padding:0 2.5mm!important}
+  body.career-mode .career-subgroup-head h3{font-size:10.5pt!important}
+  body.career-mode .career-subgroup-body{padding:1.7mm 2.5mm!important}
+  body.career-mode .personal-row-3{gap:1.5mm 3mm!important;margin-bottom:1.5mm!important}
+  body.career-mode .personal-row-2{gap:1.5mm 3mm!important}
+  body.career-mode .company-row-3,body.career-mode .foreign-row-3{gap:1.5mm 3mm!important}
+  body.career-mode .compact-pair{grid-template-columns:14mm minmax(0,1fr)!important;gap:.3mm!important}
+  body.career-mode .personal-row-2 .compact-pair:last-child{grid-template-columns:9mm minmax(0,1fr)!important;gap:.1mm!important}
+  body.career-mode .compact-pair input,body.career-mode .compact-pair select{height:7.6mm!important;font-size:9.5pt!important}
+  body.career-mode .inline-note{margin-top:1mm!important;padding:1mm 2mm!important;font-size:8pt!important}
+  body.career-mode #details{height:28mm!important;min-height:28mm!important;max-height:28mm!important}
+}
+
 </style>
 </head>
 <body>
@@ -233,31 +304,46 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   <div id="lookupSelectionArea" class="lookup-selection" style="display:none;"></div>
 
   <form id="consultForm" autocomplete="off">
-    <section class="section">
-      <div class="section-head">
-        <h2>1. 접수 정보</h2>
-        <div class="section-consult-type">
-          <span class="section-consult-label">상담구분<span class="required-mark">*</span></span>
-          <div class="consult-type-group" role="radiogroup" aria-label="상담 구분">
-            <label class="consult-type-option"><input type="radio" name="consultType" value="심리상담" checked> 심리상담</label>
-            <label class="consult-type-option"><input type="radio" name="consultType" value="진로상담"> 진로상담</label>
-          </div>
+    <section class="section" id="receiptInfoSection">
+  <div class="section-head">
+    <h2>1. 접수 정보</h2>
+    <div class="section-consult-type">
+      <span class="section-consult-label">상담구분<span class="required-mark">*</span></span>
+      <div class="consult-type-group" role="radiogroup" aria-label="상담 구분">
+        <label class="consult-type-option"><input type="radio" name="consultType" value="심리상담" checked> 심리상담</label>
+        <label class="consult-type-option"><input type="radio" name="consultType" value="진로상담"> 진로상담</label>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="receipt-row-4">
+      <div class="receipt-pair"><label for="receptionistName">접수자명<span class="required-mark">*</span></label><input id="receptionistName" class="field" type="text" placeholder="접수자명"></div>
+      <div class="receipt-pair"><label for="receptionistPhone">연락처<span class="required-mark">*</span></label><input id="receptionistPhone" class="field" type="tel" placeholder="010-0000-0000" maxlength="13" inputmode="numeric"></div>
+      <div class="receipt-pair"><label for="relationship">관계<span class="required-mark">*</span></label><select id="relationship"><option selected>본인</option><option>부모</option><option>배우자</option><option>자녀</option><option>기타</option></select></div>
+      <div class="receipt-pair"><label for="contactMethod">접수방법<span class="required-mark">*</span></label><select id="contactMethod"><option selected disabled value="">불러오는 중...</option></select></div>
+    </div>
+    <div class="receipt-row-2">
+      <div class="receipt-pair">
+        <label for="receivedDate">접수일시<span class="required-mark">*</span></label>
+        <div class="receipt-date-time">
+          <div class="date-inline-wrap"><input id="receivedDateDisplay" class="field date-inline-display" type="text" placeholder="날짜 선택" readonly tabindex="-1"><input id="receivedDate" class="date-inline-picker" type="date" aria-label="접수날짜 선택"></div>
+          <input id="receivedTime" class="field time-number-input" type="text" inputmode="numeric" maxlength="5" placeholder="숫자입력">
         </div>
       </div>
-      <div class="section-body">
-        <div class="grid-2">
-          <div class="form-pair"><label for="receptionistName">접수자명<span class="required-mark">*</span></label><input id="receptionistName" class="field" type="text" placeholder="접수자명" aria-required="true"></div>
-          <div class="form-pair"><label for="receptionistPhone">접수자 연락처<span class="required-mark">*</span></label><input id="receptionistPhone" class="field" type="tel" placeholder="010-0000-0000" maxlength="13" inputmode="numeric" aria-required="true"></div>
-          <div class="form-pair"><label for="relationship">내담자와의 관계<span class="required-mark">*</span></label><select id="relationship" aria-required="true" title="본인을 선택하면 접수자명과 연락처가 내담자 정보에 자동 입력됩니다."><option selected>본인</option><option>부모</option><option>배우자</option><option>자녀</option><option>기타</option></select></div>
-          <div class="form-pair"><label for="contactMethod">접수방법<span class="required-mark">*</span></label><select id="contactMethod" aria-required="true"><option selected disabled value="">불러오는 중...</option></select></div>
-          <div class="form-pair"><label for="receivedDate">접수일시<span class="required-mark">*</span></label><div class="date-time"><div class="date-inline-wrap"><input id="receivedDateDisplay" class="field date-inline-display" type="text" placeholder="날짜 선택" readonly tabindex="-1"><input id="receivedDate" class="date-inline-picker" type="date" aria-label="접수날짜 선택"></div><input id="receivedTime" class="field time-number-input" type="text" inputmode="numeric" maxlength="5" placeholder="숫자입력" autocomplete="off"></div></div>
-          <div class="form-pair"><label for="reservationDate">방문일시</label><div class="date-time"><div class="date-inline-wrap"><input id="reservationDateDisplay" class="field date-inline-display" type="text" placeholder="날짜 선택" readonly tabindex="-1"><input id="reservationDate" class="date-inline-picker" type="date" aria-label="방문날짜 선택"></div><input id="reservationTime" class="field time-number-input" type="text" inputmode="numeric" maxlength="5" placeholder="숫자입력" autocomplete="off"></div></div>
+      <div class="receipt-pair">
+        <label for="reservationDate">방문일시</label>
+        <div class="receipt-date-time">
+          <div class="date-inline-wrap"><input id="reservationDateDisplay" class="field date-inline-display" type="text" placeholder="날짜 선택" readonly tabindex="-1"><input id="reservationDate" class="date-inline-picker" type="date" aria-label="방문날짜 선택"></div>
+          <input id="reservationTime" class="field time-number-input" type="text" inputmode="numeric" maxlength="5" placeholder="숫자입력">
         </div>
-        <span class="receipt-preview-hidden" id="receivedPreview"></span><span class="receipt-preview-hidden" id="reservationPreview"></span>
       </div>
-    </section>
+    </div>
+    <span class="receipt-preview-hidden" id="receivedPreview"></span>
+    <span class="receipt-preview-hidden" id="reservationPreview"></span>
+  </div>
+</section>
 
-    <section class="section">
+    <section class="section" id="psychInfoSection">
       <div class="section-head"><h2>2. 내담자 정보</h2><button type="button" class="foreign-btn" id="openForeignModalBtn">외국인</button></div>
       <div class="section-body">
         <div class="grid-2">
@@ -271,6 +357,56 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         </div>
       </div>
     </section>
+<section class="section career-info info-hidden" id="careerInfoSection">
+  <div class="section-head"><h2>2. 진로 정보</h2><span class="subgroup-note">DB_basic 연계</span></div>
+  <div class="section-body">
+    <div class="career-subgroup">
+      <div class="career-subgroup-head"><h3>① 개인 기본정보</h3><span class="subgroup-note">본인 정보</span></div>
+      <div class="career-subgroup-body">
+        <div class="personal-row-3">
+          <div class="compact-pair"><label for="careerName">이름</label><input id="careerName" class="field" type="text" placeholder="이름"></div>
+          <div class="compact-pair"><label for="careerBirthDate">생년월일</label><input id="careerBirthDate" class="field" type="text" placeholder="0000-00-00" maxlength="10" inputmode="numeric"></div>
+          <div class="compact-pair"><label for="careerAge">나이</label><input id="careerAge" class="field" type="text" placeholder="자동 계산" readonly></div>
+        </div>
+        <div class="personal-row-3">
+          <div class="compact-pair"><label for="careerPhone">전화번호</label><input id="careerPhone" class="field" type="tel" placeholder="010-0000-0000" maxlength="13" inputmode="numeric"></div>
+          <div class="compact-pair"><label for="careerGender">성별</label><select id="careerGender"><option selected disabled value="">불러오는 중...</option></select></div>
+          <div class="compact-pair"><label for="careerStatus">상태</label><select id="careerStatus"><option value="" selected>선택</option><option>초등학생</option><option>중학생</option><option>고등학생</option><option>대학생</option><option>회사원</option><option>취준생</option><option>무직</option><option>현장직</option><option>기타</option></select></div>
+        </div>
+        <div class="personal-row-2">
+          <div class="compact-pair"><label for="careerEmail">메일주소</label><input id="careerEmail" class="field" type="email" placeholder="example@email.com"></div>
+          <div class="compact-pair"><label for="careerAddress">주소</label><input id="careerAddress" class="field" type="text" placeholder="주소"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="career-subgroup">
+      <div class="career-subgroup-head"><h3>② 기업 · 직장정보</h3><span class="subgroup-note">회사명 · 부서명 · 직책</span></div>
+      <div class="career-subgroup-body">
+        <div class="company-row-3">
+          <div class="compact-pair"><label for="careerCompanyName">회사명</label><input id="careerCompanyName" class="field" type="text" placeholder="회사명"></div>
+          <div class="compact-pair"><label for="careerDepartmentName">부서명</label><input id="careerDepartmentName" class="field" type="text" placeholder="부서명"></div>
+          <div class="compact-pair"><label for="careerPositionName">직책</label><input id="careerPositionName" class="field" type="text" placeholder="직책"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="career-subgroup career-foreign">
+      <div class="career-subgroup-head"><h3>③ 외국인 정보</h3><span class="subgroup-note">3열 × 2행 · 직접 입력</span></div>
+      <div class="career-subgroup-body">
+        <div class="foreign-row-3">
+          <div class="compact-pair"><label for="careerNationality">국적</label><select id="careerNationality"><option value="" selected>선택</option><option>한국</option><option>중국</option><option>베트남</option><option>필리핀</option><option>태국</option><option>몽골</option><option>우즈베키스탄</option><option>기타</option></select></div>
+          <div class="compact-pair"><label for="careerEntryDate">입국일</label><input id="careerEntryDate" class="field" type="date"></div>
+          <div class="compact-pair"><label for="careerExitDate">출국일</label><input id="careerExitDate" class="field" type="date"></div>
+          <div class="compact-pair"><label for="careerForeignerNo">외국인번호</label><input id="careerForeignerNo" class="field" type="text" placeholder="외국인번호"></div>
+          <div class="compact-pair"><label for="careerVisaType">비자</label><input id="careerVisaType" class="field" type="text" placeholder="예: E-9, E-7, D-10"></div>
+          <div class="compact-pair"><label for="careerLegalStatus">합불</label><select id="careerLegalStatus"><option value="" selected>선택</option><option>합법</option><option>불법</option></select></div>
+        </div>
+        <div class="inline-note">※ 외국인 버튼/팝업 없이 이 영역에서 바로 입력합니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
 
     <section class="section">
       <div class="section-head"><h2>3. 상담 신청 내용</h2></div>
@@ -290,7 +426,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       <button type="button" class="btn" id="resetBtn">↻ 초기화</button>
       <button type="button" class="btn" id="backBtn">← 이전화면</button>
     </div>
-    <div class="bottom-hint">💡 내담자명(+연락처)을 입력한 뒤 <b>🔍 조회</b> 버튼을 누르면 기존 접수 기록을 이 폼으로 불러올 수 있습니다.</div>
+    <div class="bottom-hint">💡 현재 화면의 이름(+연락처)을 입력한 뒤 <b>🔍 조회</b> 버튼을 누르면 기존 접수 기록을 이 폼으로 불러올 수 있습니다.</div>
   </form>
 </main>
 </div>
@@ -528,8 +664,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     }
     const receptionistPhoneEl = document.getElementById("receptionistPhone");
     const clientPhoneEl = document.getElementById("clientPhone");
+    const careerPhoneEl = document.getElementById("careerPhone");
     attachPhoneFormatter(receptionistPhoneEl);
     attachPhoneFormatter(clientPhoneEl);
+    attachPhoneFormatter(careerPhoneEl);
 
     // 2-1) 접수자가 본인일 때 접수자명/연락처를 내담자 정보로 자동 동기화
     const receptionistNameEl = document.getElementById("receptionistName");
@@ -540,34 +678,40 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       return relationshipEl.value === "본인";
     }
 
+    function getActiveBasicNameEl() {
+      return getSelectedCounselType() === "CC" ? careerNameEl : clientNameEl;
+    }
+
+    function getActiveBasicPhoneEl() {
+      return getSelectedCounselType() === "CC" ? careerPhoneEl : clientPhoneEl;
+    }
+
     function syncReceptionistToClient() {
       if (!isSelfReception()) return;
-      clientNameEl.value = receptionistNameEl.value;
-      clientPhoneEl.value = receptionistPhoneEl.value;
-      markInvalid(clientNameEl, false);
-      markInvalid(clientPhoneEl, false);
+      const nameEl = getActiveBasicNameEl();
+      const phoneEl = getActiveBasicPhoneEl();
+      nameEl.value = receptionistNameEl.value;
+      phoneEl.value = receptionistPhoneEl.value;
+      markInvalid(nameEl, false);
+      markInvalid(phoneEl, false);
     }
 
     receptionistNameEl.addEventListener("input", () => {
-      if (isSelfReception()) {
-        clientNameEl.value = receptionistNameEl.value;
-        markInvalid(clientNameEl, false);
-      }
+      if (!isSelfReception()) return;
+      const nameEl = getActiveBasicNameEl();
+      nameEl.value = receptionistNameEl.value;
+      markInvalid(nameEl, false);
     });
 
     receptionistPhoneEl.addEventListener("input", () => {
-      if (isSelfReception()) {
-        // attachPhoneFormatter가 먼저 실행된 뒤 포맷된 번호를 그대로 복사
-        clientPhoneEl.value = receptionistPhoneEl.value;
-        markInvalid(clientPhoneEl, false);
-      }
+      if (!isSelfReception()) return;
+      const phoneEl = getActiveBasicPhoneEl();
+      phoneEl.value = receptionistPhoneEl.value;
+      markInvalid(phoneEl, false);
     });
 
     relationshipEl.addEventListener("change", () => {
-      if (isSelfReception()) {
-        syncReceptionistToClient();
-      }
-      // 본인이 아닌 관계로 변경할 때는 기존 내담자 값을 지우지 않는다.
+      if (isSelfReception()) syncReceptionistToClient();
       markInvalid(relationshipEl, !relationshipEl.value);
     });
 
@@ -575,18 +719,19 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       return /^\d{3}-\d{3,4}-\d{4}$/.test(value);
     }
 
-    // 3) 생년월일 자동 하이픈 포맷 (0000-00-00)
+    // 3) 생년월일 자동 하이픈 포맷
     const birthDateEl = document.getElementById("birthDate");
-    birthDateEl.addEventListener("input", () => {
-      let digits = birthDateEl.value.replace(/\D/g, "").slice(0, 8);
-      let formatted = digits;
-      if (digits.length > 4 && digits.length <= 6) {
-        formatted = digits.slice(0, 4) + "-" + digits.slice(4);
-      } else if (digits.length > 6) {
-        formatted = digits.slice(0, 4) + "-" + digits.slice(4, 6) + "-" + digits.slice(6);
-      }
-      birthDateEl.value = formatted;
-    });
+    const careerBirthDateEl = document.getElementById("careerBirthDate");
+    function attachBirthDateFormatter(el){
+      el.addEventListener("input", () => {
+        let digits = el.value.replace(/\D/g, "").slice(0, 8);
+        if (digits.length > 6) el.value = digits.slice(0,4)+"-"+digits.slice(4,6)+"-"+digits.slice(6);
+        else if (digits.length > 4) el.value = digits.slice(0,4)+"-"+digits.slice(4);
+        else el.value = digits;
+      });
+    }
+    attachBirthDateFormatter(birthDateEl);
+    attachBirthDateFormatter(careerBirthDateEl);
 
     function isValidBirthDate(value) {
       const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -830,6 +975,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       if (relationshipEl?.value === "본인") syncReceptionistToClient();
 
       setMode("new");
+    updateCounselTypeUI();
     }
 
     resetBtn.addEventListener("click", () => {
@@ -854,41 +1000,23 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
 
     // ===== 화면 전용 추가 기능 =====
-    // 1) 생년월일 입력 시 만 나이 자동 계산
     const clientAgeEl = document.getElementById("clientAge");
-
-    function updateClientAge() {
-      const value = birthDateEl.value.trim();
-      const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-
-      if (!m) {
-        clientAgeEl.value = "";
-        return;
-      }
-
-      const birth = new Date(
-        parseInt(m[1], 10),
-        parseInt(m[2], 10) - 1,
-        parseInt(m[3], 10)
-      );
-
-      if (isNaN(birth.getTime())) {
-        clientAgeEl.value = "";
-        return;
-      }
-
+    const careerAgeEl = document.getElementById("careerAge");
+    function calculateAgeFromBirth(value){
+      if (!isValidBirthDate(value)) return "";
+      const [y,m,d] = value.split("-").map(Number);
+      const birth = new Date(y,m-1,d);
       const now = new Date();
-      let age = now.getFullYear() - birth.getFullYear();
-      const beforeBirthday =
-        now.getMonth() < birth.getMonth() ||
-        (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate());
-
-      if (beforeBirthday) age -= 1;
-      clientAgeEl.value = age >= 0 ? String(age) : "";
+      let age = now.getFullYear()-y;
+      if (now.getMonth()<m-1 || (now.getMonth()===m-1 && now.getDate()<d)) age--;
+      return age >= 0 ? String(age) : "";
     }
-
+    function updateClientAge(){ clientAgeEl.value = calculateAgeFromBirth(birthDateEl.value.trim()); }
+    function updateCareerAge(){ careerAgeEl.value = calculateAgeFromBirth(careerBirthDateEl.value.trim()); }
     birthDateEl.addEventListener("input", updateClientAge);
     birthDateEl.addEventListener("change", updateClientAge);
+    careerBirthDateEl.addEventListener("input", updateCareerAge);
+    careerBirthDateEl.addEventListener("change", updateCareerAge);
 
     // 2) 외국인 정보 팝업
     const foreignModalBackdrop = document.getElementById("foreignModalBackdrop");
@@ -931,6 +1059,53 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     });
 
 
+
+    const psychInfoSection = document.getElementById("psychInfoSection");
+    const careerInfoSection = document.getElementById("careerInfoSection");
+    const careerNameEl = document.getElementById("careerName");
+    const careerGenderEl = document.getElementById("careerGender");
+    const careerStatusEl = document.getElementById("careerStatus");
+    const careerEmailEl = document.getElementById("careerEmail");
+    const careerAddressEl = document.getElementById("careerAddress");
+    const careerCompanyNameEl = document.getElementById("careerCompanyName");
+    const careerDepartmentNameEl = document.getElementById("careerDepartmentName");
+    const careerPositionNameEl = document.getElementById("careerPositionName");
+    const careerNationalityEl = document.getElementById("careerNationality");
+    const careerEntryDateEl = document.getElementById("careerEntryDate");
+    const careerExitDateEl = document.getElementById("careerExitDate");
+    const careerForeignerNoEl = document.getElementById("careerForeignerNo");
+    const careerVisaTypeEl = document.getElementById("careerVisaType");
+    const careerLegalStatusEl = document.getElementById("careerLegalStatus");
+
+    function setSelectValueAllowCustom(el, value){
+      if (!el) return;
+      const v = String(value || "");
+      if (!v){ el.value=""; return; }
+      if (![...el.options].some(o => o.value === v)){
+        const opt = document.createElement("option");
+        opt.value=v; opt.textContent=v; el.appendChild(opt);
+      }
+      el.value=v;
+    }
+
+    function updateCounselTypeUI(){
+      const isCareer = getSelectedCounselType() === "CC";
+      psychInfoSection.classList.toggle("info-hidden", isCareer);
+      careerInfoSection.classList.toggle("info-hidden", !isCareer);
+      document.body.classList.toggle("career-mode", isCareer);
+      if (mode === "new" && relationshipEl?.value === "본인"){
+        if (isCareer){
+          careerNameEl.value = receptionistNameEl.value;
+          careerPhoneEl.value = receptionistPhoneEl.value;
+        } else {
+          clientNameEl.value = receptionistNameEl.value;
+          clientPhoneEl.value = receptionistPhoneEl.value;
+        }
+      }
+    }
+
+    document.querySelectorAll('input[name="consultType"]').forEach(el => el.addEventListener("change", updateCounselTypeUI));
+
     // ===== 7) Supabase 연결: 실패해도 위 UI 동작에는 영향 없도록 별도 처리 =====
     // index.html과 동일하게 sessionStorage를 세션 저장소로 지정해야
     // 화면 간 이동 시 로그인 상태가 정상적으로 공유됩니다.
@@ -968,6 +1143,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const value = typeCode === "CC" ? "진로상담" : "심리상담";
       const el = document.querySelector(`input[name="consultType"][value="${value}"]`);
       if (el) el.checked = true;
+      updateCounselTypeUI();
     }
 
     function getSessionTable(typeCode) {
@@ -1023,6 +1199,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     }
 
     loadLookupOptions("sex_codes", document.getElementById("gender"), sexMap);
+    loadLookupOptions("sex_codes", careerGenderEl, null);
     loadLookupOptions("job_codes", document.getElementById("job"), jobMap);
     loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"), targetMap);
     loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"), topicMap);
@@ -1103,139 +1280,135 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     setMode("new");
 
     // ===== 8) 폼 값 수집 + 검증 =====
+    function isValidEmail(value){ return !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value); }
+
     function collectAndValidateFormData() {
       const counselType = getSelectedCounselType();
-      const receptionistName = document.getElementById("receptionistName").value.trim();
+      const receptionistName = receptionistNameEl.value.trim();
       const receptionistPhone = receptionistPhoneEl.value.trim();
-      const relationship = document.getElementById("relationship").value;
+      const relationship = relationshipEl.value;
       const contactMethod = document.getElementById("contactMethod").value;
-      const clientName = document.getElementById("clientName").value.trim();
-      const gender = document.getElementById("gender").value;
-      const clientPhone = clientPhoneEl.value.trim();
-      const birthDateRaw = birthDateEl.value.trim();
-      const jobCode = document.getElementById("job").value.trim();
-      const clientAddress = document.getElementById("clientAddress").value.trim();
       const consultationTarget = document.getElementById("consultationTarget").value;
       const consultationTopic = document.getElementById("consultationTopic").value;
       const detailsVal = details.value.trim();
 
-      const nationality = document.getElementById("foreignNationality").value.trim();
-      const entryDate = document.getElementById("foreignEntryDate").value;
-      const exitDate = document.getElementById("foreignExitDate").value;
-      const foreignNumber = document.getElementById("foreignNumber").value.trim();
-      const visaType = document.getElementById("foreignVisa").value.trim();
-      const legalStatus = document.getElementById("foreignResult").value;
-
       let hasError = false;
+      markInvalid(receptionistNameEl,!receptionistName); if(!receptionistName) hasError=true;
+      markInvalid(receptionistPhoneEl,!isValidPhone(receptionistPhone)); if(!isValidPhone(receptionistPhone)) hasError=true;
+      markInvalid(relationshipEl,!relationship); if(!relationship) hasError=true;
+      markInvalid(document.getElementById("contactMethod"),!contactMethod); if(!contactMethod) hasError=true;
 
-      // ----- 1. 접수 정보: 방문일시를 제외한 접수 항목 필수 -----
-      markInvalid(receptionistNameEl, !receptionistName);
-      if (!receptionistName) hasError = true;
+      let basicPayload;
 
-      const receptionistPhoneValid = isValidPhone(receptionistPhone);
-      markInvalid(receptionistPhoneEl, !receptionistPhoneValid);
-      if (!receptionistPhoneValid) hasError = true;
+      if(counselType === "PC"){
+        const clientName = clientNameEl.value.trim();
+        const clientPhone = clientPhoneEl.value.trim();
+        const gender = document.getElementById("gender").value;
+        const birth = birthDateEl.value.trim();
+        const jobCode = document.getElementById("job").value.trim();
 
-      markInvalid(relationshipEl, !relationship);
-      if (!relationship) hasError = true;
+        markInvalid(clientNameEl,!clientName); if(!clientName) hasError=true;
+        markInvalid(clientPhoneEl,!isValidPhone(clientPhone)); if(!isValidPhone(clientPhone)) hasError=true;
+        markInvalid(document.getElementById("gender"),!gender); if(!gender) hasError=true;
+        markInvalid(birthDateEl,!isValidBirthDate(birth)); if(!isValidBirthDate(birth)) hasError=true;
+        markInvalid(document.getElementById("job"),!jobCode); if(!jobCode) hasError=true;
 
-      const contactMethodEl = document.getElementById("contactMethod");
-      markInvalid(contactMethodEl, !contactMethod);
-      if (!contactMethod) hasError = true;
+        basicPayload = {
+          counsel_type:"PC",
+          nationality:emptyToNull(document.getElementById("foreignNationality").value),
+          entry_date:emptyToNull(document.getElementById("foreignEntryDate").value),
+          departure_date:emptyToNull(document.getElementById("foreignExitDate").value),
+          foreigner_no:emptyToNull(document.getElementById("foreignNumber").value),
+          visa_type:emptyToNull(document.getElementById("foreignVisa").value),
+          legal_status:emptyToNull(document.getElementById("foreignResult").value),
+          client_name:clientName, sex_code:gender, birth_date:birth,
+          client_phone:clientPhone,
+          client_address:emptyToNull(document.getElementById("clientAddress").value),
+          job_code:jobCode,
+          updated_at:new Date().toISOString()
+        };
+      } else {
+        const clientName = careerNameEl.value.trim();
+        const clientPhone = careerPhoneEl.value.trim();
+        const gender = careerGenderEl.value;
+        const birth = careerBirthDateEl.value.trim();
+        const status = careerStatusEl.value;
+        const email = careerEmailEl.value.trim();
 
-      markInvalid(document.getElementById("clientName"), !clientName);
-      if (!clientName) hasError = true;
+        markInvalid(careerNameEl,!clientName); if(!clientName) hasError=true;
+        markInvalid(careerPhoneEl,!isValidPhone(clientPhone)); if(!isValidPhone(clientPhone)) hasError=true;
+        markInvalid(careerGenderEl,!gender); if(!gender) hasError=true;
+        markInvalid(careerBirthDateEl,!isValidBirthDate(birth)); if(!isValidBirthDate(birth)) hasError=true;
+        markInvalid(careerStatusEl,!status); if(!status) hasError=true;
+        markInvalid(careerEmailEl,!isValidEmail(email)); if(!isValidEmail(email)) hasError=true;
 
-      markInvalid(document.getElementById("gender"), !gender);
-      if (!gender) hasError = true;
+        basicPayload = {
+          counsel_type:"CC",
+          nationality:emptyToNull(careerNationalityEl.value),
+          entry_date:emptyToNull(careerEntryDateEl.value),
+          departure_date:emptyToNull(careerExitDateEl.value),
+          foreigner_no:emptyToNull(careerForeignerNoEl.value),
+          visa_type:emptyToNull(careerVisaTypeEl.value),
+          legal_status:emptyToNull(careerLegalStatusEl.value),
+          client_name:clientName, sex_code:gender, birth_date:birth,
+          client_phone:clientPhone,
+          email:emptyToNull(email),
+          client_status:emptyToNull(status),
+          client_address:emptyToNull(careerAddressEl.value),
+          company_name:emptyToNull(careerCompanyNameEl.value),
+          department_name:emptyToNull(careerDepartmentNameEl.value),
+          position_name:emptyToNull(careerPositionNameEl.value),
+          updated_at:new Date().toISOString()
+        };
+      }
 
-      const phoneValid = isValidPhone(clientPhone);
-      markInvalid(clientPhoneEl, !phoneValid);
-      if (!phoneValid) hasError = true;
+      markInvalid(document.getElementById("consultationTarget"),!consultationTarget); if(!consultationTarget) hasError=true;
+      markInvalid(document.getElementById("consultationTopic"),!consultationTopic); if(!consultationTopic) hasError=true;
 
-      const birthValid = isValidBirthDate(birthDateRaw);
-      markInvalid(birthDateEl, !birthValid);
-      if (!birthValid) hasError = true;
-
-      markInvalid(document.getElementById("job"), !jobCode);
-      if (!jobCode) hasError = true;
-
-      markInvalid(document.getElementById("consultationTarget"), !consultationTarget);
-      if (!consultationTarget) hasError = true;
-
-      markInvalid(document.getElementById("consultationTopic"), !consultationTopic);
-      if (!consultationTopic) hasError = true;
-
-      // 방문일시는 선택 입력이다. 날짜와 시간을 모두 비우면 정상 처리한다.
-      // 단, 둘 중 하나만 입력한 경우에는 불완전한 방문일시이므로 오류 처리한다.
-      const reservationDateValue = reservationDateEl.value.trim();
-      const reservationTimeValue = reservationTimeEl.value.trim();
-      const hasReservationInput = !!reservationDateValue || !!reservationTimeValue;
+      const hasVisit = !!reservationDateEl.value || !!reservationTimeEl.value;
       const appointmentISO = getAppointmentISO();
-      const reservationInvalid = hasReservationInput && !appointmentISO;
-      markInvalid(reservationDateEl, reservationInvalid);
-      markInvalid(reservationTimeEl, reservationInvalid);
-      if (reservationInvalid) hasError = true;
+      const visitInvalid = hasVisit && !appointmentISO;
+      markInvalid(reservationDateEl,visitInvalid); markInvalid(reservationTimeEl,visitInvalid);
+      if(visitInvalid) hasError=true;
 
       const receivedISO = getReceivedISO();
-      markInvalid(receivedDateEl, !receivedISO);
-      markInvalid(receivedTimeEl, !receivedISO);
-      if (!receivedISO) hasError = true;
+      if(!receivedISO) hasError=true;
 
-      const basicPayload = {
-        counsel_type: counselType,
-        nationality: emptyToNull(nationality),
-        entry_date: emptyToNull(entryDate),
-        departure_date: emptyToNull(exitDate),
-        foreigner_no: emptyToNull(foreignNumber),
-        visa_type: emptyToNull(visaType),
-        legal_status: emptyToNull(legalStatus),
-        client_name: clientName,
-        sex_code: gender,
-        birth_date: birthDateToISO(birthDateRaw),
-        client_phone: clientPhone,
-        client_address: emptyToNull(clientAddress),
-        job_code: jobCode,
-        updated_at: new Date().toISOString()
+      const common = {
+        receptionist_name:receptionistName,
+        receptionist_phone:receptionistPhone,
+        receptionist_relationship:relationship,
+        receipt_at:receivedISO,
+        contact_method:emptyToNull(contactMethod),
+        client_type_code:consultationTarget,
+        topic_code:consultationTopic,
+        updated_at:new Date().toISOString()
       };
 
-      const commonSessionPayload = {
-        receptionist_name: receptionistName,
-        receptionist_phone: receptionistPhone,
-        receptionist_relationship: relationship,
-        receipt_at: receivedISO,
-        client_type_code: consultationTarget,
-        topic_code: consultationTopic,
-        updated_at: new Date().toISOString()
+      const sessionPayload = counselType === "PC" ? {
+        ...common,
+        receipt_date:receivedDateEl.value,
+        application_topic_1:consultationTopic,
+        application_date:receivedDateEl.value,
+        application_content:emptyToNull(detailsVal),
+        visit_date:emptyToNull(reservationDateEl.value),
+        visit_at:appointmentISO,
+        session_status:"진행"
+      } : {
+        ...common,
+        appointment_at:appointmentISO,
+        career_topic_1:consultationTopic,
+        counseling_content:emptyToNull(detailsVal),
+        session_status:"진행"
       };
 
-      const sessionPayload = counselType === "PC"
-        ? {
-            ...commonSessionPayload,
-            contact_method: emptyToNull(contactMethod),
-            receipt_date: receivedDateEl.value,
-            application_topic_1: consultationTopic,
-            application_date: receivedDateEl.value,
-            application_content: emptyToNull(detailsVal),
-            visit_date: emptyToNull(reservationDateEl.value),
-            visit_at: appointmentISO,
-            session_status: "진행"
-          }
-        : {
-            ...commonSessionPayload,
-            appointment_at: appointmentISO,
-            career_topic_1: consultationTopic,
-            counseling_content: emptyToNull(detailsVal),
-            session_status: "진행"
-          };
-
-      return { hasError, counselType, basicPayload, sessionPayload };
+      return {hasError,counselType,basicPayload,sessionPayload};
     }
 
     async function findExistingClient(name, phone) {
       let query = sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, client_address, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
+        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_status, client_address, company_name, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
         .eq("client_name", name)
         .eq("client_phone", phone)
         .limit(2);
@@ -1267,10 +1440,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       }
 
       const mergedType = mergeCounselType(existing.counsel_type, counselType);
-      const updatePayload = {
-        ...basicPayload,
-        counsel_type: mergedType
-      };
+      const updatePayload = { counsel_type: mergedType, updated_at: basicPayload.updated_at };
+      Object.entries(basicPayload).forEach(([key,value]) => {
+        if(["counsel_type","updated_at"].includes(key)) return;
+        if(value !== null && value !== "") updatePayload[key] = value;
+      });
       const { data, error } = await sb
         .from(BASIC_TABLE)
         .update(updatePayload)
@@ -1353,7 +1527,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const timeColumn = getSessionTimeColumn(typeCode);
 
       const psychFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, contact_method, receipt_at, visit_at, client_type_code, topic_code, application_content";
-      const careerFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, receipt_at, appointment_at, client_type_code, topic_code, counseling_content";
+      const careerFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, contact_method, receipt_at, appointment_at, client_type_code, topic_code, counseling_content";
 
       const { data, error } = await sb
         .from(tableName)
@@ -1372,64 +1546,62 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     }
 
     function populateFormFromRecord(record) {
-      const client = record.__client;
-      const row = record.__session;
-      const typeCode = record.__type;
-      const appointmentISO = typeCode === "CC" ? row.appointment_at : row.visit_at;
-
+      const client=record.__client, row=record.__session, typeCode=record.__type;
+      const appointmentISO=typeCode==="CC"?row.appointment_at:row.visit_at;
       setSelectedCounselType(typeCode);
 
-      const receivedParts = isoToKSTParts(row.receipt_at);
-      if (receivedParts) {
-        receivedDateEl.value = receivedParts.date;
-        setTimeSelectValue(receivedTimeEl, receivedParts.time);
-      }
-      const apptParts = isoToKSTParts(appointmentISO);
-      if (apptParts) {
-        reservationDateEl.value = apptParts.date;
-        setTimeSelectValue(reservationTimeEl, apptParts.time);
-      } else {
-        // 방문일시는 선택항목이므로 DB 값이 없을 때 이전 조회값이 남지 않도록 명시적으로 비운다.
-        reservationDateEl.value = "";
-        reservationTimeEl.value = "";
-        reservationDateDisplayEl.value = "";
-      }
-      updateReceivedDateDisplay();
-      updateReservationDateDisplay();
-      updateReceivedPreview();
-      updateReservationPreview();
+      const rp=isoToKSTParts(row.receipt_at);
+      if(rp){ receivedDateEl.value=rp.date; setTimeSelectValue(receivedTimeEl,rp.time); }
+      const ap=isoToKSTParts(appointmentISO);
+      if(ap){ reservationDateEl.value=ap.date; setTimeSelectValue(reservationTimeEl,ap.time); }
+      else { reservationDateEl.value=""; reservationTimeEl.value=""; }
+      updateReceivedDateDisplay(); updateReservationDateDisplay(); updateReceivedPreview(); updateReservationPreview();
 
-      document.getElementById("receptionistName").value = row.receptionist_name || "";
-      receptionistPhoneEl.value = row.receptionist_phone || "";
-      document.getElementById("relationship").value = row.receptionist_relationship || "본인";
-      document.getElementById("contactMethod").value = typeCode === "PC" ? (row.contact_method || "") : "";
+      receptionistNameEl.value=row.receptionist_name||"";
+      receptionistPhoneEl.value=row.receptionist_phone||"";
+      relationshipEl.value=row.receptionist_relationship||"본인";
+      setSelectValueAllowCustom(document.getElementById("contactMethod"),row.contact_method||"");
 
-      document.getElementById("clientName").value = client.client_name || "";
-      clientPhoneEl.value = client.client_phone || "";
-      document.getElementById("gender").value = client.sex_code || "";
-      birthDateEl.value = client.birth_date || "";
-      updateClientAge();
-      document.getElementById("job").value = client.job_code || "";
-      document.getElementById("clientAddress").value = client.client_address || "";
+      clientNameEl.value=client.client_name||"";
+      clientPhoneEl.value=client.client_phone||"";
+      setSelectValueAllowCustom(document.getElementById("gender"),client.sex_code||"");
+      birthDateEl.value=client.birth_date||""; updateClientAge();
+      setSelectValueAllowCustom(document.getElementById("job"),client.job_code||"");
+      document.getElementById("clientAddress").value=client.client_address||"";
 
+      // 심리상담 기존 외국인 팝업 조회값 유지
       document.getElementById("foreignNationality").value = client.nationality || "";
       document.getElementById("foreignEntryDate").value = client.entry_date || "";
       document.getElementById("foreignExitDate").value = client.departure_date || "";
       document.getElementById("foreignNumber").value = client.foreigner_no || "";
       document.getElementById("foreignVisa").value = client.visa_type || "";
-      document.getElementById("foreignResult").value = client.legal_status || "";
+      setSelectValueAllowCustom(document.getElementById("foreignResult"), client.legal_status || "");
       openForeignModalBtn.textContent = client.nationality ? `외국인 · ${client.nationality}` : "외국인";
 
-      document.getElementById("consultationTarget").value = row.client_type_code || "";
-      document.getElementById("consultationTopic").value = row.topic_code || "";
-      details.value = typeCode === "CC" ? (row.counseling_content || "") : (row.application_content || "");
-      detailsCounter.textContent = `${details.value.length} / 1000`;
+      careerNameEl.value=client.client_name||"";
+      careerPhoneEl.value=client.client_phone||"";
+      setSelectValueAllowCustom(careerGenderEl,client.sex_code||"");
+      careerBirthDateEl.value=client.birth_date||""; updateCareerAge();
+      setSelectValueAllowCustom(careerStatusEl,client.client_status||"");
+      careerEmailEl.value=client.email||"";
+      careerAddressEl.value=client.client_address||"";
+      careerCompanyNameEl.value=client.company_name||"";
+      careerDepartmentNameEl.value=client.department_name||"";
+      careerPositionNameEl.value=client.position_name||"";
+      setSelectValueAllowCustom(careerNationalityEl,client.nationality||"");
+      careerEntryDateEl.value=client.entry_date||"";
+      careerExitDateEl.value=client.departure_date||"";
+      careerForeignerNoEl.value=client.foreigner_no||"";
+      careerVisaTypeEl.value=client.visa_type||"";
+      setSelectValueAllowCustom(careerLegalStatusEl,client.legal_status||"");
 
-      clearAllInvalid();
-      loadedClientId = client.id;
-      loadedRecordId = row.id;
-      loadedRecordType = typeCode;
-      setMode("loaded");
+      document.getElementById("consultationTarget").value=row.client_type_code||"";
+      document.getElementById("consultationTopic").value=row.topic_code||"";
+      details.value=typeCode==="CC"?(row.counseling_content||""):(row.application_content||"");
+      detailsCounter.textContent=`${details.value.length} / 1000`;
+
+      loadedClientId=client.id; loadedRecordId=row.id; loadedRecordType=typeCode;
+      clearAllInvalid(); setMode("loaded"); updateCounselTypeUI();
     }
 
     function showClientSelection(clients, typeCode) {
@@ -1519,17 +1691,19 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         return;
       }
 
-      const name = document.getElementById("clientName").value.trim();
-      const phone = clientPhoneEl.value.trim();
       const typeCode = getSelectedCounselType();
+      const lookupNameEl = typeCode === "CC" ? careerNameEl : clientNameEl;
+      const lookupPhoneEl = typeCode === "CC" ? careerPhoneEl : clientPhoneEl;
+      const name = lookupNameEl.value.trim();
+      const phone = lookupPhoneEl.value.trim();
 
-      markInvalid(document.getElementById("clientName"), !name);
+      markInvalid(lookupNameEl, !name);
       if (!name) {
         showLookupMsg("error", "내담자명을 입력해주세요.");
         return;
       }
       if (phone && !isValidPhone(phone)) {
-        markInvalid(clientPhoneEl, true);
+        markInvalid(lookupPhoneEl, true);
         showLookupMsg("error", "연락처 형식이 올바르지 않습니다. (예: 010-0000-0000)");
         return;
       }
@@ -1542,7 +1716,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       try {
         let query = sb
           .from(BASIC_TABLE)
-          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, client_address, job_code")
+          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_status, client_address, company_name, department_name, position_name, job_code")
           .eq("client_name", name)
           .order("created_at", { ascending: false });
         if (phone) query = query.eq("client_phone", phone);
