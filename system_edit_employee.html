@@ -44,7 +44,7 @@ thead th:nth-child(1),tbody td:nth-child(1){width:5%}thead th:nth-child(2),tbody
 .document-footer .footer-company{color:var(--blue-dark);font-size:30px;font-weight:950;letter-spacing:-1px;line-height:1;padding-top:10px;white-space:nowrap}
 @media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.top-row{align-items:flex-start;margin-bottom:16px}.grid-3,.grid-2{grid-template-columns:1fr}.form-pair{grid-template-columns:100px minmax(0,1fr)}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.action-frame{grid-template-columns:1fr}.action-buttons{justify-content:flex-start}.list-footer{flex-direction:column}.table-wrap{overflow-x:auto}table{min-width:760px}}
 @page{size:210mm 297mm;margin:12mm 7mm 29mm}
-@media print{html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page-wrap{padding:0!important;min-height:auto!important}.a4-page{width:100%!important;min-height:auto!important;max-width:none!important;padding:0!important;box-shadow:none!important}.top-row{margin-bottom:5mm!important}.main-button,.action-frame,.search-buttons{display:none!important}.section{margin-bottom:4mm!important}.section-body{padding:3mm 4mm 3.5mm!important}.section-head{min-height:10mm!important}.table-wrap{max-height:none!important;overflow:visible!important}.list-footer{font-size:9px!important}.document-footer{position:fixed;left:7mm;right:7mm;bottom:4mm;margin:0!important;padding:0!important;border-top:0!important;background:#fff!important}.document-footer .footer-rights{font-size:15pt!important;color:#6b7280!important;margin-bottom:1.5mm!important}.document-footer .footer-rule{border-top:1.2pt solid #1457a6!important}.document-footer .footer-company{font-size:30pt!important;padding-top:3mm!important}.a4-page::after{position:fixed!important;top:50%!important;font-size:65pt!important;transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;opacity:.075!important}}
+@media print{html,body{margin:0!important;padding:0!important;background:#fff!important;background-image:none!important;color-scheme:only light!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;forced-color-adjust:none!important}.page-wrap{padding:0!important;min-height:auto!important}.a4-page{width:100%!important;min-height:auto!important;max-width:none!important;padding:0!important;box-shadow:none!important}.top-row{margin-bottom:5mm!important}.main-button,.action-frame,.search-buttons{display:none!important}.section{margin-bottom:4mm!important}.section-body{padding:3mm 4mm 3.5mm!important}.section-head{min-height:10mm!important}.table-wrap{max-height:none!important;overflow:visible!important}.list-footer{font-size:9px!important}.document-footer{position:fixed;left:7mm;right:7mm;bottom:4mm;margin:0!important;padding:0!important;border-top:0!important;background:#fff!important}.document-footer .footer-rights{font-size:15pt!important;color:#6b7280!important;margin-bottom:1.5mm!important}.document-footer .footer-rule{border-top:1.2pt solid #1457a6!important}.document-footer .footer-company{font-size:30pt!important;padding-top:3mm!important}.a4-page::after{position:fixed!important;top:50%!important;font-size:65pt!important;transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;opacity:.075!important}}
 </style>
 </head>
 <body>
@@ -104,7 +104,7 @@ thead th:nth-child(1),tbody td:nth-child(1){width:5%}thead th:nth-child(2),tbody
 </div></section>
 
 <footer class="document-footer" aria-label="문서 바닥글">
-  <div class="footer-rights">이 문서의 권리는 마음:시나브로심리상담연구소입니다.</div>
+  <div class="footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</div>
   <div class="footer-rule"></div>
   <div class="footer-company">마음:시나브로심리상담연구소</div>
 </footer>
@@ -397,11 +397,12 @@ function savePdf(){
     return `<td class="${classes.join(" ")}">${pdfEsc(v)}</td>`;
   }).join("")}</tr>`).join("")||'<tr><td colspan="9">표시할 사용자 정보가 없습니다.</td></tr>';
 
-  const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>사용자등록현황_${koreaDateString()}</title><style>
+  const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>사용자등록현황_${koreaDateString()}</title><style>
 @page{size:210mm 297mm;margin:12mm 7mm 29mm}
 *{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;forced-color-adjust:none!important}
-html,body{margin:0;padding:0;background:#fff;color:#172033;font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif;color-scheme:light}
-body{font-size:8pt}.doc{position:relative;width:100%;padding-bottom:4mm}.doc>*:not(.watermark){position:relative;z-index:2}
+html{margin:0!important;padding:0!important;background-color:#fff!important;background-image:none!important;color-scheme:only light!important}
+body{margin:0!important;padding:0!important;background-color:#fff!important;background-image:none!important;color:#172033!important;font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif;color-scheme:only light!important;font-size:8pt}
+.doc{position:relative;width:100%;min-height:256mm;padding-bottom:4mm;background-color:#fff!important;background-image:none!important}.doc>*:not(.watermark){position:relative;z-index:2}
 .watermark{position:fixed;left:50%;top:50%;z-index:20;transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72);transform-origin:center;color:#c63c3c;font-size:65pt;font-weight:900;letter-spacing:1pt;white-space:nowrap;opacity:.075;pointer-events:none;user-select:none}
 .doc-head{height:15mm;border-bottom:1.4pt solid #123f78;margin-bottom:5mm;padding:0 1mm 2.5mm}.doc-head h1{margin:0;color:#123f78;font-size:20pt;line-height:1;font-weight:800;letter-spacing:-.5pt}.doc-head p{margin:3px 0 0;color:#657286;font-size:7.5pt}
 .sec{border:.65pt solid #6fa3dc;border-radius:4px;overflow:hidden;margin-bottom:5mm;break-inside:avoid;page-break-inside:avoid;background:rgba(255,255,255,.94)}.sec:last-of-type{margin-bottom:0}.sec-title{height:7.5mm;display:flex;align-items:center;padding:0 3mm;background:#eaf4ff;border-bottom:.55pt solid #a8c6e7;color:#1457a6;font-size:10.5pt;font-weight:800}.sec-body{padding:2mm 2.7mm 2.2mm}
@@ -427,7 +428,7 @@ body{font-size:8pt}.doc{position:relative;width:100%;padding-bottom:4mm}.doc>*:n
 <tr><td><div class="field-lab">이메일 주소</div><div class="box">${pdfEsc(pdfText("email","미등록"))}</div></td><td><div class="field-lab">권한 *</div><div class="box">${pdfEsc(pdfSelectedText("permission"))}</div></td><td><div class="field-lab">사용상태 *</div><div class="box ${isOn?"state-on":"state-off"}">${isOn?"ON · 접속허용":"OFF · 접속차단"}</div></td></tr>
 </table><div class="security"><b>접속 보안 기준:</b> 이메일의 존재 여부가 아니라 <b>사용상태</b>가 최우선입니다. ON이면 로그인/업무 접근을 허용하고, OFF이면 DB RLS 권한이 즉시 차단되며 다음 로그인도 거부됩니다. Auth User ID(UUID)는 화면에 표시하지 않습니다.</div></div></section>
 <section class="sec"><div class="sec-title">4. 사용자 등록 현황</div><div class="sec-body"><table class="list"><colgroup>${"<col>".repeat(9)}</colgroup><thead><tr><th>NO</th><th>사용자코드</th><th>직위</th><th>이름</th><th>이메일</th><th>메일등록</th><th>권한</th><th>Auth 연결</th><th>상태</th></tr></thead><tbody>${rowHtml}</tbody><tfoot><tr><td colspan="4">합계</td><td colspan="5">${pdfEsc(total)}건 · ON ${pdfEsc(active)}명 · OFF ${pdfEsc(inactive)}명 · 관리자 ${pdfEsc(admin)}명</td></tr></tfoot></table><div class="list-meta"><span>총 ${pdfEsc(total)}건 · 접속허용 ${pdfEsc(active)}명</span><span>※ OFF 사용자는 Auth 계정이 남아 있어도 RLS 및 로그인 검증에서 접속이 차단됩니다.</span></div></div></section>
-</main><footer class="footer"><div class="footer-rights">이 문서의 권리는 마음:시나브로심리상담연구소입니다.</div><div class="footer-rule"></div><div class="footer-company">마음:시나브로심리상담연구소</div></footer></body></html>`;
+</main><footer class="footer"><div class="footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</div><div class="footer-rule"></div><div class="footer-company">마음:시나브로심리상담연구소</div></footer></body></html>`;
 
   printWindow.document.open();printWindow.document.write(html);printWindow.document.close();
   const run=()=>{printWindow.focus();printWindow.print()};
