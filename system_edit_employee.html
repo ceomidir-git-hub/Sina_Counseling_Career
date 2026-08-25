@@ -21,8 +21,8 @@ button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
 .top-row{min-height:17mm;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--blue-dark);padding:0 2mm 4mm;margin-bottom:6mm}
 .top-title h1{margin:0;color:var(--blue-dark);font-size:29px;font-weight:950;letter-spacing:-1.3px;line-height:1}
 .top-title .subtitle{margin-top:7px;color:#657286;font-size:11.5px;font-weight:650}
-.top-actions{display:flex;align-items:center;gap:8px}.main-button{height:36px;padding:0 14px;border:1px solid var(--blue);border-radius:7px;background:#fff;color:var(--blue-dark);font-weight:900;font-size:12px}
-.main-button:hover{background:var(--blue-soft)}
+.top-actions{display:flex;align-items:center;gap:6px}.main-button{height:34px;padding:0 11px;border:1px solid var(--blue);border-radius:7px;background:#fff;color:var(--blue-dark);font-weight:900;font-size:11.5px;white-space:nowrap}
+.main-button:hover{background:var(--blue-soft)}.main-button.pdf{background:#1457a6;color:#fff}.main-button.pdf:hover{background:#123f78}
 .section{border:1px solid #6fa3dc;border-radius:6px;overflow:hidden;margin-bottom:5mm;break-inside:avoid;page-break-inside:avoid;background:#fff}
 .section-head{min-height:12mm;padding:0 4mm;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%);border-bottom:1px solid #a8c6e7}
 .section-head h2{margin:0;color:var(--blue);font-size:17px;font-weight:950;letter-spacing:-.5px}.section-body{padding:4mm 4mm 4.5mm;background:#fff}
@@ -35,11 +35,11 @@ button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
 .form-pair input,.form-pair select,.field input,.field select{width:100%;min-width:0;height:var(--field-h);padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);color:#161b22;outline:none;font-size:12.5px;font-weight:650}
 .form-pair input:focus,.form-pair select:focus,.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(20,87,166,.11)}
 .form-pair input[readonly],.field input[readonly]{background:#f3f6f9;color:#4b596c}.required{background:var(--yellow)!important}
-.search-buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:4mm}.btn{height:38px;padding:0 15px;border-radius:6px;border:1px solid var(--blue);background:#fff;color:var(--blue-dark);font-size:12px;font-weight:900;white-space:nowrap}
+.search-buttons{display:flex;justify-content:flex-end;gap:6px;margin-top:4mm}.btn{height:34px;padding:0 9px;border-radius:6px;border:1px solid var(--blue);background:#fff;color:var(--blue-dark);font-size:11.2px;font-weight:900;white-space:nowrap}
 .btn-blue{background:#1461bd;color:#fff;border-color:#1461bd}.btn-green{background:#16834b;color:#fff;border-color:#16834b}.btn-red{background:#c63c3c;color:#fff;border-color:#c63c3c}.btn-orange{background:#c77716;color:#fff;border-color:#c77716}
-.action-frame{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4mm;margin:0 0 5mm;padding:3mm 4mm;border:1px solid #cad8e7;border-radius:6px;background:#f8fbff}
-.guide-group{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}.guide-text{color:#5f6e82;font-size:11px;line-height:1.4}.access-badge{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:1px solid #cbd5e1;border-radius:999px;font-size:10.5px;font-weight:900;white-space:nowrap}
-.access-badge.admin{border-color:#9bd5b3;background:#effaf3;color:#08713f}.access-badge.viewer{border-color:#cbd5e1;background:#f8fafc;color:#475569}.action-buttons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.action-frame{display:grid;grid-template-columns:minmax(190px,1fr) auto;align-items:center;gap:8px;margin:0 0 5mm;padding:10px 12px;border:1px solid #cad8e7;border-radius:6px;background:#f8fbff}
+.guide-group{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}.guide-text{color:#5f6e82;font-size:10.5px;line-height:1.35;min-width:0}.access-badge{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:1px solid #cbd5e1;border-radius:999px;font-size:10.5px;font-weight:900;white-space:nowrap}
+.access-badge.admin{border-color:#9bd5b3;background:#effaf3;color:#08713f}.access-badge.viewer{border-color:#cbd5e1;background:#f8fafc;color:#475569}.action-buttons{display:flex;gap:4px;flex-wrap:nowrap;justify-content:flex-end;align-items:center}
 .notice{display:none;margin:0 0 4mm;padding:9px 11px;border-radius:7px;font-size:12px;font-weight:800;line-height:1.45}.notice.show{display:block}.notice.success{background:#effaf3;border:1px solid #bfe6cd;color:var(--green)}.notice.error{background:#fff1f1;border:1px solid #efc4c4;color:var(--red)}.notice.info{background:#eff6ff;border:1px solid #bfd6f5;color:#1d4f91}
 .editor-frame{display:none}.editor-frame.show{display:block}.mode-badge{padding:5px 10px;border-radius:999px;background:#e9eef7;color:#45556d;font-size:10.5px;font-weight:900}.mode-badge.new{background:#e7f7ef;color:#08713f}.mode-badge.edit{background:#fff3df;color:#9a560a}
 .switch-box{height:var(--field-h);display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow)}.switch-box input{width:17px;height:17px;margin:0;accent-color:var(--blue)}.switch-box label{font-size:12px;font-weight:850;color:#334155}
@@ -62,7 +62,7 @@ thead th:nth-child(1),tbody td:nth-child(1){width:5%}thead th:nth-child(2),tbody
       <h1>사용자 등록</h1>
       <div class="subtitle">시나브로 Counselling &amp; Career Plus Center · 사용자 기본정보 · 권한 · 이메일 등록 관리</div>
     </div>
-    <div class="top-actions"><button class="main-button" type="button" onclick="goBack()">← 이전화면</button></div>
+    <div class="top-actions"><button class="main-button" type="button" onclick="goBack()">← 이전화면</button><button class="main-button pdf" type="button" onclick="savePdf()">PDF 저장</button></div>
   </header>
 
   <section class="section">
@@ -205,7 +205,7 @@ function clearNotice(){
 function formatDbError(error){
   if(!error) return "알 수 없는 오류입니다.";
   if(error.code === "23505") return "같은 사용자코드 또는 이메일 주소가 이미 등록되어 있습니다.";
-  if(error.code === "23514") return "사용자코드는 A-001 형식이어야 하며 권한은 관리자 또는 조회자만 가능합니다.";
+  if(error.code === "23514") return "사용자코드는 A-001 형식이어야 하며 권한은 관리자, 사용자 또는 조회자만 가능합니다.";
   if(error.code === "23503") return "연결된 Auth 계정 또는 관련 데이터 때문에 처리할 수 없습니다.";
   if(error.code === "42501") return "현재 RLS 정책에서 이 작업이 허용되지 않습니다.";
   return error.message || String(error);
@@ -443,10 +443,51 @@ function startEdit(){
   document.getElementById("guideText").textContent="사용자 기본정보, 권한, 이메일 주소를 수정한 후 저장하세요.";
 }
 
-function clearMail(){
+async function callEmployeeAdminAction(action,employeeId){
+  const {data:{session},error:sessionError}=await sb.auth.getSession();
+  if(sessionError || !session?.access_token){
+    throw new Error("로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.");
+  }
+
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/manage-employee-auth`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_KEY,
+      "Authorization":`Bearer ${session.access_token}`
+    },
+    body:JSON.stringify({action,employee_id:employeeId})
+  });
+
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok || result?.ok!==true){
+    throw new Error(result?.error || result?.message || `처리 실패 (HTTP ${response.status})`);
+  }
+  return result;
+}
+
+async function clearMail(){
   if(mode!=="edit" || !isAdmin()) return;
-  document.getElementById("email").value="";
-  showNotice("이메일 입력값을 비웠습니다. 저장 버튼을 눌러야 DB에 반영됩니다.","info");
+  const row=selectedRow();
+  if(!row){ showNotice("메일을 삭제할 사용자를 선택해 주세요.","error"); return; }
+
+  const linked=Boolean(row.auth_user_id);
+  const message=linked
+    ? `${row.employee_code || ""} ${row.name || ""} 사용자의 메일을 삭제하시겠습니까?\n\n현재 Auth 로그인 계정도 함께 삭제되어 즉시 접속할 수 없게 됩니다.`
+    : `${row.employee_code || ""} ${row.name || ""} 사용자의 메일 주소를 삭제하시겠습니까?`;
+  if(!confirm(message)) return;
+
+  showLoading(true,linked?"메일 및 Auth 로그인 계정을 해제하는 중입니다...":"메일 주소를 삭제하는 중입니다...");
+  try{
+    const result=await callEmployeeAdminAction("clear_mail_and_auth",row.id);
+    await loadRows({preserveNotice:true});
+    showNotice(result.message || (linked?"메일과 Auth 로그인 연결을 모두 해제했습니다.":"메일 주소를 삭제했습니다."),"success");
+  }catch(error){
+    console.error("메일/Auth 삭제 오류:",error);
+    showNotice("메일 삭제 실패: "+(error?.message || String(error)),"error");
+  }finally{
+    showLoading(false);
+  }
 }
 
 async function saveRecord(){
@@ -465,6 +506,15 @@ async function saveRecord(){
   if(!name){ showNotice("이름을 입력해 주세요.","error"); return; }
   if(email && !isValidEmail(email)){ showNotice("이메일 주소 형식을 확인해 주세요.","error"); return; }
   if(!["관리자","사용자","조회자"].includes(permission)){ showNotice("권한은 관리자, 사용자 또는 조회자만 선택할 수 있습니다.","error"); return; }
+
+  if(mode==="edit"){
+    const original=selectedRow();
+    const originalEmail=normalizeText(original?.email).toLowerCase();
+    if(original?.auth_user_id && email!==originalEmail){
+      showNotice("Auth 연결 사용자의 이메일은 직접 변경하거나 비울 수 없습니다. 먼저 [메일삭제]로 Auth 연결을 해제한 뒤 새 이메일을 등록해 주세요.","error");
+      return;
+    }
+  }
 
   if(!confirm(mode==="new" ? "신규 사용자 정보를 등록하시겠습니까?" : "수정한 사용자 정보를 저장하시겠습니까?")) return;
 
@@ -499,18 +549,25 @@ async function deleteSelected(){
   if(!isAdmin()){ showNotice("관리자만 삭제할 수 있습니다.","error"); return; }
   if(!selectedId){ showNotice("삭제할 사용자를 선택해 주세요.","error"); return; }
   const row=selectedRow();
-  if(row?.auth_user_id){
-    showNotice("Auth 계정이 연결된 사용자는 화면에서 바로 삭제하지 않습니다. Auth 연결을 먼저 정리해야 합니다.","error");
-    return;
-  }
-  if(!confirm(`${row?.employee_code || ''} ${row?.name || ''} 사용자를 삭제하시겠습니까?`)) return;
+  if(!row){ showNotice("삭제할 사용자 정보를 찾을 수 없습니다.","error"); return; }
 
-  showLoading(true,"사용자 정보를 삭제하는 중입니다...");
-  const {error}=await sb.from("employee").delete().eq("id",selectedId);
-  showLoading(false);
-  if(error){ showNotice("삭제 실패: "+formatDbError(error),"error"); return; }
-  await loadRows({preserveNotice:true});
-  showNotice("사용자 정보가 삭제되었습니다.","success");
+  const linked=Boolean(row.auth_user_id);
+  const message=linked
+    ? `${row.employee_code || ""} ${row.name || ""} 사용자를 삭제하시겠습니까?\n\nemployee 정보와 Auth 로그인 계정이 모두 삭제되어 더 이상 접속할 수 없습니다.`
+    : `${row.employee_code || ""} ${row.name || ""} 사용자를 삭제하시겠습니까?`;
+  if(!confirm(message)) return;
+
+  showLoading(true,linked?"사용자 정보와 Auth 로그인 계정을 삭제하는 중입니다...":"사용자 정보를 삭제하는 중입니다...");
+  try{
+    const result=await callEmployeeAdminAction("delete_employee_and_auth",row.id);
+    await loadRows({preserveNotice:true});
+    showNotice(result.message || "사용자 정보가 삭제되었습니다.","success");
+  }catch(error){
+    console.error("사용자/Auth 삭제 오류:",error);
+    showNotice("삭제 실패: "+(error?.message || String(error)),"error");
+  }finally{
+    showLoading(false);
+  }
 }
 
 function searchRows(){
@@ -522,6 +579,17 @@ function resetSearch(){
   applySearch();
   document.getElementById("guideText").textContent="조회조건을 초기화했습니다.";
 }
+function savePdf(){
+  const now=new Date();
+  const y=now.getFullYear();
+  const m=String(now.getMonth()+1).padStart(2,"0");
+  const d=String(now.getDate()).padStart(2,"0");
+  const oldTitle=document.title;
+  document.title=`사용자등록현황_${y}-${m}-${d}`;
+  window.print();
+  setTimeout(()=>{ document.title=oldTitle; },500);
+}
+
 function goBack(){
   if(window.history.length > 1){
     window.history.back();
