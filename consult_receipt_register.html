@@ -137,7 +137,80 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     margin:2mm 0 0!important;text-align:center!important;color:var(--blue-dark)!important;
     font-size:23pt!important;font-weight:900!important;line-height:1!important;letter-spacing:-1px!important;
   }
+
+  /* ===== PDF 입력폼 화면 배치 준수 (A4 세로 1페이지) =====
+     화면의 2열 구조를 인쇄에서도 강제로 유지한다.
+     print viewport가 760px 이하로 계산되어도 모바일 1열 규칙을 무효화한다. */
+  .section-head{
+    min-height:11mm!important;
+    height:11mm!important;
+    padding:0 4mm!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+  }
+  .section-head h2{font-size:15pt!important;white-space:nowrap!important}
+  .section-consult-type{
+    width:auto!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:2mm!important;
+    white-space:nowrap!important;
+  }
+  .section-consult-label{font-size:9.6pt!important}
+  .section-head .consult-type-group{gap:4mm!important}
+  .section-head .consult-type-option{font-size:9.6pt!important}
+
+  .section{margin-bottom:5mm!important}
+  .section-body{padding:4mm 4.5mm!important}
+  .grid-2{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    column-gap:5mm!important;
+    row-gap:3.4mm!important;
+  }
+  .form-pair{
+    min-width:0!important;
+    display:grid!important;
+    grid-template-columns:30.5mm minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:2.5mm!important;
+  }
+  .form-pair.full{
+    grid-column:1 / -1!important;
+    grid-template-columns:30.5mm minmax(0,1fr)!important;
+  }
+  .form-pair label,.detail-label{font-size:11.5pt!important;white-space:nowrap!important}
+  :root{--field-h:9.2mm!important}
+  .field,input[type="text"],input[type="tel"],input[type="date"],select{
+    height:9.2mm!important;
+    font-size:11pt!important;
+    padding:0 3mm!important;
+  }
+  .date-time{grid-template-columns:minmax(0,1.35fr) minmax(0,.75fr)!important;gap:2mm!important}
+  .date-inline-wrap{height:9.2mm!important}
+  .date-inline-display{height:9.2mm!important;padding:0 3mm!important}
+  .radio-panel{height:9.2mm!important;padding:0 3mm!important}
+  .foreign-btn{height:8mm!important;padding:0 4mm!important;font-size:10.5pt!important}
+  .detail-grid{
+    display:grid!important;
+    grid-template-columns:30.5mm minmax(0,1fr)!important;
+    gap:2.5mm!important;
+    align-items:start!important;
+    margin-top:3.5mm!important;
+  }
+  textarea{
+    height:44mm!important;
+    min-height:44mm!important;
+    max-height:44mm!important;
+    font-size:11pt!important;
+    padding:3.2mm!important;
+  }
+  .counter{font-size:8.5pt!important;right:2mm!important;bottom:1.5mm!important}
 }
+
 </style>
 </head>
 <body>
