@@ -282,6 +282,221 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   body.career-mode #details{height:28mm!important;min-height:28mm!important;max-height:28mm!important}
 }
 
+
+/* ==========================================================
+   FINAL PDF FIX 2026-08-26
+   진로상담 A4 세로 1페이지 / 화면 배치 유지
+   ========================================================== */
+@page{
+  size:A4 portrait;
+  margin:0;
+}
+
+@media print{
+  html,body{
+    width:210mm!important;
+    min-height:297mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    background:#fff!important;
+  }
+
+  /* @page margin 0 대신 문서 자체 내부 여백으로 관리 */
+  .page-wrap{
+    width:210mm!important;
+    min-height:297mm!important;
+    padding:0!important;
+    margin:0!important;
+    display:block!important;
+  }
+  .a4-page{
+    width:210mm!important;
+    min-height:297mm!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:9mm 7mm 23mm!important;
+    box-shadow:none!important;
+    background:#fff!important;
+  }
+
+  /* 머릿글 */
+  .top-row{
+    min-height:13mm!important;
+    height:13mm!important;
+    margin:0 0 2.2mm!important;
+    padding:0 0 2mm!important;
+  }
+  .top-row h1{font-size:23pt!important}
+  .pdf-doc-subtitle{font-size:7.5pt!important}
+
+  /* 화면 전용 요소 제외 */
+  .pdf-btn,.actions,.bottom-hint,.modal-backdrop,
+  .statusMsg,.edit-mode-badge,.lookup-selection{
+    display:none!important;
+  }
+
+  /* 모든 본문 섹션 */
+  .section{
+    margin-bottom:2.2mm!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  .section-head{
+    min-height:8mm!important;
+    height:8mm!important;
+    padding:0 3mm!important;
+    flex-direction:row!important;
+    align-items:center!important;
+  }
+  .section-head h2{
+    font-size:15pt!important;
+    white-space:nowrap!important;
+  }
+  .section-body{
+    padding:2.2mm 3mm!important;
+  }
+
+  /* 1. 접수정보: 반드시 4열 + 2열 */
+  .receipt-row-4{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:1.7mm!important;
+    margin-bottom:1.5mm!important;
+  }
+  .receipt-row-2{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:3mm!important;
+  }
+  .receipt-row-4 .receipt-pair{
+    grid-template-columns:13mm minmax(0,1fr)!important;
+    gap:.6mm!important;
+  }
+  .receipt-row-2 .receipt-pair{
+    grid-template-columns:16mm minmax(0,1fr)!important;
+    gap:.6mm!important;
+  }
+  .receipt-pair label{
+    font-size:9pt!important;
+  }
+  .receipt-pair input,
+  .receipt-pair select{
+    height:7.4mm!important;
+    font-size:9pt!important;
+    padding:0 1.6mm!important;
+  }
+  .receipt-date-time{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.5fr) minmax(48px,.62fr)!important;
+    gap:1mm!important;
+  }
+  .date-inline-wrap,
+  .date-inline-display{
+    height:7.4mm!important;
+  }
+
+  /* 2. 진로정보:
+     print viewport가 760px 이하라도 모바일 1열 규칙을 완전히 무효화 */
+  body.career-mode .career-info .section-body{
+    padding:1.7mm 2.5mm!important;
+  }
+  body.career-mode .career-subgroup{
+    margin-bottom:1.4mm!important;
+  }
+  body.career-mode .career-subgroup-head{
+    min-height:6mm!important;
+    height:6mm!important;
+    padding:0 2.2mm!important;
+  }
+  body.career-mode .career-subgroup-head h3{
+    font-size:9.8pt!important;
+  }
+  body.career-mode .subgroup-note{
+    font-size:8pt!important;
+  }
+  body.career-mode .career-subgroup-body{
+    padding:1.4mm 2mm!important;
+  }
+
+  body.career-mode .personal-row-3{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:1.1mm 2.5mm!important;
+    margin-bottom:1.1mm!important;
+  }
+  body.career-mode .personal-row-2{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:1.1mm 3mm!important;
+  }
+  body.career-mode .company-row-3,
+  body.career-mode .foreign-row-3{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:1.1mm 2.5mm!important;
+  }
+  body.career-mode .compact-pair{
+    display:grid!important;
+    grid-template-columns:13mm minmax(0,1fr)!important;
+    gap:.25mm!important;
+  }
+  body.career-mode .personal-row-2 .compact-pair:last-child{
+    grid-template-columns:8mm minmax(0,1fr)!important;
+    gap:.1mm!important;
+  }
+  body.career-mode .compact-pair label{
+    font-size:8.8pt!important;
+  }
+  body.career-mode .compact-pair input,
+  body.career-mode .compact-pair select{
+    height:6.8mm!important;
+    font-size:8.8pt!important;
+    padding:0 1.5mm!important;
+  }
+  body.career-mode .inline-note{
+    margin-top:.8mm!important;
+    padding:.7mm 1.5mm!important;
+    font-size:7.4pt!important;
+  }
+
+  /* 3. 상담신청내용 */
+  body.career-mode #consultationTarget,
+  body.career-mode #consultationTopic{
+    height:7.4mm!important;
+    font-size:9pt!important;
+  }
+  body.career-mode .detail-grid{
+    margin-top:1.5mm!important;
+  }
+  body.career-mode #details{
+    height:24mm!important;
+    min-height:24mm!important;
+    max-height:24mm!important;
+    font-size:9pt!important;
+    line-height:1.35!important;
+    padding:2mm!important;
+  }
+  body.career-mode .counter{
+    font-size:7.5pt!important;
+  }
+
+  /* 고정 워터마크/바닥글 */
+  .pdf-footer{
+    left:7mm!important;
+    right:7mm!important;
+    bottom:4mm!important;
+  }
+  .footer-rights{
+    font-size:17px!important;
+    margin-bottom:1mm!important;
+  }
+  .footer-company{
+    font-size:23pt!important;
+    margin-top:2mm!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1093,6 +1308,13 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       psychInfoSection.classList.toggle("info-hidden", isCareer);
       careerInfoSection.classList.toggle("info-hidden", !isCareer);
       document.body.classList.toggle("career-mode", isCareer);
+
+      const pdfSubtitle = document.querySelector(".pdf-doc-subtitle");
+      if (pdfSubtitle) {
+        pdfSubtitle.textContent = isCareer
+          ? "시나브로 Counselling & Career Plus Center · 접수정보 · 진로정보 · 상담신청내용"
+          : "시나브로 Counselling & Career Plus Center · 접수정보 · 내담자정보 · 상담신청내용";
+      }
       if (mode === "new" && relationshipEl?.value === "본인"){
         if (isCareer){
           careerNameEl.value = receptionistNameEl.value;
@@ -1335,12 +1557,26 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         const status = careerStatusEl.value;
         const email = careerEmailEl.value.trim();
 
-        markInvalid(careerNameEl,!clientName); if(!clientName) hasError=true;
-        markInvalid(careerPhoneEl,!isValidPhone(clientPhone)); if(!isValidPhone(clientPhone)) hasError=true;
-        markInvalid(careerGenderEl,!gender); if(!gender) hasError=true;
-        markInvalid(careerBirthDateEl,!isValidBirthDate(birth)); if(!isValidBirthDate(birth)) hasError=true;
-        markInvalid(careerStatusEl,!status); if(!status) hasError=true;
-        markInvalid(careerEmailEl,!isValidEmail(email)); if(!isValidEmail(email)) hasError=true;
+        // 진로정보 필수값은 '이름 + 전화번호' 2개로 한정한다.
+        markInvalid(careerNameEl, !clientName);
+        if (!clientName) hasError = true;
+
+        const careerPhoneValid = isValidPhone(clientPhone);
+        markInvalid(careerPhoneEl, !careerPhoneValid);
+        if (!careerPhoneValid) hasError = true;
+
+        // 나머지는 선택입력.
+        // 단, 사용자가 값을 입력한 경우에만 형식 오류를 검사한다.
+        markInvalid(careerGenderEl, false);
+        markInvalid(careerStatusEl, false);
+
+        const birthInvalid = !!birth && !isValidBirthDate(birth);
+        markInvalid(careerBirthDateEl, birthInvalid);
+        if (birthInvalid) hasError = true;
+
+        const emailInvalid = !!email && !isValidEmail(email);
+        markInvalid(careerEmailEl, emailInvalid);
+        if (emailInvalid) hasError = true;
 
         basicPayload = {
           counsel_type:"CC",
@@ -1350,14 +1586,20 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           foreigner_no:emptyToNull(careerForeignerNoEl.value),
           visa_type:emptyToNull(careerVisaTypeEl.value),
           legal_status:emptyToNull(careerLegalStatusEl.value),
-          client_name:clientName, sex_code:gender, birth_date:birth,
+
+          client_name:clientName,
           client_phone:clientPhone,
+
+          // 선택입력은 비어 있으면 NULL
+          sex_code:emptyToNull(gender),
+          birth_date:emptyToNull(birth),
           email:emptyToNull(email),
           client_status:emptyToNull(status),
           client_address:emptyToNull(careerAddressEl.value),
           company_name:emptyToNull(careerCompanyNameEl.value),
           department_name:emptyToNull(careerDepartmentNameEl.value),
           position_name:emptyToNull(careerPositionNameEl.value),
+
           updated_at:new Date().toISOString()
         };
       }
@@ -1484,7 +1726,12 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
       const { hasError, counselType, basicPayload, sessionPayload } = collectAndValidateFormData();
       if (hasError) {
-        showStatus("error", "접수 정보와 필수 입력값을 확인해주세요. 방문일시를 입력했다면 날짜와 시간을 모두 입력해주세요.");
+        showStatus(
+          "error",
+          counselType === "CC"
+            ? "진로정보의 필수 입력값은 이름과 전화번호입니다. 선택항목을 입력했다면 입력 형식도 확인해주세요."
+            : "접수 정보와 필수 입력값을 확인해주세요. 방문일시를 입력했다면 날짜와 시간을 모두 입력해주세요."
+        );
         return;
       }
 
@@ -1768,7 +2015,12 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
       const { hasError, counselType, basicPayload, sessionPayload } = collectAndValidateFormData();
       if (hasError) {
-        showStatus("error", "접수 정보와 필수 입력값을 확인해주세요. 방문일시를 입력했다면 날짜와 시간을 모두 입력해주세요.");
+        showStatus(
+          "error",
+          counselType === "CC"
+            ? "진로정보의 필수 입력값은 이름과 전화번호입니다. 선택항목을 입력했다면 입력 형식도 확인해주세요."
+            : "접수 정보와 필수 입력값을 확인해주세요. 방문일시를 입력했다면 날짜와 시간을 모두 입력해주세요."
+        );
         return;
       }
       const typeChanged = counselType !== loadedRecordType;
