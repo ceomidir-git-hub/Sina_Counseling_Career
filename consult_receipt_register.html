@@ -82,44 +82,60 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   .a4-page{position:relative!important;z-index:1!important;width:100%!important;min-height:auto!important;max-width:none!important;padding:0!important;box-shadow:none!important;background:transparent!important}
 
   /* 머릿글: 문서 제목 + 부제 + 하단 실선 */
-  .top-row{min-height:17mm!important;margin:0 0 5mm!important;padding:0 0 3mm!important;border-bottom:1.2pt solid var(--blue-dark)!important;align-items:flex-end!important}
-  .title-block{display:flex!important;flex-direction:column!important;gap:2mm!important}
+  .top-row{min-height:13mm!important;margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1.2pt solid var(--blue-dark)!important;align-items:flex-end!important}
+  .title-block{display:flex!important;flex-direction:column!important;gap:1mm!important}
   .top-row h1{font-size:23pt!important;line-height:1!important;letter-spacing:-1px!important}
-  .pdf-doc-subtitle{display:block!important;margin:0!important;color:#5f6b7a!important;font-size:8.5pt!important;font-weight:700!important;letter-spacing:-.2px!important;white-space:nowrap!important}
+  .pdf-doc-subtitle{display:block!important;margin:0!important;color:#5f6b7a!important;font-size:7.5pt!important;font-weight:700!important;letter-spacing:-.2px!important;white-space:nowrap!important}
 
   /* 화면 전용 기능은 PDF에서 제외 */
   .pdf-btn,.actions,.bottom-hint,.modal-backdrop,.statusMsg,.edit-mode-badge,.lookup-selection{display:none!important}
 
   /* 본문: 번호 프레임 간격 5mm */
-  .section{margin-bottom:5mm!important;background:#fff!important}
-  .section-body{padding:3mm 4mm 3.5mm!important;background:#fff!important}
-  .section-head{min-height:10mm!important}
-  textarea{height:35mm!important;min-height:35mm!important;max-height:35mm!important}
+  .section{margin-bottom:3mm!important;background:#fff!important}
+  .section-body{padding:2mm 3mm 2.5mm!important;background:#fff!important}
+  .section-head{min-height:8mm!important;padding:0 3mm!important}
+  textarea{height:24mm!important;min-height:24mm!important;max-height:24mm!important}
   .date-inline-picker{display:none!important}.date-inline-wrap::after{display:none!important}.date-inline-display{padding-right:9px!important;background:#fff!important}
   input,select,textarea,.radio-panel{background:#fff!important;box-shadow:none!important}
+  :root{--field-h:30px!important}
+  .grid-2{gap:2mm 5mm!important}
+  .form-pair,.form-pair.full{grid-template-columns:28mm minmax(0,1fr)!important;gap:2mm!important}
+  .form-pair label,.detail-label{font-size:11.5pt!important}
+  .field,input[type="text"],input[type="tel"],input[type="date"],select{height:30px!important;font-size:11pt!important;padding:0 7px!important}
+  .radio-panel{height:30px!important;padding:0 7px!important}
+  .radio-panel label,.consult-type-option{font-size:10.5pt!important}
+  .detail-grid{grid-template-columns:28mm minmax(0,1fr)!important;gap:2mm!important;margin-top:2mm!important}
+  .section-head h2{font-size:15pt!important}
+  .foreign-btn{height:26px!important;font-size:10.5pt!important}
+  .section-consult-label{font-size:10pt!important}
+  textarea{font-size:10.5pt!important}
+  .counter{font-size:8.5pt!important}
+  .auto-sync-note{font-size:8.5pt!important}
+  .time-number-input::placeholder{font-size:9pt!important}
 
-  /* 워터마크: 65pt / 중앙 / -32deg / 7.5% / scaleX(.72) */
+  /* 워터마크: 65pt / 중앙 / -32deg / 11.25% / scaleX(.72) */
   .pdf-watermark{
     display:block!important;position:fixed!important;left:50%!important;top:50%!important;
     transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;
     transform-origin:center!important;z-index:9998!important;pointer-events:none!important;user-select:none!important;
     white-space:nowrap!important;font-size:65pt!important;font-weight:900!important;line-height:1!important;
-    color:#b91c1c!important;opacity:.075!important;letter-spacing:-2px!important;
+    color:#b91c1c!important;opacity:.1125!important;letter-spacing:-2px!important;
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
   }
 
-  /* 바닥글: 하단 4mm / 권리문구 15pt / 구분선 1.2pt / 회사명 30pt */
+  /* 바닥글: 하단 4mm / 권리문구 17px(사용자 관리현황 제목과 동일) / 구분선 1.2pt / 회사명은 머릿글 제목과 동일 23pt */
   .pdf-footer{
     display:block!important;position:fixed!important;left:0!important;right:0!important;bottom:4mm!important;
     z-index:9999!important;background:#fff!important;pointer-events:none!important;
   }
   .footer-rights{
-    margin:0 0 1.5mm!important;text-align:left!important;color:#6b7280!important;
-    font-size:15pt!important;font-weight:500!important;line-height:1.25!important;
+    margin:0 0 1mm!important;text-align:left!important;color:#6b7280!important;
+    font-size:17px!important;font-weight:500!important;line-height:1.25!important;
   }
   .footer-divider{height:0!important;border:0!important;border-top:1.2pt solid var(--blue)!important;margin:0!important}
   .footer-company{
-    margin:3mm 0 0!important;text-align:center!important;color:var(--blue-dark)!important;
-    font-size:30pt!important;font-weight:900!important;line-height:1!important;letter-spacing:-1px!important;
+    margin:2mm 0 0!important;text-align:center!important;color:var(--blue-dark)!important;
+    font-size:23pt!important;font-weight:900!important;line-height:1!important;letter-spacing:-1px!important;
   }
 }
 </style>
