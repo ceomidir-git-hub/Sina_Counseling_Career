@@ -1630,10 +1630,13 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           const { error: sessionError } = await sb
             .from(tableName)
             .update(sessionPayload)
-            .eq("id", loadedRecordId);
+            .eq("id", loadedRecordId)
+            .eq("client_id", loadedClientId);
           if (sessionError) throw sessionError;
         } else {
-          const oldTable = getSessionTable(loadedRecordType);
+          const previousRecordId = loadedRecordId;
+          const previousRecordType = loadedRecordType;
+          const oldTable = getSessionTable(previousRecordType);
           const newTable = getSessionTable(counselType);
 
           const { error: oldRecordError } = await sb
@@ -1642,23 +1645,30 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
               record_active: false,
               updated_at: new Date().toISOString()
             })
-            .eq("id", loadedRecordId)
+            .eq("id", previousRecordId)
             .eq("client_id", loadedClientId);
           if (oldRecordError) throw oldRecordError;
 
-          const { error: newRecordError } = await sb
+          // 상담구분 변경 시 새 레코드의 ID를 반드시 받아 두어야
+          // 저장 직후에도 새 레코드를 계속 조회/수정할 수 있다.
+          const { data: newRecord, error: newRecordError } = await sb
             .from(newTable)
             .insert([{
               ...sessionPayload,
               client_id: loadedClientId,
               record_active: true
-            }]);
-          if (newRecordError) {
+            }])
+            .select("id")
+            .single();
+
+          if (newRecordError || !newRecord?.id) {
+            // 새 레코드 생성 실패 시 기존 레코드를 다시 활성화한다.
             await sb
               .from(oldTable)
               .update({ record_active: true, updated_at: new Date().toISOString() })
-              .eq("id", loadedRecordId);
-            throw newRecordError;
+              .eq("id", previousRecordId)
+              .eq("client_id", loadedClientId);
+            throw newRecordError || new Error("변경된 상담구분의 새 레코드 ID를 확인하지 못했습니다.");
           }
 
           const { error: basicError } = await sb
@@ -1668,16 +1678,37 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
               counsel_type: "BOTH"
             })
             .eq("id", loadedClientId);
-          if (basicError) throw basicError;
+
+          if (basicError) {
+            // 기본정보 갱신 실패 시 가능한 범위에서 원상복구한다.
+            await sb
+              .from(newTable)
+              .update({ record_active: false, updated_at: new Date().toISOString() })
+              .eq("id", newRecord.id)
+              .eq("client_id", loadedClientId);
+            await sb
+              .from(oldTable)
+              .update({ record_active: true, updated_at: new Date().toISOString() })
+              .eq("id", previousRecordId)
+              .eq("client_id", loadedClientId);
+            throw basicError;
+          }
+
+          // 중요: 변경 후에는 새 레코드를 현재 수정 대상 레코드로 전환한다.
+          loadedRecordId = newRecord.id;
+          loadedRecordType = counselType;
         }
+
+        // 중요: 수정 저장 후 폼을 초기화하지 않는다.
+        // 현재 레코드 ID/내담자 ID/상담구분을 유지한 채 계속 조회·수정 대기 모드로 둔다.
+        setMode("loaded");
 
         showStatus(
           "success",
           typeChanged
-            ? "상담구분을 변경하여 정상적으로 저장했습니다. 기존 접수 기록은 변경이력으로 보존됩니다."
-            : "수정한 접수 상담 정보가 정상적으로 저장되었습니다."
+            ? "상담구분을 변경하여 저장했습니다. 새 기록이 현재 수정 대상으로 유지됩니다. 기존 기록은 변경이력으로 보존됩니다."
+            : "수정한 접수 상담 정보가 저장되었습니다. 현재 데이터는 조회·수정 대기 모드로 유지됩니다."
         );
-        resetFormToNewMode();
       } catch (error) {
         console.error(error);
         showStatus("error", "수정 저장 중 오류가 발생했습니다: " + (error?.message || error));
