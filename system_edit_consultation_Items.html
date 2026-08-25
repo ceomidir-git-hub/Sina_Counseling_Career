@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>상담항목 등록 · 관리</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --ink:#1f2937;
+      --line:#cbd5e1;
+      --line-strong:#64748b;
+      --muted:#64748b;
+      --paper:#ffffff;
+      --page:#eef2f6;
+      --input:#fff9d9;
+      --head:#f1f5f9;
+      --accent:#334155;
+      --danger:#991b1b;
+      --good:#166534;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--page);color:var(--ink);font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif}
+    body{padding:18px}
+    button,input,select{font:inherit}
+    .paper{
+      width:min(1100px,100%);
+      min-height:calc(100vh - 36px);
+      margin:0 auto;
+      background:var(--paper);
+      border:1px solid #d6dce4;
+      box-shadow:0 10px 28px rgba(15,23,42,.08);
+      padding:28px 34px 22px;
+      display:flex;
+      flex-direction:column;
+    }
+    .doc-head{border-top:3px solid #111827;border-bottom:1px solid var(--line-strong);padding:13px 2px 12px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
+    .brand{font-size:14px;font-weight:700;letter-spacing:-.2px;color:#475569;margin-bottom:5px}
+    h1{font-size:25px;line-height:1.15;margin:0;letter-spacing:-1px;color:#111827}
+    .head-meta{font-size:12px;line-height:1.65;text-align:right;color:#475569;white-space:nowrap}
+    .head-meta strong{color:#111827}
+
+    .guide{margin:15px 0 12px;border:1px solid var(--line);background:#f8fafc;padding:10px 13px;font-size:13px;line-height:1.65}
+    .guide b{color:#111827}
+
+    .section-title{margin:12px 0 7px;font-size:14px;font-weight:800;color:#111827;display:flex;align-items:center;gap:7px}
+    .section-title:before{content:"";width:4px;height:15px;background:#475569;display:inline-block}
+
+    .tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px}
+    .tab{height:42px;border:1px solid var(--line-strong);background:white;font-weight:700;cursor:pointer;border-radius:2px}
+    .tab:hover{background:#f8fafc}
+    .tab.active{background:#334155;color:white;border-color:#334155}
+
+    .form-grid{display:grid;grid-template-columns:150px minmax(180px,1fr) 150px minmax(180px,1fr);border-top:1px solid var(--line-strong);border-left:1px solid var(--line-strong)}
+    .label,.field{min-height:48px;border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);display:flex;align-items:center;padding:7px 10px}
+    .label{background:var(--head);font-size:13px;font-weight:800;justify-content:center;text-align:center}
+    .field{background:#fff}
+    .field input,.field select{width:100%;height:34px;border:1px solid #aeb8c5;border-radius:2px;background:var(--input);padding:0 10px;color:#111827;outline:none}
+    .field input:focus,.field select:focus{border-color:#334155;box-shadow:0 0 0 2px rgba(51,65,85,.10)}
+    .field input[readonly],.field select:disabled{background:#f4f4f5;color:#52525b}
+    .field .value-static{font-size:13px;color:#475569}
+
+    .toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0 15px;align-items:center}
+    .btn{height:38px;min-width:84px;padding:0 15px;border:1px solid #64748b;background:#fff;color:#1f2937;border-radius:3px;font-weight:800;font-size:13px;cursor:pointer}
+    .btn:hover:not(:disabled){background:#f1f5f9}
+    .btn.primary{background:#334155;color:white;border-color:#334155}
+    .btn.danger{color:var(--danger);border-color:#b91c1c}
+    .btn:disabled{opacity:.42;cursor:not-allowed}
+    .spacer{flex:1}
+    .mode-badge{height:32px;display:inline-flex;align-items:center;padding:0 10px;border:1px solid var(--line);background:#f8fafc;font-size:12px;font-weight:800}
+
+    .search-row{display:grid;grid-template-columns:120px minmax(220px,1fr) 150px 130px 100px;gap:7px;align-items:center;margin-bottom:8px}
+    .search-row label{font-size:13px;font-weight:800;text-align:right;padding-right:6px}
+    .search-row input,.search-row select{height:36px;border:1px solid #aeb8c5;background:var(--input);padding:0 10px}
+
+    .table-wrap{border:1px solid var(--line-strong);overflow:auto;min-height:250px;max-height:420px}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
+    thead th{position:sticky;top:0;background:#e9eef4;color:#111827;border-bottom:1px solid var(--line-strong);border-right:1px solid var(--line);height:39px;padding:7px 6px;z-index:1}
+    tbody td{border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;height:38px;padding:6px 8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    tbody tr{cursor:pointer}
+    tbody tr:hover{background:#f8fafc}
+    tbody tr.selected{background:#e8edf3;font-weight:700}
+    .left{text-align:left}
+    .active-yes{color:var(--good);font-weight:800}
+    .active-no{color:var(--danger);font-weight:800}
+    .empty{height:150px!important;color:#64748b;text-align:center!important}
+
+    .pager{display:flex;justify-content:center;align-items:center;gap:7px;padding:9px 0 2px}
+    .pager button{height:30px;min-width:35px;border:1px solid var(--line);background:white;cursor:pointer}
+    .pager button:disabled{opacity:.4;cursor:not-allowed}
+    .pager span{font-size:12px;color:#475569;min-width:110px;text-align:center}
+
+    .foot-note{font-size:12px;line-height:1.6;color:#64748b;margin-top:7px}
+    .copyright{margin-top:auto;padding-top:18px;border-top:1px solid #d6dce4;font-size:15pt;color:#555;text-align:left;line-height:1.3}
+
+    .toast{position:fixed;left:50%;top:28px;transform:translateX(-50%) translateY(-15px);z-index:9999;min-width:340px;max-width:min(680px,90vw);padding:12px 16px;border-radius:6px;background:#111827;color:white;font-size:13px;font-weight:700;box-shadow:0 12px 26px rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:.22s}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.error{background:#7f1d1d}
+    .toast.success{background:#14532d}
+
+    .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;z-index:9998;padding:18px}
+    .modal-backdrop.show{display:flex}
+    .modal{width:min(450px,100%);background:white;border:1px solid #94a3b8;box-shadow:0 20px 50px rgba(0,0,0,.22);padding:19px}
+    .modal h3{margin:0 0 10px;font-size:17px}
+    .modal p{margin:0 0 18px;font-size:13px;line-height:1.65;white-space:pre-line}
+    .modal-actions{display:flex;justify-content:flex-end;gap:7px}
+
+    @media(max-width:760px){
+      body{padding:8px}.paper{padding:18px 14px}.doc-head{grid-template-columns:1fr}.head-meta{text-align:left}.tabs{grid-template-columns:repeat(2,1fr)}
+      .form-grid{grid-template-columns:110px 1fr}.label,.field{min-height:45px}.search-row{grid-template-columns:90px 1fr}.search-row label{text-align:left}.search-row select,.search-row .search-btn{grid-column:auto}
+      .copyright{font-size:13pt}
+    }
+    @media print{
+      @page{size:A4 portrait;margin:14mm 12mm 18mm 12mm}
+      body{background:#fff;padding:0}.paper{width:auto;min-height:auto;border:0;box-shadow:none;padding:0}.toolbar,.search-row,.pager,.toast,.modal-backdrop{display:none!important}.table-wrap{max-height:none;overflow:visible}.copyright{margin-top:16px}
+    }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">확인</h3>
+      <p id="modalMessage"></p>
+      <div class="modal-actions">
+        <button class="btn" id="modalCancel">취소</button>
+        <button class="btn primary" id="modalOk">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="paper">
+    <header class="doc-head">
+      <div>
+        <div class="brand">마음:시나브로심리상담연구소</div>
+        <h1>상담항목 등록 · 관리</h1>
+      </div>
+      <div class="head-meta">
+        <div>문서구분 <strong>시스템 설정</strong></div>
+        <div>접속권한 <strong id="userPermission">확인 중</strong></div>
+        <div>사용자 <strong id="userName">확인 중</strong></div>
+      </div>
+    </header>
+
+    <div class="guide">
+      <b>사용 목적</b> · 상담 시스템에서 사용하는 공통 항목과 외국인 상담용 비자·국가 항목을 이 화면에서 직접 추가·조회·수정·삭제합니다.<br>
+      앞으로 항목이 변경되어도 Supabase 관리화면에 직접 들어가지 않고 본 화면에서 유지관리할 수 있도록 구성했습니다.
+    </div>
+
+    <div class="section-title">관리 항목 선택</div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-key="clientType">상담대상</button>
+      <button class="tab" data-key="topic">상담주제</button>
+      <button class="tab" data-key="inspection">검사도구</button>
+      <button class="tab" data-key="job">직업</button>
+      <button class="tab" data-key="sex">성별</button>
+      <button class="tab" data-key="visa">비자</button>
+      <button class="tab" data-key="country">국가</button>
+    </div>
+
+    <div class="section-title">항목 입력</div>
+    <div class="form-grid">
+      <div class="label">관리구분</div>
+      <div class="field"><div class="value-static" id="categoryName">상담대상</div></div>
+      <div class="label">작업상태</div>
+      <div class="field"><div class="value-static" id="modeText">조회</div></div>
+
+      <div class="label">코드</div>
+      <div class="field"><input id="code" maxlength="30" autocomplete="off" placeholder="예: CT01" readonly></div>
+      <div class="label">표시순서</div>
+      <div class="field"><input id="sortOrder" type="number" min="0" step="1" placeholder="숫자 입력" readonly></div>
+
+      <div class="label">항목명</div>
+      <div class="field"><input id="name" maxlength="100" autocomplete="off" placeholder="항목명을 입력하세요" readonly></div>
+      <div class="label">사용여부</div>
+      <div class="field">
+        <select id="active" disabled>
+          <option value="true">사용</option>
+          <option value="false">미사용</option>
+        </select>
+      </div>
+
+      <div class="label">등록일시</div>
+      <div class="field"><div class="value-static" id="createdAt">-</div></div>
+      <div class="label">선택코드</div>
+      <div class="field"><div class="value-static" id="selectedCode">-</div></div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn" id="btnNew">신규등록</button>
+      <button class="btn" id="btnView">조회</button>
+      <button class="btn" id="btnEdit" disabled>수정</button>
+      <button class="btn danger" id="btnDelete" disabled>삭제</button>
+      <button class="btn primary" id="btnSave" disabled>저장</button>
+      <button class="btn" id="btnReset">초기화</button>
+      <span class="spacer"></span>
+      <span class="mode-badge" id="rowCount">0건</span>
+      <button class="btn" id="btnBack">이전화면</button>
+    </div>
+
+    <div class="section-title">등록 항목 조회</div>
+    <div class="search-row">
+      <label for="searchText">코드/항목명</label>
+      <input id="searchText" placeholder="검색어 입력" autocomplete="off">
+      <select id="activeFilter">
+        <option value="all">전체</option>
+        <option value="true">사용</option>
+        <option value="false">미사용</option>
+      </select>
+      <button class="btn search-btn" id="btnSearch">조회</button>
+      <button class="btn" id="btnAll">전체</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col style="width:70px">
+          <col style="width:150px">
+          <col>
+          <col style="width:110px">
+          <col style="width:110px">
+          <col style="width:180px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>NO</th>
+            <th>코드</th>
+            <th>항목명</th>
+            <th>표시순서</th>
+            <th>사용여부</th>
+            <th>등록일시</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <button id="prevPage">◀</button>
+      <span id="pageInfo">1 / 1</span>
+      <button id="nextPage">▶</button>
+    </div>
+
+    <div class="foot-note">
+      ※ 행을 클릭하면 상세내용이 위 입력폼에 표시됩니다. 코드는 기본키(PK)이므로 등록 후에는 수정하지 않습니다.<br>
+      ※ DB에서 이미 사용 중인 코드는 삭제가 제한될 수 있으며, 이 경우 ‘미사용’으로 변경하여 기존 상담기록을 보존하는 방식이 안전합니다.
+    </div>
+
+    <footer class="copyright">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</footer>
+  </main>
+
+<script>
+(() => {
+  'use strict';
+
+  const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
+  const sb = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    {
+      auth: {
+        storage: window.sessionStorage,
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+
+  const CONFIG = {
+    clientType: { label:'상담대상', table:'counsel_client_type', sortType:'text' },
+    topic:      { label:'상담주제', table:'counsel_topic', sortType:'number' },
+    inspection: { label:'검사도구', table:'inspection_tool_codes', sortType:'number' },
+    job:        { label:'직업', table:'job_codes', sortType:'number' },
+    sex:        { label:'성별', table:'sex_codes', sortType:'number' },
+    visa:       { label:'비자', table:'visa_codes', sortType:'number' },
+    country:    { label:'국가', table:'country_codes', sortType:'number' }
+  };
+
+  const PAGE_SIZE = 20;
+  let currentKey = 'clientType';
+  let currentRows = [];
+  let filteredRows = [];
+  let page = 1;
+  let selected = null;
+  let mode = 'view'; // view | new | edit
+  let permission = '조회자';
+  let toastTimer = null;
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    tabs: $('tabs'), categoryName:$('categoryName'), modeText:$('modeText'),
+    code:$('code'), name:$('name'), sortOrder:$('sortOrder'), active:$('active'), createdAt:$('createdAt'), selectedCode:$('selectedCode'),
+    userPermission:$('userPermission'), userName:$('userName'),
+    btnNew:$('btnNew'), btnView:$('btnView'), btnEdit:$('btnEdit'), btnDelete:$('btnDelete'), btnSave:$('btnSave'), btnReset:$('btnReset'), btnBack:$('btnBack'),
+    searchText:$('searchText'), activeFilter:$('activeFilter'), btnSearch:$('btnSearch'), btnAll:$('btnAll'),
+    tbody:$('tbody'), rowCount:$('rowCount'), prevPage:$('prevPage'), nextPage:$('nextPage'), pageInfo:$('pageInfo'),
+    toast:$('toast'), modalBackdrop:$('modalBackdrop'), modalTitle:$('modalTitle'), modalMessage:$('modalMessage'), modalCancel:$('modalCancel'), modalOk:$('modalOk')
+  };
+
+  function showToast(message, type='') {
+    clearTimeout(toastTimer);
+    el.toast.textContent = message;
+    el.toast.className = 'toast show' + (type ? ' ' + type : '');
+    toastTimer = setTimeout(() => { el.toast.className = 'toast'; }, 5000);
+  }
+
+  function confirmBox(title, message) {
+    return new Promise(resolve => {
+      el.modalTitle.textContent = title;
+      el.modalMessage.textContent = message;
+      el.modalBackdrop.classList.add('show');
+      el.modalBackdrop.setAttribute('aria-hidden','false');
+      const done = (value) => {
+        el.modalBackdrop.classList.remove('show');
+        el.modalBackdrop.setAttribute('aria-hidden','true');
+        el.modalOk.onclick = null;
+        el.modalCancel.onclick = null;
+        resolve(value);
+      };
+      el.modalOk.onclick = () => done(true);
+      el.modalCancel.onclick = () => done(false);
+    });
+  }
+
+  function canCreateUpdate(){ return permission === '관리자' || permission === '사용자'; }
+  function canDelete(){ return permission === '관리자'; }
+
+  function setMode(newMode){
+    mode = newMode;
+    const editable = (mode === 'new' || mode === 'edit') && canCreateUpdate();
+    el.code.readOnly = !(mode === 'new' && canCreateUpdate());
+    el.name.readOnly = !editable;
+    el.sortOrder.readOnly = !editable;
+    el.active.disabled = !editable;
+    el.btnSave.disabled = !editable;
+    el.btnEdit.disabled = !selected || !canCreateUpdate();
+    el.btnDelete.disabled = !selected || !canDelete();
+    el.modeText.textContent = mode === 'new' ? '신규등록' : mode === 'edit' ? '수정' : '조회';
+  }
+
+  function resetForm(keepMode=false){
+    selected = null;
+    el.code.value = '';
+    el.name.value = '';
+    el.sortOrder.value = '';
+    el.active.value = 'true';
+    el.createdAt.textContent = '-';
+    el.selectedCode.textContent = '-';
+    if(!keepMode) setMode('view');
+    renderTable();
+  }
+
+  function formatDateTime(v){
+    if(!v) return '-';
+    const d = new Date(v);
+    if(Number.isNaN(d.getTime())) return String(v);
+    return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(d);
+  }
+
+  function escapeHtml(s){
+    return String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  }
+
+  async function loadUser(){
+    const { data:{ user }, error } = await sb.auth.getUser();
+    if(error || !user){
+      el.userPermission.textContent = '미인증';
+      el.userName.textContent = '-';
+      permission = '조회자';
+      setMode('view');
+      showToast('로그인 정보를 확인할 수 없습니다. 로그인 후 사용하세요.', 'error');
+      return;
+    }
+    try{
+      let q = sb.from('employee').select('name,permission,active').eq('auth_user_id', user.id).maybeSingle();
+      let { data, error:empErr } = await q;
+      if((empErr || !data) && user.email){
+        const r = await sb.from('employee').select('name,permission,active').eq('email', user.email).maybeSingle();
+        data = r.data; empErr = r.error;
+      }
+      if(empErr || !data){
+        permission = '조회자';
+        el.userName.textContent = user.email || '-';
+        el.userPermission.textContent = '조회자';
+      }else{
+        permission = data.active === false ? '조회자' : (data.permission || '조회자');
+        el.userName.textContent = data.name || user.email || '-';
+        el.userPermission.textContent = permission;
+      }
+    }catch(e){
+      permission = '조회자';
+      el.userName.textContent = user.email || '-';
+      el.userPermission.textContent = '조회자';
+    }
+    setMode('view');
+  }
+
+  async function loadRows(){
+    const cfg = CONFIG[currentKey];
+    el.tbody.innerHTML = '<tr><td colspan="6" class="empty">조회 중...</td></tr>';
+    const { data, error } = await sb.from(cfg.table).select('code,name,sort_order,active,created_at').limit(1000);
+    if(error){
+      currentRows = []; filteredRows = [];
+      renderTable();
+      showToast('조회 실패: ' + error.message, 'error');
+      return;
+    }
+    currentRows = (data || []).slice().sort((a,b) => {
+      const av = Number(a.sort_order), bv = Number(b.sort_order);
+      if(Number.isFinite(av) && Number.isFinite(bv) && av !== bv) return av-bv;
+      return String(a.sort_order ?? '').localeCompare(String(b.sort_order ?? ''), 'ko', {numeric:true}) || String(a.code).localeCompare(String(b.code),'ko',{numeric:true});
+    });
+    applyFilter();
+  }
+
+  function applyFilter(){
+    const keyword = el.searchText.value.trim().toLowerCase();
+    const activeFilter = el.activeFilter.value;
+    filteredRows = currentRows.filter(r => {
+      const matchesText = !keyword || String(r.code ?? '').toLowerCase().includes(keyword) || String(r.name ?? '').toLowerCase().includes(keyword);
+      const matchesActive = activeFilter === 'all' || String(r.active) === activeFilter;
+      return matchesText && matchesActive;
+    });
+    page = 1;
+    renderTable();
+  }
+
+  function renderTable(){
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+    if(page > totalPages) page = totalPages;
+    const start = (page - 1) * PAGE_SIZE;
+    const rows = filteredRows.slice(start, start + PAGE_SIZE);
+    el.rowCount.textContent = filteredRows.length + '건';
+    el.pageInfo.textContent = page + ' / ' + totalPages;
+    el.prevPage.disabled = page <= 1;
+    el.nextPage.disabled = page >= totalPages;
+    if(!rows.length){
+      el.tbody.innerHTML = '<tr><td colspan="6" class="empty">등록된 항목이 없습니다.</td></tr>';
+      return;
+    }
+    el.tbody.innerHTML = rows.map((r,i) => `
+      <tr data-code="${escapeHtml(r.code)}" class="${selected && selected.code === r.code ? 'selected' : ''}">
+        <td>${start+i+1}</td>
+        <td>${escapeHtml(r.code)}</td>
+        <td class="left">${escapeHtml(r.name)}</td>
+        <td>${escapeHtml(r.sort_order ?? '')}</td>
+        <td class="${r.active === false ? 'active-no' : 'active-yes'}">${r.active === false ? '미사용' : '사용'}</td>
+        <td>${escapeHtml(formatDateTime(r.created_at))}</td>
+      </tr>`).join('');
+  }
+
+  function selectRow(code){
+    const row = currentRows.find(r => String(r.code) === String(code));
+    if(!row) return;
+    selected = row;
+    el.code.value = row.code ?? '';
+    el.name.value = row.name ?? '';
+    el.sortOrder.value = row.sort_order ?? '';
+    el.active.value = row.active === false ? 'false' : 'true';
+    el.createdAt.textContent = formatDateTime(row.created_at);
+    el.selectedCode.textContent = row.code ?? '-';
+    setMode('view');
+    renderTable();
+  }
+
+  function getPayload(){
+    const cfg = CONFIG[currentKey];
+    const code = el.code.value.trim();
+    const name = el.name.value.trim();
+    const sortRaw = el.sortOrder.value.trim();
+    if(!code) throw new Error('코드를 입력하세요.');
+    if(!name) throw new Error('항목명을 입력하세요.');
+    if(sortRaw === '' || !Number.isInteger(Number(sortRaw)) || Number(sortRaw) < 0) throw new Error('표시순서는 0 이상의 정수로 입력하세요.');
+    return {
+      code,
+      name,
+      sort_order: cfg.sortType === 'text' ? String(Number(sortRaw)) : Number(sortRaw),
+      active: el.active.value === 'true'
+    };
+  }
+
+  async function saveRecord(){
+    if(!canCreateUpdate()) return showToast('현재 권한으로는 저장할 수 없습니다.', 'error');
+    if(mode !== 'new' && mode !== 'edit') return showToast('신규등록 또는 수정 버튼을 먼저 선택하세요.', 'error');
+    let payload;
+    try{ payload = getPayload(); }catch(e){ return showToast(e.message,'error'); }
+    const cfg = CONFIG[currentKey];
+
+    if(mode === 'new'){
+      const duplicate = currentRows.some(r => String(r.code).toLowerCase() === payload.code.toLowerCase());
+      if(duplicate) return showToast('이미 등록된 코드입니다.', 'error');
+      const ok = await confirmBox('신규 항목 저장', `${cfg.label} 항목을 신규 등록하시겠습니까?\n\n코드: ${payload.code}\n항목명: ${payload.name}`);
+      if(!ok) return;
+      const { error } = await sb.from(cfg.table).insert(payload);
+      if(error){
+        return showToast('저장 실패: ' + friendlyDbError(error), 'error');
+      }
+      showToast('신규 항목이 저장되었습니다.', 'success');
+    }else{
+      if(!selected) return showToast('수정할 항목을 먼저 선택하세요.', 'error');
+      const ok = await confirmBox('항목 수정 저장', `${cfg.label} 항목의 변경내용을 저장하시겠습니까?\n\n코드: ${selected.code}\n항목명: ${payload.name}`);
+      if(!ok) return;
+      const updatePayload = { name:payload.name, sort_order:payload.sort_order, active:payload.active };
+      const { error } = await sb.from(cfg.table).update(updatePayload).eq('code', selected.code);
+      if(error){
+        return showToast('수정 실패: ' + friendlyDbError(error), 'error');
+      }
+      showToast('변경내용이 저장되었습니다.', 'success');
+    }
+    resetForm();
+    await loadRows();
+  }
+
+  function friendlyDbError(error){
+    const msg = error?.message || String(error);
+    if(/relation .* does not exist|could not find the table|schema cache/i.test(msg)) return '해당 관리항목의 DB 테이블이 아직 생성되지 않았습니다.';
+    if(/row-level security|policy/i.test(msg)) return 'DB 쓰기 권한(RLS 정책)이 아직 허용되지 않았습니다. 관리자/사용자 권한별 INSERT·UPDATE·DELETE 정책을 1회 설정해야 합니다.';
+    if(/duplicate key/i.test(msg)) return '이미 존재하는 코드입니다.';
+    if(/foreign key/i.test(msg)) return '다른 상담기록에서 사용 중인 항목이라 삭제할 수 없습니다.';
+    return msg;
+  }
+
+  async function deleteRecord(){
+    if(!canDelete()) return showToast('삭제는 관리자만 가능합니다.', 'error');
+    if(!selected) return showToast('삭제할 항목을 선택하세요.', 'error');
+    const cfg = CONFIG[currentKey];
+    const ok = await confirmBox('항목 삭제', `선택한 항목을 삭제하시겠습니까?\n\n${cfg.label}: ${selected.name}\n코드: ${selected.code}\n\n이미 상담기록에서 사용 중인 코드는 삭제되지 않을 수 있습니다.`);
+    if(!ok) return;
+
+    const { error } = await sb.from(cfg.table).delete().eq('code', selected.code);
+    if(error){
+      if(/foreign key|violates foreign key constraint/i.test(error.message || '')){
+        const inactive = await confirmBox('삭제 제한', '이 항목은 기존 상담기록에서 사용 중이어서 삭제할 수 없습니다.\n기존 기록은 유지하고 신규 선택목록에서만 제외하도록 “미사용”으로 변경할까요?');
+        if(inactive){
+          const r = await sb.from(cfg.table).update({active:false}).eq('code', selected.code);
+          if(r.error) return showToast('미사용 변경 실패: ' + friendlyDbError(r.error), 'error');
+          showToast('기존 기록을 보존하고 항목을 미사용으로 변경했습니다.', 'success');
+          resetForm(); await loadRows();
+        }
+        return;
+      }
+      return showToast('삭제 실패: ' + friendlyDbError(error), 'error');
+    }
+    showToast('항목이 삭제되었습니다.', 'success');
+    resetForm();
+    await loadRows();
+  }
+
+  function updatePlaceholders(){
+    const examples = {
+      clientType:{code:'예: CT01', name:'예: 개인상담'},
+      topic:{code:'예: TP01', name:'예: 우울·불안'},
+      inspection:{code:'예: IT01', name:'예: MMPI-2'},
+      job:{code:'예: JOB01', name:'예: 제조업'},
+      sex:{code:'예: M', name:'예: 남성'},
+      visa:{code:'예: E9', name:'예: 비전문취업(E-9)'},
+      country:{code:'예: VN', name:'예: 베트남'}
+    };
+    const ex = examples[currentKey] || {code:'코드 입력', name:'항목명 입력'};
+    el.code.placeholder = ex.code;
+    el.name.placeholder = ex.name;
+  }
+
+  function switchCategory(key){
+    if(!CONFIG[key]) return;
+    currentKey = key;
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.key === key));
+    el.categoryName.textContent = CONFIG[key].label;
+    updatePlaceholders();
+    el.searchText.value = '';
+    el.activeFilter.value = 'all';
+    resetForm();
+    loadRows();
+  }
+
+  el.tabs.addEventListener('click', e => {
+    const btn = e.target.closest('.tab');
+    if(btn) switchCategory(btn.dataset.key);
+  });
+  el.tbody.addEventListener('click', e => {
+    const tr = e.target.closest('tr[data-code]');
+    if(tr) selectRow(tr.dataset.code);
+  });
+  el.btnNew.addEventListener('click', () => {
+    if(!canCreateUpdate()) return showToast('현재 권한으로는 신규등록할 수 없습니다.', 'error');
+    resetForm(true); setMode('new'); el.code.focus();
+  });
+  el.btnView.addEventListener('click', applyFilter);
+  el.btnEdit.addEventListener('click', () => {
+    if(!selected) return showToast('수정할 항목을 선택하세요.', 'error');
+    if(!canCreateUpdate()) return showToast('현재 권한으로는 수정할 수 없습니다.', 'error');
+    setMode('edit'); el.name.focus();
+  });
+  el.btnDelete.addEventListener('click', deleteRecord);
+  el.btnSave.addEventListener('click', saveRecord);
+  el.btnReset.addEventListener('click', () => { el.searchText.value=''; el.activeFilter.value='all'; resetForm(); applyFilter(); });
+  el.btnBack.addEventListener('click', () => { if(history.length > 1) history.back(); else location.href='main.html'; });
+  el.btnSearch.addEventListener('click', applyFilter);
+  el.btnAll.addEventListener('click', () => { el.searchText.value=''; el.activeFilter.value='all'; applyFilter(); });
+  el.searchText.addEventListener('keydown', e => { if(e.key === 'Enter') applyFilter(); });
+  el.prevPage.addEventListener('click', () => { if(page>1){ page--; renderTable(); } });
+  el.nextPage.addEventListener('click', () => { const max=Math.max(1,Math.ceil(filteredRows.length/PAGE_SIZE)); if(page<max){ page++; renderTable(); } });
+
+  async function init(){
+    updatePlaceholders();
+    await loadUser();
+    await loadRows();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
