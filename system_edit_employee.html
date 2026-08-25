@@ -120,6 +120,11 @@ const MAIN_PAGE_URL = "main.html";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 
 let currentUser=null,currentEmployee=null,allRows=[],visibleRows=[],selectedId=null,mode="view";
+let pageInitialized=false;
+let rowsSyncInFlight=false;
+let lastRowsSyncAt=0;
+const ROW_SYNC_MIN_INTERVAL_MS=800;
+const ROW_SYNC_POLL_MS=20000;
 const editableIds=["employeeCode","position","employeeName","email","permission","active"];
 const $=id=>document.getElementById(id);
 function normalizeText(v){return String(v??"").trim()}
@@ -176,20 +181,87 @@ function setMode(nextMode){
   updateActiveText();
 }
 function clearForm(){selectedId=null;$("employeeForm").reset();$("permission").value="조회자";$("active").checked=true;updateActiveText();document.querySelectorAll("#tableBody tr").forEach(tr=>tr.classList.remove("selected"))}
-function fillForm(row){$("employeeCode").value=row.employee_code||"";$("position").value=row.position||"";$("employeeName").value=row.name||"";$("email").value=row.email||"";$("permission").value=row.permission||"조회자";$("active").checked=row.active!==false;updateActiveText()}
+function fillForm(row){$("employeeCode").value=row.employee_code||"";$("position").value=row.position||"";$("employeeName").value=row.name||"";$("email").value=row.email||"";$("permission").value=row.permission||"조회자";$("active").checked=row.active===true;updateActiveText()}
 
+function getSearchValues(){
+  return {
+    code:normalizeText($("searchCode").value).toLowerCase(),
+    position:normalizeText($("searchPosition").value).toLowerCase(),
+    name:normalizeText($("searchName").value).toLowerCase(),
+    email:normalizeText($("searchEmail").value).toLowerCase()
+  };
+}
+function rebuildVisibleRows(){
+  const {code,position,name,email}=getSearchValues();
+  visibleRows=allRows.filter(row=>(!code||String(row.employee_code||"").toLowerCase().includes(code))&&(!position||String(row.position||"").toLowerCase().includes(position))&&(!name||String(row.name||"").toLowerCase().includes(name))&&(!email||String(row.email||"").toLowerCase().includes(email)));
+}
+function restoreSelectedRow(id){
+  if(!id)return false;
+  const row=allRows.find(item=>item.id===id);
+  if(!row)return false;
+  selectedId=id;
+  fillForm(row);
+  document.querySelectorAll("#tableBody tr").forEach(tr=>tr.classList.toggle("selected",tr.dataset.id===id));
+  setMode("view");
+  return true;
+}
+async function refreshCurrentEmployeeAccess(){
+  if(!currentUser?.id)return false;
+  const {data:employee,error}=await sb.from("employee").select("id,employee_code,position,name,email,permission,active").eq("auth_user_id",currentUser.id).maybeSingle();
+  if(error||!employee||employee.active!==true){
+    try{await sb.auth.signOut({scope:"local"})}catch(_e){}
+    sessionStorage.removeItem("sina_employee");
+    window.location.replace(LOGIN_PAGE_URL);
+    return false;
+  }
+  currentEmployee=employee;
+  applyPermissionUI();
+  return true;
+}
 async function loadRows(options={}){
-  if(options.preserveNotice!==true)clearNotice();showLoading(true,"사용자 정보를 불러오는 중입니다...");
-  const {data,error}=await sb.from("employee").select("id,employee_code,position,name,email,auth_user_id,permission,active,created_at,updated_at").order("employee_code",{ascending:true});
-  showLoading(false);
-  if(error){allRows=[];visibleRows=[];renderRows();showNotice("조회 실패: "+formatDbError(error),"error");return false}
-  allRows=(data||[]).map(r=>({id:r.id,employee_code:r.employee_code,position:r.position,name:r.name,email:r.email,permission:r.permission,active:r.active,auth_linked:Boolean(r.auth_user_id)}));
-  applySearch();clearForm();setMode("view");$("guideText").textContent=`사용자 정보 ${allRows.length}건을 불러왔습니다.`;return true;
+  const preserveNotice=options.preserveNotice===true;
+  const preserveSelection=options.preserveSelection===true;
+  const silent=options.silent===true;
+  const previousSelectedId=preserveSelection?selectedId:null;
+  if(!preserveNotice)clearNotice();
+  if(!silent)showLoading(true,"사용자 정보를 불러오는 중입니다...");
+  try{
+    const {data,error}=await sb.from("employee").select("id,employee_code,position,name,email,auth_user_id,permission,active,created_at,updated_at").order("employee_code",{ascending:true});
+    if(error)throw error;
+    allRows=(data||[]).map(r=>({id:r.id,employee_code:r.employee_code,position:r.position,name:r.name,email:r.email,permission:r.permission,active:r.active===true,auth_linked:Boolean(r.auth_user_id),created_at:r.created_at,updated_at:r.updated_at}));
+    rebuildVisibleRows();
+    renderRows();
+    if(!restoreSelectedRow(previousSelectedId)){
+      clearForm();
+      setMode("view");
+    }
+    $("guideText").textContent=`사용자 정보 ${allRows.length}건을 불러왔습니다.`;
+    lastRowsSyncAt=Date.now();
+    return true;
+  }catch(error){
+    if(!silent){allRows=[];visibleRows=[];renderRows();showNotice("조회 실패: "+formatDbError(error),"error");}
+    console.error("사용자 목록 동기화 실패:",error);
+    return false;
+  }finally{
+    if(!silent)showLoading(false);
+  }
+}
+async function syncRowsFromServer(reason="sync"){
+  if(!pageInitialized||rowsSyncInFlight||mode!=="view")return false;
+  if(Date.now()-lastRowsSyncAt<ROW_SYNC_MIN_INTERVAL_MS)return false;
+  rowsSyncInFlight=true;
+  try{
+    const accessOk=await refreshCurrentEmployeeAccess();
+    if(!accessOk)return false;
+    return await loadRows({preserveNotice:true,preserveSelection:true,silent:true});
+  }finally{rowsSyncInFlight=false;}
 }
 function applySearch(){
-  const code=normalizeText($("searchCode").value).toLowerCase(),position=normalizeText($("searchPosition").value).toLowerCase(),name=normalizeText($("searchName").value).toLowerCase(),email=normalizeText($("searchEmail").value).toLowerCase();
-  visibleRows=allRows.filter(row=>(!code||String(row.employee_code||"").toLowerCase().includes(code))&&(!position||String(row.position||"").toLowerCase().includes(position))&&(!name||String(row.name||"").toLowerCase().includes(name))&&(!email||String(row.email||"").toLowerCase().includes(email)));
-  selectedId=null;renderRows();setMode("view");
+  rebuildVisibleRows();
+  selectedId=null;
+  renderRows();
+  clearForm();
+  setMode("view");
 }
 function renderRows(){
   const body=$("tableBody");
@@ -234,7 +306,20 @@ async function saveRecord(){
   const employeeCode=normalizeText($("employeeCode").value).toUpperCase(),position=normalizeText($("position").value),name=normalizeText($("employeeName").value),email=normalizeText($("email").value).toLowerCase(),permission=$("permission").value,active=$("active").checked;
   if(!/^A-\d{3}$/.test(employeeCode)){showNotice("사용자코드는 A-001 형식으로 입력해 주세요.","error");return}
   if(!position){showNotice("직위를 입력해 주세요.","error");return}if(!name){showNotice("이름을 입력해 주세요.","error");return}if(email&&!isValidEmail(email)){showNotice("이메일 주소 형식을 확인해 주세요.","error");return}if(!["관리자","사용자","조회자"].includes(permission)){showNotice("권한 값을 확인해 주세요.","error");return}
-  const original=mode==="edit"?selectedRow():null;
+
+  let original=mode==="edit"?selectedRow():null;
+  if(mode==="edit"){
+    if(!selectedId||!original){showNotice("수정 대상 사용자를 다시 선택해 주세요.","error");return}
+    const {data:fresh,error:freshError}=await sb.from("employee").select("id,employee_code,position,name,email,auth_user_id,permission,active,updated_at").eq("id",selectedId).maybeSingle();
+    if(freshError||!fresh){showNotice("최신 사용자 정보를 확인할 수 없습니다. 다시 조회해 주세요.","error");return}
+    if(original.updated_at&&fresh.updated_at&&original.updated_at!==fresh.updated_at){
+      await loadRows({preserveNotice:true,preserveSelection:true});
+      showNotice("다른 화면에서 사용자 정보가 변경되었습니다. 최신 값을 불러왔으니 다시 수정해 주세요.","info");
+      return;
+    }
+    original={...original,active:fresh.active===true,auth_linked:Boolean(fresh.auth_user_id),updated_at:fresh.updated_at};
+  }
+
   const safetyError=validateAdminSafety(original,permission,active);if(safetyError){showNotice(safetyError,"error");return}
   const needsAuth=active===true&&(mode==="new"||!original?.auth_linked);
   if(needsAuth&&!email){showNotice("사용상태를 ON으로 저장하려면 최초 Auth 등록에 사용할 이메일 주소가 필요합니다.","error");return}
@@ -244,11 +329,16 @@ async function saveRecord(){
   showLoading(true,mode==="new"?"사용자를 등록하는 중입니다...":"사용자 정보를 저장하는 중입니다...");
   try{
     let savedId=selectedId;
+    let savedRow=null;
     if(mode==="new"){
-      const {data,error}=await sb.from("employee").insert(payload).select("id").single();if(error)throw error;savedId=data.id;
+      const {data,error}=await sb.from("employee").insert(payload).select("id,employee_code,position,name,email,auth_user_id,permission,active,updated_at").single();
+      if(error)throw error;savedId=data.id;savedRow=data;
     }else{
-      const {error}=await sb.from("employee").update(payload).eq("id",selectedId);if(error)throw error;
+      const {data,error}=await sb.from("employee").update(payload).eq("id",selectedId).select("id,employee_code,position,name,email,auth_user_id,permission,active,updated_at").single();
+      if(error)throw error;savedRow=data;
     }
+    if(Boolean(savedRow?.active)!==Boolean(active))throw new Error("사용상태 저장 검증에 실패했습니다. DB 상태를 다시 확인해 주세요.");
+
     let authMessage="";
     if(needsAuth){
       try{const result=await createAuthForEmployee(savedId);authMessage=result?.message?` ${result.message}`:" Auth 계정을 연결하고 비밀번호 설정 메일을 발송했습니다."}
@@ -258,7 +348,7 @@ async function saveRecord(){
         throw new Error(`Auth 등록에 실패하여 보안을 위해 사용상태를 OFF로 되돌렸습니다. ${authError?.message||String(authError)}`);
       }
     }
-    await loadRows({preserveNotice:true});
+    await loadRows({preserveNotice:true,preserveSelection:false});
     showNotice(`${mode==="new"?"사용자 정보가 등록되었습니다.":"사용자 정보가 수정되었습니다."} 현재 상태는 ${statusText}입니다.${authMessage}`,"success");
   }catch(error){showNotice("저장 실패: "+formatDbError(error),"error")}
   finally{showLoading(false)}
@@ -345,8 +435,32 @@ body{font-size:8pt}.doc{position:relative;width:100%;padding-bottom:4mm}.doc>*:n
 }
 function goBack(){if(window.history.length>1)window.history.back();else window.location.href=MAIN_PAGE_URL}
 sb.auth.onAuthStateChange(event=>{if(event==="SIGNED_OUT")window.location.replace(LOGIN_PAGE_URL)});
-async function initializePage(){try{const ok=await verifySession();if(!ok)return;clearForm();setMode("view");await loadRows();applyPermissionUI();setMode("view");if(!isAdmin())$("guideText").textContent=`${currentEmployee?.permission||"조회자"} 권한은 사용자 등록 화면에서 조회만 할 수 있습니다.`}catch(error){document.documentElement.classList.remove("auth-pending");showNotice("화면 초기화 오류: "+formatDbError(error),"error")}}
+async function initializePage(){
+  try{
+    const ok=await verifySession();if(!ok)return;
+    clearForm();setMode("view");
+    await loadRows();
+    applyPermissionUI();setMode("view");
+    pageInitialized=true;
+    if(!isAdmin())$("guideText").textContent=`${currentEmployee?.permission||"조회자"} 권한은 사용자 등록 화면에서 조회만 할 수 있습니다.`;
+  }catch(error){
+    document.documentElement.classList.remove("auth-pending");
+    showNotice("화면 초기화 오류: "+formatDbError(error),"error");
+  }
+}
 window.addEventListener("load",initializePage);
+
+// 브라우저 뒤로가기/BFCache 복원 시 화면에 남아 있던 오래된 ON/OFF 값을 사용하지 않는다.
+window.addEventListener("pageshow",event=>{
+  if(pageInitialized)syncRowsFromServer(event.persisted?"bfcache":"pageshow");
+});
+// 다른 탭 또는 다른 업무화면에서 상태가 변경된 뒤 이 탭으로 돌아오면 즉시 최신 DB 값을 다시 읽는다.
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible")syncRowsFromServer("visible");
+});
+window.addEventListener("focus",()=>syncRowsFromServer("focus"));
+// 화면을 장시간 열어 둔 경우에도 관리 상태가 낡지 않도록 주기적으로 재검증한다.
+setInterval(()=>syncRowsFromServer("poll"),ROW_SYNC_POLL_MS);
 </script>
 </body>
 </html>
