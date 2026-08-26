@@ -36,7 +36,7 @@ button,input{font:inherit}button{cursor:pointer}
 .result-section{margin-bottom:0}.result-section .table-box{margin:3.5mm 4mm 4mm}.print-meta{display:none}.table-box{border:1px solid #cbd5e1;border-radius:4px;overflow:hidden;background:#fff}.table-scroll{max-height:120mm;overflow:auto;scrollbar-width:thin;scrollbar-color:#b5bdc9 #f4f6f8}
 table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}col.no{width:5%}col.regdate{width:15%}col.name{width:10%}col.phone{width:16%}col.sex{width:6%}col.age{width:6%}col.type{width:15%}col.status-col{width:15%}col.session{width:12%}
 thead th{position:sticky;top:0;z-index:3;height:34px;padding:0 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;text-align:center;font-size:11.5px;font-weight:900;line-height:1.2}
-tbody td{height:33px;padding:5px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;background:#fff;color:#303846;text-align:center;font-size:11.5px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}thead th:last-child,tbody td:last-child{border-right:0}tbody tr:nth-child(even) td{background:#fffdf6}tbody tr:hover td{background:#f5f8fd}td.left{text-align:left;padding-left:8px}.empty-row td{height:80px;color:#8a94a5;background:#fff!important}.badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap}.badge.progress{background:#eaf3ff;color:#275ea9}.badge.done{background:#eaf8ef;color:#197047}.badge.unknown{background:#f2f4f7;color:#667085}
+tbody td{height:33px;padding:5px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;background:#fff;color:#303846;text-align:center;font-size:11.5px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}thead th:last-child,tbody td:last-child{border-right:0}tbody tr:nth-child(even) td{background:#fffdf6}tbody tr:hover td{background:#f5f8fd}td.left{text-align:left;padding-left:8px}.client-link{display:inline-block;color:var(--blue);font-weight:900;text-decoration:none;border-bottom:1px solid transparent;line-height:1.25;cursor:pointer}.client-link:hover{color:var(--blue-dark);border-bottom-color:var(--blue-dark)}.client-link:focus-visible{outline:2px solid rgba(20,87,166,.32);outline-offset:2px;border-radius:2px}.empty-row td{height:80px;color:#8a94a5;background:#fff!important}.badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap}.badge.progress{background:#eaf3ff;color:#275ea9}.badge.done{background:#eaf8ef;color:#197047}.badge.unknown{background:#f2f4f7;color:#667085}
 .document-footer{margin-top:5mm;padding:0 3mm 1mm;text-align:center}.footer-rights{text-align:left;color:#6b7280;font-size:17px;font-weight:500;line-height:1.25;margin-bottom:1mm}.footer-rule{height:0;border-top:1.2pt solid var(--blue-dark)}.footer-company{color:var(--blue-dark);font-size:31px;font-weight:950;letter-spacing:-1px;line-height:1;padding-top:2mm;white-space:nowrap}
 .pdf-watermark{display:none}.loading{position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:rgba(255,255,255,.72);backdrop-filter:blur(2px)}.loading.show{display:grid}.loading-box{min-width:220px;padding:18px 22px;border:1px solid #dbe1e9;border-radius:10px;background:#fff;box-shadow:0 12px 34px rgba(15,23,42,.14);text-align:center;color:#455066;font-size:13px;font-weight:800}
 @media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.page-head{align-items:flex-start}.head-right{flex-direction:column;align-items:flex-end}.search-grid{grid-template-columns:1fr 1fr}.search-grid>div:nth-child(5){grid-column:1/-1}.search-btn{grid-column:1/-1}.table-scroll{overflow:auto}table{min-width:720px}.document-footer{margin-top:20px}}
@@ -51,6 +51,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
   table{font-size:var(--print-font)!important}thead{display:table-header-group!important}thead th{position:static!important;height:7.5mm!important;padding:1mm .8mm!important;border-color:#777!important;background:#eaf2fb!important;color:#111!important;font-size:9.25pt!important;font-weight:900!important}tbody td{height:var(--print-row-h)!important;padding:.8mm .7mm!important;border-color:#aaa!important;background:#fff!important;color:#111!important;font-size:var(--print-font)!important;font-weight:500!important;line-height:1.12!important}.badge{padding:0!important;background:none!important;color:#111!important;font-size:inherit!important;font-weight:500!important}
   .document-footer{position:fixed!important;left:7mm!important;right:7mm!important;bottom:4mm!important;margin:0!important;padding:0!important;background:#fff!important;z-index:20}.footer-rights{font-size:17px!important;color:#6b7280!important;line-height:1.25!important;margin:0 0 1mm!important}.footer-rule{border-top:1.2pt solid #1457a6!important}.footer-company{font-size:23pt!important;line-height:1!important;padding-top:2mm!important;color:#123f78!important}
   .pdf-watermark{display:block!important;position:fixed!important;left:50%!important;top:50%!important;z-index:15!important;transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;transform-origin:center!important;color:#b91c1c!important;font-size:65pt!important;font-weight:900!important;letter-spacing:1px!important;white-space:nowrap!important;opacity:.1125!important;pointer-events:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .client-link{color:#111!important;text-decoration:none!important;border-bottom:0!important;pointer-events:none!important}
   .loading{display:none!important}
 }
 
@@ -477,17 +478,26 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
     }
   }
 
+  function buildReceiptUrl(row){
+    const params = new URLSearchParams();
+    params.set("client_id", String(row.id || ""));
+    return `consult_receipt_register.html?${params.toString()}`;
+  }
+
   function renderRows(rows){
     els.resultCount.textContent = String(rows.length);
     if (!rows.length){
       els.body.innerHTML = '<tr class="empty-row"><td colspan="9">조회 결과가 없습니다.</td></tr>';
       return;
     }
-    els.body.innerHTML = rows.map((r,i) => `
+    els.body.innerHTML = rows.map((r,i) => {
+      const receiptUrl = buildReceiptUrl(r);
+      const linkTitle = `${r.name} 접수 상담 등록으로 이동`;
+      return `
       <tr>
         <td>${i+1}</td>
         <td>${escapeHTML(formatDateWithWeekday(r.registeredAt))}</td>
-        <td class="left">${escapeHTML(r.name)}</td>
+        <td class="left"><a class="client-link" href="${escapeHTML(receiptUrl)}" title="${escapeHTML(linkTitle)}" aria-label="${escapeHTML(linkTitle)}">${escapeHTML(r.name)}</a></td>
         <td>${escapeHTML(r.phone)}</td>
         <td>${escapeHTML(r.sex)}</td>
         <td>${escapeHTML(r.age)}</td>
@@ -495,7 +505,8 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
         <td><span class="badge ${badgeClass(r.status)}">${escapeHTML(r.status)}</span></td>
         <td>${escapeHTML(r.session)}</td>
       </tr>
-    `).join("");
+    `;
+    }).join("");
   }
 
   els.phone.addEventListener("input",() => formatPhoneInput(els.phone));
