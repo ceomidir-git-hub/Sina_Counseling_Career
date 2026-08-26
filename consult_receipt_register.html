@@ -249,13 +249,15 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 .personal-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3mm 4mm;margin-bottom:3mm}
 .personal-row-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3mm 4mm}
 .company-row-3,.foreign-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3mm 4mm}
+.company-row-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3mm 3mm}
+.company-row-4 + .company-row-4{margin-top:3mm}
 .compact-pair{min-width:0;display:grid;grid-template-columns:16mm minmax(0,1fr);align-items:center;gap:.4mm}
 .compact-pair label{font-weight:850;color:#252b34;white-space:nowrap}
 .compact-pair input,.compact-pair select{height:var(--field-h);padding:0 7px}
 .personal-row-2 .compact-pair:last-child{grid-template-columns:10mm minmax(0,1fr);gap:.1mm}
 
 @media(max-width:760px){
-  .receipt-row-4,.receipt-row-2,.personal-row-3,.personal-row-2,.company-row-3,.foreign-row-3{grid-template-columns:1fr}
+  .receipt-row-4,.receipt-row-2,.personal-row-3,.personal-row-2,.company-row-3,.company-row-4,.foreign-row-3{grid-template-columns:1fr}
   .receipt-row-4 .receipt-pair,.receipt-row-2 .receipt-pair,.compact-pair,.personal-row-2 .compact-pair:last-child{grid-template-columns:90px minmax(0,1fr);gap:2px}
 }
 
@@ -275,6 +277,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   body.career-mode .personal-row-3{gap:1.5mm 3mm!important;margin-bottom:1.5mm!important}
   body.career-mode .personal-row-2{gap:1.5mm 3mm!important}
   body.career-mode .company-row-3,body.career-mode .foreign-row-3{gap:1.5mm 3mm!important}
+  body.career-mode .company-row-4{gap:1.5mm 2mm!important}
+  body.career-mode .company-row-4 + .company-row-4{margin-top:1.5mm!important}
   body.career-mode .compact-pair{grid-template-columns:14mm minmax(0,1fr)!important;gap:.3mm!important}
   body.career-mode .personal-row-2 .compact-pair:last-child{grid-template-columns:9mm minmax(0,1fr)!important;gap:.1mm!important}
   body.career-mode .compact-pair input,body.career-mode .compact-pair select{height:7.6mm!important;font-size:9.5pt!important}
@@ -436,6 +440,14 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
     gap:1.1mm 2.5mm!important;
   }
+  body.career-mode .company-row-4{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:1.1mm 1.8mm!important;
+  }
+  body.career-mode .company-row-4 + .company-row-4{
+    margin-top:1.1mm!important;
+  }
   body.career-mode .compact-pair{
     display:grid!important;
     grid-template-columns:13mm minmax(0,1fr)!important;
@@ -596,6 +608,107 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   .edit-confirm-backdrop{display:none!important}
 }
 
+
+/* ===== FINAL 2026-08-26 : 기업·직장정보 간격/순서 최적화 =====
+   기존 고정 16mm 라벨폭을 제거하고 라벨 실제 글자폭을 사용한다.
+   라벨과 입력칸 간격을 1mm로 고정하여 체감 여백을 약 50% 이상 축소한다. */
+.company-row-4 .compact-pair{
+  grid-template-columns:max-content minmax(0,1fr);
+  column-gap:1mm;
+}
+.company-row-4{
+  column-gap:2mm;
+  row-gap:1.5mm;
+}
+.company-row-4 + .company-row-4{margin-top:1.5mm}
+
+@media print{
+  body.career-mode .company-row-4 .compact-pair{
+    grid-template-columns:max-content minmax(0,1fr)!important;
+    column-gap:.6mm!important;
+  }
+  body.career-mode .company-row-4{
+    column-gap:1.4mm!important;
+    row-gap:.8mm!important;
+  }
+  body.career-mode .company-row-4 + .company-row-4{
+    margin-top:.8mm!important;
+  }
+}
+
+
+
+/* ===== FINAL 2026-08-26 : 상담 신청 내용 항목-입력칸 간격 50% 축소 =====
+   기존 30mm 고정 라벨폭을 제거하고 실제 라벨 글자폭을 사용한다.
+   항목명과 입력칸 사이 간격은 1mm로 통일한다. */
+.consultation-content-section .grid-2 .form-pair{
+  grid-template-columns:max-content minmax(0,1fr);
+  column-gap:1mm;
+}
+.consultation-content-section .detail-grid{
+  grid-template-columns:max-content minmax(0,1fr);
+  column-gap:1mm;
+}
+
+@media(max-width:760px){
+  .consultation-content-section .grid-2 .form-pair,
+  .consultation-content-section .detail-grid{
+    grid-template-columns:90px minmax(0,1fr);
+    column-gap:2px;
+  }
+}
+
+@media print{
+  .consultation-content-section .grid-2 .form-pair{
+    grid-template-columns:max-content minmax(0,1fr)!important;
+    column-gap:.6mm!important;
+  }
+  .consultation-content-section .detail-grid{
+    grid-template-columns:max-content minmax(0,1fr)!important;
+    column-gap:.6mm!important;
+  }
+}
+
+
+
+/* ===== FINAL 2026-08-26 : 접수상담내용 입력칸 다음 행 배치 =====
+   항목명은 첫 행, textarea는 다음 행 전체 폭으로 배치한다. */
+.consultation-content-section .detail-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  row-gap:1.2mm;
+  column-gap:0;
+  align-items:start;
+  margin-top:3.2mm;
+}
+.consultation-content-section .detail-grid .detail-label{
+  display:block;
+  width:max-content;
+}
+.consultation-content-section .detail-grid .textarea-wrap{
+  width:100%;
+  min-width:0;
+}
+
+@media(max-width:760px){
+  .consultation-content-section .detail-grid{
+    grid-template-columns:1fr;
+    row-gap:4px;
+    column-gap:0;
+  }
+}
+
+@media print{
+  .consultation-content-section .detail-grid{
+    grid-template-columns:1fr!important;
+    row-gap:.8mm!important;
+    column-gap:0!important;
+    margin-top:1.2mm!important;
+  }
+  .consultation-content-section .detail-grid .textarea-wrap{
+    width:100%!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -695,10 +808,17 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     </div>
 
     <div class="career-subgroup">
-      <div class="career-subgroup-head"><h3>② 기업 · 직장정보</h3><span class="subgroup-note">회사명 · 부서명 · 직책</span></div>
+      <div class="career-subgroup-head"><h3>② 기업 · 직장정보</h3><span class="subgroup-note">회사 · 사업자 · 소속정보</span></div>
       <div class="career-subgroup-body">
-        <div class="company-row-3">
+        <div class="company-row-4">
           <div class="compact-pair"><label for="careerCompanyName">회사명</label><input id="careerCompanyName" class="field" type="text" placeholder="회사명"></div>
+          <div class="compact-pair"><label for="careerRepresentativeName">대표자명</label><input id="careerRepresentativeName" class="field" type="text" placeholder="대표자명"></div>
+          <div class="compact-pair"><label for="careerBusinessOpenDate">개업일시</label><input id="careerBusinessOpenDate" class="field" type="date"></div>
+          <div class="compact-pair"><label for="careerBusinessType">업태</label><input id="careerBusinessType" class="field" type="text" placeholder="업태"></div>
+        </div>
+        <div class="company-row-4">
+          <div class="compact-pair"><label for="careerBusinessItem">종목</label><input id="careerBusinessItem" class="field" type="text" placeholder="종목"></div>
+          <div class="compact-pair"><label for="careerBusinessRegistrationNo">등록번호</label><input id="careerBusinessRegistrationNo" class="field" type="text" inputmode="numeric" maxlength="12" placeholder="000-00-00000"></div>
           <div class="compact-pair"><label for="careerDepartmentName">부서명</label><input id="careerDepartmentName" class="field" type="text" placeholder="부서명"></div>
           <div class="compact-pair"><label for="careerPositionName">직책</label><input id="careerPositionName" class="field" type="text" placeholder="직책"></div>
         </div>
@@ -722,7 +842,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   </div>
 </section>
 
-    <section class="section">
+    <section class="section consultation-content-section">
       <div class="section-head"><h2>3. 상담 신청 내용</h2></div>
       <div class="section-body">
         <div class="grid-2">
@@ -995,6 +1115,24 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         }
         inputEl.value = formatted;
       });
+    }
+
+    // 사업자 등록번호 자동 하이픈 포맷: 000-00-00000
+    function attachBusinessRegistrationFormatter(inputEl) {
+      inputEl.addEventListener("input", () => {
+        const digits = inputEl.value.replace(/\D/g, "").slice(0, 10);
+        let formatted = digits;
+        if (digits.length > 3 && digits.length <= 5) {
+          formatted = digits.slice(0, 3) + "-" + digits.slice(3);
+        } else if (digits.length > 5) {
+          formatted = digits.slice(0, 3) + "-" + digits.slice(3, 5) + "-" + digits.slice(5);
+        }
+        inputEl.value = formatted;
+      });
+    }
+
+    function isValidBusinessRegistrationNo(value) {
+      return !value || /^\d{3}-\d{2}-\d{5}$/.test(value);
     }
     const receptionistPhoneEl = document.getElementById("receptionistPhone");
     const clientPhoneEl = document.getElementById("clientPhone");
@@ -1402,8 +1540,14 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const careerEmailEl = document.getElementById("careerEmail");
     const careerAddressEl = document.getElementById("careerAddress");
     const careerCompanyNameEl = document.getElementById("careerCompanyName");
+    const careerRepresentativeNameEl = document.getElementById("careerRepresentativeName");
+    const careerBusinessOpenDateEl = document.getElementById("careerBusinessOpenDate");
+    const careerBusinessTypeEl = document.getElementById("careerBusinessType");
+    const careerBusinessItemEl = document.getElementById("careerBusinessItem");
+    const careerBusinessRegistrationNoEl = document.getElementById("careerBusinessRegistrationNo");
     const careerDepartmentNameEl = document.getElementById("careerDepartmentName");
     const careerPositionNameEl = document.getElementById("careerPositionName");
+    attachBusinessRegistrationFormatter(careerBusinessRegistrationNoEl);
     const careerNationalityEl = document.getElementById("careerNationality");
     const careerEntryDateEl = document.getElementById("careerEntryDate");
     const careerExitDateEl = document.getElementById("careerExitDate");
@@ -1810,6 +1954,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         const birth = careerBirthDateEl.value.trim();
         const status = careerStatusEl.value;
         const email = careerEmailEl.value.trim();
+        const businessRegistrationNo = careerBusinessRegistrationNoEl.value.trim();
 
         // 진로정보 필수값은 '이름 + 전화번호' 2개로 한정한다.
         markInvalid(careerNameEl, !clientName);
@@ -1832,6 +1977,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         markInvalid(careerEmailEl, emailInvalid);
         if (emailInvalid) hasError = true;
 
+        const businessRegistrationInvalid = !isValidBusinessRegistrationNo(businessRegistrationNo);
+        markInvalid(careerBusinessRegistrationNoEl, businessRegistrationInvalid);
+        if (businessRegistrationInvalid) hasError = true;
+
         basicPayload = {
           counsel_type:"CC",
           nationality:emptyToNull(careerNationalityEl.value),
@@ -1851,6 +2000,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           client_status:emptyToNull(status),
           client_address:emptyToNull(careerAddressEl.value),
           company_name:emptyToNull(careerCompanyNameEl.value),
+          representative_name:emptyToNull(careerRepresentativeNameEl.value),
+          business_open_date:emptyToNull(careerBusinessOpenDateEl.value),
+          business_type:emptyToNull(careerBusinessTypeEl.value),
+          business_item:emptyToNull(careerBusinessItemEl.value),
+          business_registration_no:emptyToNull(businessRegistrationNo),
           department_name:emptyToNull(careerDepartmentNameEl.value),
           position_name:emptyToNull(careerPositionNameEl.value),
 
@@ -1904,7 +2058,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function findExistingClient(name, phone) {
       let query = sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_status, client_address, company_name, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
+        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_status, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
         .eq("client_name", name)
         .eq("client_phone", phone)
         .limit(2);
@@ -2087,6 +2241,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       careerEmailEl.value=client.email||"";
       careerAddressEl.value=client.client_address||"";
       careerCompanyNameEl.value=client.company_name||"";
+      careerRepresentativeNameEl.value=client.representative_name||"";
+      careerBusinessOpenDateEl.value=client.business_open_date||"";
+      careerBusinessTypeEl.value=client.business_type||"";
+      careerBusinessItemEl.value=client.business_item||"";
+      careerBusinessRegistrationNoEl.value=client.business_registration_no||"";
       careerDepartmentNameEl.value=client.department_name||"";
       careerPositionNameEl.value=client.position_name||"";
       setSelectValueAllowCustom(careerNationalityEl,client.nationality||"");
@@ -2217,7 +2376,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       try {
         let query = sb
           .from(BASIC_TABLE)
-          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_status, client_address, company_name, department_name, position_name, job_code")
+          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_status, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
           .eq("client_name", name)
           .order("created_at", { ascending: false });
         if (phone) query = query.eq("client_phone", phone);
