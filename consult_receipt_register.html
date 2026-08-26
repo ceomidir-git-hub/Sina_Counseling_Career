@@ -497,6 +497,105 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   }
 }
 
+
+/* ===== 조회조건 강조 + 수정저장 확인 팝업 ===== */
+.bottom-hint{
+  margin-top:4mm;
+  text-align:center;
+  font-size:12px;
+  line-height:1.5;
+  color:#475569;
+  font-weight:700;
+}
+.lookup-key-warning{
+  display:inline-block;
+  color:#c62828;
+  font-weight:950;
+  margin-right:5px;
+}
+.lookup-sub-note{
+  color:#475569;
+  font-weight:750;
+}
+
+.edit-confirm-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10020;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.45);
+}
+.edit-confirm-backdrop.show{display:flex}
+.edit-confirm-modal{
+  width:min(500px,94vw);
+  background:#fff;
+  border:1px solid #d6dee8;
+  border-radius:12px;
+  box-shadow:0 24px 70px rgba(15,23,42,.28);
+  overflow:hidden;
+}
+.edit-confirm-head{
+  min-height:48px;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  border-bottom:1px solid #e4eaf1;
+  background:#f7fbff;
+}
+.edit-confirm-head h3{
+  margin:0;
+  color:#123f78;
+  font-size:16px;
+  font-weight:950;
+}
+.edit-confirm-body{
+  padding:18px 18px 14px;
+  text-align:center;
+}
+.edit-confirm-message{
+  margin:0 0 10px;
+  color:#172033;
+  font-size:14px;
+  font-weight:850;
+  line-height:1.55;
+  white-space:pre-line;
+}
+.edit-confirm-warning{
+  margin:0;
+  color:#c62828;
+  font-size:14px;
+  font-weight:950;
+  line-height:1.5;
+}
+.edit-confirm-actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  padding:0 18px 18px;
+}
+.edit-confirm-btn{
+  min-width:92px;
+  height:38px;
+  border-radius:7px;
+  border:1px solid #1457a6;
+  background:#fff;
+  color:#123f78;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+}
+.edit-confirm-btn.primary{
+  background:#1461bd;
+  border-color:#1461bd;
+  color:#fff;
+}
+@media print{
+  .edit-confirm-backdrop{display:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -641,7 +740,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       <button type="button" class="btn" id="resetBtn">↻ 초기화</button>
       <button type="button" class="btn" id="backBtn">← 이전화면</button>
     </div>
-    <div class="bottom-hint">💡 현재 화면의 이름(+연락처)을 입력한 뒤 <b>🔍 조회</b> 버튼을 누르면 기존 접수 기록을 이 폼으로 불러올 수 있습니다.</div>
+    <div class="bottom-hint">
+      💡 <span class="lookup-key-warning">조회조건 필수: 이름 + 상담구분이 반드시 일치해야 합니다.</span>
+      <span class="lookup-sub-note">동명이인 구분이 필요한 경우 연락처도 함께 입력한 뒤 <b>🔍 조회</b> 버튼을 눌러주세요.</span>
+    </div>
   </form>
 </main>
 </div>
@@ -669,6 +771,23 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   </div>
 </div>
 
+
+
+<div class="edit-confirm-backdrop" id="editConfirmBackdrop" aria-hidden="true">
+  <div class="edit-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="editConfirmTitle">
+    <div class="edit-confirm-head">
+      <h3 id="editConfirmTitle">수정 내용 저장 확인</h3>
+    </div>
+    <div class="edit-confirm-body">
+      <p class="edit-confirm-message" id="editConfirmMessage">수정한 내용을 저장하시겠습니까?</p>
+      <p class="edit-confirm-warning">수정된 항목을 다시 체크해 주세요.</p>
+    </div>
+    <div class="edit-confirm-actions">
+      <button type="button" class="edit-confirm-btn" id="editConfirmCancelBtn">취소</button>
+      <button type="button" class="edit-confirm-btn primary" id="editConfirmOkBtn">확인</button>
+    </div>
+  </div>
+</div>
 
 
   <!-- Supabase JS SDK -->
@@ -1327,6 +1446,49 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     }
 
     document.querySelectorAll('input[name="consultType"]').forEach(el => el.addEventListener("change", updateCounselTypeUI));
+
+
+    // ===== 수정 저장 전용 확인 팝업 =====
+    const editConfirmBackdrop = document.getElementById("editConfirmBackdrop");
+    const editConfirmMessageEl = document.getElementById("editConfirmMessage");
+    const editConfirmCancelBtn = document.getElementById("editConfirmCancelBtn");
+    const editConfirmOkBtn = document.getElementById("editConfirmOkBtn");
+    let editConfirmResolver = null;
+
+    function closeEditConfirm(result){
+      if (!editConfirmResolver) return;
+      editConfirmBackdrop.classList.remove("show");
+      editConfirmBackdrop.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+      const resolver = editConfirmResolver;
+      editConfirmResolver = null;
+      resolver(result);
+    }
+
+    function showEditConfirm(message){
+      editConfirmMessageEl.textContent = message;
+      editConfirmBackdrop.classList.add("show");
+      editConfirmBackdrop.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+      setTimeout(() => editConfirmOkBtn.focus(), 0);
+
+      return new Promise(resolve => {
+        editConfirmResolver = resolve;
+      });
+    }
+
+    editConfirmCancelBtn.addEventListener("click", () => closeEditConfirm(false));
+    editConfirmOkBtn.addEventListener("click", () => closeEditConfirm(true));
+
+    editConfirmBackdrop.addEventListener("click", (e) => {
+      if (e.target === editConfirmBackdrop) closeEditConfirm(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && editConfirmBackdrop.classList.contains("show")) {
+        closeEditConfirm(false);
+      }
+    });
 
     // ===== 7) Supabase 연결: 실패해도 위 UI 동작에는 영향 없도록 별도 처리 =====
     // index.html과 동일하게 sessionStorage를 세션 저장소로 지정해야
@@ -2027,7 +2189,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const confirmMessage = typeChanged
         ? `${loadedRecordType === "PC" ? "심리상담" : "진로상담"} 기록을 ${counselType === "PC" ? "심리상담" : "진로상담"}으로 변경하시겠습니까?\n기존 기록은 변경이력으로 보존됩니다.`
         : "수정한 내용을 저장하시겠습니까?";
-      const confirmed = window.confirm(confirmMessage);
+      const confirmed = await showEditConfirm(confirmMessage);
       if (!confirmed) return;
 
       editSaveBtn.disabled = true;
