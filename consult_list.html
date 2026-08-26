@@ -11,7 +11,7 @@
   --blue:#1457a6;--blue-dark:#123f78;--blue-soft:#eef6ff;--bg:#eef1f5;
   --line:#b9cce3;--line-soft:#dde7f1;--text:#172033;--muted:#6b7788;
   --yellow:#fffdf2;--green:#16784b;--red:#b42318;
-  --print-row-h:7.2mm;--print-font:9.4pt;
+  --print-row-h:7.2mm;--print-font:10.15pt;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
@@ -28,27 +28,27 @@ button,input{font:inherit}button{cursor:pointer}
 .top-actions{display:flex;gap:6px}.btn{height:34px;padding:0 12px;border:1px solid var(--blue);border-radius:7px;background:#fff;color:var(--blue-dark);font-size:11.5px;font-weight:900;white-space:nowrap}.btn:hover{background:var(--blue-soft)}.btn.pdf{background:var(--blue);color:#fff}.btn.pdf:hover{background:var(--blue-dark)}
 .section{border:1px solid #6fa3dc;border-radius:6px;overflow:hidden;margin-bottom:5mm;background:#fff;break-inside:avoid;page-break-inside:avoid}
 .section-title{min-height:10mm;margin:0;padding:0 4mm;display:flex;align-items:center;background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%);border-bottom:1px solid #a8c6e7;color:var(--blue);font-size:15px;font-weight:950;letter-spacing:-.4px}
-.search-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr;gap:3.2mm 3mm;align-items:end;margin:3.5mm 4mm 0}.field{min-width:0}.field label,.radio-label{display:block;margin:0 0 5px;color:#374151;font-size:11.5px;font-weight:850}.field input{width:100%;height:36px;padding:0 9px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);color:#111827;font-size:11.5px;font-weight:650;outline:none}.field input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(20,87,166,.11)}
-.radio-wrap{height:36px;display:flex;align-items:center;gap:12px;padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);white-space:nowrap}.radio-option{display:inline-flex;align-items:center;gap:5px;color:#364152;font-size:10.8px;font-weight:700;cursor:pointer}.radio-option input{width:15px;height:15px;margin:0;accent-color:var(--blue)}
+.search-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr;gap:3.2mm 3mm;align-items:end;margin:3.5mm 4mm 0}.field{min-width:0}.field label,.radio-label{display:block;margin:0 0 5px;color:#374151;font-size:12.5px;font-weight:850}.field input{width:100%;height:36px;padding:0 9px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);color:#111827;font-size:12.5px;font-weight:650;outline:none}.field input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(20,87,166,.11)}
+.radio-wrap{height:36px;display:flex;align-items:center;gap:12px;padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);white-space:nowrap}.radio-option{display:inline-flex;align-items:center;gap:5px;color:#364152;font-size:11.8px;font-weight:700;cursor:pointer}.radio-option input{width:15px;height:15px;margin:0;accent-color:var(--blue)}
 .search-grid>div:nth-child(5){grid-column:1/4}.search-btn{grid-column:4;height:36px;border:1px solid var(--blue);border-radius:5px;background:var(--blue);color:#fff;font-size:11.5px;font-weight:900;cursor:pointer}.search-btn:hover{background:var(--blue-dark)}
 .search-note{margin:2.5mm 4mm 3.5mm;color:#6f7b8d;font-size:9.5px;line-height:1.45}
 .status{display:none;margin:0 0 4mm;padding:8px 11px;border-radius:7px;font-size:11px;font-weight:700}.status.show{display:block}.status.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e4f9a}.status.error{background:#fff1f2;border:1px solid #fecdd3;color:#a61b2b}
 .result-section{margin-bottom:0}.result-section .table-box{margin:3.5mm 4mm 4mm}.print-meta{display:none}.table-box{border:1px solid #cbd5e1;border-radius:4px;overflow:hidden;background:#fff}.table-scroll{max-height:120mm;overflow:auto;scrollbar-width:thin;scrollbar-color:#b5bdc9 #f4f6f8}
-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10.5px}col.no{width:7%}col.name{width:13%}col.phone{width:18%}col.sex{width:8%}col.age{width:8%}col.type{width:18%}col.status-col{width:16%}col.session{width:12%}
-thead th{position:sticky;top:0;z-index:3;height:34px;padding:0 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;text-align:center;font-size:10.5px;font-weight:900;line-height:1.2}
-tbody td{height:33px;padding:5px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;background:#fff;color:#303846;text-align:center;font-size:10.5px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}thead th:last-child,tbody td:last-child{border-right:0}tbody tr:nth-child(even) td{background:#fffdf6}tbody tr:hover td{background:#f5f8fd}td.left{text-align:left;padding-left:8px}.empty-row td{height:80px;color:#8a94a5;background:#fff!important}.badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:9.5px;font-weight:800;line-height:1.2;white-space:nowrap}.badge.progress{background:#eaf3ff;color:#275ea9}.badge.done{background:#eaf8ef;color:#197047}.badge.unknown{background:#f2f4f7;color:#667085}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}col.no{width:5%}col.regdate{width:15%}col.name{width:10%}col.phone{width:16%}col.sex{width:6%}col.age{width:6%}col.type{width:15%}col.status-col{width:15%}col.session{width:12%}
+thead th{position:sticky;top:0;z-index:3;height:34px;padding:0 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;text-align:center;font-size:11.5px;font-weight:900;line-height:1.2}
+tbody td{height:33px;padding:5px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;background:#fff;color:#303846;text-align:center;font-size:11.5px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}thead th:last-child,tbody td:last-child{border-right:0}tbody tr:nth-child(even) td{background:#fffdf6}tbody tr:hover td{background:#f5f8fd}td.left{text-align:left;padding-left:8px}.empty-row td{height:80px;color:#8a94a5;background:#fff!important}.badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap}.badge.progress{background:#eaf3ff;color:#275ea9}.badge.done{background:#eaf8ef;color:#197047}.badge.unknown{background:#f2f4f7;color:#667085}
 .document-footer{margin-top:5mm;padding:0 3mm 1mm;text-align:center}.footer-rights{text-align:left;color:#6b7280;font-size:17px;font-weight:500;line-height:1.25;margin-bottom:1mm}.footer-rule{height:0;border-top:1.2pt solid var(--blue-dark)}.footer-company{color:var(--blue-dark);font-size:31px;font-weight:950;letter-spacing:-1px;line-height:1;padding-top:2mm;white-space:nowrap}
 .pdf-watermark{display:none}.loading{position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:rgba(255,255,255,.72);backdrop-filter:blur(2px)}.loading.show{display:grid}.loading-box{min-width:220px;padding:18px 22px;border:1px solid #dbe1e9;border-radius:10px;background:#fff;box-shadow:0 12px 34px rgba(15,23,42,.14);text-align:center;color:#455066;font-size:13px;font-weight:800}
 @media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.page-head{align-items:flex-start}.head-right{flex-direction:column;align-items:flex-end}.search-grid{grid-template-columns:1fr 1fr}.search-grid>div:nth-child(5){grid-column:1/-1}.search-btn{grid-column:1/-1}.table-scroll{overflow:auto}table{min-width:720px}.document-footer{margin-top:20px}}
-html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:8.8pt}html[data-print-density="dense"]{--print-row-h:5.35mm;--print-font:8.1pt}
+html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[data-print-density="dense"]{--print-row-h:5.35mm;--print-font:8.85pt}
 @page{size:210mm 297mm;margin:18mm 7mm 12mm}
 @media print{
   html,body{margin:0!important;padding:0!important;background:#fff!important;background-image:none!important;color-scheme:only light!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;forced-color-adjust:none!important}
   .page-wrap{padding:0!important;min-height:auto!important;display:block!important}.a4-page{width:100%!important;min-height:auto!important;max-width:none!important;padding:0!important;box-shadow:none!important;overflow:visible!important}.a4-page::after{display:none!important}
-  .page-head{min-height:13mm!important;padding:0 0 3mm!important;margin:0 0 3mm!important;border-bottom:1.2pt solid #1457a6!important}.page-title{font-size:23pt!important;line-height:1!important}.page-sub{font-size:7.5pt!important;margin-top:2mm!important}.head-right,.status,.search-section{display:none!important}
-  .result-section{border:0!important;border-radius:0!important;margin:0!important;overflow:visible!important}.result-section .section-title{min-height:10mm!important;padding:0!important;background:#fff!important;border-bottom:1.2pt solid #1457a6!important;font-size:15pt!important;color:#1457a6!important}
+  .page-head{position:fixed!important;left:0!important;right:0!important;top:0!important;z-index:30!important;min-height:13mm!important;padding:0 0 3mm!important;margin:0!important;border-bottom:1.2pt solid #1457a6!important;background:#fff!important}.page-title{font-size:23pt!important;line-height:1!important}.page-sub{font-size:7.5pt!important;margin-top:2mm!important}.head-right,.status,.search-section{display:none!important}
+  .result-section{border:0!important;border-radius:0!important;margin:0!important;padding-top:17mm!important;padding-bottom:24mm!important;overflow:visible!important}.result-section .section-title{min-height:10mm!important;padding:0!important;background:#fff!important;border-bottom:1.2pt solid #1457a6!important;font-size:15pt!important;color:#1457a6!important}
   .print-meta{display:block!important;margin:2mm 0 2.5mm!important;font-size:8.3pt!important;color:#4b5563!important;text-align:right!important;line-height:1.3}.result-section .table-box{margin:0!important;border:1px solid #777!important;border-radius:0!important;overflow:visible!important}.table-scroll{max-height:none!important;overflow:visible!important}
-  table{font-size:var(--print-font)!important}thead{display:table-header-group!important}thead th{position:static!important;height:7.5mm!important;padding:1mm .8mm!important;border-color:#777!important;background:#eaf2fb!important;color:#111!important;font-size:8.5pt!important;font-weight:900!important}tbody td{height:var(--print-row-h)!important;padding:.8mm .7mm!important;border-color:#aaa!important;background:#fff!important;color:#111!important;font-size:var(--print-font)!important;font-weight:500!important;line-height:1.12!important}.badge{padding:0!important;background:none!important;color:#111!important;font-size:inherit!important;font-weight:500!important}
+  table{font-size:var(--print-font)!important}thead{display:table-header-group!important}thead th{position:static!important;height:7.5mm!important;padding:1mm .8mm!important;border-color:#777!important;background:#eaf2fb!important;color:#111!important;font-size:9.25pt!important;font-weight:900!important}tbody td{height:var(--print-row-h)!important;padding:.8mm .7mm!important;border-color:#aaa!important;background:#fff!important;color:#111!important;font-size:var(--print-font)!important;font-weight:500!important;line-height:1.12!important}.badge{padding:0!important;background:none!important;color:#111!important;font-size:inherit!important;font-weight:500!important}
   .document-footer{position:fixed!important;left:7mm!important;right:7mm!important;bottom:4mm!important;margin:0!important;padding:0!important;background:#fff!important;z-index:20}.footer-rights{font-size:17px!important;color:#6b7280!important;line-height:1.25!important;margin:0 0 1mm!important}.footer-rule{border-top:1.2pt solid #1457a6!important}.footer-company{font-size:23pt!important;line-height:1!important;padding-top:2mm!important;color:#123f78!important}
   .pdf-watermark{display:block!important;position:fixed!important;left:50%!important;top:50%!important;z-index:15!important;transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;transform-origin:center!important;color:#b91c1c!important;font-size:65pt!important;font-weight:900!important;letter-spacing:1px!important;white-space:nowrap!important;opacity:.1125!important;pointer-events:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .loading{display:none!important}
@@ -116,12 +116,13 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:8.8pt}html[d
       <div class="table-scroll">
         <table aria-label="상담 대상자 목록">
           <colgroup>
-            <col class="no"><col class="name"><col class="phone"><col class="sex">
+            <col class="no"><col class="regdate"><col class="name"><col class="phone"><col class="sex">
             <col class="age"><col class="type"><col class="status-col"><col class="session">
           </colgroup>
           <thead>
             <tr>
               <th>NO</th>
+              <th>등록일</th>
               <th>이름</th>
               <th>전화번호</th>
               <th>성별</th>
@@ -132,7 +133,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:8.8pt}html[d
             </tr>
           </thead>
           <tbody id="resultBody">
-            <tr class="empty-row"><td colspan="8">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
+            <tr class="empty-row"><td colspan="9">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
           </tbody>
         </table>
       </div>
@@ -230,6 +231,27 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:8.8pt}html[d
     const map = {};
     parts.forEach(p => map[p.type] = p.value);
     return `${map.year}-${map.month}-${map.day}`;
+  }
+  function formatDateWithWeekday(value){
+    const ymd = dateOnlyKST(value);
+    if (!ymd) return "-";
+    const [y,m,d] = ymd.split("-").map(Number);
+    const weekday = ["일","월","화","수","목","금","토"][new Date(Date.UTC(y,m-1,d)).getUTCDay()];
+    return `${ymd}(${weekday})`;
+  }
+  function earliestRegistrationDate(psychRows,careerRows){
+    const dates = [];
+    psychRows.forEach(r => {
+      const d = dateOnlyKST(r.receipt_at) || r.receipt_date || "";
+      if (d) dates.push(d);
+    });
+    careerRows.forEach(r => {
+      const d = dateOnlyKST(r.receipt_at) || "";
+      if (d) dates.push(d);
+    });
+    if (!dates.length) return "";
+    dates.sort();
+    return dates[0];
   }
   function effectivePsychDate(row){
     return dateOnlyKST(row.session_start_at) ||
@@ -422,6 +444,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:8.8pt}html[d
 
         out.push({
           id:client.id,
+          registeredAt:earliestRegistrationDate(allPsych,allCareer),
           name:name || "-",
           phone:phone || "-",
           sex:sexMap.get(client.sex_code) || client.sex_code || "-",
@@ -457,12 +480,13 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:8.8pt}html[d
   function renderRows(rows){
     els.resultCount.textContent = String(rows.length);
     if (!rows.length){
-      els.body.innerHTML = '<tr class="empty-row"><td colspan="8">조회 결과가 없습니다.</td></tr>';
+      els.body.innerHTML = '<tr class="empty-row"><td colspan="9">조회 결과가 없습니다.</td></tr>';
       return;
     }
     els.body.innerHTML = rows.map((r,i) => `
       <tr>
         <td>${i+1}</td>
+        <td>${escapeHTML(formatDateWithWeekday(r.registeredAt))}</td>
         <td class="left">${escapeHTML(r.name)}</td>
         <td>${escapeHTML(r.phone)}</td>
         <td>${escapeHTML(r.sex)}</td>
