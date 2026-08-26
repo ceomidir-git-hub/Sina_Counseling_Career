@@ -709,11 +709,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       <div class="career-subgroup-head"><h3>③ 외국인 정보</h3><span class="subgroup-note">3열 × 2행 · 직접 입력</span></div>
       <div class="career-subgroup-body">
         <div class="foreign-row-3">
-          <div class="compact-pair"><label for="careerNationality">국적</label><select id="careerNationality"><option value="" selected>선택</option><option>한국</option><option>중국</option><option>베트남</option><option>필리핀</option><option>태국</option><option>몽골</option><option>우즈베키스탄</option><option>기타</option></select></div>
+          <div class="compact-pair"><label for="careerNationality">국적</label><select id="careerNationality"><option selected disabled value="">불러오는 중...</option></select></div>
           <div class="compact-pair"><label for="careerEntryDate">입국일</label><input id="careerEntryDate" class="field" type="date"></div>
           <div class="compact-pair"><label for="careerExitDate">출국일</label><input id="careerExitDate" class="field" type="date"></div>
           <div class="compact-pair"><label for="careerForeignerNo">외국인번호</label><input id="careerForeignerNo" class="field" type="text" placeholder="외국인번호"></div>
-          <div class="compact-pair"><label for="careerVisaType">비자</label><input id="careerVisaType" class="field" type="text" placeholder="예: E-9, E-7, D-10"></div>
+          <div class="compact-pair"><label for="careerVisaType">비자</label><select id="careerVisaType"><option selected disabled value="">불러오는 중...</option></select></div>
           <div class="compact-pair"><label for="careerLegalStatus">합불</label><select id="careerLegalStatus"><option value="" selected>선택</option><option>합법</option><option>불법</option></select></div>
         </div>
         <div class="inline-note">※ 외국인 버튼/팝업 없이 이 영역에서 바로 입력합니다.</div>
@@ -760,11 +760,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   <div class="foreign-modal" role="dialog" aria-modal="true" aria-labelledby="foreignModalTitle">
     <div class="foreign-modal-head"><h3 class="foreign-modal-title" id="foreignModalTitle">외국인 정보</h3><button type="button" class="modal-x" id="closeForeignModalX" aria-label="닫기">×</button></div>
     <div class="foreign-modal-body"><div class="foreign-grid">
-      <div class="foreign-field"><label for="foreignNationality">국적</label><input id="foreignNationality" class="field" type="text" placeholder="국적"></div>
+      <div class="foreign-field"><label for="foreignNationality">국적</label><select id="foreignNationality"><option selected disabled value="">불러오는 중...</option></select></div>
       <div class="foreign-field"><label for="foreignEntryDate">입국일</label><input id="foreignEntryDate" class="field" type="date"></div>
       <div class="foreign-field"><label for="foreignExitDate">출국일</label><input id="foreignExitDate" class="field" type="date"></div>
       <div class="foreign-field"><label for="foreignNumber">외국인번호</label><input id="foreignNumber" class="field" type="text" placeholder="외국인번호" maxlength="20"></div>
-      <div class="foreign-field"><label for="foreignVisa">비자</label><input id="foreignVisa" class="field" type="text" placeholder="비자" maxlength="20"></div>
+      <div class="foreign-field"><label for="foreignVisa">비자</label><select id="foreignVisa"><option selected disabled value="">불러오는 중...</option></select></div>
       <div class="foreign-field"><label for="foreignResult">합불</label><select id="foreignResult"><option value="" selected>선택</option><option value="합">합</option><option value="불">불</option></select></div>
     </div></div>
     <div class="foreign-modal-actions"><button type="button" class="modal-btn" id="cancelForeignModalBtn">닫기</button><button type="button" class="modal-btn primary" id="saveForeignModalBtn">확인</button></div>
@@ -1588,6 +1588,97 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"), targetMap);
     loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"), topicMap);
 
+
+    // ===== 국가 / 비자 마스터 동적 로딩 =====
+    // DB_basic에는 기존 데이터 호환을 위해:
+    // - nationality : 국가명(예: 베트남)
+    // - visa_type   : 표준 비자표기(예: E-9, E-7, D-10)
+    // 로 저장한다.
+    function normalizeVisaDisplay(code, name) {
+      const source = String(name || "");
+      const matched = source.match(/\(([A-Z]+-\d+)\)/i);
+      if (matched) return matched[1].toUpperCase();
+
+      const raw = String(code || "").toUpperCase().replace(/\s/g, "");
+      const m = raw.match(/^([A-Z]+)(\d+)$/);
+      return m ? `${m[1]}-${m[2]}` : raw;
+    }
+
+    async function loadCountryOptions(selectEl) {
+      if (!selectEl) return;
+      if (!sb) {
+        selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`;
+        return;
+      }
+
+      const { data, error } = await sb
+        .from("country_codes")
+        .select("code, name, sort_order")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        console.error("country_codes 로딩 실패:", error);
+        selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`;
+        return;
+      }
+
+      selectEl.innerHTML = `<option value="" selected>선택</option>`;
+      data.forEach((row) => {
+        const option = document.createElement("option");
+        option.value = row.name;          // DB_basic.nationality에는 국가명 저장
+        option.textContent = row.name;
+        option.dataset.code = row.code;   // 마스터 코드도 DOM에 보존
+        selectEl.appendChild(option);
+      });
+    }
+
+    async function loadVisaOptions(selectEl) {
+      if (!selectEl) return;
+      if (!sb) {
+        selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`;
+        return;
+      }
+
+      const { data, error } = await sb
+        .from("visa_codes")
+        .select("code, name, sort_order")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        console.error("visa_codes 로딩 실패:", error);
+        selectEl.innerHTML = `<option selected disabled value="">목록을 불러올 수 없습니다</option>`;
+        return;
+      }
+
+      selectEl.innerHTML = `<option value="" selected>선택</option>`;
+      data.forEach((row) => {
+        const visaValue = normalizeVisaDisplay(row.code, row.name);
+        const option = document.createElement("option");
+        option.value = visaValue;         // 기존 DB 형식과 동일: E-9 / E-7 / D-10
+        option.textContent = row.name;    // 화면: 비전문취업(E-9) 등
+        option.dataset.code = row.code;   // 마스터 코드 E9/E7/D10 보존
+        selectEl.appendChild(option);
+      });
+    }
+
+    async function loadForeignMasterOptions() {
+      const countryTargets = [
+        document.getElementById("foreignNationality"),
+        document.getElementById("careerNationality")
+      ];
+      const visaTargets = [
+        document.getElementById("foreignVisa"),
+        document.getElementById("careerVisaType")
+      ];
+
+      await Promise.all([
+        ...countryTargets.map(loadCountryOptions),
+        ...visaTargets.map(loadVisaOptions)
+      ]);
+    }
+
     // 방법1(접수방법): DB에 등록된 contact_method 값을 우선 반영하고,
     // 테스트 DB가 비어 있는 경우 엑셀 방법1의 6개 항목을 기본 목록으로 표시합니다.
     // DB 구조는 변경하지 않습니다.
@@ -1640,6 +1731,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     }
 
     loadContactMethodOptions();
+    loadForeignMasterOptions();
 
     // ===== 7-2) 로그인 상태 초기화 및 실시간 반영 =====
     async function initAuth() {
