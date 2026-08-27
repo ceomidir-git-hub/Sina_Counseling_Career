@@ -798,7 +798,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         <div class="personal-row-3">
           <div class="compact-pair"><label for="careerPhone">전화번호</label><input id="careerPhone" class="field" type="tel" placeholder="010-0000-0000" maxlength="13" inputmode="numeric"></div>
           <div class="compact-pair"><label for="careerGender">성별</label><select id="careerGender"><option selected disabled value="">불러오는 중...</option></select></div>
-          <div class="compact-pair"><label for="careerStatus">상태</label><select id="careerStatus"><option value="" selected>선택</option><option>초등학생</option><option>중학생</option><option>고등학생</option><option>대학생</option><option>회사원</option><option>취준생</option><option>무직</option><option>현장직</option><option>기타</option></select></div>
+          <div class="compact-pair"><label for="careerJob">직업</label><select id="careerJob"><option selected disabled value="">불러오는 중...</option></select></div>
         </div>
         <div class="personal-row-2">
           <div class="compact-pair"><label for="careerEmail">메일주소</label><input id="careerEmail" class="field" type="email" placeholder="example@email.com"></div>
@@ -1554,7 +1554,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const careerInfoSection = document.getElementById("careerInfoSection");
     const careerNameEl = document.getElementById("careerName");
     const careerGenderEl = document.getElementById("careerGender");
-    const careerStatusEl = document.getElementById("careerStatus");
+    const careerJobEl = document.getElementById("careerJob");
     const careerEmailEl = document.getElementById("careerEmail");
     const careerAddressEl = document.getElementById("careerAddress");
     const careerCompanyNameEl = document.getElementById("careerCompanyName");
@@ -1572,6 +1572,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const careerForeignerNoEl = document.getElementById("careerForeignerNo");
     const careerVisaTypeEl = document.getElementById("careerVisaType");
     const careerLegalStatusEl = document.getElementById("careerLegalStatus");
+    const psychJobEl = document.getElementById("job");
 
     function setSelectValueAllowCustom(el, value){
       if (!el) return;
@@ -1584,11 +1585,28 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       el.value=v;
     }
 
+    // 심리/진로 모두 동일한 DB_basic.job_code를 사용하므로 두 직업 선택값을 동기화한다.
+    function syncJobSelection(sourceEl, targetEl){
+      if (!sourceEl || !targetEl) return;
+      setSelectValueAllowCustom(targetEl, sourceEl.value || "");
+      markInvalid(targetEl, false);
+    }
+    psychJobEl.addEventListener("change", () => syncJobSelection(psychJobEl, careerJobEl));
+    careerJobEl.addEventListener("change", () => syncJobSelection(careerJobEl, psychJobEl));
+
     function updateCounselTypeUI(){
       const isCareer = getSelectedCounselType() === "CC";
       psychInfoSection.classList.toggle("info-hidden", isCareer);
       careerInfoSection.classList.toggle("info-hidden", !isCareer);
       document.body.classList.toggle("career-mode", isCareer);
+
+      if (mode === "new") {
+        if (isCareer && !careerJobEl.value && psychJobEl.value) {
+          syncJobSelection(psychJobEl, careerJobEl);
+        } else if (!isCareer && !psychJobEl.value && careerJobEl.value) {
+          syncJobSelection(careerJobEl, psychJobEl);
+        }
+      }
 
       const pdfSubtitle = document.querySelector(".pdf-doc-subtitle");
       if (pdfSubtitle) {
@@ -1727,7 +1745,6 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       "birth_date",
       "client_phone",
       "email",
-      "client_status",
       "client_address",
       "company_name",
       "representative_name",
@@ -1753,7 +1770,6 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       birth_date:"생년월일",
       client_phone:"전화번호",
       email:"메일주소",
-      client_status:"상태",
       client_address:"주소",
       company_name:"회사명",
       representative_name:"대표자명",
@@ -1849,6 +1865,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       loadLookupOptions("sex_codes", document.getElementById("gender"), sexMap),
       loadLookupOptions("sex_codes", careerGenderEl, null),
       loadLookupOptions("job_codes", document.getElementById("job"), jobMap),
+      loadLookupOptions("job_codes", careerJobEl, null),
       loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"), targetMap),
       loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"), topicMap)
     ]);
@@ -2094,7 +2111,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         const clientPhone = careerPhoneEl.value.trim();
         const gender = careerGenderEl.value;
         const birth = careerBirthDateEl.value.trim();
-        const status = careerStatusEl.value;
+        const jobCode = careerJobEl.value;
         const email = careerEmailEl.value.trim();
         const businessRegistrationNo = careerBusinessRegistrationNoEl.value.trim();
 
@@ -2109,7 +2126,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         // 나머지는 선택입력.
         // 단, 사용자가 값을 입력한 경우에만 형식 오류를 검사한다.
         markInvalid(careerGenderEl, false);
-        markInvalid(careerStatusEl, false);
+        markInvalid(careerJobEl, false);
 
         const birthInvalid = !!birth && !isValidBirthDate(birth);
         markInvalid(careerBirthDateEl, birthInvalid);
@@ -2135,11 +2152,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           client_name:clientName,
           client_phone:clientPhone,
 
-          // 선택입력은 비어 있으면 NULL
+          // 선택입력은 비어 있으면 NULL. 직업은 심리/진로 모두 DB_basic.job_code를 사용한다.
           sex_code:emptyToNull(gender),
           birth_date:emptyToNull(birth),
           email:emptyToNull(email),
-          client_status:emptyToNull(status),
+          job_code:emptyToNull(jobCode),
           client_address:emptyToNull(careerAddressEl.value),
           company_name:emptyToNull(careerCompanyNameEl.value),
           representative_name:emptyToNull(careerRepresentativeNameEl.value),
@@ -2200,7 +2217,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function findExistingClient(name, phone) {
       let query = sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_status, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
+        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
         .eq("client_name", name)
         .eq("client_phone", phone)
         .limit(2);
@@ -2383,7 +2400,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       careerPhoneEl.value=client.client_phone||"";
       setSelectValueAllowCustom(careerGenderEl,client.sex_code||"");
       careerBirthDateEl.value=client.birth_date||""; updateCareerAge();
-      setSelectValueAllowCustom(careerStatusEl,client.client_status||"");
+      setSelectValueAllowCustom(careerJobEl,client.job_code||"");
       careerEmailEl.value=client.email||"";
       careerAddressEl.value=client.client_address||"";
       careerCompanyNameEl.value=client.company_name||"";
@@ -2525,7 +2542,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       try {
         let query = sb
           .from(BASIC_TABLE)
-          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_status, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
+          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
           .eq("client_name", name)
           .order("created_at", { ascending: false });
         if (phone) query = query.eq("client_phone", phone);
@@ -2753,7 +2770,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function fetchClientById(clientId) {
       const { data, error } = await sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_status, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
+        .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
         .eq("id", clientId)
         .maybeSingle();
 
