@@ -484,7 +484,15 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
         });
       }
 
-      out.sort((a,b) => a.name.localeCompare(b.name,"ko") || a.phone.localeCompare(b.phone));
+      // 등록일 기준 최신순(내림차순) 정렬.
+      // 등록일이 같은 경우 이름순 → 전화번호순으로 안정적으로 정렬한다.
+      out.sort((a,b) => {
+        const dateCompare = String(b.registeredAt || "").localeCompare(String(a.registeredAt || ""));
+        if (dateCompare !== 0) return dateCompare;
+        const nameCompare = a.name.localeCompare(b.name,"ko");
+        if (nameCompare !== 0) return nameCompare;
+        return a.phone.localeCompare(b.phone);
+      });
       lastRows = out;
       renderRows(out);
 
