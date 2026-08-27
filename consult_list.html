@@ -34,7 +34,7 @@ button,input{font:inherit}button{cursor:pointer}
 .search-note{margin:2.5mm 4mm 3.5mm;color:#6f7b8d;font-size:9.5px;line-height:1.45}
 .status{display:none;margin:0 0 4mm;padding:8px 11px;border-radius:7px;font-size:11px;font-weight:700}.status.show{display:block}.status.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e4f9a}.status.error{background:#fff1f2;border:1px solid #fecdd3;color:#a61b2b}
 .result-section{margin-bottom:0}.result-section .table-box{margin:3.5mm 4mm 4mm}.print-meta{display:none}.table-box{border:1px solid #cbd5e1;border-radius:4px;overflow:hidden;background:#fff}.table-scroll{max-height:120mm;overflow:auto;scrollbar-width:thin;scrollbar-color:#b5bdc9 #f4f6f8}
-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}col.no{width:5%}col.regdate{width:15%}col.name{width:10%}col.phone{width:16%}col.sex{width:6%}col.age{width:6%}col.type{width:15%}col.status-col{width:15%}col.session{width:12%}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}col.no{width:5%}col.regdate{width:14%}col.name{width:9%}col.phone{width:15%}col.sex{width:5%}col.age{width:5%}col.nationality{width:8%}col.type{width:14%}col.status-col{width:14%}col.session{width:11%}
 thead th{position:sticky;top:0;z-index:3;height:34px;padding:0 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;text-align:center;font-size:11.5px;font-weight:900;line-height:1.2}
 tbody td{height:33px;padding:5px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;background:#fff;color:#303846;text-align:center;font-size:11.5px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}thead th:last-child,tbody td:last-child{border-right:0}tbody tr:nth-child(even) td{background:#fffdf6}tbody tr:hover td{background:#f5f8fd}td.left{text-align:left;padding-left:8px}.client-link{display:inline-block;color:var(--blue);font-weight:900;text-decoration:none;border-bottom:1px solid transparent;line-height:1.25;cursor:pointer}.client-link:hover{color:var(--blue-dark);border-bottom-color:var(--blue-dark)}.client-link:focus-visible{outline:2px solid rgba(20,87,166,.32);outline-offset:2px;border-radius:2px}.empty-row td{height:80px;color:#8a94a5;background:#fff!important}.badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap}.badge.progress{background:#eaf3ff;color:#275ea9}.badge.done{background:#eaf8ef;color:#197047}.badge.unknown{background:#f2f4f7;color:#667085}
 .document-footer{margin-top:5mm;padding:0 3mm 1mm;text-align:center}.footer-rights{text-align:left;color:#6b7280;font-size:17px;font-weight:500;line-height:1.25;margin-bottom:1mm}.footer-rule{height:0;border-top:1.2pt solid var(--blue-dark)}.footer-company{color:var(--blue-dark);font-size:31px;font-weight:950;letter-spacing:-1px;line-height:1;padding-top:2mm;white-space:nowrap}
@@ -118,7 +118,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
         <table aria-label="상담 대상자 목록">
           <colgroup>
             <col class="no"><col class="regdate"><col class="name"><col class="phone"><col class="sex">
-            <col class="age"><col class="type"><col class="status-col"><col class="session">
+            <col class="age"><col class="nationality"><col class="type"><col class="status-col"><col class="session">
           </colgroup>
           <thead>
             <tr>
@@ -128,13 +128,14 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
               <th>전화번호</th>
               <th>성별</th>
               <th>나이</th>
+              <th>국적</th>
               <th>상담종류</th>
               <th>진행상태</th>
               <th>최종회기</th>
             </tr>
           </thead>
           <tbody id="resultBody">
-            <tr class="empty-row"><td colspan="9">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
+            <tr class="empty-row"><td colspan="10">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
           </tbody>
         </table>
       </div>
@@ -285,6 +286,32 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
     if (md < bmd) age--;
     return age >= 0 ? `${age}세` : "";
   }
+
+  // 한국 국적은 목록에서 별도 표기하지 않고,
+  // 외국 국적만 실제 국가명을 표시한다.
+  function foreignNationalityText(value){
+    const raw = String(value || "").trim();
+    if (!raw) return "-";
+
+    const normalized = raw
+      .toLowerCase()
+      .replace(/\s+/g,"")
+      .replace(/[._-]/g,"");
+
+    const koreanValues = new Set([
+      "한국",
+      "대한민국",
+      "한국인",
+      "대한민국국적",
+      "korea",
+      "southkorea",
+      "republicofkorea",
+      "kr",
+      "kor"
+    ]);
+
+    return koreanValues.has(normalized) ? "-" : raw;
+  }
   function newestRow(rows,dateFn){
     if (!rows.length) return null;
     return rows.slice().sort((a,b) => {
@@ -402,7 +429,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
 
     try{
       const [basicRows,psychRows,careerRows,sexRows] = await Promise.all([
-        fetchPaged(BASIC_TABLE,"id,client_name,client_phone,sex_code,birth_date,counsel_type"),
+        fetchPaged(BASIC_TABLE,"id,client_name,client_phone,sex_code,birth_date,nationality,counsel_type"),
         fetchPaged(PSYCH_TABLE,"id,client_id,visit_at,visit_date,receipt_at,receipt_date,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
         fetchPaged(CAREER_TABLE,"id,client_id,counseling_date,appointment_at,receipt_at,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
         fetchPaged("sex_codes","code,name,active")
@@ -450,6 +477,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
           phone:phone || "-",
           sex:sexMap.get(client.sex_code) || client.sex_code || "-",
           age:calcAge(client.birth_date) || "-",
+          nationality:foreignNationalityText(client.nationality),
           counselType:typeText(allPsych,allCareer,type),
           status:statusText(allPsych,allCareer,type),
           session:sessionText(allPsych,allCareer,type)
@@ -495,7 +523,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
   function renderRows(rows){
     els.resultCount.textContent = String(rows.length);
     if (!rows.length){
-      els.body.innerHTML = '<tr class="empty-row"><td colspan="9">조회 결과가 없습니다.</td></tr>';
+      els.body.innerHTML = '<tr class="empty-row"><td colspan="10">조회 결과가 없습니다.</td></tr>';
       return;
     }
     els.body.innerHTML = rows.map((r,i) => {
@@ -509,6 +537,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
         <td>${escapeHTML(r.phone)}</td>
         <td>${escapeHTML(r.sex)}</td>
         <td>${escapeHTML(r.age)}</td>
+        <td>${escapeHTML(r.nationality)}</td>
         <td>${escapeHTML(r.counselType)}</td>
         <td><span class="badge ${badgeClass(r.status)}">${escapeHTML(r.status)}</span></td>
         <td>${escapeHTML(r.session)}</td>
