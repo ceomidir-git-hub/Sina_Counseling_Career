@@ -256,8 +256,15 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 .compact-pair input,.compact-pair select{height:var(--field-h);padding:0 7px}
 .personal-row-2 .compact-pair:last-child{grid-template-columns:10mm minmax(0,1fr);gap:.1mm}
 
+.foreign-extra-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3mm 4mm;
+  margin-top:3mm;
+}
+
 @media(max-width:760px){
-  .receipt-row-4,.receipt-row-2,.personal-row-3,.personal-row-2,.company-row-3,.company-row-4,.foreign-row-3{grid-template-columns:1fr}
+  .receipt-row-4,.receipt-row-2,.personal-row-3,.personal-row-2,.company-row-3,.company-row-4,.foreign-row-3,.foreign-extra-row{grid-template-columns:1fr}
   .receipt-row-4 .receipt-pair,.receipt-row-2 .receipt-pair,.compact-pair,.personal-row-2 .compact-pair:last-child{grid-template-columns:90px minmax(0,1fr);gap:2px}
 }
 
@@ -671,6 +678,16 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
 
 
+/* ===== FINAL 2026-08-27 : 외국인 영문이름 / 주요경력 ===== */
+@media print{
+  body.career-mode .foreign-extra-row{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:1.1mm 3mm!important;
+    margin-top:1.1mm!important;
+  }
+}
+
 /* ===== FINAL 2026-08-26 : 접수상담내용 입력칸 다음 행 배치 =====
    항목명은 첫 행, textarea는 다음 행 전체 폭으로 배치한다. */
 .consultation-content-section .detail-grid{
@@ -826,7 +843,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     </div>
 
     <div class="career-subgroup career-foreign">
-      <div class="career-subgroup-head"><h3>③ 외국인 정보</h3><span class="subgroup-note">3열 × 2행 · 직접 입력</span></div>
+      <div class="career-subgroup-head"><h3>③ 외국인 정보</h3><span class="subgroup-note">외국인 기본정보 · 직접 입력</span></div>
       <div class="career-subgroup-body">
         <div class="foreign-row-3">
           <div class="compact-pair"><label for="careerNationality">국적</label><select id="careerNationality"><option selected disabled value="">불러오는 중...</option></select></div>
@@ -836,7 +853,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           <div class="compact-pair"><label for="careerVisaType">비자</label><select id="careerVisaType"><option selected disabled value="">불러오는 중...</option></select></div>
           <div class="compact-pair"><label for="careerLegalStatus">합불</label><select id="careerLegalStatus"><option value="" selected>선택</option><option>합법</option><option>불법</option></select></div>
         </div>
-        <div class="inline-note">※ 외국인 버튼/팝업 없이 이 영역에서 바로 입력합니다.</div>
+        <div class="foreign-extra-row">
+          <div class="compact-pair"><label for="careerEnglishName">영문이름</label><input id="careerEnglishName" class="field" type="text" maxlength="100" placeholder="영문이름"></div>
+          <div class="compact-pair"><label for="careerMajorCareer">주요경력</label><input id="careerMajorCareer" class="field" type="text" maxlength="30" placeholder="주요경력 (최대 30자)"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1572,6 +1592,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const careerForeignerNoEl = document.getElementById("careerForeignerNo");
     const careerVisaTypeEl = document.getElementById("careerVisaType");
     const careerLegalStatusEl = document.getElementById("careerLegalStatus");
+    const careerEnglishNameEl = document.getElementById("careerEnglishName");
+    const careerMajorCareerEl = document.getElementById("careerMajorCareer");
     const psychJobEl = document.getElementById("job");
 
     function setSelectValueAllowCustom(el, value){
@@ -1740,6 +1762,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       "foreigner_no",
       "visa_type",
       "legal_status",
+      "english_name",
+      "major_career",
       "client_name",
       "sex_code",
       "birth_date",
@@ -1765,6 +1789,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       foreigner_no:"외국인번호",
       visa_type:"비자",
       legal_status:"합불/합법여부",
+      english_name:"영문이름",
+      major_career:"주요경력",
       client_name:"이름",
       sex_code:"성별",
       birth_date:"생년월일",
@@ -2114,6 +2140,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         const jobCode = careerJobEl.value;
         const email = careerEmailEl.value.trim();
         const businessRegistrationNo = careerBusinessRegistrationNoEl.value.trim();
+        const majorCareer = careerMajorCareerEl.value.trim();
 
         // 진로정보 필수값은 '이름 + 전화번호' 2개로 한정한다.
         markInvalid(careerNameEl, !clientName);
@@ -2140,6 +2167,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         markInvalid(careerBusinessRegistrationNoEl, businessRegistrationInvalid);
         if (businessRegistrationInvalid) hasError = true;
 
+        const majorCareerInvalid = majorCareer.length > 30;
+        markInvalid(careerMajorCareerEl, majorCareerInvalid);
+        if (majorCareerInvalid) hasError = true;
+
         basicPayload = {
           counsel_type:"CC",
           nationality:emptyToNull(careerNationalityEl.value),
@@ -2148,6 +2179,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           foreigner_no:emptyToNull(careerForeignerNoEl.value),
           visa_type:emptyToNull(careerVisaTypeEl.value),
           legal_status:emptyToNull(careerLegalStatusEl.value),
+          english_name:emptyToNull(careerEnglishNameEl.value),
+          major_career:emptyToNull(majorCareer),
 
           client_name:clientName,
           client_phone:clientPhone,
@@ -2217,7 +2250,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function findExistingClient(name, phone) {
       let query = sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status")
+        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career")
         .eq("client_name", name)
         .eq("client_phone", phone)
         .limit(2);
@@ -2417,6 +2450,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       careerForeignerNoEl.value=client.foreigner_no||"";
       careerVisaTypeEl.value=client.visa_type||"";
       setSelectValueAllowCustom(careerLegalStatusEl,client.legal_status||"");
+      careerEnglishNameEl.value=client.english_name||"";
+      careerMajorCareerEl.value=client.major_career||"";
 
       document.getElementById("consultationTarget").value=row.client_type_code||"";
       document.getElementById("consultationTopic").value=row.topic_code||"";
@@ -2542,7 +2577,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       try {
         let query = sb
           .from(BASIC_TABLE)
-          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
+          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
           .eq("client_name", name)
           .order("created_at", { ascending: false });
         if (phone) query = query.eq("client_phone", phone);
@@ -2770,7 +2805,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function fetchClientById(clientId) {
       const { data, error } = await sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
+        .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
         .eq("id", clientId)
         .maybeSingle();
 
