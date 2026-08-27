@@ -1364,20 +1364,36 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     }
 
     async function loadCurrentEmployee() {
-      currentEmployee = null;
-      if (!sb || !currentSession?.user?.id) return;
+      // 중요:
+      // 권한 재조회 시작 시 currentEmployee를 먼저 null로 만들지 않는다.
+      // Supabase auth INITIAL_SESSION 이벤트와 자동조회가 겹칠 때
+      // 순간적으로 권한이 없는 것으로 오인되는 race condition을 방지한다.
+      if (!sb || !currentSession?.user?.id) {
+        currentEmployee = null;
+        return null;
+      }
+
+      const sessionUserId = currentSession.user.id;
 
       const { data, error } = await sb
         .from("employee")
         .select("id, employee_code, name, permission, active, auth_user_id")
-        .eq("auth_user_id", currentSession.user.id)
+        .eq("auth_user_id", sessionUserId)
         .maybeSingle();
 
       if (error) {
         console.error("employee 권한 조회 실패:", error);
-        return;
+        // 기존에 정상 로딩된 권한은 유지한다.
+        return currentEmployee;
       }
-      if (data?.active === true) currentEmployee = data;
+
+      // 조회 도중 세션 사용자가 바뀌었으면 이 결과는 폐기한다.
+      if (currentSession?.user?.id !== sessionUserId) {
+        return currentEmployee;
+      }
+
+      currentEmployee = data?.active === true ? data : null;
+      return currentEmployee;
     }
 
     function setMode(newMode) {
@@ -1888,13 +1904,34 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         updateLoginGate();
         return;
       }
-      const { data } = await sb.auth.getSession();
+
+      const { data, error } = await sb.auth.getSession();
+      if (error) {
+        console.error("세션 조회 실패:", error);
+        currentSession = null;
+        currentEmployee = null;
+        updateLoginGate();
+        return;
+      }
+
       currentSession = data.session;
       await loadCurrentEmployee();
       updateLoginGate();
 
       sb.auth.onAuthStateChange(async (_event, session) => {
+        const previousUserId = currentSession?.user?.id || null;
+        const nextUserId = session?.user?.id || null;
+
         currentSession = session;
+
+        // 같은 사용자에 대한 INITIAL_SESSION / TOKEN_REFRESHED 이벤트는
+        // 기존 권한을 유지한 상태에서 재확인한다.
+        if (!nextUserId) {
+          currentEmployee = null;
+          updateLoginGate();
+          return;
+        }
+
         await loadCurrentEmployee();
         updateLoginGate();
       });
@@ -2631,6 +2668,13 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           showLookupMsg("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
           return;
         }
+
+        // auth 이벤트와 자동조회가 동시에 실행되어도 권한을 한 번 더 확정한 뒤 판정
+        if (!currentEmployee) {
+          await loadCurrentEmployee();
+          updateLoginGate();
+        }
+
         if (!canRead()) {
           showLookupMsg("error", "현재 계정에 상담 조회 권한이 없습니다.");
           return;
