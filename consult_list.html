@@ -481,6 +481,14 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
   function buildReceiptUrl(row){
     const params = new URLSearchParams();
     params.set("client_id", String(row.id || ""));
+
+    // 상담 LIST에서 확인한 상담종류도 함께 전달한다.
+    // 단일 유형은 해당 유형을, 심리+진로 모두 있으면 BOTH를 전달한다.
+    let counselTypeCode = "BOTH";
+    if (row.counselType === "심리상담") counselTypeCode = "PC";
+    else if (row.counselType === "진로상담") counselTypeCode = "CC";
+    params.set("counsel_type", counselTypeCode);
+
     return `consult_receipt_register.html?${params.toString()}`;
   }
 
