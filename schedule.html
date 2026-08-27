@@ -26,6 +26,7 @@
   --green:#16a34a;
   --gray:#6b7280;
   --violet:#7c3aed;
+  --receipt:#0f766e;
   --red:#dc2626;
   --bg:#f4f7fb;
   --card:#fff;
@@ -67,7 +68,7 @@ button{font:inherit}
 .calendar-title-wrap{display:flex;align-items:center;gap:10px;flex:0 0 auto}.calendar-title{font-size:18px;font-weight:400;letter-spacing:-.4px;white-space:nowrap}.calendar-back-btn{height:32px;padding:0 11px;border:1px solid #b8c4d3;border-radius:7px;background:#fff;color:#26364d;font-size:11px;font-weight:400;cursor:pointer;white-space:nowrap}.calendar-back-btn:hover{background:#f7f9fc}
 .legend{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:13.2px;color:#334155;font-weight:400;white-space:nowrap}
 .legend span{display:flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.dot.planned{background:var(--blue)}.dot.progress{background:var(--orange)}.dot.done{background:var(--green)}.dot.missed{background:#9ca3af}.dot.next{background:var(--violet)}
+.dot.received{background:var(--receipt)}.dot.planned{background:var(--blue)}.dot.progress{background:var(--orange)}.dot.done{background:var(--green)}.dot.missed{background:#9ca3af}.dot.next{background:var(--violet)}
 .month-tools{display:flex;align-items:center;gap:8px;white-space:nowrap}
 .month-btn,.today-btn{height:34px;border:1px solid #b8c4d3;background:#fff;border-radius:7px;color:#334155;font-weight:400;cursor:pointer}
 .month-btn{width:34px;font-size:18px}.today-btn{padding:0 12px;font-size:11px;color:#245fae}
@@ -90,9 +91,9 @@ button{font:inherit}
 
 .status-summary{border-top:1px solid var(--line2);padding:10px 14px 12px;display:grid;grid-template-rows:22px minmax(0,1fr);gap:6px}
 .summary-title{display:flex;align-items:center;gap:10px;font-size:13.2px;font-weight:400}.summary-title small{font-size:11px;color:var(--muted);font-weight:400}
-.summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.summary-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
 .summary-box{border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;align-content:center;gap:3px;background:#fbfcfe}
-.summary-box small{font-size:16.5px;font-weight:400}.summary-box strong{font-size:18.7px;line-height:1;font-weight:400}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.progress small,.summary-box.progress strong{color:#d65d0b}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
+.summary-box small{font-size:16.5px;font-weight:400}.summary-box strong{font-size:18.7px;line-height:1;font-weight:400}.summary-box.received small,.summary-box.received strong{color:var(--receipt)}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.progress small,.summary-box.progress strong{color:#d65d0b}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
 .calendar-foot{display:flex;align-items:center;padding:0 14px;color:#4b5563;font-size:9.5px;font-weight:750;border-top:1px solid var(--line2);background:#fbfcfe}
 
 /* ===== RIGHT : DAY TIMELINE ===== */
@@ -157,6 +158,7 @@ button{font:inherit}
           <button class="calendar-back-btn" id="backBtn" type="button">← 이전화면</button>
         </div>
         <div class="legend" aria-label="일정 상태 범례">
+          <span><i class="dot received"></i>접수</span>
           <span><i class="dot planned"></i>예정</span>
           <span><i class="dot progress"></i>진행중</span>
           <span><i class="dot done"></i>완료</span>
@@ -179,6 +181,7 @@ button{font:inherit}
       <div class="status-summary">
         <div class="summary-title">당월 상담 일정 요약 <small id="summaryDate">-</small></div>
         <div class="summary-grid">
+          <div class="summary-box received"><small>접수</small><strong id="sumReceived">0건</strong></div>
           <div class="summary-box planned"><small>예정</small><strong id="sumPlanned">0건</strong></div>
           <div class="summary-box progress"><small>진행중</small><strong id="sumProgress">0건</strong></div>
           <div class="summary-box done"><small>완료</small><strong id="sumDone">0건</strong></div>
@@ -187,7 +190,7 @@ button{font:inherit}
           <div class="summary-box total"><small>총 일정</small><strong id="sumTotal">0건</strong></div>
         </div>
       </div>
-      <div class="calendar-foot">ⓘ 날짜 칸에는 시간순으로 최대 3건까지 표시하고, 초과 일정은 “+N건 더보기”로 계산해 표시합니다.</div>
+      <div class="calendar-foot">ⓘ 접수일(receipt_at)도 별도 “접수” 일정으로 표시하며, 날짜 칸에는 시간순으로 최대 3건까지 표시합니다.</div>
     </section>
 
     <aside class="card timeline-card">
@@ -226,7 +229,7 @@ button{font:inherit}
   5) 화면 표시 대상은 record_active=true 또는 이미 완료(session_end_at 존재)된 기록이다.
      - 비활성 + 미실시 기록은 상담구분 변경 과정에서 생긴 중복 접수 가능성이 있어 제외한다.
      - 비활성이라도 실제 완료된 과거 상담은 일정 이력으로 보존해 표시한다.
-  6) receipt_at은 '접수일'이지 상담 일정이 아니므로 달력에서 제외한다.
+  6) receipt_at은 상담/예약일과 별개의 '접수' 일정으로 달력에 함께 표시한다.
   7) 이 화면은 SELECT 전용이다. INSERT/UPDATE/DELETE를 하지 않는다.
 */
 
@@ -255,6 +258,7 @@ button{font:inherit}
     timelineTotal: document.getElementById('timelineTotal'), timelineScroll: document.getElementById('timelineScroll'),
     loading: document.getElementById('loadingCover'), toast: document.getElementById('toast'),
     psychCount: document.getElementById('psychCount'), careerCount: document.getElementById('careerCount'),
+    sumReceived: document.getElementById('sumReceived'),
     sumPlanned: document.getElementById('sumPlanned'), sumProgress: document.getElementById('sumProgress'),
     sumDone: document.getElementById('sumDone'), sumMissed: document.getElementById('sumMissed'),
     sumNext: document.getElementById('sumNext'), sumTotal: document.getElementById('sumTotal')
@@ -296,6 +300,7 @@ button{font:inherit}
 
   function statusMeta(status){
     return {
+      received:{label:'접수',color:'#0f766e',cls:'received'},
       planned:{label:'예정',color:'#2563eb',cls:'planned'},
       progress:{label:'진행중',color:'#f97316',cls:'progress'},
       done:{label:'완료',color:'#16a34a',cls:'done'},
@@ -313,6 +318,30 @@ button{font:inherit}
     const scheduled=scheduledIso ? new Date(scheduledIso).getTime() : NaN;
     if(Number.isFinite(scheduled) && scheduled<now) return 'missed';
     return 'planned';
+  }
+
+  function buildReceiptEvent(source,row,basic){
+    if(!row.receipt_at) return null;
+    const key=isoToDateKey(row.receipt_at);
+    if(!key) return null;
+
+    return {
+      uid:`${source}:${row.id}:receipt`,
+      source,
+      kind:'receipt',
+      date:key,
+      time:isoToTime(row.receipt_at),
+      sortMs:new Date(row.receipt_at).getTime(),
+      status:'received',
+      clientId:row.client_id,
+      name:basic?.client_name || '이름없음',
+      phone:basic?.client_phone || '-',
+      birthDate:basic?.birth_date || null,
+      sessionNo:null,
+      location:'-',
+      sessionStatus:row.session_status || '-',
+      counselLabel:source==='psych'?'심리상담 접수':'진로상담 접수'
+    };
   }
 
   function buildPrimaryEvent(source,row,basic,scheduledIso){
@@ -376,13 +405,14 @@ button{font:inherit}
   async function queryPsych(y,m){
     const u=monthUtcBounds(y,m), d=monthDateBounds(y,m);
     const orFilter=[
+      `and(receipt_at.gte.${u.start},receipt_at.lt.${u.end})`,
       `and(visit_at.gte.${u.start},visit_at.lt.${u.end})`,
       `and(visit_at.is.null,session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
       `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
       `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
     ].join(',');
     const {data,error}=await sb.from('DB_psychological_counseling')
-      .select('id,client_id,visit_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
+      .select('id,client_id,receipt_at,visit_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
       .or(orFilter);
     if(error) throw error; return data||[];
   }
@@ -390,13 +420,14 @@ button{font:inherit}
   async function queryCareer(y,m){
     const u=monthUtcBounds(y,m), d=monthDateBounds(y,m);
     const orFilter=[
+      `and(receipt_at.gte.${u.start},receipt_at.lt.${u.end})`,
       `and(appointment_at.gte.${u.start},appointment_at.lt.${u.end})`,
       `and(appointment_at.is.null,session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
       `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
       `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
     ].join(',');
     const {data,error}=await sb.from('DB_career_counseling')
-      .select('id,client_id,appointment_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
+      .select('id,client_id,receipt_at,appointment_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
       .or(orFilter);
     if(error) throw error; return data||[];
   }
@@ -411,16 +442,20 @@ button{font:inherit}
       for(const r of psych){
         if(r.record_active !== true && !r.session_end_at) continue;
         const b=basics.get(r.client_id);
+        const receipt=buildReceiptEvent('psych',r,b);
         const primary=buildPrimaryEvent('psych',r,b,r.visit_at || r.session_start_at);
         const next=buildNextEvent('psych',r,b);
+        if(receipt && receipt.date>=monthStart && receipt.date<monthEnd) events.push(receipt);
         if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
         if(next && next.date>=monthStart && next.date<monthEnd) events.push(next);
       }
       for(const r of career){
         if(r.record_active !== true && !r.session_end_at) continue;
         const b=basics.get(r.client_id);
+        const receipt=buildReceiptEvent('career',r,b);
         const primary=buildPrimaryEvent('career',r,b,r.appointment_at || r.session_start_at);
         const next=buildNextEvent('career',r,b);
+        if(receipt && receipt.date>=monthStart && receipt.date<monthEnd) events.push(receipt);
         if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
         if(next && next.date>=monthStart && next.date<monthEnd) events.push(next);
       }
@@ -475,7 +510,7 @@ button{font:inherit}
   }
 
   function countStatuses(items){
-    const c={planned:0,progress:0,done:0,missed:0,next:0,total:items.length};
+    const c={received:0,planned:0,progress:0,done:0,missed:0,next:0,total:items.length};
     items.forEach(x=>{ if(Object.prototype.hasOwnProperty.call(c,x.status)) c[x.status]++; });
     return c;
   }
@@ -490,6 +525,7 @@ button{font:inherit}
     const monthCount=countStatuses(monthlyItems);
 
     els.summaryDate.textContent=`${state.viewYear}년 ${state.viewMonth}월`;
+    els.sumReceived.textContent=`${monthCount.received}건`;
     els.sumPlanned.textContent=`${monthCount.planned}건`;
     els.sumProgress.textContent=`${monthCount.progress}건`;
     els.sumDone.textContent=`${monthCount.done}건`;
@@ -537,7 +573,9 @@ button{font:inherit}
     const name=document.createElement('div'); name.className='t-name'; name.textContent=age==null?ev.name:`${ev.name} (${age}세)`;
     const pill=document.createElement('span'); pill.className='status-pill'; pill.textContent=meta.label; top.append(name,pill);
     const metaRow=document.createElement('div'); metaRow.className='t-meta';
-    const fields=[`◉ ${ev.counselLabel}`, ev.sessionNo?`│ ${ev.sessionNo}회기`:'│ 회기 미지정', `⌖ ${ev.location||'-'}`];
+    const fields = ev.kind==='receipt'
+      ? [`◉ ${ev.counselLabel}`, '│ 접수등록', '⌖ 접수일시']
+      : [`◉ ${ev.counselLabel}`, ev.sessionNo?`│ ${ev.sessionNo}회기`:'│ 회기 미지정', `⌖ ${ev.location||'-'}`];
     fields.forEach(v=>{ const s=document.createElement('span'); s.textContent=v; metaRow.appendChild(s); });
     const phone=document.createElement('div'); phone.className='t-phone'; phone.textContent=`연락처 ${ev.phone||'-'}`;
     item.append(time,top,metaRow,phone);
