@@ -30,6 +30,11 @@ h1{margin:0;color:var(--blue-dark);font-size:29px;font-weight:950;letter-spacing
 .section-head h2{margin:0;color:var(--blue);font-size:17px;font-weight:950;letter-spacing:-.5px}
 .lookup-btn{height:31px;padding:0 11px;border:1px solid var(--blue);border-radius:6px;background:#fff;color:var(--blue-dark);font-size:12px;font-weight:900;cursor:pointer}
 .lookup-btn:hover{background:var(--blue-soft)}
+.consult-type-wrap{display:flex;align-items:center;gap:14px;margin-left:auto;margin-right:8px;white-space:nowrap}
+.consult-type-label{font-size:12px;font-weight:950;color:#25364c}
+.consult-type-option{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:900;color:#25364c;cursor:default}
+.consult-type-option input{width:15px;height:15px;margin:0;accent-color:var(--blue);pointer-events:none}
+.section-head-right{display:flex;align-items:center;gap:10px}
 .section-body{padding:4mm 4mm 4.5mm;background:#fff}
 .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3.2mm 7mm}
 .form-pair{min-width:0;display:grid;grid-template-columns:27mm minmax(0,1fr);align-items:center;gap:2.5mm}
@@ -110,7 +115,14 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 <section class="section">
   <div class="section-head">
     <h2>1. 내담자 정보</h2>
-    <button type="button" class="lookup-btn no-print" id="lookupBtn">⌕ 상담조회</button>
+    <div class="section-head-right">
+      <div class="consult-type-wrap" aria-label="상담구분">
+        <span class="consult-type-label">상담구분</span>
+        <label class="consult-type-option"><input type="radio" name="recordConsultType" value="PC" disabled> 심리상담</label>
+        <label class="consult-type-option"><input type="radio" name="recordConsultType" value="CC" disabled> 진로상담</label>
+      </div>
+      <button type="button" class="lookup-btn no-print" id="lookupBtn">⌕ 상담조회</button>
+    </div>
   </div>
   <div class="section-body">
     <div class="grid-2">
@@ -127,7 +139,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 </section>
 
 <section class="section">
-  <div class="section-head"><h2>2. 예약 및 진행 정보</h2></div>
+  <div class="section-head"><h2>2. 진행정보 및 예약현황</h2></div>
   <div class="section-body">
     <div class="grid-2">
       <div class="form-pair"><label for="sessionNo">금회 회기</label>
@@ -138,7 +150,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           <option value="7">7회기</option><option value="8">8회기</option><option value="9">9회기</option><option value="10">10회기</option>
         </select>
       </div>
-      <div class="form-pair"><label>예약일</label><div class="date-time"><input type="date" id="reservationDate" readonly><input type="text" id="reservationTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="자동" readonly></div></div>
+      <div class="form-pair"><label>접수시 예약일</label><div class="date-time"><input type="date" id="reservationDate" readonly><input type="text" id="reservationTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="자동" readonly></div></div>
       <div class="form-pair"><label>실시일 시작</label><div class="date-time"><input type="date" id="startDate"><input type="text" id="startTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
       <div class="form-pair"><label>실시일 종료</label><div class="date-time"><input type="date" id="endDate"><input type="text" id="endTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
       <div class="form-pair"><label for="duration">상담시간</label><input type="text" id="duration" readonly placeholder="자동 계산"></div>
@@ -424,8 +436,14 @@ function setSessionStatus(value){
   const radio=document.querySelector(`input[name="sessionStatus"][value="${value==="종결"?"종결":"진행"}"]`);
   if(radio)radio.checked=true;
 }
+function setRecordConsultType(type){
+  document.querySelectorAll('input[name="recordConsultType"]').forEach(el=>{
+    el.checked = el.value === type;
+  });
+}
 function populateRecord(item){
   const {client,row,type}=item;
+  setRecordConsultType(type);
   $("clientName").value=client.client_name||"";
   $("clientPhone").value=formatPhone(client.client_phone||"");
   $("gender").value=sexMap[client.sex_code]||client.sex_code||"";
@@ -549,6 +567,7 @@ form.addEventListener("submit",async e=>{
 /* 초기화 */
 form.addEventListener("reset",()=>setTimeout(()=>{
   selectedRecord=null;
+  setRecordConsultType("");
   $("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";
   $("recordMeta").classList.remove("show");$("recordMeta").textContent="";
   document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));
@@ -581,10 +600,10 @@ function buildPrintDocument(){
       </div></div>
     </section>
     <section class="print-section">
-      <div class="print-section-title">2. 예약 및 진행 정보</div>
+      <div class="print-section-title">2. 진행정보 및 예약현황</div>
       <div class="print-section-body"><div class="print-grid">
         <div class="print-pair"><div class="print-label">금회 회기</div><div class="print-box">${escapeHtml(printable($("sessionNo").value?$("sessionNo").value+"회기":""))}</div></div>
-        <div class="print-pair"><div class="print-label">예약일</div><div class="print-box">${escapeHtml(printable([$("reservationDate").value,$("reservationTime").value].filter(Boolean).join(" ")))}</div></div>
+        <div class="print-pair"><div class="print-label">접수시 예약일</div><div class="print-box">${escapeHtml(printable([$("reservationDate").value,$("reservationTime").value].filter(Boolean).join(" ")))}</div></div>
         <div class="print-pair"><div class="print-label">실시일 시작</div><div class="print-box">${escapeHtml(printable([$("startDate").value,$("startTime").value].filter(Boolean).join(" ")))}</div></div>
         <div class="print-pair"><div class="print-label">실시일 종료</div><div class="print-box">${escapeHtml(printable([$("endDate").value,$("endTime").value].filter(Boolean).join(" ")))}</div></div>
         <div class="print-pair"><div class="print-label">상담시간</div><div class="print-box">${escapeHtml(printable($("duration").value))}</div></div>
