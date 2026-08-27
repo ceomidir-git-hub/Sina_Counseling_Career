@@ -1726,11 +1726,14 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       selectEl.innerHTML = html;
     }
 
-    loadLookupOptions("sex_codes", document.getElementById("gender"), sexMap);
-    loadLookupOptions("sex_codes", careerGenderEl, null);
-    loadLookupOptions("job_codes", document.getElementById("job"), jobMap);
-    loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"), targetMap);
-    loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"), topicMap);
+    // 상담 LIST 자동조회 시 select 마스터 로딩 완료 후 폼을 채우기 위해 Promise로 관리
+    const lookupOptionsReady = Promise.all([
+      loadLookupOptions("sex_codes", document.getElementById("gender"), sexMap),
+      loadLookupOptions("sex_codes", careerGenderEl, null),
+      loadLookupOptions("job_codes", document.getElementById("job"), jobMap),
+      loadLookupOptions("counsel_client_type", document.getElementById("consultationTarget"), targetMap),
+      loadLookupOptions("counsel_topic", document.getElementById("consultationTopic"), topicMap)
+    ]);
 
 
     // ===== 국가 / 비자 마스터 동적 로딩 =====
@@ -1874,8 +1877,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       });
     }
 
-    loadContactMethodOptions();
-    loadForeignMasterOptions();
+    const contactMethodReady = loadContactMethodOptions();
+    const foreignMasterReady = loadForeignMasterOptions();
 
     // ===== 7-2) 로그인 상태 초기화 및 실시간 반영 =====
     async function initAuth() {
@@ -1896,7 +1899,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         updateLoginGate();
       });
     }
-    initAuth();
+    const authReady = initAuth();
     setMode("new");
 
     // ===== 8) 폼 값 수집 + 검증 =====
@@ -2315,7 +2318,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         html += `
           <div class="lookup-item" data-idx="${idx}">
             <div class="lookup-item-date">${formatKST(row.receipt_at)}</div>
-            <div class="lookup-item-sub">상담대상: ${escapeHTML(target)} · 상담주제: ${escapeHTML(topic)}</div>
+            <div class="lookup-item-sub">${record.__type === "CC" ? "진로상담" : "심리상담"} · 상담대상: ${escapeHTML(target)} · 상담주제: ${escapeHTML(topic)}</div>
           </div>`;
       });
       lookupSelectionAreaEl.innerHTML = html;
@@ -2557,8 +2560,126 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       }
     }
 
+
+    // ===== 12) 상담 대상자 LIST -> 접수 상담 등록 자동조회 =====
+    // URL 예:
+    // consult_receipt_register.html?client_id=<DB_basic.id>&counsel_type=CC
+    //
+    // 핵심 원칙:
+    // 1. 화면 표시용 이름/전화번호가 아니라 DB_basic.id(client_id)로 정확히 1명을 특정한다.
+    // 2. 로그인/권한 및 select 마스터 로딩 완료 후 데이터를 채운다.
+    // 3. 기존 fetchSessionsForClient -> proceedWithRecords -> populateFormFromRecord를 그대로 사용한다.
+    function isValidClientUUID(value) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
+    }
+
+    async function fetchClientById(clientId) {
+      const { data, error } = await sb
+        .from(BASIC_TABLE)
+        .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, client_name, sex_code, birth_date, client_phone, email, client_status, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
+        .eq("id", clientId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data || null;
+    }
+
+    function getAutoLookupTypes(requestedType, clientCounselType) {
+      const requested = String(requestedType || "").toUpperCase();
+      if (requested === "PC") return ["PC"];
+      if (requested === "CC") return ["CC"];
+      if (requested === "BOTH") return ["PC", "CC"];
+
+      const saved = String(clientCounselType || "").toUpperCase();
+      if (saved === "CC") return ["CC"];
+      if (saved === "BOTH") return ["PC", "CC"];
+      return ["PC"];
+    }
+
+    async function autoLoadFromConsultList() {
+      const params = new URLSearchParams(window.location.search);
+      const clientId = String(params.get("client_id") || "").trim();
+      const requestedType = String(params.get("counsel_type") || "").trim().toUpperCase();
+
+      // 일반 접수등록 진입이면 기존 동작 그대로 유지
+      if (!clientId) return;
+
+      hideStatus();
+      hideLookupMsg();
+      lookupSelectionAreaEl.style.display = "none";
+      lookupSelectionAreaEl.innerHTML = "";
+
+      if (!isValidClientUUID(clientId)) {
+        showLookupMsg("error", "상담 리스트에서 전달된 내담자 ID 형식이 올바르지 않습니다.");
+        return;
+      }
+
+      try {
+        // 중요: 값이 다시 초기화되지 않도록 모든 마스터 및 인증 로딩이 끝난 뒤 조회한다.
+        await Promise.all([
+          authReady,
+          lookupOptionsReady,
+          contactMethodReady,
+          foreignMasterReady
+        ]);
+
+        if (!sb) {
+          showLookupMsg("error", "조회 서버(Supabase) 연결에 실패했습니다.");
+          return;
+        }
+        if (!isLoggedIn()) {
+          showLookupMsg("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
+          return;
+        }
+        if (!canRead()) {
+          showLookupMsg("error", "현재 계정에 상담 조회 권한이 없습니다.");
+          return;
+        }
+
+        const client = await fetchClientById(clientId);
+        if (!client) {
+          showLookupMsg("error", "상담 리스트에서 선택한 내담자 기본정보를 찾을 수 없습니다.");
+          return;
+        }
+
+        const lookupTypes = getAutoLookupTypes(requestedType, client.counsel_type);
+        const groups = await Promise.all(
+          lookupTypes.map(typeCode => fetchSessionsForClient(client, typeCode))
+        );
+
+        const records = groups
+          .flat()
+          .sort((a, b) => {
+            const aTime = new Date(a.__session?.receipt_at || 0).getTime();
+            const bTime = new Date(b.__session?.receipt_at || 0).getTime();
+            return bTime - aTime;
+          });
+
+        if (!records.length) {
+          showLookupMsg(
+            "error",
+            `${client.client_name || "선택한 내담자"}의 활성 접수 기록이 없습니다.`
+          );
+          return;
+        }
+
+        // 1건이면 즉시 폼 표시, 여러 건이면 기존 선택목록 표시
+        proceedWithRecords(records);
+      } catch (error) {
+        console.error("상담 LIST 자동조회 실패:", error);
+        showLookupMsg(
+          "error",
+          "상담 리스트의 접수 데이터를 불러오는 중 오류가 발생했습니다: " +
+          (error?.message || error)
+        );
+      }
+    }
+
     lookupSaveBtn.addEventListener("click", handleLookup);
     editSaveBtn.addEventListener("click", handleSave);
+
+    // 모든 함수 정의가 끝난 뒤 URL client_id 자동조회 실행
+    autoLoadFromConsultList();
 
     // ===== A4 세로 PDF 저장 =====
     const pdfSaveBtn = document.getElementById("pdfSaveBtn");
