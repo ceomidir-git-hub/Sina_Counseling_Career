@@ -923,6 +923,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     let loadedRecordId = null;      // 상담 접수(심리/진로) 레코드 ID
     let loadedClientId = null;      // DB_basic.id
     let loadedRecordType = null;    // "PC" 또는 "CC"
+    let loadedSessionStatus = null; // 기존 상담상태 보존용 ("진행"/"종결")
 
 
     // ===== 24시간 숫자입력 공통 처리 =====
@@ -1407,6 +1408,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         loadedRecordId = null;
         loadedClientId = null;
         loadedRecordType = null;
+        loadedSessionStatus = null;
       }
 
       document.querySelectorAll('input[name="consultType"]').forEach((el) => {
@@ -1708,6 +1710,106 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     function emptyToNull(value) {
       const v = String(value ?? "").trim();
       return v === "" ? null : v;
+    }
+
+    // ===== DB_basic 저장 검증 =====
+    // 화면에서 전송한 값과 DB에 실제 저장된 값을 저장 직후 다시 비교한다.
+    const BASIC_VERIFY_FIELDS = [
+      "counsel_type",
+      "nationality",
+      "entry_date",
+      "departure_date",
+      "foreigner_no",
+      "visa_type",
+      "legal_status",
+      "client_name",
+      "sex_code",
+      "birth_date",
+      "client_phone",
+      "email",
+      "client_status",
+      "client_address",
+      "company_name",
+      "representative_name",
+      "business_open_date",
+      "business_type",
+      "business_item",
+      "business_registration_no",
+      "department_name",
+      "position_name",
+      "job_code"
+    ];
+
+    const BASIC_FIELD_LABELS = {
+      counsel_type:"상담구분",
+      nationality:"국적",
+      entry_date:"입국일",
+      departure_date:"출국일",
+      foreigner_no:"외국인번호",
+      visa_type:"비자",
+      legal_status:"합불/합법여부",
+      client_name:"이름",
+      sex_code:"성별",
+      birth_date:"생년월일",
+      client_phone:"전화번호",
+      email:"메일주소",
+      client_status:"상태",
+      client_address:"주소",
+      company_name:"회사명",
+      representative_name:"대표자명",
+      business_open_date:"개업일시",
+      business_type:"업태",
+      business_item:"종목",
+      business_registration_no:"등록번호",
+      department_name:"부서명",
+      position_name:"직책",
+      job_code:"직업"
+    };
+
+    function normalizeDbCompareValue(value) {
+      if (value === null || value === undefined || value === "") return null;
+      return String(value).trim();
+    }
+
+    function verifyBasicSavedValues(expectedPayload, savedRow) {
+      const mismatches = [];
+
+      BASIC_VERIFY_FIELDS.forEach((field) => {
+        if (!(field in expectedPayload)) return;
+
+        const expected = normalizeDbCompareValue(expectedPayload[field]);
+        const actual = normalizeDbCompareValue(savedRow?.[field]);
+
+        if (expected !== actual) {
+          mismatches.push({
+            field,
+            label: BASIC_FIELD_LABELS[field] || field,
+            expected,
+            actual
+          });
+        }
+      });
+
+      return mismatches;
+    }
+
+    function buildBasicSelectColumns() {
+      return ["id", ...BASIC_VERIFY_FIELDS, "updated_at"].join(",");
+    }
+
+    function throwIfBasicMismatch(expectedPayload, savedRow) {
+      const mismatches = verifyBasicSavedValues(expectedPayload, savedRow);
+      if (!mismatches.length) return;
+
+      const message = mismatches
+        .map(item =>
+          `${item.label}: 입력값=${item.expected ?? "(빈값)"} / DB값=${item.actual ?? "(빈값)"}`
+        )
+        .join("\n");
+
+      throw new Error(
+        "기본정보 저장 검증에 실패했습니다. 아래 항목을 다시 확인해주세요.\n" + message
+      );
     }
 
     // ===== 7-1) lookup 테이블 동적 로딩 =====
@@ -2123,9 +2225,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         const { data, error } = await sb
           .from(BASIC_TABLE)
           .insert([insertPayload])
-          .select("id, counsel_type")
+          .select(buildBasicSelectColumns())
           .single();
         if (error) throw error;
+
+        throwIfBasicMismatch(insertPayload, data);
         return data;
       }
 
@@ -2139,9 +2243,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         .from(BASIC_TABLE)
         .update(updatePayload)
         .eq("id", existing.id)
-        .select("id, counsel_type")
+        .select(buildBasicSelectColumns())
         .single();
       if (error) throw error;
+
+      throwIfBasicMismatch(updatePayload, data);
       return data;
     }
 
@@ -2221,8 +2327,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const tableName = getSessionTable(typeCode);
       const timeColumn = getSessionTimeColumn(typeCode);
 
-      const psychFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, contact_method, receipt_at, visit_at, client_type_code, topic_code, application_content";
-      const careerFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, contact_method, receipt_at, appointment_at, client_type_code, topic_code, counseling_content";
+      const psychFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, contact_method, receipt_at, visit_at, client_type_code, topic_code, application_content, session_status";
+      const careerFields = "id, client_id, receptionist_name, receptionist_phone, receptionist_relationship, contact_method, receipt_at, appointment_at, client_type_code, topic_code, counseling_content, session_status";
 
       const { data, error } = await sb
         .from(tableName)
@@ -2300,7 +2406,10 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       details.value=typeCode==="CC"?(row.counseling_content||""):(row.application_content||"");
       detailsCounter.textContent=`${details.value.length} / 1000`;
 
-      loadedClientId=client.id; loadedRecordId=row.id; loadedRecordType=typeCode;
+      loadedClientId=client.id;
+      loadedRecordId=row.id;
+      loadedRecordType=typeCode;
+      loadedSessionStatus=row.session_status || "진행";
       clearAllInvalid(); setMode("loaded"); updateCounselTypeUI();
     }
 
@@ -2496,22 +2605,43 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         if (basicReadError) throw basicReadError;
 
         if (!typeChanged) {
-          const { error: basicError } = await sb
+          const finalBasicPayload = {
+            ...basicPayload,
+            counsel_type: mergeCounselType(currentBasic.counsel_type, loadedRecordType)
+          };
+
+          const { data: savedBasic, error: basicError } = await sb
             .from(BASIC_TABLE)
-            .update({
-              ...basicPayload,
-              counsel_type: mergeCounselType(currentBasic.counsel_type, loadedRecordType)
-            })
-            .eq("id", loadedClientId);
+            .update(finalBasicPayload)
+            .eq("id", loadedClientId)
+            .select(buildBasicSelectColumns())
+            .single();
           if (basicError) throw basicError;
 
+          // 중요: 대표자명 포함 모든 DB_basic 항목을 즉시 재검증
+          throwIfBasicMismatch(finalBasicPayload, savedBasic);
+
           const tableName = getSessionTable(loadedRecordType);
-          const { error: sessionError } = await sb
+          const finalSessionPayload = {
+            ...sessionPayload,
+            // 기존 기록 수정 시 상담상태를 임의로 "진행"으로 덮어쓰지 않는다.
+            session_status: loadedSessionStatus || "진행"
+          };
+
+          const { data: savedSession, error: sessionError } = await sb
             .from(tableName)
-            .update(sessionPayload)
+            .update(finalSessionPayload)
             .eq("id", loadedRecordId)
-            .eq("client_id", loadedClientId);
+            .eq("client_id", loadedClientId)
+            .select("id,client_id,session_status,updated_at")
+            .single();
           if (sessionError) throw sessionError;
+
+          if ((savedSession?.session_status || null) !== (finalSessionPayload.session_status || null)) {
+            throw new Error(
+              `상담상태 저장 검증 실패: 입력값=${finalSessionPayload.session_status || "(빈값)"} / DB값=${savedSession?.session_status || "(빈값)"}`
+            );
+          }
         } else {
           const previousRecordId = loadedRecordId;
           const previousRecordType = loadedRecordType;
@@ -2550,13 +2680,22 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
             throw newRecordError || new Error("변경된 상담구분의 새 레코드 ID를 확인하지 못했습니다.");
           }
 
-          const { error: basicError } = await sb
+          const changedBasicPayload = {
+            ...basicPayload,
+            counsel_type: "BOTH"
+          };
+
+          const { data: savedChangedBasic, error: basicError } = await sb
             .from(BASIC_TABLE)
-            .update({
-              ...basicPayload,
-              counsel_type: "BOTH"
-            })
-            .eq("id", loadedClientId);
+            .update(changedBasicPayload)
+            .eq("id", loadedClientId)
+            .select(buildBasicSelectColumns())
+            .single();
+
+          if (!basicError) {
+            // 대표자명 포함 기본정보 전체 저장 검증
+            throwIfBasicMismatch(changedBasicPayload, savedChangedBasic);
+          }
 
           if (basicError) {
             // 기본정보 갱신 실패 시 가능한 범위에서 원상복구한다.
@@ -2576,6 +2715,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
           // 중요: 변경 후에는 새 레코드를 현재 수정 대상 레코드로 전환한다.
           loadedRecordId = newRecord.id;
           loadedRecordType = counselType;
+          loadedSessionStatus = sessionPayload.session_status || "진행";
         }
 
         // 중요: 수정 저장 후 폼을 초기화하지 않는다.
