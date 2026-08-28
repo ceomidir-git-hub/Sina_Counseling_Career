@@ -224,6 +224,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
 <script>
 (() => {
+console.info("consultation_edit_save build: 20260829-common-verify");
 const SUPABASE_URL="https://fafdxaifluftnertbpvr.supabase.co";
 const SUPABASE_KEY="sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 const BASIC_TABLE="DB_basic";
@@ -673,73 +674,52 @@ form.addEventListener("submit",async e=>{
       ? {...common,visit_date:$("startDate").value||null,session_topic_1:topicName,session_content:$("counselDetail").value.trim()||null}
       : {...common,counseling_date:$("startDate").value||null,career_topic_1:topicName,counseling_content:$("counselDetail").value.trim()||null};
 
-    // 중요:
-    // 심리상담(PC)과 진로상담(CC)은 일부 컬럼명이 서로 다르므로
-    // 저장 후 검증 SELECT 컬럼을 상담유형별로 분리한다.
-    // PC 테이블에서 counseling_date / career_topic_1 / counseling_content를
-    // 조회하면 PostgREST 요청 전체가 실패하므로 절대 공통 SELECT로 묶지 않는다.
-    const savedSelectColumns = type === "PC"
-      ? [
-          "id",
-          "session_no",
-          "client_type_code",
-          "topic_code",
-          "assessment_tool",
-          "next_session_date",
-          "next_session_at",
-          "session_status",
-          "session_start_at",
-          "session_end_at",
-          "updated_at",
-          "visit_date",
-          "session_topic_1",
-          "session_content"
-        ].join(",")
-      : [
-          "id",
-          "session_no",
-          "client_type_code",
-          "topic_code",
-          "assessment_tool",
-          "next_session_date",
-          "next_session_at",
-          "session_status",
-          "session_start_at",
-          "session_end_at",
-          "updated_at",
-          "counseling_date",
-          "career_topic_1",
-          "counseling_content"
-        ].join(",");
-
-    const {data,error}=await sb
+    // FINAL 2026-08-29:
+    // UPDATE 단계에서는 반환 SELECT를 붙이지 않는다.
+    // 이유: PC/CC 전용 컬럼이 잘못 섞여 PostgREST 전체 UPDATE가 실패하는 것을 원천 차단한다.
+    const {error:updateError}=await sb
       .from(tableName)
       .update(payload)
+      .eq("id",row.id);
+
+    if(updateError) throw updateError;
+
+    // UPDATE 성공 후, 두 상담 테이블에 공통으로 존재하는 컬럼만 별도로 재조회하여 검증한다.
+    const {data:verified,error:verifyError}=await sb
+      .from(tableName)
+      .select("id,session_no,session_start_at,session_end_at,next_session_at,session_status,updated_at")
       .eq("id",row.id)
-      .select(savedSelectColumns)
       .single();
 
-    if(error)throw error;
+    if(verifyError) throw verifyError;
 
     // 수정 저장 직후 시간값이 실제 DB에 들어갔는지 재검증
     const normalize=v=>v?new Date(v).toISOString():null;
     const timingMismatch=
-      normalize(data.session_start_at)!==normalize(startISO) ||
-      normalize(data.session_end_at)!==normalize(endISO) ||
-      normalize(data.next_session_at)!==normalize(nextISO);
+      normalize(verified.session_start_at)!==normalize(startISO) ||
+      normalize(verified.session_end_at)!==normalize(endISO) ||
+      normalize(verified.next_session_at)!==normalize(nextISO);
 
     if(timingMismatch){
-      throw new Error("시간정보 저장 검증에 실패했습니다. 실시 시작/종료 및 차기 예약시간을 다시 확인해주세요.");
+      throw new Error(
+        "시간정보 저장 검증에 실패했습니다. " +
+        "실시 시작/종료 및 차기 예약시간을 다시 확인해주세요."
+      );
     }
 
-    selectedRecord.row={...selectedRecord.row,...data};
+    selectedRecord.row={
+      ...selectedRecord.row,
+      ...payload,
+      ...verified
+    };
+
     clearLegacyWarning();
     updateDuration();
 
     $("recordMeta").textContent=
       `회원 Key ${client.member_key||"-"} · `+
       `${type==="PC"?"심리상담":"진로상담"} · ${sessionNo}회기 · `+
-      `DB ID ${row.id} · 마지막 수정 ${formatKST(data.updated_at)}`;
+      `DB ID ${row.id} · 마지막 수정 ${formatKST(verified.updated_at)}`;
 
     showStatus(
       "success",
