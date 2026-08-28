@@ -113,6 +113,271 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 }
 .legacy-data-warning.show{display:block}
 
+
+/* ==========================================================
+   FINAL 2026-08-29 : 상담 조회/수정 문서 표준
+   - 머릿글 위치 고정
+   - 화면 바닥글 표기
+   - PDF 바닥글 고정
+   - A4 세로 1페이지
+   ========================================================== */
+
+/* 화면용 바닥글 */
+.screen-footer{
+  margin-top:8mm;
+  padding:0 1mm 2mm;
+}
+.screen-footer .footer-rights{
+  margin:0 0 1.5mm;
+  color:#6b7280;
+  font-size:12px;
+  font-weight:500;
+  line-height:1.3;
+  text-align:left;
+}
+.screen-footer .footer-divider{
+  border:0;
+  border-top:1.2pt solid #1457a6;
+  margin:0;
+}
+.screen-footer .footer-company{
+  margin:2.5mm 0 0;
+  color:#123f78;
+  font-size:29px;
+  font-weight:950;
+  line-height:1;
+  letter-spacing:-1.3px;
+  text-align:center;
+}
+
+/* PDF 전용 바닥글 */
+.print-footer{
+  display:none;
+}
+
+@media print{
+  @page{
+    size:210mm 297mm;
+    margin:0;
+  }
+
+  html,body{
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    background:#fff!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+
+  .page-wrap,
+  .modal-backdrop,
+  .screen-footer{
+    display:none!important;
+  }
+
+  .print-document{
+    display:block!important;
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    background:#fff!important;
+  }
+
+  .print-sheet{
+    position:relative!important;
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+    margin:0!important;
+    padding:8mm 7mm 23mm!important;
+    overflow:hidden!important;
+    background:#fff!important;
+  }
+
+  /* 머릿글: 현재 확정 위치 */
+  .print-title-row{
+    width:100%!important;
+    min-height:13mm!important;
+    height:13mm!important;
+    margin:0 0 2.5mm!important;
+    padding:0 0 2mm!important;
+    display:flex!important;
+    align-items:flex-end!important;
+    border-bottom:1.2pt solid #123f78!important;
+  }
+  .print-title-row h1{
+    margin:0!important;
+    color:#123f78!important;
+    font-size:23pt!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-1px!important;
+  }
+
+  /* 본문: A4 1페이지에 자연스럽게 배치 */
+  .print-section{
+    border:1px solid #6fa3dc!important;
+    border-radius:6px!important;
+    overflow:hidden!important;
+    margin:0 0 3.5mm!important;
+    background:#fff!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  .print-section:last-of-type{
+    margin-bottom:0!important;
+  }
+
+  .print-section-title{
+    min-height:8.5mm!important;
+    height:8.5mm!important;
+    display:flex!important;
+    align-items:center!important;
+    padding:0 3mm!important;
+    background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%)!important;
+    border-bottom:1px solid #a8c6e7!important;
+    color:#1457a6!important;
+    font-size:14pt!important;
+    font-weight:950!important;
+    letter-spacing:-.5px!important;
+  }
+
+  .print-section-body{
+    padding:2.6mm 3.2mm 3mm!important;
+    background:#fff!important;
+  }
+
+  .print-grid{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    justify-content:space-between!important;
+    align-items:stretch!important;
+    row-gap:2.5mm!important;
+    column-gap:0!important;
+  }
+
+  .print-pair{
+    width:48.7%!important;
+    min-width:0!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:2.5mm!important;
+  }
+
+  .print-pair.full{
+    width:100%!important;
+  }
+
+  .print-pair > .print-label{
+    flex:0 0 27mm!important;
+    width:27mm!important;
+  }
+
+  .print-pair > .print-box{
+    flex:1 1 auto!important;
+    width:auto!important;
+  }
+
+  .print-label{
+    color:#252b34!important;
+    font-size:10pt!important;
+    font-weight:850!important;
+    line-height:1.25!important;
+    white-space:nowrap!important;
+  }
+
+  .print-box{
+    min-width:0!important;
+    min-height:8.2mm!important;
+    height:8.2mm!important;
+    display:flex!important;
+    align-items:center!important;
+    padding:0 2.4mm!important;
+    border:1px solid #cfd6df!important;
+    border-radius:4px!important;
+    background:#f8fafc!important;
+    color:#384557!important;
+    font-size:10pt!important;
+    font-weight:650!important;
+    line-height:1.3!important;
+    overflow:hidden!important;
+    overflow-wrap:anywhere!important;
+  }
+
+  .print-detail-row{
+    display:block!important;
+    margin-top:2.8mm!important;
+  }
+
+  .print-detail-row .print-label{
+    display:block!important;
+    margin:0 0 1.5mm!important;
+    padding:0!important;
+  }
+
+  .print-box.detail{
+    width:100%!important;
+    min-height:31mm!important;
+    height:31mm!important;
+    max-height:31mm!important;
+    padding:2.5mm 2.8mm!important;
+    align-items:flex-start!important;
+    white-space:pre-wrap!important;
+    line-height:1.5!important;
+    overflow:hidden!important;
+    font-size:10.2pt!important;
+  }
+
+  /* 바닥글: 접수상담등록/상담등록과 동일한 최종 형식 */
+  .print-footer{
+    display:block!important;
+    position:fixed!important;
+    left:7mm!important;
+    right:7mm!important;
+    bottom:3.5mm!important;
+    z-index:9999!important;
+    background:#fff!important;
+    pointer-events:none!important;
+  }
+
+  .print-footer-rights{
+    margin:0 0 1mm!important;
+    text-align:left!important;
+    color:#6b7280!important;
+    font-size:17px!important;
+    font-weight:500!important;
+    line-height:1.25!important;
+  }
+
+  .print-footer-divider{
+    height:0!important;
+    border:0!important;
+    border-top:1.2pt solid #1457a6!important;
+    margin:0!important;
+  }
+
+  .print-footer-company{
+    margin:2mm 0 0!important;
+    text-align:center!important;
+    color:#123f78!important;
+    font-size:23pt!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-1px!important;
+    white-space:nowrap!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -205,6 +470,12 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   <button type="button" class="btn" id="backBtn">← 이전화면</button>
 </div>
 </form>
+
+<footer class="screen-footer" aria-label="문서 바닥글">
+  <p class="footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</p>
+  <hr class="footer-divider">
+  <p class="footer-company">마음:시나브로 심리상담연구소</p>
+</footer>
 </main>
 </div>
 
@@ -797,6 +1068,12 @@ function buildPrintDocument(){
         <div class="print-detail-row"><div class="print-label">상세 상담내용</div><div class="print-box detail">${escapeHtml(printable($("counselDetail").value))}</div></div>
       </div>
     </section>
+
+    <footer class="print-footer">
+      <p class="print-footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</p>
+      <hr class="print-footer-divider">
+      <p class="print-footer-company">마음:시나브로 심리상담연구소</p>
+    </footer>
   </div>`;
   $("printDocument").innerHTML=html;
 }
