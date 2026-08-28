@@ -1847,7 +1847,17 @@
       <div class="nav-item"><span class="nav-icon">♙</span><span>구직자 관리</span></div>
       <div class="nav-item"><span class="nav-icon">▦</span><span>구인기업 관리</span></div>
       <div class="nav-item"><span class="nav-icon">∞</span><span>매칭 관리</span></div>
-      <div class="nav-item"><span class="nav-icon">▣</span><span>프로그램 관리</span></div>
+      <div class="nav-item has-submenu" id="documentManagementNav" aria-expanded="false">
+        <span class="nav-icon">▣</span>
+        <span>문서관리</span>
+        <span class="nav-menu-arrow">▼</span>
+      </div>
+      <div class="nav-submenu" id="documentManagementSubmenu" aria-label="문서관리 하위메뉴">
+        <a class="nav-subitem" id="memberRecordCardMenu" href="Member_Record_Card.html">
+          <span class="nav-subicon">└</span>
+          <span>회원기록카드</span>
+        </a>
+      </div>
       <div class="nav-item"><span class="nav-icon">▥</span><span>통계 분석</span></div>
       <div class="nav-item has-submenu" id="systemSettingsNav" aria-expanded="false">
         <span class="nav-icon">⚙</span>
@@ -2689,6 +2699,28 @@
       item.classList.add("active");
     })
   );
+
+  /* 문서관리 → 회원기록카드 하위메뉴 */
+  const documentManagementNav = document.getElementById("documentManagementNav");
+  const documentManagementSubmenu = document.getElementById("documentManagementSubmenu");
+  const memberRecordCardMenu = document.getElementById("memberRecordCardMenu");
+
+  function setDocumentManagementOpen(open){
+    if (!documentManagementNav || !documentManagementSubmenu) return;
+    documentManagementNav.classList.toggle("open", Boolean(open));
+    documentManagementSubmenu.classList.toggle("open", Boolean(open));
+    documentManagementNav.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  documentManagementNav?.addEventListener("click", () => {
+    setDocumentManagementOpen(
+      !documentManagementSubmenu.classList.contains("open")
+    );
+  });
+
+  memberRecordCardMenu?.addEventListener("click", () => {
+    memberRecordCardMenu.classList.add("active");
+  });
 
   /* 시스템 설정 → 사용자등록 / 상담항목등록 하위메뉴 */
   const systemSettingsNav = document.getElementById("systemSettingsNav");
