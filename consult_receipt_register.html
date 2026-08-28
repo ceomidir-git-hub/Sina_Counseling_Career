@@ -726,6 +726,121 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     width:100%!important;
   }
 }
+
+
+/* ===== FINAL 2026-08-28 : 회원 KEY 조회 팝업 ===== */
+.member-lookup-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10030;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.46);
+}
+.member-lookup-backdrop.show{display:flex}
+.member-lookup-modal{
+  width:min(420px,94vw);
+  background:#fff;
+  border:1px solid #d6dee8;
+  border-radius:12px;
+  box-shadow:0 24px 70px rgba(15,23,42,.28);
+  overflow:hidden;
+}
+.member-lookup-head{
+  min-height:48px;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #e4eaf1;
+  background:#f7fbff;
+}
+.member-lookup-head h3{
+  margin:0;
+  color:#123f78;
+  font-size:16px;
+  font-weight:950;
+}
+.member-lookup-close{
+  width:32px;
+  height:32px;
+  border:0;
+  border-radius:7px;
+  background:#eef2f6;
+  color:#475569;
+  font-size:20px;
+  cursor:pointer;
+}
+.member-lookup-body{padding:18px}
+.member-lookup-label{
+  display:block;
+  margin:0 0 7px;
+  color:#263548;
+  font-size:12.5px;
+  font-weight:900;
+}
+.member-lookup-input{
+  width:100%;
+  height:40px;
+  padding:0 12px;
+  border:1px solid #cfd6df;
+  border-radius:6px;
+  background:var(--yellow);
+  color:#111827;
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:1.2px;
+  text-align:center;
+  outline:none;
+  font-variant-numeric:tabular-nums;
+}
+.member-lookup-input:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 2px rgba(20,87,166,.11);
+}
+.member-lookup-help{
+  margin:8px 0 0;
+  color:#64748b;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.45;
+}
+.member-lookup-error{
+  display:none;
+  margin:10px 0 0;
+  padding:7px 9px;
+  border:1px solid #efc4c4;
+  border-radius:6px;
+  background:#fff1f1;
+  color:var(--red);
+  font-size:11.5px;
+  font-weight:850;
+  line-height:1.45;
+}
+.member-lookup-error.show{display:block}
+.member-lookup-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  padding:0 18px 18px;
+}
+.member-lookup-btn{
+  min-width:90px;
+  height:36px;
+  border-radius:6px;
+  border:1px solid var(--blue);
+  background:#fff;
+  color:var(--blue-dark);
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.member-lookup-btn.primary{background:var(--blue);color:#fff}
+.member-lookup-btn:disabled{opacity:.5;cursor:not-allowed}
+@media print{.member-lookup-backdrop{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -881,8 +996,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       <button type="button" class="btn" id="backBtn">← 이전화면</button>
     </div>
     <div class="bottom-hint">
-      💡 <span class="lookup-key-warning">조회조건 필수: 상담구분 + 이름이 반드시 일치해야 합니다.</span>
-      <span class="lookup-sub-note">먼저 상담구분을 선택하고 이름을 입력한 뒤 <b>🔍 조회</b> 버튼을 눌러주세요. 동일한 이름이 여러 명일 경우 연락처를 함께 입력하면 정확하게 조회할 수 있습니다.</span>
+      💡 <span class="lookup-key-warning">조회조건: 회원 KEY</span>
+      <span class="lookup-sub-note"><b>🔍 조회</b> 버튼을 누르면 회원 KEY 조회창이 열립니다. 8자리 회원 KEY를 입력하면 해당 내담자의 심리상담·진로상담 접수 기록을 조회할 수 있습니다.</span>
     </div>
   </form>
 </main>
@@ -911,6 +1026,26 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   </div>
 </div>
 
+
+
+<div class="member-lookup-backdrop" id="memberLookupBackdrop" aria-hidden="true">
+  <div class="member-lookup-modal" role="dialog" aria-modal="true" aria-labelledby="memberLookupTitle">
+    <div class="member-lookup-head">
+      <h3 id="memberLookupTitle">회원 KEY 조회</h3>
+      <button type="button" class="member-lookup-close" id="memberLookupCloseBtn" aria-label="닫기">×</button>
+    </div>
+    <div class="member-lookup-body">
+      <label class="member-lookup-label" for="memberKeyLookupInput">회원 KEY</label>
+      <input id="memberKeyLookupInput" class="member-lookup-input" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="예: 26021001">
+      <p class="member-lookup-help">회원 KEY 8자리를 입력하세요. 이름과 전화번호는 조회조건으로 사용하지 않습니다.</p>
+      <div class="member-lookup-error" id="memberLookupError" role="alert"></div>
+    </div>
+    <div class="member-lookup-actions">
+      <button type="button" class="member-lookup-btn" id="memberLookupCancelBtn">취소</button>
+      <button type="button" class="member-lookup-btn primary" id="memberLookupSearchBtn">조회</button>
+    </div>
+  </div>
+</div>
 
 
 <div class="edit-confirm-backdrop" id="editConfirmBackdrop" aria-hidden="true">
@@ -2533,77 +2668,139 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       });
     }
 
-    async function handleLookup() {
-      hideLookupMsg();
+    // ===== 10-1) 회원 KEY 팝업 조회 =====
+    const memberLookupBackdrop = document.getElementById("memberLookupBackdrop");
+    const memberKeyLookupInput = document.getElementById("memberKeyLookupInput");
+    const memberLookupErrorEl = document.getElementById("memberLookupError");
+    const memberLookupCloseBtn = document.getElementById("memberLookupCloseBtn");
+    const memberLookupCancelBtn = document.getElementById("memberLookupCancelBtn");
+    const memberLookupSearchBtn = document.getElementById("memberLookupSearchBtn");
+
+    function showMemberLookupError(message){
+      memberLookupErrorEl.textContent = message || "";
+      memberLookupErrorEl.classList.toggle("show", !!message);
+    }
+
+    function openMemberLookupModal(){
       hideStatus();
+      hideLookupMsg();
       lookupSelectionAreaEl.style.display = "none";
       lookupSelectionAreaEl.innerHTML = "";
+      showMemberLookupError("");
+      memberKeyLookupInput.value = "";
+      memberLookupBackdrop.classList.add("show");
+      memberLookupBackdrop.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+      setTimeout(() => memberKeyLookupInput.focus(), 0);
+    }
 
+    function closeMemberLookupModal(){
+      memberLookupBackdrop.classList.remove("show");
+      memberLookupBackdrop.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+      showMemberLookupError("");
+    }
+
+    function normalizeMemberKey(value){
+      return String(value || "").replace(/\D/g, "").slice(0, 8);
+    }
+
+    memberKeyLookupInput.addEventListener("input", () => {
+      memberKeyLookupInput.value = normalizeMemberKey(memberKeyLookupInput.value);
+      showMemberLookupError("");
+    });
+
+    memberLookupCloseBtn.addEventListener("click", closeMemberLookupModal);
+    memberLookupCancelBtn.addEventListener("click", closeMemberLookupModal);
+    memberLookupBackdrop.addEventListener("click", (e) => {
+      if (e.target === memberLookupBackdrop) closeMemberLookupModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && memberLookupBackdrop.classList.contains("show")) {
+        closeMemberLookupModal();
+      }
+    });
+
+    async function handleMemberKeyLookup(){
+      const memberKey = normalizeMemberKey(memberKeyLookupInput.value);
+      memberKeyLookupInput.value = memberKey;
+      showMemberLookupError("");
+
+      if (!/^\d{8}$/.test(memberKey)) {
+        showMemberLookupError("회원 KEY는 8자리 숫자로 입력해주세요. 예: 26021001");
+        memberKeyLookupInput.focus();
+        return;
+      }
       if (!sb) {
-        showLookupMsg("error", "조회 서버(Supabase) 연결에 실패했습니다.");
+        showMemberLookupError("조회 서버(Supabase) 연결에 실패했습니다.");
         return;
       }
       if (!isLoggedIn()) {
-        showLookupMsg("error", "로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
+        showMemberLookupError("로그인이 필요합니다. 메인화면에서 먼저 로그인해주세요.");
         return;
       }
       if (!canRead()) {
-        showLookupMsg("error", "현재 계정에 상담 조회 권한이 없습니다.");
+        showMemberLookupError("현재 계정에 상담 조회 권한이 없습니다.");
         return;
       }
 
-      const typeCode = getSelectedCounselType();
-      const lookupNameEl = typeCode === "CC" ? careerNameEl : clientNameEl;
-      const lookupPhoneEl = typeCode === "CC" ? careerPhoneEl : clientPhoneEl;
-      const name = lookupNameEl.value.trim();
-      const phone = lookupPhoneEl.value.trim();
-
-      markInvalid(lookupNameEl, !name);
-      if (!name) {
-        showLookupMsg("error", "내담자명을 입력해주세요.");
-        return;
-      }
-      if (phone && !isValidPhone(phone)) {
-        markInvalid(lookupPhoneEl, true);
-        showLookupMsg("error", "연락처 형식이 올바르지 않습니다. (예: 010-0000-0000)");
-        return;
-      }
-      markInvalid(clientPhoneEl, false);
-
-      lookupSaveBtn.disabled = true;
-      const originalText = lookupSaveBtn.textContent;
-      lookupSaveBtn.textContent = "조회 중...";
+      memberLookupSearchBtn.disabled = true;
+      memberLookupCancelBtn.disabled = true;
+      memberLookupCloseBtn.disabled = true;
+      const originalText = memberLookupSearchBtn.textContent;
+      memberLookupSearchBtn.textContent = "조회 중...";
 
       try {
-        let query = sb
+        const { data: client, error } = await sb
           .from(BASIC_TABLE)
-          .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
-          .eq("client_name", name)
-          .order("created_at", { ascending: false });
-        if (phone) query = query.eq("client_phone", phone);
+          .select("id, member_key, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
+          .eq("member_key", memberKey)
+          .maybeSingle();
 
-        const { data: clients, error } = await query;
         if (error) throw error;
-        if (!clients || clients.length === 0) {
-          showLookupMsg("error", "일치하는 내담자 기본정보가 없습니다.");
+        if (!client) {
+          showMemberLookupError("해당 회원 KEY의 내담자가 없습니다.");
           return;
         }
 
-        if (!phone && clients.length > 1) {
-          showClientSelection(clients, typeCode);
+        const lookupTypes = getAutoLookupTypes("", client.counsel_type);
+        const groups = await Promise.all(
+          lookupTypes.map(typeCode => fetchSessionsForClient(client, typeCode))
+        );
+        const records = groups
+          .flat()
+          .sort((a, b) => {
+            const aTime = new Date(a.__session?.receipt_at || 0).getTime();
+            const bTime = new Date(b.__session?.receipt_at || 0).getTime();
+            return bTime - aTime;
+          });
+
+        if (!records.length) {
+          showMemberLookupError(`${memberKey} 회원의 활성 접수 기록이 없습니다.`);
           return;
         }
 
-        const records = await fetchSessionsForClient(clients[0], typeCode);
+        closeMemberLookupModal();
         proceedWithRecords(records);
       } catch (error) {
-        console.error(error);
-        showLookupMsg("error", "조회 중 오류가 발생했습니다: " + (error?.message || error));
+        console.error("회원 KEY 조회 실패:", error);
+        showMemberLookupError("회원 KEY 조회 중 오류가 발생했습니다: " + (error?.message || error));
       } finally {
-        lookupSaveBtn.textContent = originalText;
-        updateLoginGate();
+        memberLookupSearchBtn.textContent = originalText;
+        memberLookupSearchBtn.disabled = false;
+        memberLookupCancelBtn.disabled = false;
+        memberLookupCloseBtn.disabled = false;
       }
     }
+
+    memberLookupSearchBtn.addEventListener("click", handleMemberKeyLookup);
+    memberKeyLookupInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleMemberKeyLookup();
+      }
+    });
 
     // ===== 11) 조회된 접수 수정 저장 =====
     async function handleSave() {
@@ -2805,7 +3002,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function fetchClientById(clientId) {
       const { data, error } = await sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
+        .select("id, member_key, counsel_type, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career, client_name, sex_code, birth_date, client_phone, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, job_code")
         .eq("id", clientId)
         .maybeSingle();
 
@@ -2911,7 +3108,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       }
     }
 
-    lookupSaveBtn.addEventListener("click", handleLookup);
+    lookupSaveBtn.addEventListener("click", openMemberLookupModal);
     editSaveBtn.addEventListener("click", handleSave);
 
     // 모든 함수 정의가 끝난 뒤 URL client_id 자동조회 실행
