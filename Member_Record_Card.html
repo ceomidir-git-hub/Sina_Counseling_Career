@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>회원기록카드</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "맑은 고딕", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+    background: #f2f2f2;
+  }
+  .toolbar {
+    width: 210mm;
+    margin: 8mm auto 0 auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .pdf-save-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 11pt;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .pdf-save-btn:hover {
+    background: #1d4ed8;
+  }
+  @media print {
+    .toolbar {
+      display: none;
+    }
+  }
+  .page {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    margin: 10mm auto;
+    background: #ffffff;
+    padding: 0 14mm;
+    box-shadow: 0 0 8px rgba(0,0,0,0.15);
+  }
+  /* 머릿글: 페이지 상단에 고정 */
+  .header-fixed {
+    position: absolute;
+    top: 12mm;
+    left: 14mm;
+    right: 14mm;
+  }
+  .header-date {
+    font-size: 9pt;
+    color: #333;
+    margin: 0 0 2mm 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .approval-table {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 34mm;
+    margin: 0;
+    border-collapse: collapse;
+  }
+  .approval-table td {
+    border: 1px solid #999;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 8pt;
+    height: 7mm;
+    padding: 1px 2px;
+  }
+  .approval-table td.sign-row {
+    height: 14mm;
+  }
+  .approval-table .label {
+    background: #f4f4f4;
+    font-weight: 700;
+  }
+  .approval-table .placeholder {
+    color: #bbb;
+    font-size: 7pt;
+  }
+  /* 바닥글: 페이지 하단에 고정 */
+  .footer-fixed {
+    position: absolute;
+    bottom: 10mm;
+    left: 14mm;
+    right: 14mm;
+    text-align: center;
+    font-size: 15pt;
+    font-weight: 700;
+    color: #555;
+  }
+  .content-body {
+    padding-top: 42mm;
+    padding-bottom: 12mm;
+  }
+  h1.title {
+    text-align: center;
+    font-size: 18pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin: 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 3mm;
+    table-layout: fixed;
+  }
+  table.section-table {
+    margin-bottom: 3.8mm;
+  }
+  td, th {
+    border: 1px solid #999;
+    padding: 2px 4px;
+    font-size: 9pt;
+    vertical-align: middle;
+    height: 7.3mm;
+    word-break: keep-all;
+  }
+  .label {
+    background: #f4f4f4;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .label .en {
+    display: block;
+    font-weight: 400;
+    font-size: 8.5pt;
+    color: #555;
+  }
+  .label.same-line .en {
+    display: inline;
+    margin-left: 3px;
+  }
+  .value {
+    text-align: center;
+  }
+  .section-title {
+    background: #d9d9d9 !important;
+    text-align: left !important;
+    font-weight: 700;
+    font-size: 10.5pt;
+    padding-left: 6px;
+  }
+  .section-title .en {
+    font-weight: 400;
+    font-size: 9pt;
+    color: #333;
+    display: inline;
+  }
+  .photo-box {
+    text-align: center;
+    font-size: 9pt;
+    color: #666;
+  }
+  .photo-inner {
+    width: 28mm;
+    height: 35mm;
+    margin: 0 auto;
+    border: 1px dashed #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+  }
+  .fillable {
+    min-height: 6mm;
+  }
+  .small-note {
+    font-size: 8.5pt;
+    color: #777;
+    text-align: right;
+    margin-top: 3mm;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .page {
+      margin: 0 auto;
+      box-shadow: none;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button class="pdf-save-btn" onclick="window.print()">PDF로 저장</button>
+</div>
+<div class="page">
+
+  <div class="header-fixed">
+    <table class="approval-table">
+      <tr>
+        <td class="label">담 당</td>
+        <td class="label">대 표</td>
+      </tr>
+      <tr>
+        <td class="placeholder sign-row">(서명)</td>
+        <td class="placeholder sign-row">(서명)</td>
+      </tr>
+      <tr>
+        <td class="placeholder">(날짜)</td>
+        <td class="placeholder">(날짜)</td>
+      </tr>
+    </table>
+    <h1 class="title">회원기록카드</h1>
+  </div>
+
+  <div class="content-body">
+
+  <div class="header-date">
+    <span>작성일 : __________ 년 ______ 월 ______ 일</span>
+    <span>회원 Key : ______________________________</span>
+  </div>
+
+  <!-- 기본 인적사항 -->
+  <table style="width:182mm;">
+    <colgroup>
+      <col style="width:32mm">
+      <col style="width:24mm">
+      <col style="width:50.5mm">
+      <col style="width:21mm">
+      <col style="width:54.5mm">
+    </colgroup>
+    <tr>
+      <td class="label" rowspan="5">사 진<br><span class="en">(Photo)</span></td>
+      <td class="label">성 명<span class="en">(Name)</span></td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="label">영 문<span class="en">(English)</span></td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="label">소속회사<span class="en">(Company)</span></td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="label">성 별<span class="en">(Sex)</span></td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="label">입사일자<span class="en">(Hire Date)</span></td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="label">업무명<span class="en">(Dept.)</span></td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="label">전화번호<span class="en">(Phone)</span></td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="label">생년월일<span class="en">(D.O.B)</span></td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="label">체류지주소<span class="en">(Address)</span></td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="label">나 이<span class="en">(Age)</span></td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+  </table>
+
+  <!-- 여권사항 -->
+  <table class="section-table">
+    <colgroup>
+      <col style="width:14%">
+      <col style="width:19%">
+      <col style="width:15%">
+      <col style="width:15%">
+      <col style="width:22%">
+      <col style="width:15%">
+    </colgroup>
+    <tr>
+      <td class="section-title" colspan="6">• 여권사항 <span class="en">(Passport)</span></td>
+    </tr>
+    <tr>
+      <td class="label">국 적<span class="en">(Nationality)</span></td>
+      <td class="label">여권번호<span class="en">(Passport No.)</span></td>
+      <td class="label">발급일자<span class="en">(Issue Date)</span></td>
+      <td class="label">유효기간<span class="en">(Expiry Date)</span></td>
+      <td class="label">외국인등록번호<span class="en">(Alien Reg. No.)</span></td>
+      <td class="label">비 자<span class="en">(Visa)</span></td>
+    </tr>
+    <tr>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+  </table>
+
+  <!-- 학력 & 언어능력 -->
+  <table class="section-table">
+    <colgroup>
+      <col style="width:23%">
+      <col style="width:23%">
+      <col style="width:23%">
+      <col style="width:23%">
+    </colgroup>
+    <tr>
+      <td class="section-title" colspan="2">• 학력 <span class="en">(School Career)</span></td>
+      <td class="section-title" colspan="2" style="text-align:center !important;">• 언어능력 <span class="en">(Language)</span></td>
+    </tr>
+    <tr>
+      <td class="label same-line">기 간<span class="en">(Period)</span></td>
+      <td class="label same-line">학교명<span class="en">(School)</span></td>
+      <td class="label same-line">종 류<span class="en">(Type)</span></td>
+      <td class="label same-line">능 력<span class="en">(Ability)</span></td>
+    </tr>
+    <tr>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value">한국어<span class="en">(Korean)</span></td>
+      <td class="value fillable">상 / 중 / 하</td>
+    </tr>
+    <tr>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value">영 어<span class="en">(English)</span></td>
+      <td class="value fillable">상 / 중 / 하</td>
+    </tr>
+    <tr>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+  </table>
+
+  <!-- 가족 -->
+  <table class="section-table">
+    <colgroup>
+      <col style="width:22%">
+      <col style="width:12%">
+      <col style="width:22%">
+      <col style="width:12%">
+      <col style="width:16%">
+      <col style="width:16%">
+    </colgroup>
+    <tr>
+      <td class="section-title" colspan="6">• 가족 <span class="en">(Family)</span></td>
+    </tr>
+    <tr>
+      <td class="label">성 명<span class="en">(Name in full)</span></td>
+      <td class="label">성 별<span class="en">(Sex)</span></td>
+      <td class="label">생년월일<span class="en">(Date of Birth)</span></td>
+      <td class="label">관 계<span class="en">(Relation)</span></td>
+      <td class="label">나 이<span class="en">(Age)</span></td>
+      <td class="label">비 자<span class="en">(Visa)</span></td>
+    </tr>
+    <tr>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable">&nbsp;</td>
+    </tr>
+  </table>
+
+  <!-- 경력사항 -->
+  <table class="section-table">
+    <colgroup>
+      <col style="width:10%">
+      <col style="width:25%">
+      <col style="width:30%">
+      <col style="width:35%">
+    </colgroup>
+    <tr>
+      <td class="section-title" colspan="4">• 경력사항 <span class="en">(Career)</span></td>
+    </tr>
+    <tr>
+      <td class="label">번 호<span class="en">(No.)</span></td>
+      <td class="label">기 간<span class="en">(Period)</span></td>
+      <td class="label">회사명<span class="en">(Company)</span></td>
+      <td class="label">경력(업무내용)<span class="en">(Job Description)</span></td>
+    </tr>
+    <tr><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td></tr>
+    <tr><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td></tr>
+    <tr><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td></tr>
+  </table>
+
+  <div class="small-note" style="text-align:left; font-weight:400; margin-top:4mm;">
+    ※ 본 기록카드는 사실에 근거하여 정확하게 작성해 주시기 바랍니다. 기재된 개인정보는 마음:시나브로심리상담연구소의 회원 관리(전산 등록 포함) 및 상담 서비스 제공 목적으로만 사용되며, 관계 법령에 따라 안전하게 관리됩니다. 본 기록카드를 작성하시는 것으로 마음:시나브로심리상담연구소의 개인정보 관리(전산 등록 포함)에 동의하신 것으로 간주합니다.
+  </div>
+  <div class="small-note" style="text-align:left; font-weight:400; margin-top:1.5mm; color:#999;">
+    ※ Please fill out this record card accurately and truthfully. The personal information provided will be used solely for member management (including system registration) by Ma-eum: Sinabro Psychological Counseling Institute and for providing counseling services, and will be securely managed in accordance with applicable laws. By completing this record card, you are deemed to have agreed to the institute's management of your personal information (including system registration).
+  </div>
+
+  </div><!-- /content-body -->
+
+  <div class="footer-fixed">마음:시나브로 심리상담연구소</div>
+
+</div>
+</body>
+</html>
