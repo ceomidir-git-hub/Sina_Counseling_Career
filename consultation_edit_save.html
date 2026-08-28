@@ -673,11 +673,50 @@ form.addEventListener("submit",async e=>{
       ? {...common,visit_date:$("startDate").value||null,session_topic_1:topicName,session_content:$("counselDetail").value.trim()||null}
       : {...common,counseling_date:$("startDate").value||null,career_topic_1:topicName,counseling_content:$("counselDetail").value.trim()||null};
 
+    // 중요:
+    // 심리상담(PC)과 진로상담(CC)은 일부 컬럼명이 서로 다르므로
+    // 저장 후 검증 SELECT 컬럼을 상담유형별로 분리한다.
+    // PC 테이블에서 counseling_date / career_topic_1 / counseling_content를
+    // 조회하면 PostgREST 요청 전체가 실패하므로 절대 공통 SELECT로 묶지 않는다.
+    const savedSelectColumns = type === "PC"
+      ? [
+          "id",
+          "session_no",
+          "client_type_code",
+          "topic_code",
+          "assessment_tool",
+          "next_session_date",
+          "next_session_at",
+          "session_status",
+          "session_start_at",
+          "session_end_at",
+          "updated_at",
+          "visit_date",
+          "session_topic_1",
+          "session_content"
+        ].join(",")
+      : [
+          "id",
+          "session_no",
+          "client_type_code",
+          "topic_code",
+          "assessment_tool",
+          "next_session_date",
+          "next_session_at",
+          "session_status",
+          "session_start_at",
+          "session_end_at",
+          "updated_at",
+          "counseling_date",
+          "career_topic_1",
+          "counseling_content"
+        ].join(",");
+
     const {data,error}=await sb
       .from(tableName)
       .update(payload)
       .eq("id",row.id)
-      .select("id,session_no,client_type_code,topic_code,assessment_tool,next_session_date,next_session_at,session_status,session_start_at,session_end_at,updated_at,visit_date,counseling_date,session_topic_1,career_topic_1,session_content,counseling_content")
+      .select(savedSelectColumns)
       .single();
 
     if(error)throw error;
