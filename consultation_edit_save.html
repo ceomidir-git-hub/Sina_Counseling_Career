@@ -30,10 +30,6 @@ h1{margin:0;color:var(--blue-dark);font-size:29px;font-weight:950;letter-spacing
 .section-head h2{margin:0;color:var(--blue);font-size:17px;font-weight:950;letter-spacing:-.5px}
 .lookup-btn{height:31px;padding:0 11px;border:1px solid var(--blue);border-radius:6px;background:#fff;color:var(--blue-dark);font-size:12px;font-weight:900;cursor:pointer}
 .lookup-btn:hover{background:var(--blue-soft)}
-.consult-type-wrap{display:flex;align-items:center;gap:14px;margin-left:auto;margin-right:8px;white-space:nowrap}
-.consult-type-label{font-size:12px;font-weight:950;color:#25364c}
-.consult-type-option{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:900;color:#25364c;cursor:default}
-.consult-type-option input{width:15px;height:15px;margin:0;accent-color:var(--blue);pointer-events:none}
 .section-head-right{display:flex;align-items:center;gap:10px}
 .section-body{padding:4mm 4mm 4.5mm;background:#fff}
 .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3.2mm 7mm}
@@ -65,7 +61,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 .modal{width:min(760px,96vw);max-height:84vh;overflow:hidden;background:#fff;border-radius:12px;box-shadow:0 26px 70px rgba(15,23,42,.3);border:1px solid #d7e1ec;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
 .modal-head{height:52px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e4eaf1;background:#f7fbff}.modal-head h3{margin:0;color:var(--blue-dark);font-size:17px;font-weight:950}
 .modal-x{width:32px;height:32px;border:0;border-radius:7px;background:#eef2f6;color:#475569;font-size:20px;cursor:pointer}
-.modal-search{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr auto;gap:8px;border-bottom:1px solid #edf1f5}
+.modal-search{padding:14px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;border-bottom:1px solid #edf1f5}
 .modal-search button{min-width:72px;border:0;border-radius:6px;background:var(--blue);color:#fff;font-size:12px;font-weight:900;cursor:pointer}
 .lookup-results{min-height:170px;overflow:auto;padding:14px 18px 18px}
 .lookup-empty{padding:28px 10px;text-align:center;color:#738095;font-size:12px}
@@ -116,11 +112,6 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   <div class="section-head">
     <h2>1. 내담자 정보</h2>
     <div class="section-head-right">
-      <div class="consult-type-wrap" aria-label="상담구분">
-        <span class="consult-type-label">상담구분</span>
-        <label class="consult-type-option"><input type="radio" name="recordConsultType" value="PC" disabled> 심리상담</label>
-        <label class="consult-type-option"><input type="radio" name="recordConsultType" value="CC" disabled> 진로상담</label>
-      </div>
       <button type="button" class="lookup-btn no-print" id="lookupBtn">⌕ 상담조회</button>
     </div>
   </div>
@@ -199,13 +190,12 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 <!-- 상담 조회 모달 -->
 <div class="modal-backdrop no-print" id="lookupModalBackdrop" aria-hidden="true">
 <section class="modal" role="dialog" aria-modal="true" aria-labelledby="lookupModalTitle">
-  <div class="modal-head"><h3 id="lookupModalTitle">상담 조회</h3><button type="button" class="modal-x" id="lookupCloseBtn">×</button></div>
+  <div class="modal-head"><h3 id="lookupModalTitle">회원 Key 상담조회</h3><button type="button" class="modal-x" id="lookupCloseBtn">×</button></div>
   <div class="modal-search">
-    <input type="text" id="lookupName" placeholder="내담자명">
-    <input type="text" id="lookupPhone" placeholder="연락처(선택)" maxlength="13">
+    <input type="text" id="lookupMemberKey" placeholder="회원 Key 8자리 입력" maxlength="8" inputmode="numeric" autocomplete="off">
     <button type="button" id="lookupSearchBtn">조회</button>
   </div>
-  <div class="lookup-results" id="lookupResults"><div class="lookup-empty">내담자명을 입력해 상담기록을 조회하세요.</div></div>
+  <div class="lookup-results" id="lookupResults"><div class="lookup-empty">회원 Key를 입력해 상담기록을 조회하세요.</div></div>
 </section>
 </div>
 
@@ -245,7 +235,7 @@ function formatPhone(v){
   return d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);
 }
 function attachPhoneFormatter(el){el.addEventListener("input",()=>el.value=formatPhone(el.value))}
-attachPhoneFormatter($("clientPhone"));attachPhoneFormatter($("lookupPhone"));
+attachPhoneFormatter($("clientPhone"));
 
 function normalizeTimeInput(value){
   const digits=String(value||"").replace(/\D/g,"").slice(0,4);
@@ -347,11 +337,10 @@ async function guardLogin(){
 
 /* 상담 조회 */
 function openLookup(){
-  $("lookupName").value=$("clientName").value.trim();
-  $("lookupPhone").value=$("clientPhone").value.trim();
-  lookupResults.innerHTML='<div class="lookup-empty">내담자명을 입력해 상담기록을 조회하세요.</div>';
+  $("lookupMemberKey").value="";
+  lookupResults.innerHTML='<div class="lookup-empty">회원 Key를 입력해 상담기록을 조회하세요.</div>';
   modalBackdrop.classList.add("show");modalBackdrop.setAttribute("aria-hidden","false");
-  setTimeout(()=>$("lookupName").focus(),0);
+  setTimeout(()=>$("lookupMemberKey").focus(),0);
 }
 function closeLookup(){modalBackdrop.classList.remove("show");modalBackdrop.setAttribute("aria-hidden","true")}
 $("lookupBtn").addEventListener("click",openLookup);
@@ -393,57 +382,93 @@ async function getSessionRows(client){
 }
 
 async function searchConsultations(){
-  const name=$("lookupName").value.trim();
-  const phone=$("lookupPhone").value.trim();
-  if(!name){lookupResults.innerHTML='<div class="lookup-empty">내담자명을 입력해주세요.</div>';return}
+  const memberKey=$("lookupMemberKey").value.trim();
+
+  if(!/^\d{8}$/.test(memberKey)){
+    lookupResults.innerHTML='<div class="lookup-empty">회원 Key는 8자리 숫자로 입력해주세요.</div>';
+    return;
+  }
+
   lookupResults.innerHTML='<div class="lookup-empty">조회 중...</div>';
+
   try{
-    let q=sb.from(BASIC_TABLE).select("id,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address").eq("client_name",name);
-    const {data:clients,error}=await q;
+    const {data:client,error}=await sb
+      .from(BASIC_TABLE)
+      .select("id,member_key,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address")
+      .eq("member_key",memberKey)
+      .maybeSingle();
+
     if(error)throw error;
-    const phoneDigits=digitsOnly(phone);
-    const matched=(clients||[]).filter(c=>!phoneDigits||digitsOnly(c.client_phone)===phoneDigits);
-    if(!matched.length){lookupResults.innerHTML='<div class="lookup-empty">일치하는 내담자 기본정보가 없습니다.</div>';return}
 
-    let records=[];
-    for(const client of matched)records.push(...await getSessionRows(client));
-    if(!records.length){lookupResults.innerHTML='<div class="lookup-empty">등록된 상담 회기가 없습니다.</div>';return}
+    if(!client){
+      lookupResults.innerHTML='<div class="lookup-empty">일치하는 회원 Key의 내담자 기본정보가 없습니다.</div>';
+      return;
+    }
 
-    lookupResults.innerHTML='<div class="lookup-section-label">수정할 상담 회기를 선택하세요.</div>';
+    const records=await getSessionRows(client);
+
+    if(!records.length){
+      lookupResults.innerHTML='<div class="lookup-empty">해당 회원 Key에 등록된 상담 회기가 없습니다.</div>';
+      return;
+    }
+
+    lookupResults.innerHTML=
+      `<div class="lookup-section-label">회원 Key ${escapeHtml(client.member_key||memberKey)} · 수정할 상담 회기를 선택하세요.</div>`;
+
     records.forEach(item=>{
       const typeLabel=item.type==="PC"?"심리상담":"진로상담";
       const row=item.row;
-      const date=row.session_start_at?formatKST(row.session_start_at):(item.type==="PC"?(row.visit_date||"-"):(row.counseling_date||"-"));
-      const topic=topicMap[topicCodeFromRow(row,item.type)]||(item.type==="PC"?row.session_topic_1:row.career_topic_1)||"-";
+      const date=row.session_start_at
+        ? formatKST(row.session_start_at)
+        : (item.type==="PC"?(row.visit_date||"-"):(row.counseling_date||"-"));
+      const topic=
+        topicMap[topicCodeFromRow(row,item.type)]||
+        (item.type==="PC"?row.session_topic_1:row.career_topic_1)||
+        "-";
+
       const card=document.createElement("div");
       card.className="lookup-card";
-      card.innerHTML=`<div class="lookup-card-top"><strong>${escapeHtml(item.client.client_name)} · ${escapeHtml(formatPhone(item.client.client_phone||""))}</strong><span><span class="type-badge">${typeLabel}</span><span class="session-badge">${row.session_no}회기</span></span></div>
-        <p>상담일 : ${escapeHtml(date)} · 상태 : ${escapeHtml(row.session_status||"진행")}</p>
-        <p>상담주제 : ${escapeHtml(topic)}</p>`;
-      card.addEventListener("click",()=>{selectedRecord=item;populateRecord(item);closeLookup()});
+      card.innerHTML=
+        `<div class="lookup-card-top">`+
+          `<strong>${escapeHtml(item.client.client_name)} · ${escapeHtml(formatPhone(item.client.client_phone||""))}</strong>`+
+          `<span><span class="type-badge">${typeLabel}</span><span class="session-badge">${row.session_no}회기</span></span>`+
+        `</div>`+
+        `<p>회원 Key : ${escapeHtml(item.client.member_key||memberKey)}</p>`+
+        `<p>상담일 : ${escapeHtml(date)} · 상태 : ${escapeHtml(row.session_status||"진행")}</p>`+
+        `<p>상담주제 : ${escapeHtml(topic)}</p>`;
+
+      card.addEventListener("click",()=>{
+        selectedRecord=item;
+        populateRecord(item);
+        closeLookup();
+      });
+
       lookupResults.appendChild(card);
     });
+
   }catch(err){
     console.error(err);
-    lookupResults.innerHTML=`<div class="lookup-empty">조회 중 오류가 발생했습니다.<br>${escapeHtml(err.message||String(err))}</div>`;
+    lookupResults.innerHTML=
+      `<div class="lookup-empty">조회 중 오류가 발생했습니다.<br>${escapeHtml(err.message||String(err))}</div>`;
   }
 }
 $("lookupSearchBtn").addEventListener("click",searchConsultations);
-$("lookupName").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchConsultations()}});
-$("lookupPhone").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchConsultations()}});
+$("lookupMemberKey").addEventListener("input",e=>{
+  e.target.value=e.target.value.replace(/\D/g,"").slice(0,8);
+});
+$("lookupMemberKey").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    searchConsultations();
+  }
+});
 
 function setSessionStatus(value){
   const radio=document.querySelector(`input[name="sessionStatus"][value="${value==="종결"?"종결":"진행"}"]`);
   if(radio)radio.checked=true;
 }
-function setRecordConsultType(type){
-  document.querySelectorAll('input[name="recordConsultType"]').forEach(el=>{
-    el.checked = el.value === type;
-  });
-}
 function populateRecord(item){
   const {client,row,type}=item;
-  setRecordConsultType(type);
   $("clientName").value=client.client_name||"";
   $("clientPhone").value=formatPhone(client.client_phone||"");
   $("gender").value=sexMap[client.sex_code]||client.sex_code||"";
@@ -483,7 +508,7 @@ function populateRecord(item){
 
   updateDuration();
   $("recordMeta").classList.add("show");
-  $("recordMeta").textContent=`${type==="PC"?"심리상담":"진로상담"} · ${row.session_no}회기 · DB ID ${row.id} · 마지막 수정 ${formatKST(row.updated_at)}`;
+  $("recordMeta").textContent=`회원 Key ${client.member_key||"-"} · ${type==="PC"?"심리상담":"진로상담"} · ${row.session_no}회기 · DB ID ${row.id} · 마지막 수정 ${formatKST(row.updated_at)}`;
   document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));
   hideStatus();
   showStatus("success",`${type==="PC"?"심리상담":"진로상담"} ${row.session_no}회기를 불러왔습니다. 내용을 수정한 뒤 저장하세요.`);
@@ -553,7 +578,7 @@ form.addEventListener("submit",async e=>{
     if(error)throw error;
 
     selectedRecord.row={...selectedRecord.row,...data};
-    $("recordMeta").textContent=`${type==="PC"?"심리상담":"진로상담"} · ${sessionNo}회기 · DB ID ${row.id} · 마지막 수정 ${formatKST(data.updated_at)}`;
+    $("recordMeta").textContent=`회원 Key ${client.member_key||"-"} · ${type==="PC"?"심리상담":"진로상담"} · ${sessionNo}회기 · DB ID ${row.id} · 마지막 수정 ${formatKST(data.updated_at)}`;
     showStatus("success",`${type==="PC"?"심리상담":"진로상담"} ${sessionNo}회기가 정상적으로 수정 저장되었습니다.`);
   }catch(err){
     console.error(err);
@@ -567,7 +592,6 @@ form.addEventListener("submit",async e=>{
 /* 초기화 */
 form.addEventListener("reset",()=>setTimeout(()=>{
   selectedRecord=null;
-  setRecordConsultType("");
   $("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";
   $("recordMeta").classList.remove("show");$("recordMeta").textContent="";
   document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));
@@ -671,7 +695,7 @@ function recordActivity(e){
       const table=directType==="PC"?PSYCH_TABLE:CAREER_TABLE;
       const {data:row,error}=await sb.from(table).select("*").eq("id",directId).single();
       if(!error&&row){
-        const {data:client}=await sb.from(BASIC_TABLE).select("id,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address").eq("id",row.client_id).single();
+        const {data:client}=await sb.from(BASIC_TABLE).select("id,member_key,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address").eq("id",row.client_id).single();
         if(client){selectedRecord={type:directType,client,row};populateRecord(selectedRecord)}
       }
     }
