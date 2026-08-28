@@ -93,6 +93,26 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .page-wrap,.modal-backdrop{display:none!important}.print-document{display:block!important}.print-sheet{width:100%!important;margin:0!important}
 }
+
+/* ===== FINAL 2026-08-29 : 과거 상담 시간 누락 데이터 표시 ===== */
+.legacy-missing{
+  border-color:#e6a23c!important;
+  background:#fff8e8!important;
+}
+.legacy-data-warning{
+  display:none;
+  margin:0 0 4mm;
+  padding:9px 11px;
+  border:1px solid #f0c36d;
+  border-radius:7px;
+  background:#fff8e6;
+  color:#7a5310;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.5;
+}
+.legacy-data-warning.show{display:block}
+
 </style>
 </head>
 <body>
@@ -106,6 +126,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 </header>
 
 <div id="statusMsg" class="statusMsg"></div>
+<div id="legacyDataWarning" class="legacy-data-warning"></div>
 
 <form id="consultForm" autocomplete="off">
 <section class="section">
@@ -217,7 +238,7 @@ let currentEmployee=null;
 let selectedRecord=null;
 let sexMap={},jobMap={},targetMap={},topicMap={},toolRows=[];
 const $=id=>document.getElementById(id);
-const form=$("consultForm"),statusMsg=$("statusMsg"),saveBtn=$("saveBtn");
+const form=$("consultForm"),statusMsg=$("statusMsg"),saveBtn=$("saveBtn"),legacyDataWarning=$("legacyDataWarning");
 const modalBackdrop=$("lookupModalBackdrop"),lookupResults=$("lookupResults");
 
 function showStatus(type,message){
@@ -226,6 +247,37 @@ function showStatus(type,message){
   statusMsg.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function hideStatus(){statusMsg.className="statusMsg";statusMsg.textContent=""}
+function clearLegacyWarning(){
+  legacyDataWarning.className="legacy-data-warning";
+  legacyDataWarning.textContent="";
+  ["startTime","endTime","nextReservationTime"].forEach(id=>{
+    const el=$(id);
+    if(el){
+      el.classList.remove("legacy-missing");
+      if(el.dataset.originalPlaceholder!==undefined){
+        el.placeholder=el.dataset.originalPlaceholder;
+        delete el.dataset.originalPlaceholder;
+      }
+    }
+  });
+}
+function markLegacyMissing(id){
+  const el=$(id);
+  if(!el)return;
+  if(el.dataset.originalPlaceholder===undefined) el.dataset.originalPlaceholder=el.placeholder||"";
+  el.classList.add("legacy-missing");
+  el.placeholder="미등록";
+}
+function showLegacyWarning(items){
+  clearLegacyWarning();
+  if(!items.length)return;
+  items.forEach(item=>markLegacyMissing(item.id));
+  legacyDataWarning.textContent=
+    "⚠ 기존 상담기록의 시간 데이터가 일부 저장되지 않았습니다. " +
+    items.map(item=>item.label).join(", ") +
+    " 값을 입력한 뒤 수정/저장을 누르면 DB에 정상 보완됩니다.";
+  legacyDataWarning.classList.add("show");
+}
 const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const digitsOnly=v=>String(v||"").replace(/\D/g,"");
 function formatPhone(v){
@@ -290,7 +342,10 @@ function formatKST(iso){
 function updateDuration(){
   const s=dateTimeToISO($("startDate").value,$("startTime").value);
   const e=dateTimeToISO($("endDate").value,$("endTime").value);
-  if(!s||!e||new Date(e)<=new Date(s)){$("duration").value="";return}
+  if(!s||!e||new Date(e)<=new Date(s)){
+    $("duration").value="";
+    return;
+  }
   $("duration").value=Math.round((new Date(e)-new Date(s))/60000)+"분";
 }
 ["startDate","startTime","endDate","endTime"].forEach(id=>$(id).addEventListener("change",updateDuration));
@@ -469,6 +524,7 @@ function setSessionStatus(value){
 }
 function populateRecord(item){
   const {client,row,type}=item;
+
   $("clientName").value=client.client_name||"";
   $("clientPhone").value=formatPhone(client.client_phone||"");
   $("gender").value=sexMap[client.sex_code]||client.sex_code||"";
@@ -480,15 +536,22 @@ function populateRecord(item){
   $("sessionNo").value=String(row.session_no||"");
   $("nextSessionNo").value=row.session_no&&row.session_no<10?`${row.session_no+1}회기`:"";
 
+  // 접수 당시 예약일시는 기존 접수 데이터에서 정상 복원
   const appt=isoToKSTParts(type==="PC"?row.visit_at:row.appointment_at);
   $("reservationDate").value=appt.date||"";
   $("reservationTime").value=appt.time||"";
 
+  // 상담 실시 시각
   const start=isoToKSTParts(row.session_start_at);
   const end=isoToKSTParts(row.session_end_at);
 
-  $("startDate").value=start.date||(type==="PC"?(row.visit_date||""):(row.counseling_date||""));
+  // 과거 데이터 호환:
+  // 시작/종료 timestamp가 없으면 과거 날짜 컬럼까지만 복원하고,
+  // 없는 '시간'은 임의 추정하지 않는다.
+  const legacyStartDate=type==="PC"?(row.visit_date||""):(row.counseling_date||"");
+  $("startDate").value=start.date||legacyStartDate;
   $("startTime").value=start.time||"";
+
   $("endDate").value=end.date||$("startDate").value;
   $("endTime").value=end.time||"";
 
@@ -497,6 +560,7 @@ function populateRecord(item){
   const tools=parseAssessmentTools(row.assessment_tool);
   ["testTool1","testTool2","testTool3","testTool4"].forEach((id,i)=>$(id).value=tools[i]||"");
 
+  // 차기 예약: timestamp 우선, 과거에는 next_session_date만 저장된 자료가 존재
   const next=isoToKSTParts(row.next_session_at);
   $("nextReservationDate").value=next.date||row.next_session_date||"";
   $("nextReservationTime").value=next.time||"";
@@ -506,12 +570,47 @@ function populateRecord(item){
   $("counselDetail").value=(type==="PC"?row.session_content:row.counseling_content)||"";
   $("charCount").textContent=$("counselDetail").value.length;
 
+  // 과거 등록파일에서 누락된 시간 컬럼을 정확히 감지
+  const missing=[];
+  if(!row.session_start_at){
+    missing.push({id:"startTime",label:"실시일 시작시간"});
+  }
+  if(!row.session_end_at){
+    missing.push({id:"endTime",label:"실시일 종료시간"});
+  }
+  if(row.next_session_date && !row.next_session_at){
+    missing.push({id:"nextReservationTime",label:"차기 예약시간"});
+  }
+  showLegacyWarning(missing);
+
   updateDuration();
+
+  // 시간이 없으면 '빈칸'처럼 보이지 않도록 상담시간에도 상태를 명확히 표시
+  if((!row.session_start_at || !row.session_end_at) && !$("duration").value){
+    $("duration").value="시간 미등록";
+  }
+
   $("recordMeta").classList.add("show");
-  $("recordMeta").textContent=`회원 Key ${client.member_key||"-"} · ${type==="PC"?"심리상담":"진로상담"} · ${row.session_no}회기 · DB ID ${row.id} · 마지막 수정 ${formatKST(row.updated_at)}`;
+  $("recordMeta").textContent=
+    `회원 Key ${client.member_key||"-"} · `+
+    `${type==="PC"?"심리상담":"진로상담"} · ${row.session_no}회기 · `+
+    `DB ID ${row.id} · 마지막 수정 ${formatKST(row.updated_at)}`;
+
   document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));
   hideStatus();
-  showStatus("success",`${type==="PC"?"심리상담":"진로상담"} ${row.session_no}회기를 불러왔습니다. 내용을 수정한 뒤 저장하세요.`);
+
+  if(missing.length){
+    showStatus(
+      "info",
+      `${type==="PC"?"심리상담":"진로상담"} ${row.session_no}회기를 불러왔습니다. `+
+      `과거 등록 당시 저장되지 않은 시간값이 있어 노란색으로 표시했습니다. 값을 보완한 뒤 저장해주세요.`
+    );
+  }else{
+    showStatus(
+      "success",
+      `${type==="PC"?"심리상담":"진로상담"} ${row.session_no}회기의 진행정보 및 예약현황을 모두 불러왔습니다.`
+    );
+  }
 }
 
 function selectedStatus(){return document.querySelector('input[name="sessionStatus"]:checked')?.value||"진행"}
@@ -574,12 +673,40 @@ form.addEventListener("submit",async e=>{
       ? {...common,visit_date:$("startDate").value||null,session_topic_1:topicName,session_content:$("counselDetail").value.trim()||null}
       : {...common,counseling_date:$("startDate").value||null,career_topic_1:topicName,counseling_content:$("counselDetail").value.trim()||null};
 
-    const {data,error}=await sb.from(tableName).update(payload).eq("id",row.id).select().single();
+    const {data,error}=await sb
+      .from(tableName)
+      .update(payload)
+      .eq("id",row.id)
+      .select("id,session_no,client_type_code,topic_code,assessment_tool,next_session_date,next_session_at,session_status,session_start_at,session_end_at,updated_at,visit_date,counseling_date,session_topic_1,career_topic_1,session_content,counseling_content")
+      .single();
+
     if(error)throw error;
 
+    // 수정 저장 직후 시간값이 실제 DB에 들어갔는지 재검증
+    const normalize=v=>v?new Date(v).toISOString():null;
+    const timingMismatch=
+      normalize(data.session_start_at)!==normalize(startISO) ||
+      normalize(data.session_end_at)!==normalize(endISO) ||
+      normalize(data.next_session_at)!==normalize(nextISO);
+
+    if(timingMismatch){
+      throw new Error("시간정보 저장 검증에 실패했습니다. 실시 시작/종료 및 차기 예약시간을 다시 확인해주세요.");
+    }
+
     selectedRecord.row={...selectedRecord.row,...data};
-    $("recordMeta").textContent=`회원 Key ${client.member_key||"-"} · ${type==="PC"?"심리상담":"진로상담"} · ${sessionNo}회기 · DB ID ${row.id} · 마지막 수정 ${formatKST(data.updated_at)}`;
-    showStatus("success",`${type==="PC"?"심리상담":"진로상담"} ${sessionNo}회기가 정상적으로 수정 저장되었습니다.`);
+    clearLegacyWarning();
+    updateDuration();
+
+    $("recordMeta").textContent=
+      `회원 Key ${client.member_key||"-"} · `+
+      `${type==="PC"?"심리상담":"진로상담"} · ${sessionNo}회기 · `+
+      `DB ID ${row.id} · 마지막 수정 ${formatKST(data.updated_at)}`;
+
+    showStatus(
+      "success",
+      `${type==="PC"?"심리상담":"진로상담"} ${sessionNo}회기가 정상적으로 수정 저장되었습니다. `+
+      `실시 시작·종료 및 차기 예약시간까지 DB 저장을 확인했습니다.`
+    );
   }catch(err){
     console.error(err);
     showStatus("error","수정 저장 중 오류가 발생했습니다: "+(err.message||err));
@@ -594,6 +721,7 @@ form.addEventListener("reset",()=>setTimeout(()=>{
   selectedRecord=null;
   $("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";
   $("recordMeta").classList.remove("show");$("recordMeta").textContent="";
+  clearLegacyWarning();
   document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));
   hideStatus();
   if(currentEmployee?.permission==="조회자")showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.");
