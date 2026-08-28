@@ -555,6 +555,115 @@
   }
 }
 
+
+/* ===== FINAL 2026-08-29 : 모든 날짜 요일 표기 ===== */
+.date-time.weekday-enabled{
+  grid-template-columns:minmax(0,1.25fr) 34px minmax(0,.72fr);
+  gap:5px;
+}
+.weekday-chip{
+  height:var(--field-h);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #cfd6df;
+  border-radius:4px;
+  background:#f8fafc;
+  color:#384557;
+  font-size:11.5px;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+
+/* ==========================================================
+   FINAL PDF OPTIMIZE 2026-08-29
+   머릿글/바닥글 위치 변경 금지
+   - 접수상담 요약 잘림 제거
+   - 본문 세로공간 확대
+   - A4 세로 1페이지
+   ========================================================== */
+@media print{
+  /* 제목과 바닥글 위치는 기존 확정값 그대로 */
+  .print-title-row{
+    min-height:13mm!important;
+    height:13mm!important;
+    margin:0 0 2mm!important;
+    padding:0 0 2mm!important;
+  }
+  .print-footer{
+    left:7mm!important;
+    right:7mm!important;
+    bottom:3.5mm!important;
+  }
+
+  /* 본문 프레임 사이 간격을 접수상담등록 수준으로 자연스럽게 확대 */
+  .print-section{
+    margin-bottom:4.5mm!important;
+  }
+  .print-section-title{
+    min-height:9mm!important;
+    height:9mm!important;
+  }
+  .print-section-body{
+    padding:3.2mm 3.5mm 3.5mm!important;
+  }
+
+  /* 일반 입력값 높이를 화면과 가깝게 확대 */
+  .print-grid{
+    row-gap:3mm!important;
+  }
+  .print-box{
+    min-height:8.8mm!important;
+    height:8.8mm!important;
+    font-size:10.2pt!important;
+    overflow:hidden!important;
+  }
+
+  /* 접수상담 요약:
+     고정 15mm + overflow:hidden 제거가 핵심.
+     내용이 여러 줄이어도 프레임 안에서 정상 표시한다. */
+  .print-summary-row{
+    margin-top:3mm!important;
+  }
+  .print-summary-row .print-label{
+    padding-top:2.3mm!important;
+  }
+  .print-summary-box{
+    min-height:27mm!important;
+    height:auto!important;
+    max-height:33mm!important;
+    padding:2.2mm 2.6mm!important;
+    align-items:flex-start!important;
+    white-space:pre-wrap!important;
+    line-height:1.5!important;
+    overflow:visible!important;
+    font-size:10pt!important;
+  }
+
+  /* 상담내용 영역을 하단 쪽까지 자연스럽게 사용 */
+  .print-counsel-detail{
+    margin-top:3mm!important;
+  }
+  .print-counsel-detail .print-label{
+    margin-bottom:1.8mm!important;
+  }
+  .print-box.detail{
+    min-height:32mm!important;
+    height:32mm!important;
+    max-height:32mm!important;
+    padding:2.5mm 2.8mm!important;
+    line-height:1.5!important;
+    overflow:hidden!important;
+    font-size:10.2pt!important;
+  }
+
+  /* 마지막 섹션과 고정 바닥글 사이 여유를 과도하게 남기지 않는다 */
+  .print-section:last-of-type{
+    margin-bottom:0!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -587,9 +696,9 @@
 <div class="section-body">
 <div class="grid-2">
 <div class="form-pair"><label for="sessionNo">금회 회기</label><select id="sessionNo"><option value="">선택</option><option value="1">1회기</option><option value="2">2회기</option><option value="3">3회기</option><option value="4">4회기</option><option value="5">5회기</option><option value="6">6회기</option><option value="7">7회기</option><option value="8">8회기</option><option value="9">9회기</option><option value="10">10회기</option></select></div>
-<div class="form-pair"><label>예약일</label><div class="date-time"><input type="date" id="reservationDate" readonly><input type="text" id="reservationTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력" readonly></div></div>
-<div class="form-pair"><label>실시일 시작</label><div class="date-time"><input type="date" id="startDate"><input type="text" id="startTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
-<div class="form-pair"><label>실시일 종료</label><div class="date-time"><input type="date" id="endDate"><input type="text" id="endTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
+<div class="form-pair"><label>예약일</label><div class="date-time weekday-enabled"><input type="date" id="reservationDate" readonly><span class="weekday-chip" id="reservationDateWeekday">-</span><input type="text" id="reservationTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력" readonly></div></div>
+<div class="form-pair"><label>실시일 시작</label><div class="date-time weekday-enabled"><input type="date" id="startDate"><span class="weekday-chip" id="startDateWeekday">-</span><input type="text" id="startTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
+<div class="form-pair"><label>실시일 종료</label><div class="date-time weekday-enabled"><input type="date" id="endDate"><span class="weekday-chip" id="endDateWeekday">-</span><input type="text" id="endTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
 <div class="form-pair"><label for="duration">상담시간</label><input type="text" id="duration" readonly placeholder="자동 계산"></div>
 <div class="form-pair"><label>진행상태</label><div class="session-status-wrap"><label class="radio-label"><input type="radio" name="sessionStatus" value="진행" checked> 진행</label><label class="radio-label"><input type="radio" name="sessionStatus" value="종결"> 종결</label></div></div>
 </div>
@@ -600,7 +709,7 @@
 <div class="form-pair"><label for="testTool3">검사도구3</label><select id="testTool3"><option value="">선택</option></select></div>
 <div class="form-pair"><label for="testTool4">검사도구4</label><select id="testTool4"><option value="">선택</option></select></div>
 <div class="form-pair"><label for="nextSessionNo">차기 회기</label><input type="text" id="nextSessionNo" readonly placeholder="자동 계산"></div>
-<div class="form-pair"><label>차기 예약일</label><div class="date-time"><input type="date" id="nextReservationDate"><input type="text" id="nextReservationTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
+<div class="form-pair"><label>차기 예약일</label><div class="date-time weekday-enabled"><input type="date" id="nextReservationDate"><span class="weekday-chip" id="nextReservationDateWeekday">-</span><input type="text" id="nextReservationTime" class="time-input" inputmode="numeric" maxlength="5" placeholder="숫자입력"></div></div>
 </div>
 </div>
 </section>
@@ -700,11 +809,46 @@ function attachNumericTimeInput(el){
 
 function calcAge(birthDate){if(!birthDate)return"";const birth=new Date(birthDate+"T00:00:00");if(Number.isNaN(birth.getTime()))return"";const today=new Date();let age=today.getFullYear()-birth.getFullYear();const md=today.getMonth()-birth.getMonth();if(md<0||(md===0&&today.getDate()<birth.getDate()))age--;return age>=0?age+"세":""}
 function isoToLocalParts(iso){if(!iso)return{date:"",time:""};const d=new Date(iso);if(Number.isNaN(d.getTime()))return{date:"",time:""};const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(d);const map={};parts.forEach(p=>{if(p.type!=="literal")map[p.type]=p.value});return{date:`${map.year}-${map.month}-${map.day}`,time:`${map.hour}:${map.minute}`}}
-function formatKST(iso){if(!iso)return"-";const p=isoToLocalParts(iso);return p.date&&p.time?`${p.date} ${p.time}`:"-"}
+const DAY_KR=["일","월","화","수","목","금","토"];
+function weekdayFromDate(dateValue){
+  const m=String(dateValue||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return"";
+  const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12,0,0);
+  return Number.isNaN(d.getTime())?"":DAY_KR[d.getDay()];
+}
+function formatDateWithWeekday(dateValue){
+  const day=weekdayFromDate(dateValue);
+  return dateValue ? `${dateValue}${day?` (${day})`:""}` : "";
+}
+function formatDateTimeWithWeekday(dateValue,timeValue){
+  const d=formatDateWithWeekday(dateValue);
+  const t=String(timeValue||"").trim();
+  return [d,t].filter(Boolean).join(" ");
+}
+function updateDateWeekdayChip(dateId,chipId){
+  const dateEl=$(dateId),chip=$(chipId);
+  if(!dateEl||!chip)return;
+  const day=weekdayFromDate(dateEl.value);
+  chip.textContent=day?`(${day})`:"-";
+}
+function updateAllDateWeekdayChips(){
+  updateDateWeekdayChip("reservationDate","reservationDateWeekday");
+  updateDateWeekdayChip("startDate","startDateWeekday");
+  updateDateWeekdayChip("endDate","endDateWeekday");
+  updateDateWeekdayChip("nextReservationDate","nextReservationDateWeekday");
+}
+function formatKST(iso){
+  if(!iso)return"-";
+  const p=isoToLocalParts(iso);
+  return p.date&&p.time?formatDateTimeWithWeekday(p.date,p.time):"-";
+}
 const selectedStatus=()=>document.querySelector('input[name="sessionStatus"]:checked')?.value||"진행";
 function combineDateTime(d,t){if(!d||!t)return null;const nt=/^\d{2}:\d{2}$/.test(t)?t:normalizeTimeInput(t);if(!nt)return null;return new Date(`${d}T${nt}:00+09:00`)}
 function updateDuration(){const s=combineDateTime($("startDate").value,$("startTime").value),e=combineDateTime($("endDate").value,$("endTime").value);if(!s||!e||e<=s){$("duration").value="";return}$("duration").value=Math.round((e-s)/60000)+"분"}
 ["startDate","startTime","endDate","endTime"].forEach(id=>$(id).addEventListener("change",updateDuration));
+["startDate","endDate","nextReservationDate"].forEach(id=>{
+  $(id).addEventListener("change",updateAllDateWeekdayChips);
+});
 let sessionDuplicateBlocked=false;
 async function checkSelectedSessionDuplicate(){
   sessionDuplicateBlocked=false;
@@ -815,7 +959,45 @@ async function searchReceipts(){
 $("lookupSearchBtn").addEventListener("click",searchReceipts);
 $("lookupMemberKey").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchReceipts();}});
 
-function populateFromReceipt(item){const {client,row,type}=item,appt=isoToLocalParts(type==="PC"?row.visit_at:row.appointment_at);$("clientName").value=client.client_name||"";$("clientPhone").value=formatPhone(client.client_phone||"");$("gender").value=sexMap[client.sex_code]||client.sex_code||"";$("birthDate").value=client.birth_date||"";$("age").value=calcAge(client.birth_date);$("job").value=jobMap[client.job_code]||client.job_code||"";$("address").value=client.client_address||"";$("reservationDate").value=appt.date||"";$("reservationTime").value=appt.time||"";$("consultationTarget").value=row.client_type_code||"";$("consultationTopic").value=row.topic_code||"";const typeLabel=type==="PC"?"심리상담":"진로상담";$("receiptMeta").textContent=`${typeLabel} 접수 연결\n접수일시 : ${formatKST(row.receipt_at)}   ·   접수자 : ${row.receptionist_name||"-"}\n접수내용 : ${type==="PC"?(row.application_content||"-"):(row.counseling_content||"-")}`;const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());if(!$("startDate").value)$("startDate").value=today;hideStatus();showStatus("success",`${typeLabel} 접수기록을 상담등록 화면에 불러왔습니다.`)}
+function populateFromReceipt(item){
+  const {client,row,type}=item;
+  const appt=isoToLocalParts(type==="PC"?row.visit_at:row.appointment_at);
+
+  $("clientName").value=client.client_name||"";
+  $("clientPhone").value=formatPhone(client.client_phone||"");
+  $("gender").value=sexMap[client.sex_code]||client.sex_code||"";
+  $("birthDate").value=formatDateWithWeekday(client.birth_date||"");
+  $("age").value=calcAge(client.birth_date);
+  $("job").value=jobMap[client.job_code]||client.job_code||"";
+  $("address").value=client.client_address||"";
+
+  $("reservationDate").value=appt.date||"";
+  $("reservationTime").value=appt.time||"";
+
+  $("consultationTarget").value=row.client_type_code||"";
+  $("consultationTopic").value=row.topic_code||"";
+
+  const typeLabel=type==="PC"?"심리상담":"진로상담";
+  const receiptContent=type==="PC"?(row.application_content||"-"):(row.counseling_content||"-");
+
+  $("receiptMeta").textContent=
+    `${typeLabel} 접수 연결
+`+
+    `접수일시 : ${formatKST(row.receipt_at)}
+`+
+    `접수내용 : ${receiptContent}`;
+
+  const today=new Intl.DateTimeFormat("en-CA",{
+    timeZone:"Asia/Seoul",
+    year:"numeric",month:"2-digit",day:"2-digit"
+  }).format(new Date());
+
+  if(!$("startDate").value)$("startDate").value=today;
+
+  updateAllDateWeekdayChips();
+  hideStatus();
+  showStatus("success",`${typeLabel} 접수기록을 상담등록 화면에 불러왔습니다.`);
+}
 
 const markInvalid=(el,invalid)=>el.classList.toggle("invalid",!!invalid);
 const collectTools=()=>["testTool1","testTool2","testTool3","testTool4"].map(id=>$(id).value).filter(Boolean);
@@ -825,7 +1007,7 @@ function validateForm(){let ok=true;[$("clientName"),$("clientPhone"),$("session
 
 form.addEventListener("submit",async e=>{e.preventDefault();hideStatus();if(currentEmployee?.permission==="조회자"){showStatus("error","조회자는 상담을 등록할 수 없습니다.");return}if(!validateForm()){if(!statusMsg.classList.contains("show"))showStatus("error","필수 입력항목을 확인해주세요.");return}if(!confirm("입력한 상담내용을 등록하시겠습니까?"))return;submitBtn.disabled=true;const original=submitBtn.textContent;submitBtn.textContent="등록 중...";try{const type=selectedReceipt.type,tableName=type==="PC"?PSYCH_TABLE:CAREER_TABLE,sessionNo=Number($("sessionNo").value);if(await duplicateSessionExists(tableName,selectedReceipt.client.id,sessionNo))throw new Error(`이미 ${sessionNo}회기가 등록되어 있습니다.`);const sessionPayload=buildSessionPayload(),receiptRow=selectedReceipt.row;if(receiptRow.session_no==null){const {error}=await sb.from(tableName).update(sessionPayload).eq("id",receiptRow.id);if(error)throw error;selectedReceipt.row.session_no=sessionNo}else{let newRow;if(type==="PC"){newRow={client_id:selectedReceipt.client.id,receptionist_name:receiptRow.receptionist_name,receptionist_phone:receiptRow.receptionist_phone,receptionist_relationship:receiptRow.receptionist_relationship,receipt_at:receiptRow.receipt_at,visit_at:receiptRow.visit_at,client_type_code:receiptRow.client_type_code,topic_code:receiptRow.topic_code,application_content:receiptRow.application_content,record_active:false,...sessionPayload}}else{newRow={client_id:selectedReceipt.client.id,receptionist_name:receiptRow.receptionist_name,receptionist_phone:receiptRow.receptionist_phone,receptionist_relationship:receiptRow.receptionist_relationship,receipt_at:receiptRow.receipt_at,appointment_at:receiptRow.appointment_at,client_type_code:receiptRow.client_type_code,topic_code:receiptRow.topic_code,record_active:false,...sessionPayload}}const {error}=await sb.from(tableName).insert([newRow]);if(error)throw error}showStatus("success",`${type==="PC"?"심리상담":"진로상담"} ${sessionNo}회기가 정상적으로 등록되었습니다.`)}catch(err){console.error(err);showStatus("error","상담 등록 중 오류가 발생했습니다: "+(err.message||err))}finally{submitBtn.disabled=currentEmployee?.permission==="조회자";submitBtn.textContent=original}});
 
-form.addEventListener("reset",()=>setTimeout(()=>{selectedReceipt=null;sessionDuplicateBlocked=false;$("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";$("receiptMeta").textContent="접수상담조회 후 자동으로 표시됩니다.";document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));hideStatus();submitBtn.disabled=currentEmployee?.permission==="조회자";if(currentEmployee?.permission==="조회자")showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")},0));
+form.addEventListener("reset",()=>setTimeout(()=>{selectedReceipt=null;sessionDuplicateBlocked=false;$("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";$("receiptMeta").textContent="접수상담조회 후 자동으로 표시됩니다.";updateAllDateWeekdayChips();document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));hideStatus();submitBtn.disabled=currentEmployee?.permission==="조회자";if(currentEmployee?.permission==="조회자")showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")},0));
 
 // 10분 미사용 자동 로그아웃
 const IDLE_LOGOUT_MS=10*60*1000;
@@ -893,9 +1075,9 @@ function buildPrintDocument(){
         <div class="print-section-body">
           <div class="print-grid">
             <div class="print-pair"><div class="print-label">금회 회기</div><div class="print-box">${escapeHtml(printable(getSelectText("sessionNo")))}</div></div>
-            <div class="print-pair"><div class="print-label">예약일</div><div class="print-box">${escapeHtml(printable([$("reservationDate").value,$("reservationTime").value].filter(Boolean).join(" ")))}</div></div>
-            <div class="print-pair"><div class="print-label">실시일 시작</div><div class="print-box">${escapeHtml(printable([$("startDate").value,$("startTime").value].filter(Boolean).join(" ")))}</div></div>
-            <div class="print-pair"><div class="print-label">실시일 종료</div><div class="print-box">${escapeHtml(printable([$("endDate").value,$("endTime").value].filter(Boolean).join(" ")))}</div></div>
+            <div class="print-pair"><div class="print-label">예약일</div><div class="print-box">${escapeHtml(printable(formatDateTimeWithWeekday($("reservationDate").value,$("reservationTime").value)))}</div></div>
+            <div class="print-pair"><div class="print-label">실시일 시작</div><div class="print-box">${escapeHtml(printable(formatDateTimeWithWeekday($("startDate").value,$("startTime").value)))}</div></div>
+            <div class="print-pair"><div class="print-label">실시일 종료</div><div class="print-box">${escapeHtml(printable(formatDateTimeWithWeekday($("endDate").value,$("endTime").value)))}</div></div>
             <div class="print-pair"><div class="print-label">상담시간</div><div class="print-box">${escapeHtml(printable($("duration").value))}</div></div>
             <div class="print-pair"><div class="print-label">진행상태</div><div class="print-box">${escapeHtml(printable(status))}</div></div>
             <div class="print-pair"><div class="print-label">검사도구1</div><div class="print-box">${escapeHtml(printable(getSelectText("testTool1")))}</div></div>
@@ -903,7 +1085,7 @@ function buildPrintDocument(){
             <div class="print-pair"><div class="print-label">검사도구3</div><div class="print-box">${escapeHtml(printable(getSelectText("testTool3")))}</div></div>
             <div class="print-pair"><div class="print-label">검사도구4</div><div class="print-box">${escapeHtml(printable(getSelectText("testTool4")))}</div></div>
             <div class="print-pair"><div class="print-label">차기 회기</div><div class="print-box">${escapeHtml(printable($("nextSessionNo").value))}</div></div>
-            <div class="print-pair"><div class="print-label">차기 예약일</div><div class="print-box">${escapeHtml(printable([$("nextReservationDate").value,$("nextReservationTime").value].filter(Boolean).join(" ")))}</div></div>
+            <div class="print-pair"><div class="print-label">차기 예약일</div><div class="print-box">${escapeHtml(printable(formatDateTimeWithWeekday($("nextReservationDate").value,$("nextReservationTime").value)))}</div></div>
           </div>
         </div>
       </section>
