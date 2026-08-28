@@ -1890,6 +1890,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     // ===== DB_basic 저장 검증 =====
     // 화면에서 전송한 값과 DB에 실제 저장된 값을 저장 직후 다시 비교한다.
     const BASIC_VERIFY_FIELDS = [
+      "member_key",
       "counsel_type",
       "nationality",
       "entry_date",
@@ -1917,6 +1918,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     ];
 
     const BASIC_FIELD_LABELS = {
+      member_key:"회원 KEY",
       counsel_type:"상담구분",
       nationality:"국적",
       entry_date:"입국일",
@@ -2385,7 +2387,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     async function findExistingClient(name, phone) {
       let query = sb
         .from(BASIC_TABLE)
-        .select("id, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career")
+        .select("id, member_key, counsel_type, client_name, client_phone, sex_code, birth_date, job_code, email, client_address, company_name, representative_name, business_open_date, business_type, business_item, business_registration_no, department_name, position_name, nationality, entry_date, departure_date, foreigner_no, visa_type, legal_status, english_name, major_career")
         .eq("client_name", name)
         .eq("client_phone", phone)
         .limit(2);
@@ -2399,31 +2401,119 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       return data[0];
     }
 
-    async function saveBasicForNewRegistration(basicPayload, counselType) {
-      const existing = await findExistingClient(basicPayload.client_name, basicPayload.client_phone);
+    // ===== 신규 회원 KEY 자동 발급 =====
+    // 규칙: 접수일 YYMMDD + 당일 등록순번 2자리
+    // 예: 2026-08-28 첫 번째 신규 회원 -> 26082801
+    // 기존 회원은 최초 발급된 member_key를 절대 변경하지 않는다.
+    function memberKeyPrefixFromDate(dateValue) {
+      const m = String(dateValue || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) throw new Error("회원 KEY 발급 기준이 되는 접수일 형식이 올바르지 않습니다.");
 
-      if (!existing) {
+      const year = Number(m[1]);
+      const month = Number(m[2]);
+      const day = Number(m[3]);
+      const test = new Date(Date.UTC(year, month - 1, day));
+      if (
+        test.getUTCFullYear() !== year ||
+        test.getUTCMonth() + 1 !== month ||
+        test.getUTCDate() !== day
+      ) {
+        throw new Error("회원 KEY 발급 기준이 되는 접수일이 올바르지 않습니다.");
+      }
+
+      return `${String(year).slice(-2)}${m[2]}${m[3]}`;
+    }
+
+    async function getNextMemberKey(registrationDate) {
+      const prefix = memberKeyPrefixFromDate(registrationDate);
+
+      const { data, error } = await sb
+        .from(BASIC_TABLE)
+        .select("member_key")
+        .like("member_key", `${prefix}%`)
+        .order("member_key", { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+
+      let lastSequence = 0;
+      const lastKey = data?.[0]?.member_key || "";
+      if (new RegExp(`^${prefix}\\d{2}$`).test(lastKey)) {
+        lastSequence = Number(lastKey.slice(6, 8));
+      }
+
+      const nextSequence = lastSequence + 1;
+      if (nextSequence > 99) {
+        throw new Error(
+          `${registrationDate}에는 이미 회원 KEY가 99개 발급되었습니다. ` +
+          "현재 8자리 회원 KEY 규칙으로는 더 이상 등록할 수 없습니다."
+        );
+      }
+
+      return `${prefix}${String(nextSequence).padStart(2, "0")}`;
+    }
+
+    function isMemberKeyUniqueConflict(error) {
+      if (!error) return false;
+      const text = `${error.code || ""} ${error.message || ""} ${error.details || ""} ${error.hint || ""}`.toLowerCase();
+      return text.includes("23505") && text.includes("member_key");
+    }
+
+    async function insertNewClientWithMemberKey(basicPayload, counselType, registrationDate) {
+      // UNIQUE 제약이 최종 중복 방지 장치다.
+      // 같은 순간 두 사용자가 같은 번호를 계산해도 한쪽은 23505가 발생하고,
+      // 즉시 다음 번호를 다시 계산하여 재시도한다.
+      const MAX_RETRY = 8;
+
+      for (let attempt = 1; attempt <= MAX_RETRY; attempt++) {
+        const memberKey = await getNextMemberKey(registrationDate);
         const insertPayload = {
           ...basicPayload,
+          member_key: memberKey,
           counsel_type: counselType
         };
+
         const { data, error } = await sb
           .from(BASIC_TABLE)
           .insert([insertPayload])
           .select(buildBasicSelectColumns())
           .single();
-        if (error) throw error;
 
-        throwIfBasicMismatch(insertPayload, data);
-        return data;
+        if (!error) {
+          throwIfBasicMismatch(insertPayload, data);
+          return data;
+        }
+
+        if (isMemberKeyUniqueConflict(error) && attempt < MAX_RETRY) {
+          continue;
+        }
+        throw error;
+      }
+
+      throw new Error("회원 KEY 자동 발급 중 중복 충돌이 반복되었습니다. 다시 등록해주세요.");
+    }
+
+    async function saveBasicForNewRegistration(basicPayload, counselType, registrationDate) {
+      const existing = await findExistingClient(basicPayload.client_name, basicPayload.client_phone);
+
+      if (!existing) {
+        return await insertNewClientWithMemberKey(basicPayload, counselType, registrationDate);
       }
 
       const mergedType = mergeCounselType(existing.counsel_type, counselType);
       const updatePayload = { counsel_type: mergedType, updated_at: basicPayload.updated_at };
+
+      // 과거 데이터 등 예외적으로 member_key가 없는 기존 회원이면 한 번만 신규 발급한다.
+      // 이미 발급된 member_key는 어떤 경우에도 변경하지 않는다.
+      if (!existing.member_key) {
+        updatePayload.member_key = await getNextMemberKey(registrationDate);
+      }
+
       Object.entries(basicPayload).forEach(([key,value]) => {
-        if(["counsel_type","updated_at"].includes(key)) return;
+        if(["member_key","counsel_type","updated_at"].includes(key)) return;
         if(value !== null && value !== "") updatePayload[key] = value;
       });
+
       const { data, error } = await sb
         .from(BASIC_TABLE)
         .update(updatePayload)
@@ -2480,7 +2570,11 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
       try {
         // ① 내담자 기본정보 등록 또는 갱신
-        const basicRow = await saveBasicForNewRegistration(basicPayload, counselType);
+        const basicRow = await saveBasicForNewRegistration(
+          basicPayload,
+          counselType,
+          receivedDateEl.value
+        );
 
         // ② 선택 상담유형의 접수 이력 1건 등록
         const tableName = getSessionTable(counselType);
@@ -2493,9 +2587,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
         showStatus(
           "success",
-          counselType === "PC"
-            ? "심리상담 접수가 정상적으로 등록되었습니다."
-            : "진로상담 접수가 정상적으로 등록되었습니다."
+          `${counselType === "PC" ? "심리상담" : "진로상담"} 접수가 정상적으로 등록되었습니다. ` +
+          `회원 KEY: ${basicRow.member_key || "확인 필요"}`
         );
         resetFormToNewMode();
       } catch (error) {
