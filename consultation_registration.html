@@ -63,7 +63,7 @@
   .modal{width:min(720px,96vw);max-height:82vh;overflow:hidden;background:#fff;border-radius:12px;box-shadow:0 26px 70px rgba(15,23,42,.3);border:1px solid #d7e1ec;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
   .modal-head{height:52px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e4eaf1;background:#f7fbff}.modal-head h3{margin:0;color:var(--blue-dark);font-size:17px;font-weight:950}
   .modal-x{width:32px;height:32px;border:0;border-radius:7px;background:#eef2f6;color:#475569;font-size:20px;cursor:pointer}
-  .modal-search{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr auto;gap:8px;border-bottom:1px solid #edf1f5}.modal-search button{min-width:72px;border:0;border-radius:6px;background:var(--blue);color:#fff;font-size:12px;font-weight:900;cursor:pointer}
+  .modal-search{padding:14px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;border-bottom:1px solid #edf1f5}.modal-search button{min-width:72px;border:0;border-radius:6px;background:var(--blue);color:#fff;font-size:12px;font-weight:900;cursor:pointer}
   .lookup-results{min-height:160px;overflow:auto;padding:14px 18px 18px}.lookup-empty{padding:28px 10px;text-align:center;color:#738095;font-size:12px}
   .lookup-card{border:1px solid #d7e1ec;border-radius:8px;padding:11px 12px;margin-bottom:8px;cursor:pointer;background:#fff}.lookup-card:hover{border-color:#7ca9dd;background:#f7fbff}
   .lookup-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}.lookup-card-top strong{font-size:13px;color:#233650}
@@ -245,9 +245,9 @@
 
 <div class="modal-backdrop no-print" id="lookupModalBackdrop" aria-hidden="true">
 <section class="modal" role="dialog" aria-modal="true" aria-labelledby="lookupModalTitle">
-<div class="modal-head"><h3 id="lookupModalTitle">접수상담조회</h3><button type="button" class="modal-x" id="lookupCloseBtn">×</button></div>
-<div class="modal-search"><input type="text" id="lookupName" placeholder="내담자명"><input type="text" id="lookupPhone" placeholder="010-0000-0000" maxlength="13"><button type="button" id="lookupSearchBtn">조회</button></div>
-<div class="lookup-results" id="lookupResults"><div class="lookup-empty">내담자명과 연락처로 접수상담을 조회하세요.</div></div>
+<div class="modal-head"><h3 id="lookupModalTitle">회원 Key 조회</h3><button type="button" class="modal-x" id="lookupCloseBtn">×</button></div>
+<div class="modal-search"><input type="text" id="lookupMemberKey" placeholder="회원 Key 입력" autocomplete="off"><button type="button" id="lookupSearchBtn">조회</button></div>
+<div class="lookup-results" id="lookupResults"><div class="lookup-empty">회원 Key로 접수상담을 조회하세요.</div></div>
 </section>
 </div>
 
@@ -267,7 +267,7 @@ function hideStatus(){statusMsg.className="statusMsg";statusMsg.textContent=""}
 const digitsOnly=v=>String(v||"").replace(/\D/g,"");
 function formatPhone(v){const d=digitsOnly(v).slice(0,11);if(d.length<=3)return d;if(d.length<=7)return d.slice(0,3)+"-"+d.slice(3);return d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7)}
 function attachPhoneFormatter(el){el.addEventListener("input",()=>el.value=formatPhone(el.value))}
-attachPhoneFormatter($("clientPhone"));attachPhoneFormatter($("lookupPhone"));
+attachPhoneFormatter($("clientPhone"));
 
 // 시간은 드롭다운/브라우저 time picker를 사용하지 않고 숫자로 직접 입력한다.
 // 예: 930 -> 09:30, 1530 -> 15:30
@@ -354,15 +354,75 @@ async function loadLookups(){try{const [s,j,t,tp,tools]=await Promise.all([loadC
 
 async function guardLogin(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){alert("로그인이 필요한 화면입니다. 메인화면으로 이동합니다.");location.href="index.html";return false}const {data:employee,error}=await sb.from("employee").select("name,position,permission,active").eq("auth_user_id",session.user.id).maybeSingle();if(error||!employee||!employee.active){alert("사용자 권한을 확인할 수 없습니다. 메인화면으로 이동합니다.");location.href="index.html";return false}currentEmployee=employee;if(employee.permission==="조회자"){submitBtn.disabled=true;submitBtn.title="조회자는 상담 등록 권한이 없습니다.";showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")}return true}
 
-function openLookup(){$("lookupName").value=$("clientName").value.trim();$("lookupPhone").value=$("clientPhone").value.trim();lookupResults.innerHTML='<div class="lookup-empty">내담자명과 연락처로 접수상담을 조회하세요.</div>';modalBackdrop.classList.add("show");modalBackdrop.setAttribute("aria-hidden","false");setTimeout(()=>$("lookupName").focus(),0)}
+function openLookup(){$("lookupMemberKey").value="";lookupResults.innerHTML='<div class="lookup-empty">회원 Key로 접수상담을 조회하세요.</div>';modalBackdrop.classList.add("show");modalBackdrop.setAttribute("aria-hidden","false");setTimeout(()=>$("lookupMemberKey").focus(),0)}
 function closeLookup(){modalBackdrop.classList.remove("show");modalBackdrop.setAttribute("aria-hidden","true")}
 $("lookupBtn").addEventListener("click",openLookup);$("lookupCloseBtn").addEventListener("click",closeLookup);modalBackdrop.addEventListener("click",e=>{if(e.target===modalBackdrop)closeLookup()});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLookup()});
 
 async function getReceiptRows(client){const ps="id,client_id,receptionist_name,receptionist_phone,receptionist_relationship,receipt_at,visit_at,client_type_code,topic_code,application_content,session_no,record_active";const cs="id,client_id,receptionist_name,receptionist_phone,receptionist_relationship,receipt_at,appointment_at,client_type_code,topic_code,counseling_content,session_no,record_active";const [p,c]=await Promise.all([sb.from(PSYCH_TABLE).select(ps).eq("client_id",client.id).eq("record_active",true).order("receipt_at",{ascending:false,nullsFirst:false}),sb.from(CAREER_TABLE).select(cs).eq("client_id",client.id).eq("record_active",true).order("receipt_at",{ascending:false,nullsFirst:false})]);if(p.error)throw p.error;if(c.error)throw c.error;const rows=[];(p.data||[]).forEach(row=>rows.push({type:"PC",client,row}));(c.data||[]).forEach(row=>rows.push({type:"CC",client,row}));return rows.sort((a,b)=>new Date(b.row.receipt_at||0)-new Date(a.row.receipt_at||0))}
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
 
-async function searchReceipts(){const name=$("lookupName").value.trim(),phone=$("lookupPhone").value.trim();if(!name||!phone){lookupResults.innerHTML='<div class="lookup-empty">내담자명과 연락처를 모두 입력해주세요.</div>';return}lookupResults.innerHTML='<div class="lookup-empty">조회 중...</div>';try{const {data:clients,error}=await sb.from(BASIC_TABLE).select("id,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address").eq("client_name",name);if(error)throw error;const np=digitsOnly(phone),matched=(clients||[]).filter(c=>digitsOnly(c.client_phone)===np);if(!matched.length){lookupResults.innerHTML='<div class="lookup-empty">일치하는 내담자 기본정보가 없습니다.</div>';return}let candidates=[];for(const client of matched)candidates.push(...await getReceiptRows(client));if(!candidates.length){lookupResults.innerHTML='<div class="lookup-empty">일치하는 활성 접수상담 기록이 없습니다.</div>';return}lookupResults.innerHTML="";candidates.forEach(item=>{const typeLabel=item.type==="PC"?"심리상담":"진로상담",appt=item.type==="PC"?item.row.visit_at:item.row.appointment_at,card=document.createElement("div");card.className="lookup-card";card.innerHTML=`<div class="lookup-card-top"><strong>${escapeHtml(item.client.client_name)} · ${escapeHtml(formatPhone(item.client.client_phone))}</strong><span class="type-badge">${typeLabel}</span></div><p>접수일시 : ${escapeHtml(formatKST(item.row.receipt_at))}</p><p>예약일시 : ${escapeHtml(formatKST(appt))}</p><p>상담대상 : ${escapeHtml(targetMap[item.row.client_type_code]||item.row.client_type_code||"-")} · 상담주제 : ${escapeHtml(topicMap[item.row.topic_code]||item.row.topic_code||"-")}</p>`;card.addEventListener("click",()=>{selectedReceipt=item;populateFromReceipt(item);closeLookup()});lookupResults.appendChild(card)})}catch(err){console.error(err);lookupResults.innerHTML=`<div class="lookup-empty">조회 중 오류가 발생했습니다.<br>${escapeHtml(err.message||String(err))}</div>`}}
+async function searchReceipts(){
+  const memberKey=$("lookupMemberKey").value.trim();
+
+  if(!memberKey){
+    lookupResults.innerHTML='<div class="lookup-empty">회원 Key를 입력해주세요.</div>';
+    return;
+  }
+
+  lookupResults.innerHTML='<div class="lookup-empty">조회 중...</div>';
+
+  try{
+    const {data:client,error}=await sb
+      .from(BASIC_TABLE)
+      .select("id,member_key,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address")
+      .eq("member_key",memberKey)
+      .maybeSingle();
+
+    if(error) throw error;
+
+    if(!client){
+      lookupResults.innerHTML='<div class="lookup-empty">일치하는 회원 Key의 내담자 기본정보가 없습니다.</div>';
+      return;
+    }
+
+    const candidates=await getReceiptRows(client);
+
+    if(!candidates.length){
+      lookupResults.innerHTML='<div class="lookup-empty">해당 회원 Key의 활성 접수상담 기록이 없습니다.</div>';
+      return;
+    }
+
+    lookupResults.innerHTML="";
+
+    candidates.forEach(item=>{
+      const typeLabel=item.type==="PC"?"심리상담":"진로상담";
+      const appt=item.type==="PC"?item.row.visit_at:item.row.appointment_at;
+      const card=document.createElement("div");
+
+      card.className="lookup-card";
+      card.innerHTML=
+        `<div class="lookup-card-top"><strong>${escapeHtml(item.client.client_name)} · ${escapeHtml(formatPhone(item.client.client_phone))}</strong><span class="type-badge">${typeLabel}</span></div>`+
+        `<p>회원 Key : ${escapeHtml(item.client.member_key||memberKey)}</p>`+
+        `<p>접수일시 : ${escapeHtml(formatKST(item.row.receipt_at))}</p>`+
+        `<p>예약일시 : ${escapeHtml(formatKST(appt))}</p>`+
+        `<p>상담대상 : ${escapeHtml(targetMap[item.row.client_type_code]||item.row.client_type_code||"-")} · 상담주제 : ${escapeHtml(topicMap[item.row.topic_code]||item.row.topic_code||"-")}</p>`;
+
+      card.addEventListener("click",()=>{
+        selectedReceipt=item;
+        populateFromReceipt(item);
+        closeLookup();
+      });
+
+      lookupResults.appendChild(card);
+    });
+
+  }catch(err){
+    console.error(err);
+    lookupResults.innerHTML=`<div class="lookup-empty">조회 중 오류가 발생했습니다.<br>${escapeHtml(err.message||String(err))}</div>`;
+  }
+}
 $("lookupSearchBtn").addEventListener("click",searchReceipts);
+$("lookupMemberKey").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchReceipts();}});
 
 function populateFromReceipt(item){const {client,row,type}=item,appt=isoToLocalParts(type==="PC"?row.visit_at:row.appointment_at);$("clientName").value=client.client_name||"";$("clientPhone").value=formatPhone(client.client_phone||"");$("gender").value=sexMap[client.sex_code]||client.sex_code||"";$("birthDate").value=client.birth_date||"";$("age").value=calcAge(client.birth_date);$("job").value=jobMap[client.job_code]||client.job_code||"";$("address").value=client.client_address||"";$("reservationDate").value=appt.date||"";$("reservationTime").value=appt.time||"";$("consultationTarget").value=row.client_type_code||"";$("consultationTopic").value=row.topic_code||"";const typeLabel=type==="PC"?"심리상담":"진로상담";$("receiptMeta").classList.add("show");$("receiptMeta").textContent=`${typeLabel} 접수 연결 · 접수일시 ${formatKST(row.receipt_at)} · 접수자 ${row.receptionist_name||"-"} · 접수내용 ${type==="PC"?(row.application_content||"-"):(row.counseling_content||"-")}`;const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());if(!$("startDate").value)$("startDate").value=today;hideStatus();showStatus("success",`${typeLabel} 접수기록을 상담등록 화면에 불러왔습니다.`)}
 
