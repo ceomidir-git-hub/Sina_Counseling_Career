@@ -59,12 +59,38 @@
     right: 14mm;
   }
   .header-date {
+    position: relative;
     font-size: 9pt;
     color: #333;
     margin: 0 0 2mm 0;
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+  }
+  .header-date .center-item {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9pt;
+    white-space: nowrap;
+  }
+  .header-date .radio-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 9pt;
+    white-space: nowrap;
+  }
+  .header-date .radio-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .header-date .radio-group input[type="radio"] {
+    margin: 0;
   }
   .approval-table {
     position: absolute;
@@ -88,6 +114,7 @@
   .approval-table .label {
     background: #f4f4f4;
     font-weight: 700;
+    font-size: 9pt;
   }
   .approval-table .placeholder {
     color: #bbb;
@@ -212,12 +239,12 @@
         <td class="label">대 표</td>
       </tr>
       <tr>
-        <td class="placeholder sign-row">(서명)</td>
-        <td class="placeholder sign-row">(서명)</td>
+        <td class="placeholder sign-row">&nbsp;</td>
+        <td class="placeholder sign-row">&nbsp;</td>
       </tr>
       <tr>
-        <td class="placeholder">(날짜)</td>
-        <td class="placeholder">(날짜)</td>
+        <td class="placeholder">&nbsp;</td>
+        <td class="placeholder">&nbsp;</td>
       </tr>
     </table>
     <h1 class="title">회원기록카드</h1>
@@ -227,7 +254,11 @@
 
   <div class="header-date">
     <span>작성일 : __________ 년 ______ 월 ______ 일</span>
-    <span>회원 Key : ______________________________</span>
+    <span class="center-item">회원 Key : ___________________</span>
+    <span class="radio-group">
+      <label><input type="radio" name="consult-type" value="psych">심리상담</label>
+      <label><input type="radio" name="consult-type" value="career">진로상담</label>
+    </span>
   </div>
 
   <!-- 기본 인적사항 -->
