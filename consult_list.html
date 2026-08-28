@@ -30,16 +30,16 @@ button,input{font:inherit}button{cursor:pointer}
 .section-title{min-height:10mm;margin:0;padding:0 4mm;display:flex;align-items:center;background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%);border-bottom:1px solid #a8c6e7;color:var(--blue);font-size:15px;font-weight:950;letter-spacing:-.4px}
 .search-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr;gap:3.2mm 3mm;align-items:end;margin:3.5mm 4mm 0}.field{min-width:0}.field label,.radio-label{display:block;margin:0 0 5px;color:#374151;font-size:12.5px;font-weight:850}.field input{width:100%;height:36px;padding:0 9px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);color:#111827;font-size:12.5px;font-weight:650;outline:none}.field input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(20,87,166,.11)}
 .radio-wrap{height:36px;display:flex;align-items:center;gap:12px;padding:0 10px;border:1px solid #cfd6df;border-radius:4px;background:var(--yellow);white-space:nowrap}.radio-option{display:inline-flex;align-items:center;gap:5px;color:#364152;font-size:11.8px;font-weight:700;cursor:pointer}.radio-option input{width:15px;height:15px;margin:0;accent-color:var(--blue)}
-.search-grid>div:nth-child(5){grid-column:1/4}.search-btn{grid-column:4;height:36px;border:1px solid var(--blue);border-radius:5px;background:var(--blue);color:#fff;font-size:11.5px;font-weight:900;cursor:pointer}.search-btn:hover{background:var(--blue-dark)}
+.counsel-filter{grid-column:2/4}.search-btn{grid-column:4;height:36px;border:1px solid var(--blue);border-radius:5px;background:var(--blue);color:#fff;font-size:11.5px;font-weight:900;cursor:pointer}.search-btn:hover{background:var(--blue-dark)}
 .search-note{margin:2.5mm 4mm 3.5mm;color:#6f7b8d;font-size:9.5px;line-height:1.45}
 .status{display:none;margin:0 0 4mm;padding:8px 11px;border-radius:7px;font-size:11px;font-weight:700}.status.show{display:block}.status.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e4f9a}.status.error{background:#fff1f2;border:1px solid #fecdd3;color:#a61b2b}
 .result-section{margin-bottom:0}.result-section .table-box{margin:3.5mm 4mm 4mm}.print-meta{display:none}.table-box{border:1px solid #cbd5e1;border-radius:4px;overflow:hidden;background:#fff}.table-scroll{max-height:120mm;overflow:auto;scrollbar-width:thin;scrollbar-color:#b5bdc9 #f4f6f8}
-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}col.no{width:5%}col.regdate{width:14%}col.name{width:9%}col.phone{width:15%}col.sex{width:5%}col.age{width:5%}col.nationality{width:8%}col.type{width:14%}col.status-col{width:14%}col.session{width:11%}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}col.no{width:4%}col.regdate{width:12%}col.memberkey{width:10%}col.name{width:9%}col.phone{width:13%}col.sex{width:5%}col.age{width:5%}col.nationality{width:8%}col.type{width:12%}col.status-col{width:12%}col.session{width:10%}
 thead th{position:sticky;top:0;z-index:3;height:34px;padding:0 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;text-align:center;font-size:11.5px;font-weight:900;line-height:1.2}
 tbody td{height:33px;padding:5px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;background:#fff;color:#303846;text-align:center;font-size:11.5px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}thead th:last-child,tbody td:last-child{border-right:0}tbody tr:nth-child(even) td{background:#fffdf6}tbody tr:hover td{background:#f5f8fd}td.left{text-align:left;padding-left:8px}.client-link{display:inline-block;color:var(--blue);font-weight:900;text-decoration:none;border-bottom:1px solid transparent;line-height:1.25;cursor:pointer}.client-link:hover{color:var(--blue-dark);border-bottom-color:var(--blue-dark)}.client-link:focus-visible{outline:2px solid rgba(20,87,166,.32);outline-offset:2px;border-radius:2px}.empty-row td{height:80px;color:#8a94a5;background:#fff!important}.badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap}.badge.progress{background:#eaf3ff;color:#275ea9}.badge.done{background:#eaf8ef;color:#197047}.badge.unknown{background:#f2f4f7;color:#667085}
 .document-footer{margin-top:5mm;padding:0 3mm 1mm;text-align:center}.footer-rights{text-align:left;color:#6b7280;font-size:17px;font-weight:500;line-height:1.25;margin-bottom:1mm}.footer-rule{height:0;border-top:1.2pt solid var(--blue-dark)}.footer-company{color:var(--blue-dark);font-size:31px;font-weight:950;letter-spacing:-1px;line-height:1;padding-top:2mm;white-space:nowrap}
 .pdf-watermark{display:none}.loading{position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:rgba(255,255,255,.72);backdrop-filter:blur(2px)}.loading.show{display:grid}.loading-box{min-width:220px;padding:18px 22px;border:1px solid #dbe1e9;border-radius:10px;background:#fff;box-shadow:0 12px 34px rgba(15,23,42,.14);text-align:center;color:#455066;font-size:13px;font-weight:800}
-@media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.page-head{align-items:flex-start}.head-right{flex-direction:column;align-items:flex-end}.search-grid{grid-template-columns:1fr 1fr}.search-grid>div:nth-child(5){grid-column:1/-1}.search-btn{grid-column:1/-1}.table-scroll{overflow:auto}table{min-width:720px}.document-footer{margin-top:20px}}
+@media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.page-head{align-items:flex-start}.head-right{flex-direction:column;align-items:flex-end}.search-grid{grid-template-columns:1fr 1fr}.counsel-filter{grid-column:1/-1}.search-btn{grid-column:1/-1}.table-scroll{overflow:auto}table{min-width:800px}.document-footer{margin-top:20px}}
 html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[data-print-density="dense"]{--print-row-h:5.35mm;--print-font:8.85pt}
 @page{size:210mm 297mm;margin:18mm 7mm 12mm}
 @media print{
@@ -87,6 +87,10 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
         <input type="date" id="dateTo">
       </div>
       <div class="field">
+        <label for="memberKeyQuery">회원 KEY</label>
+        <input type="text" id="memberKeyQuery" placeholder="예: 26021001" inputmode="numeric" maxlength="8" autocomplete="off">
+      </div>
+      <div class="field">
         <label for="nameQuery">이름</label>
         <input type="text" id="nameQuery" placeholder="내담자명">
       </div>
@@ -94,7 +98,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
         <label for="phoneQuery">전화번호</label>
         <input type="text" id="phoneQuery" placeholder="010-0000-0000" inputmode="numeric" maxlength="13">
       </div>
-      <div>
+      <div class="counsel-filter">
         <span class="radio-label">상담종류</span>
         <div class="radio-wrap">
           <label class="radio-option"><input type="radio" name="counselType" value="ALL" checked>전체</label>
@@ -105,7 +109,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
       <button type="button" class="search-btn" id="searchBtn">조회</button>
     </div>
     <p class="search-note">
-      기간·이름·전화번호·상담종류는 각각 단독 조회하거나 서로 조합하여 조회할 수 있습니다.
+      기간·회원 KEY·이름·전화번호·상담종류는 각각 단독 조회하거나 서로 조합하여 조회할 수 있습니다. 회원 KEY는 8자리 전체 번호를 입력합니다.
       기간은 실제 상담 시작일을 우선 적용하고, 시작일이 없으면 상담일/예약일을 기준으로 판정합니다.
     </p>
   </section>
@@ -117,13 +121,14 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
       <div class="table-scroll">
         <table aria-label="상담 대상자 목록">
           <colgroup>
-            <col class="no"><col class="regdate"><col class="name"><col class="phone"><col class="sex">
+            <col class="no"><col class="regdate"><col class="memberkey"><col class="name"><col class="phone"><col class="sex">
             <col class="age"><col class="nationality"><col class="type"><col class="status-col"><col class="session">
           </colgroup>
           <thead>
             <tr>
               <th>NO</th>
               <th>등록일</th>
+              <th>회원 KEY</th>
               <th>이름</th>
               <th>전화번호</th>
               <th>성별</th>
@@ -135,7 +140,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
             </tr>
           </thead>
           <tbody id="resultBody">
-            <tr class="empty-row"><td colspan="10">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
+            <tr class="empty-row"><td colspan="11">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
           </tbody>
         </table>
       </div>
@@ -168,7 +173,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
 
   const $ = id => document.getElementById(id);
   const els = {
-    dateFrom:$("dateFrom"), dateTo:$("dateTo"), name:$("nameQuery"), phone:$("phoneQuery"),
+    dateFrom:$("dateFrom"), dateTo:$("dateTo"), memberKey:$("memberKeyQuery"), name:$("nameQuery"), phone:$("phoneQuery"),
     searchBtn:$("searchBtn"), body:$("resultBody"), resultCount:$("resultCount"),
     status:$("statusBox"), loading:$("loading"), loadingText:$("loadingText"),
     backBtn:$("backBtn"), pdfBtn:$("pdfBtn"), printMeta:$("printMeta")
@@ -210,8 +215,14 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
       .replaceAll("&","&amp;").replaceAll("<","&lt;")
       .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
+  function normalizeMemberKey(value){
+    return String(value || "").replace(/\D/g,"").slice(0,8);
+  }
   function normalizePhone(value){
     return String(value || "").replace(/\D/g,"");
+  }
+  function formatMemberKeyInput(el){
+    el.value = normalizeMemberKey(el.value);
   }
   function formatPhoneInput(el){
     let d = normalizePhone(el.value).slice(0,11);
@@ -410,10 +421,19 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
     }
     return true;
   }
+  function validateMemberKey(){
+    const key = normalizeMemberKey(els.memberKey.value);
+    if (key && key.length !== 8){
+      showStatus("error","회원 KEY는 8자리 숫자로 입력해 주세요. 예: 26021001");
+      els.memberKey.focus();
+      return false;
+    }
+    return true;
+  }
 
   async function search(){
     clearStatus();
-    if (!validatePeriod()) return;
+    if (!validatePeriod() || !validateMemberKey()) return;
     if (!sb){
       showStatus("error","Supabase 연결을 사용할 수 없습니다.");
       return;
@@ -421,6 +441,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
 
     const from = els.dateFrom.value;
     const to = els.dateTo.value;
+    const memberKeyQ = normalizeMemberKey(els.memberKey.value);
     const nameQ = els.name.value.trim().toLowerCase();
     const phoneQ = normalizePhone(els.phone.value);
     const type = getCounselType();
@@ -429,7 +450,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
 
     try{
       const [basicRows,psychRows,careerRows,sexRows] = await Promise.all([
-        fetchPaged(BASIC_TABLE,"id,client_name,client_phone,sex_code,birth_date,nationality,counsel_type"),
+        fetchPaged(BASIC_TABLE,"id,member_key,client_name,client_phone,sex_code,birth_date,nationality,counsel_type"),
         fetchPaged(PSYCH_TABLE,"id,client_id,visit_at,visit_date,receipt_at,receipt_date,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
         fetchPaged(CAREER_TABLE,"id,client_id,counseling_date,appointment_at,receipt_at,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
         fetchPaged("sex_codes","code,name,active")
@@ -451,9 +472,11 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
       const out = [];
 
       for (const client of basicRows){
+        const memberKey = String(client.member_key || "");
         const name = String(client.client_name || "");
         const phone = String(client.client_phone || "");
 
+        if (memberKeyQ && memberKey !== memberKeyQ) continue;
         if (nameQ && !name.toLowerCase().includes(nameQ)) continue;
         if (phoneQ && !normalizePhone(phone).includes(phoneQ)) continue;
 
@@ -473,6 +496,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
         out.push({
           id:client.id,
           registeredAt:earliestRegistrationDate(allPsych,allCareer),
+          memberKey:memberKey || "-",
           name:name || "-",
           phone:phone || "-",
           sex:sexMap.get(client.sex_code) || client.sex_code || "-",
@@ -498,6 +522,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
 
       const cond = [];
       if (from || to) cond.push(`기간 ${from || "처음"} ~ ${to || "현재"}`);
+      if (memberKeyQ) cond.push(`회원 KEY ${memberKeyQ}`);
       if (els.name.value.trim()) cond.push(`이름 ${els.name.value.trim()}`);
       if (els.phone.value.trim()) cond.push(`전화번호 ${els.phone.value.trim()}`);
       cond.push(`상담종류 ${type==="PC"?"심리상담":type==="CC"?"진로상담":"전체"}`);
@@ -531,7 +556,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
   function renderRows(rows){
     els.resultCount.textContent = String(rows.length);
     if (!rows.length){
-      els.body.innerHTML = '<tr class="empty-row"><td colspan="10">조회 결과가 없습니다.</td></tr>';
+      els.body.innerHTML = '<tr class="empty-row"><td colspan="11">조회 결과가 없습니다.</td></tr>';
       return;
     }
     els.body.innerHTML = rows.map((r,i) => {
@@ -541,6 +566,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
       <tr>
         <td>${i+1}</td>
         <td>${escapeHTML(formatDateWithWeekday(r.registeredAt))}</td>
+        <td>${escapeHTML(r.memberKey)}</td>
         <td class="left"><a class="client-link" href="${escapeHTML(receiptUrl)}" title="${escapeHTML(linkTitle)}" aria-label="${escapeHTML(linkTitle)}">${escapeHTML(r.name)}</a></td>
         <td>${escapeHTML(r.phone)}</td>
         <td>${escapeHTML(r.sex)}</td>
@@ -554,9 +580,10 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
     }).join("");
   }
 
+  els.memberKey.addEventListener("input",() => formatMemberKeyInput(els.memberKey));
   els.phone.addEventListener("input",() => formatPhoneInput(els.phone));
   els.searchBtn.addEventListener("click",search);
-  [els.dateFrom,els.dateTo,els.name,els.phone].forEach(el => {
+  [els.dateFrom,els.dateTo,els.memberKey,els.name,els.phone].forEach(el => {
     el.addEventListener("keydown",e => {
       if (e.key === "Enter"){
         e.preventDefault();
