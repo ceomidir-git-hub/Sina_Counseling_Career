@@ -841,6 +841,192 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 .member-lookup-btn:disabled{opacity:.5;cursor:not-allowed}
 @media print{.member-lookup-backdrop{display:none!important}}
 
+
+
+/* ==========================================================
+   FINAL 2026-08-29 : 회원 KEY 표시 / 고정 머릿글 / 소형 하단버튼 / A4 세로 1장
+   ========================================================== */
+/* 머릿글 제목은 좌측 기준 위치를 고정하고 우측 기능영역 변화의 영향을 받지 않는다. */
+.top-row{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+}
+.title-block{
+  min-width:0;
+  justify-self:start;
+  align-self:center;
+}
+.title-block h1{
+  white-space:nowrap;
+}
+
+/* 내담자 정보 우측: 외국인 버튼 대신 DB_basic.member_key 표시 */
+.member-key-display{
+  min-height:31px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 11px;
+  border:1px solid #8fb5de;
+  border-radius:6px;
+  background:#fff;
+  color:var(--blue-dark);
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.member-key-label{
+  font-size:11px;
+  font-weight:850;
+  color:#5a6b7f;
+}
+.member-key-value{
+  min-width:66px;
+  text-align:center;
+  font-size:12.5px;
+  font-weight:950;
+  letter-spacing:.7px;
+  color:var(--blue-dark);
+}
+
+/* 하단 5개 기능은 유지하되 화면에서만 작고 중앙에 모아 배치 */
+.actions{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:7px;
+  width:auto;
+  max-width:560px;
+  margin:5mm auto 0;
+}
+.actions .btn{
+  flex:0 0 auto;
+  width:auto;
+  min-width:82px;
+  height:31px;
+  padding:0 10px;
+  border-radius:5px;
+  font-size:11.5px;
+  line-height:1;
+}
+.actions #editSaveBtn{min-width:96px}
+.actions #backBtn{min-width:92px}
+
+@media(max-width:760px){
+  .top-row{grid-template-columns:1fr auto}
+  .actions{display:flex;grid-template-columns:none;gap:6px}
+  .actions .btn{min-width:78px}
+}
+
+@media print{
+  /* A4 세로 한 장의 물리 크기를 고정한다. */
+  @page{size:210mm 297mm;margin:0}
+  html,body,.page-wrap{
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+  }
+  body{overflow:hidden!important}
+  .page-wrap{overflow:hidden!important}
+  .a4-page{
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+    overflow:hidden!important;
+    padding:8mm 7mm 22mm!important;
+  }
+
+  /* 머릿글을 동일 좌표/높이에 고정 */
+  .top-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    width:100%!important;
+    min-height:13mm!important;
+    height:13mm!important;
+    margin:0 0 2mm!important;
+    padding:0 0 2mm!important;
+    align-items:end!important;
+  }
+  .title-block{
+    justify-self:start!important;
+    align-self:end!important;
+  }
+  .top-row h1{
+    margin:0!important;
+    font-size:23pt!important;
+    line-height:1!important;
+  }
+
+  /* 회원 KEY는 PDF에서도 내담자 정보 머릿글 우측에 표시 */
+  .member-key-display{
+    min-height:7mm!important;
+    height:7mm!important;
+    padding:0 2.5mm!important;
+    gap:1.5mm!important;
+    border-radius:4px!important;
+  }
+  .member-key-label{font-size:8.5pt!important}
+  .member-key-value{min-width:18mm!important;font-size:9.5pt!important;letter-spacing:.4pt!important}
+
+  /* A4 1장 여유 확보: 기존 배치/순서는 그대로, 세로 간격만 미세 조정 */
+  .section{margin-bottom:1.8mm!important}
+  .section-head{min-height:7.5mm!important;height:7.5mm!important}
+  .section-body{padding-top:1.8mm!important;padding-bottom:1.8mm!important}
+  body:not(.career-mode) .grid-2{row-gap:2.3mm!important}
+  body:not(.career-mode) .detail-grid{margin-top:1mm!important}
+  body:not(.career-mode) #details{
+    height:31mm!important;
+    min-height:31mm!important;
+    max-height:31mm!important;
+  }
+  body.career-mode #details{
+    height:21mm!important;
+    min-height:21mm!important;
+    max-height:21mm!important;
+  }
+
+  /* 버튼/안내문은 인쇄하지 않아 본문 높이에 영향을 주지 않는다. */
+  .actions,.bottom-hint{display:none!important}
+
+  /* 바닥글 연구소명 = 머릿글 '접수 상담 등록'과 동일한 23pt */
+  .pdf-footer{
+    left:7mm!important;
+    right:7mm!important;
+    bottom:3.5mm!important;
+  }
+  .footer-company{
+    font-size:23pt!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+}
+
+/* ===== FINAL 2026-08-29 : 화면 입력폼 하단 연구소명 ===== */
+.screen-footer-company{
+  margin:8mm 0 1mm;
+  padding-top:3mm;
+  border-top:1.5px solid var(--blue-dark);
+  text-align:center;
+  color:var(--blue-dark);
+  font-size:29px;
+  font-weight:950;
+  line-height:1;
+  letter-spacing:-1.3px;
+  white-space:nowrap;
+}
+@media(max-width:760px){
+  .screen-footer-company{font-size:24px;margin-top:20px;}
+}
+@media print{
+  /* PDF에는 기존 고정 바닥글(.pdf-footer)을 사용하므로 중복 출력하지 않는다. */
+  .screen-footer-company{display:none!important;}
+}
+
 </style>
 </head>
 <body>
@@ -903,7 +1089,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 </section>
 
     <section class="section" id="psychInfoSection">
-      <div class="section-head"><h2>2. 내담자 정보</h2><button type="button" class="foreign-btn" id="openForeignModalBtn">외국인</button></div>
+      <div class="section-head"><h2>2. 내담자 정보</h2><div class="member-key-display" id="memberKeyDisplay" aria-live="polite"><span class="member-key-label">회원 KEY</span><span class="member-key-value" id="memberKeyValue">미발급</span></div></div>
       <div class="section-body">
         <div class="grid-2">
           <div class="form-pair"><label for="clientName">내담자명</label><input id="clientName" class="field" type="text" placeholder="내담자명"></div>
@@ -1000,6 +1186,8 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       <span class="lookup-sub-note"><b>🔍 조회</b> 버튼을 누르면 회원 KEY 조회창이 열립니다. 8자리 회원 KEY를 입력하면 해당 내담자의 심리상담·진로상담 접수 기록을 조회할 수 있습니다.</span>
     </div>
   </form>
+  <div class="screen-footer-company" aria-label="연구소명">마음:시나브로 심리상담연구소</div>
+
 </main>
 </div>
 
@@ -1008,7 +1196,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 <footer class="pdf-footer" aria-hidden="true">
   <p class="footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</p>
   <hr class="footer-divider">
-  <p class="footer-company">마음:시나브로심리상담연구소</p>
+  <p class="footer-company">마음:시나브로 심리상담연구소</p>
 </footer>
 
 <div class="modal-backdrop" id="foreignModalBackdrop" aria-hidden="true">
@@ -1500,6 +1688,14 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
     const resetBtn = document.getElementById("resetBtn");
     const editModeBadgeEl = document.getElementById("editModeBadge");
     const lookupSelectionAreaEl = document.getElementById("lookupSelectionArea");
+    const memberKeyValueEl = document.getElementById("memberKeyValue");
+
+    function setMemberKeyDisplay(memberKey) {
+      if (!memberKeyValueEl) return;
+      const key = String(memberKey || "").trim();
+      memberKeyValueEl.textContent = /^\d{8}$/.test(key) ? key : "미발급";
+    }
+
     let currentSession = null;
     let currentEmployee = null;
 
@@ -1614,7 +1810,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
         const el = document.getElementById(id);
         if (el) el.value = "";
       });
-      openForeignModalBtn.textContent = "외국인";
+      setMemberKeyDisplay(null);
 
       // form.reset() 후 관계 기본값은 '본인'. 접수자/내담자 값은 모두 빈값으로 일치시킨다.
       if (relationshipEl?.value === "본인") syncReceptionistToClient();
@@ -1683,13 +1879,13 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       document.body.style.overflow = "";
     }
 
-    openForeignModalBtn.addEventListener("click", openForeignModal);
+    // 외국인 버튼은 화면에서 제거되었으므로 기존 팝업 데이터 구조만 호환용으로 유지한다.
+    if (openForeignModalBtn) openForeignModalBtn.addEventListener("click", openForeignModal);
     closeForeignModalX.addEventListener("click", closeForeignModal);
     cancelForeignModalBtn.addEventListener("click", closeForeignModal);
 
     saveForeignModalBtn.addEventListener("click", () => {
       const nationality = document.getElementById("foreignNationality").value.trim();
-      openForeignModalBtn.textContent = nationality ? `외국인 · ${nationality}` : "외국인";
       closeForeignModal();
     });
 
@@ -2219,6 +2415,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       });
     }
     const authReady = initAuth();
+    setMemberKeyDisplay(null);
     setMode("new");
 
     // ===== 8) 폼 값 수집 + 검증 =====
@@ -2628,6 +2825,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       const client=record.__client, row=record.__session, typeCode=record.__type;
       const appointmentISO=typeCode==="CC"?row.appointment_at:row.visit_at;
       setSelectedCounselType(typeCode);
+      setMemberKeyDisplay(client.member_key);
 
       const rp=isoToKSTParts(row.receipt_at);
       if(rp){ receivedDateEl.value=rp.date; setTimeSelectValue(receivedTimeEl,rp.time); }
@@ -2655,7 +2853,6 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
       document.getElementById("foreignNumber").value = client.foreigner_no || "";
       document.getElementById("foreignVisa").value = client.visa_type || "";
       setSelectValueAllowCustom(document.getElementById("foreignResult"), client.legal_status || "");
-      openForeignModalBtn.textContent = client.nationality ? `외국인 · ${client.nationality}` : "외국인";
 
       careerNameEl.value=client.client_name||"";
       careerPhoneEl.value=client.client_phone||"";
