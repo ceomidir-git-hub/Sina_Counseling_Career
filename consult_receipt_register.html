@@ -1027,6 +1027,98 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
   .screen-footer-company{display:none!important;}
 }
 
+
+/* ==========================================================
+   FINAL 2026-08-29 : PDF 본문 세로 균형 재배치
+   중요: 머릿글(.top-row)과 고정 바닥글(.pdf-footer)의 좌표/크기는 변경하지 않는다.
+   심리상담 PDF의 1~3번 입력폼만 화면 비율에 가깝게 확장한다.
+   ========================================================== */
+@media print{
+  /* 머릿글 바로 아래에서 시작하되 기존보다 답답하지 않은 최소 여백만 부여 */
+  body:not(.career-mode) #consultForm{
+    padding-top:2mm!important;
+  }
+
+  /* 섹션 사이 간격을 화면 비율에 가깝게 복원 */
+  body:not(.career-mode) #receiptInfoSection,
+  body:not(.career-mode) #psychInfoSection{
+    margin-bottom:4mm!important;
+  }
+  body:not(.career-mode) .consultation-content-section{
+    margin-bottom:0!important;
+  }
+
+  /* 섹션 제목 높이와 본문 안쪽 여백 확대 */
+  body:not(.career-mode) #receiptInfoSection .section-head,
+  body:not(.career-mode) #psychInfoSection .section-head,
+  body:not(.career-mode) .consultation-content-section .section-head{
+    min-height:9mm!important;
+    height:9mm!important;
+  }
+  body:not(.career-mode) #receiptInfoSection .section-body,
+  body:not(.career-mode) #psychInfoSection .section-body,
+  body:not(.career-mode) .consultation-content-section .section-body{
+    padding-top:3mm!important;
+    padding-bottom:3mm!important;
+  }
+
+  /* 1. 접수정보: 화면과 유사한 입력칸 높이로 복원 */
+  body:not(.career-mode) #receiptInfoSection .receipt-row-4{
+    gap:2.2mm!important;
+    margin-bottom:2.6mm!important;
+  }
+  body:not(.career-mode) #receiptInfoSection .receipt-row-2{
+    gap:3.4mm!important;
+  }
+  body:not(.career-mode) #receiptInfoSection .receipt-pair input,
+  body:not(.career-mode) #receiptInfoSection .receipt-pair select,
+  body:not(.career-mode) #receiptInfoSection .date-inline-wrap,
+  body:not(.career-mode) #receiptInfoSection .date-inline-display{
+    height:8.4mm!important;
+  }
+
+  /* 2. 내담자정보: 행간과 필드 높이를 화면 비율에 가깝게 확대 */
+  body:not(.career-mode) #psychInfoSection .grid-2{
+    row-gap:3.2mm!important;
+    column-gap:5mm!important;
+  }
+  body:not(.career-mode) #psychInfoSection .field,
+  body:not(.career-mode) #psychInfoSection input[type="text"],
+  body:not(.career-mode) #psychInfoSection input[type="tel"],
+  body:not(.career-mode) #psychInfoSection select{
+    height:8.6mm!important;
+  }
+  body:not(.career-mode) #psychInfoSection .member-key-display{
+    min-height:7mm!important;
+    height:7mm!important;
+  }
+
+  /* 3. 상담신청내용: 남는 A4 세로 공간을 상담내용 영역에 자연스럽게 사용 */
+  body:not(.career-mode) .consultation-content-section .grid-2{
+    row-gap:3mm!important;
+  }
+  body:not(.career-mode) .consultation-content-section #consultationTarget,
+  body:not(.career-mode) .consultation-content-section #consultationTopic{
+    height:8.6mm!important;
+  }
+  body:not(.career-mode) .consultation-content-section .detail-grid{
+    margin-top:2.4mm!important;
+    row-gap:1.4mm!important;
+  }
+  body:not(.career-mode) #details{
+    height:65mm!important;
+    min-height:65mm!important;
+    max-height:65mm!important;
+  }
+
+  /* 인쇄에서만 사용하는 본문 조정이며 버튼/안내문 숨김 정책은 기존 그대로 유지 */
+  body:not(.career-mode) .actions,
+  body:not(.career-mode) .bottom-hint,
+  body:not(.career-mode) .screen-footer-company{
+    display:none!important;
+  }
+}
+
 </style>
 </head>
 <body>
