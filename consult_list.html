@@ -258,32 +258,40 @@ col.session{width:11%}
     table-layout:fixed!important;
   }
 
-  /* PDF 열 폭 재계산
-     PDF 본문 폭 = 210 - 7 - 7 = 196mm
-     table 외곽선/rounding 안전여유 = 0.4mm
-     실제 표 폭 = 195.6mm
-
-     비율 합계 = 100%
-     NO 4.5 / 등록일 13.5 / KEY 10 / 이름 15 / 전화 13.5 /
-     성별 5 / 나이 5 / 국적 12 / 상담종류 10.5 / 최종회기 11
-
-     실제 폭(mm):
-     8.802 / 26.406 / 19.560 / 29.340 / 26.406 /
-     9.780 / 9.780 / 23.472 / 20.538 / 21.516 */
-  .print-table{
-    width:calc(100% - .4mm)!important;
-    margin:0 auto!important;
+  /* ======================================================
+     PDF 열 폭 FINAL ABSOLUTE-MM
+     A4 본문 가용 폭 = 196mm
+     표 폭 = 194.8mm
+     좌우 안전 여유 = 1.2mm
+     열 폭 합계 = 정확히 194.8mm
+     ====================================================== */
+  .print-table-box{
+    width:194.8mm!important;
+    max-width:194.8mm!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    overflow:hidden!important;
   }
-  .print-table col.no{width:4.5%!important}
-  .print-table col.regdate{width:13.5%!important}
-  .print-table col.memberkey{width:10%!important}
-  .print-table col.name{width:15%!important}
-  .print-table col.phone{width:13.5%!important}
-  .print-table col.sex{width:5%!important}
-  .print-table col.age{width:5%!important}
-  .print-table col.nationality{width:12%!important}
-  .print-table col.type{width:10.5%!important}
-  .print-table col.session{width:11%!important}
+
+  .print-table{
+    width:194.8mm!important;
+    min-width:194.8mm!important;
+    max-width:194.8mm!important;
+    table-layout:fixed!important;
+    border-collapse:collapse!important;
+    margin:0!important;
+  }
+
+  .print-table col.no{width:8mm!important}
+  .print-table col.regdate{width:25mm!important}
+  .print-table col.memberkey{width:20mm!important}
+  .print-table col.name{width:28mm!important}
+  .print-table col.phone{width:26mm!important}
+  .print-table col.sex{width:10mm!important}
+  .print-table col.age{width:10mm!important}
+  .print-table col.nationality{width:24mm!important}
+  .print-table col.type{width:20mm!important}
+  .print-table col.session{width:23.8mm!important}
 
   .print-table th{
     height:7mm!important;
@@ -619,6 +627,47 @@ col.session{width:11%}
 }
 @media print{
   .result-inline-msg{display:none!important;}
+}
+
+
+/* ===== FINAL PDF COLUMN CLIP FIX ===== */
+@media print{
+  .print-table th,
+  .print-table td{
+    box-sizing:border-box!important;
+    max-width:none!important;
+  }
+
+  .print-table th{
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
+    padding-left:.35mm!important;
+    padding-right:.35mm!important;
+  }
+
+  .print-table td{
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    padding-left:.45mm!important;
+    padding-right:.45mm!important;
+  }
+
+  /* 마지막 열은 우측 외곽선과 겹치지 않도록 여백 추가 */
+  .print-table th:last-child,
+  .print-table td:last-child{
+    padding-right:.8mm!important;
+    border-right:0!important;
+  }
+
+  /* 최종회기/상담종류는 헤더 및 값 모두 중앙 정렬 */
+  .print-table th:nth-child(9),
+  .print-table th:nth-child(10),
+  .print-table td:nth-child(9),
+  .print-table td:nth-child(10){
+    text-align:center!important;
+  }
 }
 
 </style>
