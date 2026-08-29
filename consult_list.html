@@ -59,8 +59,8 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
 /* ==========================================================
    FINAL 2026-08-29 : 상담 리스트 문서 표준
    - LIST 값 한 줄 고정
-   - A4 세로 페이지당 최대 34명
-   - 35명 이상 자동 다중 페이지
+   - A4 세로 페이지당 최대 44명
+   - 45명 이상 자동 다중 페이지
    - 각 페이지 머릿글/바닥글 반복
    ========================================================== */
 
@@ -87,16 +87,16 @@ tbody td{
 /* 한 줄 가독성을 위한 열 폭 재조정
    요청 가중치: NO4 / 등록일12 / KEY9 / 이름12 / 전화12 / 성별5 / 나이5 / 국적11 / 상담종류10 / 최종회기9
    합계 89를 브라우저가 전체 폭에 비례 배분하도록 사용 */
-col.no{width:4%}
-col.regdate{width:12%}
-col.memberkey{width:9%}
-col.name{width:12%}
-col.phone{width:12%}
+col.no{width:4.5%}
+col.regdate{width:13.5%}
+col.memberkey{width:10%}
+col.name{width:15%}
+col.phone{width:13.5%}
 col.sex{width:5%}
 col.age{width:5%}
-col.nationality{width:11%}
-col.type{width:10%}
-col.session{width:9%}
+col.nationality{width:12%}
+col.type{width:10.5%}
+col.session{width:11%}
 
 /* 화면 바닥글: 확정 형식
    기존 표 화면행 높이 33px × 2행 = 66px 만큼 추가 하향 */
@@ -258,20 +258,32 @@ col.session{width:9%}
     table-layout:fixed!important;
   }
 
-  /* PDF 열 폭 수치 계산
-     본문폭 = 210 - 7 - 7 = 196mm
-     요청 가중치 합 = 89
-     1단위 = 196 / 89 = 2.202247mm */
-  .print-table col.no{width:8.809mm!important}
-  .print-table col.regdate{width:26.427mm!important}
-  .print-table col.memberkey{width:19.820mm!important}
-  .print-table col.name{width:26.427mm!important}
-  .print-table col.phone{width:26.427mm!important}
-  .print-table col.sex{width:11.011mm!important}
-  .print-table col.age{width:11.011mm!important}
-  .print-table col.nationality{width:24.225mm!important}
-  .print-table col.type{width:22.022mm!important}
-  .print-table col.session{width:19.820mm!important}
+  /* PDF 열 폭 재계산
+     PDF 본문 폭 = 210 - 7 - 7 = 196mm
+     table 외곽선/rounding 안전여유 = 0.4mm
+     실제 표 폭 = 195.6mm
+
+     비율 합계 = 100%
+     NO 4.5 / 등록일 13.5 / KEY 10 / 이름 15 / 전화 13.5 /
+     성별 5 / 나이 5 / 국적 12 / 상담종류 10.5 / 최종회기 11
+
+     실제 폭(mm):
+     8.802 / 26.406 / 19.560 / 29.340 / 26.406 /
+     9.780 / 9.780 / 23.472 / 20.538 / 21.516 */
+  .print-table{
+    width:calc(100% - .4mm)!important;
+    margin:0 auto!important;
+  }
+  .print-table col.no{width:4.5%!important}
+  .print-table col.regdate{width:13.5%!important}
+  .print-table col.memberkey{width:10%!important}
+  .print-table col.name{width:15%!important}
+  .print-table col.phone{width:13.5%!important}
+  .print-table col.sex{width:5%!important}
+  .print-table col.age{width:5%!important}
+  .print-table col.nationality{width:12%!important}
+  .print-table col.type{width:10.5%!important}
+  .print-table col.session{width:11%!important}
 
   .print-table th{
     height:7mm!important;
@@ -281,7 +293,7 @@ col.session{width:9%}
     background:#eaf2fb!important;
     color:#111!important;
     text-align:center!important;
-    font-size:8.7pt!important;
+    font-size:8.45pt!important;
     font-weight:900!important;
     line-height:1!important;
     white-space:nowrap!important;
@@ -337,24 +349,26 @@ col.session{width:9%}
     font-size:8.25pt!important;
   }
   .print-table td.small-text{
-    font-size:7.8pt!important;
+    font-size:8.05pt!important;
   }
 
   /* 페이지별 워터마크 */
   .print-list-watermark{
     position:absolute!important;
     left:50%!important;
-    top:51%!important;
-    z-index:10!important;
+    top:53%!important;
+    z-index:24!important;
     transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;
     transform-origin:center!important;
     color:#b91c1c!important;
-    font-size:65pt!important;
+    font-size:61pt!important;
     font-weight:900!important;
     letter-spacing:1px!important;
     white-space:nowrap!important;
-    opacity:.10!important;
+    opacity:.085!important;
     pointer-events:none!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
   }
 
   /* 페이지별 고정 바닥글 */
@@ -390,6 +404,115 @@ col.session{width:9%}
     text-align:center!important;
     white-space:nowrap!important;
   }
+}
+
+
+/* ==========================================================
+   FINAL 2026-08-29 : 검색조건 시인성/입력폼 최적화
+   ========================================================== */
+.search-grid{
+  display:grid;
+  grid-template-columns:1.05fr 1.05fr 1fr 1.1fr;
+  gap:4mm 3.5mm;
+  align-items:end;
+  margin:4mm 4mm 0;
+}
+.field label,
+.radio-label{
+  display:block;
+  margin:0 0 6px;
+  color:#26364a;
+  font-size:13.5px;
+  font-weight:900;
+  line-height:1.2;
+}
+.field input{
+  width:100%;
+  height:40px;
+  padding:0 10px;
+  border:1.4px solid #a9bbcf;
+  border-radius:5px;
+  background:#fffdf2;
+  color:#111827;
+  font-size:13.5px;
+  font-weight:750;
+  outline:none;
+}
+.field input::placeholder{
+  color:#8a96a6;
+  font-weight:650;
+}
+.field input:focus{
+  border-color:#1457a6;
+  box-shadow:0 0 0 2px rgba(20,87,166,.13);
+}
+#memberKeyQuery{
+  letter-spacing:.35px;
+}
+.radio-wrap{
+  height:40px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:0 11px;
+  border:1.4px solid #a9bbcf;
+  border-radius:5px;
+  background:#fffdf2;
+  white-space:nowrap;
+}
+.radio-option{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:#26364a;
+  font-size:12.8px;
+  font-weight:800;
+  cursor:pointer;
+}
+.radio-option input{
+  width:16px;
+  height:16px;
+  margin:0;
+  accent-color:#1457a6;
+}
+.counsel-filter{
+  grid-column:2/4;
+}
+.search-actions{
+  grid-column:4;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.search-btn,
+.reset-search-btn{
+  height:40px;
+  border-radius:5px;
+  font-size:12.8px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.search-btn{
+  border:1px solid #1457a6;
+  background:#1457a6;
+  color:#fff;
+}
+.search-btn:hover{background:#123f78}
+.reset-search-btn{
+  border:1px solid #7f93aa;
+  background:#fff;
+  color:#31445b;
+}
+.reset-search-btn:hover{
+  background:#f1f5f9;
+  border-color:#526b87;
+}
+.search-note{
+  margin:3mm 4mm 3.8mm;
+  color:#536075;
+  font-size:10.5px; /* 기존 9.5px + 1px */
+  font-weight:650;
+  line-height:1.55;
 }
 
 </style>
@@ -443,7 +566,10 @@ col.session{width:9%}
           <label class="radio-option"><input type="radio" name="counselType" value="CC">진로상담</label>
         </div>
       </div>
-      <button type="button" class="search-btn" id="searchBtn">조회</button>
+      <div class="search-actions">
+        <button type="button" class="search-btn" id="searchBtn">조회</button>
+        <button type="button" class="reset-search-btn" id="resetSearchBtn">초기화</button>
+      </div>
     </div>
     <p class="search-note">
       기간·회원 KEY·이름·전화번호·상담종류는 각각 단독 조회하거나 서로 조합하여 조회할 수 있습니다. 회원 KEY는 8자리 전체 번호를 입력합니다.
@@ -513,7 +639,7 @@ col.session{width:9%}
   const $ = id => document.getElementById(id);
   const els = {
     dateFrom:$("dateFrom"), dateTo:$("dateTo"), memberKey:$("memberKeyQuery"), name:$("nameQuery"), phone:$("phoneQuery"),
-    searchBtn:$("searchBtn"), body:$("resultBody"), resultCount:$("resultCount"),
+    searchBtn:$("searchBtn"), resetSearchBtn:$("resetSearchBtn"), body:$("resultBody"), resultCount:$("resultCount"),
     status:$("statusBox"), loading:$("loading"), loadingText:$("loadingText"),
     backBtn:$("backBtn"), pdfBtn:$("pdfBtn"), printMeta:$("printMeta"), printPages:$("printPages")
   };
@@ -1008,9 +1134,36 @@ col.session{width:9%}
     els.printPages.setAttribute("aria-hidden","false");
   }
 
+
+  function resetSearchConditions(){
+    els.dateFrom.value="";
+    els.dateTo.value="";
+    els.memberKey.value="";
+    els.name.value="";
+    els.phone.value="";
+
+    const allRadio=document.querySelector('input[name="counselType"][value="ALL"]');
+    if(allRadio) allRadio.checked=true;
+
+    lastRows=[];
+    els.resultCount.textContent="0";
+    els.body.innerHTML=
+      '<tr class="empty-row"><td colspan="10">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>';
+    els.printMeta.textContent="";
+    clearStatus();
+
+    if(els.printPages){
+      els.printPages.innerHTML="";
+      els.printPages.setAttribute("aria-hidden","true");
+    }
+
+    els.dateFrom.focus();
+  }
+
   els.memberKey.addEventListener("input",() => formatMemberKeyInput(els.memberKey));
   els.phone.addEventListener("input",() => formatPhoneInput(els.phone));
   els.searchBtn.addEventListener("click",search);
+  els.resetSearchBtn.addEventListener("click",resetSearchConditions);
   [els.dateFrom,els.dateTo,els.memberKey,els.name,els.phone].forEach(el => {
     el.addEventListener("keydown",e => {
       if (e.key === "Enter"){
@@ -1031,7 +1184,7 @@ col.session{width:9%}
       return;
     }
 
-    // 최대 34명씩 A4 세로 페이지로 자동 분할한다.
+    // 최대 44명씩 A4 세로 페이지로 자동 분할한다.
     buildPrintPages(lastRows);
 
     const oldTitle=document.title;
