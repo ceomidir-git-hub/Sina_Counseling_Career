@@ -55,6 +55,313 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
   .loading{display:none!important}
 }
 
+
+/* ==========================================================
+   FINAL 2026-08-29 : 상담 리스트 문서 표준
+   - LIST 값 한 줄 고정
+   - A4 세로 페이지당 최대 34명
+   - 35명 이상 자동 다중 페이지
+   - 각 페이지 머릿글/바닥글 반복
+   ========================================================== */
+
+/* 화면 LIST 값은 절대 2줄로 내려가지 않게 한다. */
+thead th,
+tbody td,
+.client-link,
+.badge{
+  white-space:nowrap;
+}
+tbody td{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  overflow-wrap:normal;
+  word-break:keep-all;
+}
+.client-link{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  vertical-align:middle;
+}
+
+/* 한 줄 가독성을 위한 열 폭 재조정 */
+col.no{width:4%}
+col.regdate{width:13%}
+col.memberkey{width:9%}
+col.name{width:8%}
+col.phone{width:12%}
+col.sex{width:5%}
+col.age{width:5%}
+col.nationality{width:7%}
+col.type{width:14%}
+col.status-col{width:12%}
+col.session{width:11%}
+
+/* 화면 바닥글: 확정 형식 */
+.document-footer{
+  margin-top:8mm;
+  padding:0 1mm 2mm;
+  text-align:center;
+}
+.footer-rights{
+  margin:0 0 1.5mm;
+  color:#6b7280;
+  font-size:12px;
+  font-weight:500;
+  line-height:1.3;
+  text-align:left;
+}
+.footer-rule{
+  height:0;
+  border:0;
+  border-top:1.2pt solid #1457a6;
+}
+.footer-company{
+  margin:2.5mm 0 0;
+  padding:0;
+  color:#123f78;
+  font-size:29px;
+  font-weight:950;
+  line-height:1;
+  letter-spacing:-1.3px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+/* 전용 PDF 페이지는 화면에서 숨김 */
+.print-pages{
+  display:none;
+}
+
+/* ----------------------------------------------------------
+   PDF 전용 페이지 구조
+   ---------------------------------------------------------- */
+@media print{
+  @page{
+    size:210mm 297mm;
+    margin:0;
+  }
+
+  html,body{
+    width:210mm!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+
+  /* 기존 화면은 PDF에서 완전히 제외 */
+  .page-wrap,
+  .loading,
+  body > .pdf-watermark{
+    display:none!important;
+  }
+
+  .print-pages{
+    display:block!important;
+    width:210mm!important;
+    margin:0!important;
+    padding:0!important;
+  }
+
+  .print-page{
+    position:relative!important;
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    background:#fff!important;
+    page-break-after:always!important;
+    break-after:page!important;
+  }
+  .print-page:last-child{
+    page-break-after:auto!important;
+    break-after:auto!important;
+  }
+
+  /* 페이지별 고정 머릿글 */
+  .print-list-header{
+    position:absolute!important;
+    left:7mm!important;
+    right:7mm!important;
+    top:8mm!important;
+    height:13mm!important;
+    display:flex!important;
+    align-items:flex-end!important;
+    padding:0 0 2mm!important;
+    border-bottom:1.2pt solid #123f78!important;
+    background:#fff!important;
+    z-index:30!important;
+  }
+  .print-list-title{
+    margin:0!important;
+    color:#123f78!important;
+    font-size:23pt!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-1px!important;
+  }
+
+  /* 본문 */
+  .print-list-content{
+    position:absolute!important;
+    left:7mm!important;
+    right:7mm!important;
+    top:24mm!important;
+    bottom:27mm!important;
+    z-index:20!important;
+  }
+  .print-list-section-title{
+    height:8.5mm!important;
+    display:flex!important;
+    align-items:center!important;
+    padding:0 3mm!important;
+    border:1px solid #6fa3dc!important;
+    border-bottom:1px solid #a8c6e7!important;
+    border-radius:6px 6px 0 0!important;
+    background:linear-gradient(180deg,#f3f8fe 0%,#e6f2ff 100%)!important;
+    color:#1457a6!important;
+    font-size:14pt!important;
+    font-weight:950!important;
+  }
+  .print-list-meta{
+    height:6mm!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    color:#4b5563!important;
+    font-size:8pt!important;
+    line-height:1!important;
+  }
+  .print-page-number{
+    color:#123f78!important;
+    font-size:9pt!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+  }
+
+  .print-table-box{
+    border:1px solid #777!important;
+    overflow:hidden!important;
+    background:#fff!important;
+  }
+  .print-table{
+    width:100%!important;
+    border-collapse:collapse!important;
+    table-layout:fixed!important;
+  }
+  .print-table th{
+    height:7mm!important;
+    padding:.7mm .5mm!important;
+    border-right:1px solid #777!important;
+    border-bottom:1px solid #777!important;
+    background:#eaf2fb!important;
+    color:#111!important;
+    text-align:center!important;
+    font-size:8.7pt!important;
+    font-weight:900!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  .print-table td{
+    padding:.55mm .45mm!important;
+    border-right:1px solid #aaa!important;
+    border-bottom:1px solid #aaa!important;
+    background:#fff!important;
+    color:#111!important;
+    text-align:center!important;
+    font-weight:550!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    word-break:keep-all!important;
+  }
+  .print-table th:last-child,
+  .print-table td:last-child{
+    border-right:0!important;
+  }
+  .print-table tr:last-child td{
+    border-bottom:0!important;
+  }
+  .print-table td.name-cell{
+    text-align:left!important;
+    padding-left:1.2mm!important;
+  }
+
+  /* 페이지별 행 밀도 */
+  .print-page.density-normal .print-table td{
+    height:7.2mm!important;
+    font-size:9.2pt!important;
+  }
+  .print-page.density-compact .print-table td{
+    height:6.2mm!important;
+    font-size:8.8pt!important;
+  }
+  .print-page.density-dense .print-table td{
+    height:5.35mm!important;
+    font-size:8.25pt!important;
+  }
+  .print-table td.small-text{
+    font-size:7.8pt!important;
+  }
+
+  /* 페이지별 워터마크 */
+  .print-list-watermark{
+    position:absolute!important;
+    left:50%!important;
+    top:51%!important;
+    z-index:10!important;
+    transform:translate(-50%,-50%) rotate(-32deg) scaleX(.72)!important;
+    transform-origin:center!important;
+    color:#b91c1c!important;
+    font-size:65pt!important;
+    font-weight:900!important;
+    letter-spacing:1px!important;
+    white-space:nowrap!important;
+    opacity:.10!important;
+    pointer-events:none!important;
+  }
+
+  /* 페이지별 고정 바닥글 */
+  .print-list-footer{
+    position:absolute!important;
+    left:7mm!important;
+    right:7mm!important;
+    bottom:3.5mm!important;
+    z-index:30!important;
+    background:#fff!important;
+  }
+  .print-list-footer-rights{
+    margin:0 0 1mm!important;
+    color:#6b7280!important;
+    font-size:17px!important;
+    font-weight:500!important;
+    line-height:1.25!important;
+    text-align:left!important;
+  }
+  .print-list-footer-rule{
+    height:0!important;
+    border:0!important;
+    border-top:1.2pt solid #1457a6!important;
+    margin:0!important;
+  }
+  .print-list-footer-company{
+    margin:2mm 0 0!important;
+    color:#123f78!important;
+    font-size:23pt!important;
+    font-weight:900!important;
+    line-height:1!important;
+    letter-spacing:-1px!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -150,10 +457,12 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
   <footer class="document-footer" aria-label="문서 바닥글">
     <div class="footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</div>
     <div class="footer-rule"></div>
-    <div class="footer-company">마음:시나브로심리상담연구소</div>
+    <div class="footer-company">마음:시나브로 심리상담연구소</div>
   </footer>
 </main></div>
 <div class="pdf-watermark" aria-hidden="true">중요 보안 문서 유출 금지</div>
+
+<div id="printPages" class="print-pages" aria-hidden="true"></div>
 
 <div class="loading" id="loading">
   <div class="loading-box" id="loadingText">조회 중입니다.</div>
@@ -169,6 +478,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
   const PSYCH_TABLE = "DB_psychological_counseling";
   const CAREER_TABLE = "DB_career_counseling";
   const PAGE_SIZE = 1000;
+  const PRINT_ROWS_PER_PAGE = 34;
   const IDLE_LIMIT_MS = 10 * 60 * 1000;
 
   const $ = id => document.getElementById(id);
@@ -176,7 +486,7 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
     dateFrom:$("dateFrom"), dateTo:$("dateTo"), memberKey:$("memberKeyQuery"), name:$("nameQuery"), phone:$("phoneQuery"),
     searchBtn:$("searchBtn"), body:$("resultBody"), resultCount:$("resultCount"),
     status:$("statusBox"), loading:$("loading"), loadingText:$("loadingText"),
-    backBtn:$("backBtn"), pdfBtn:$("pdfBtn"), printMeta:$("printMeta")
+    backBtn:$("backBtn"), pdfBtn:$("pdfBtn"), printMeta:$("printMeta"), printPages:$("printPages")
   };
 
   let sb = null;
@@ -580,6 +890,99 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
     }).join("");
   }
 
+
+  function printDensityClass(rowCount){
+    if (rowCount <= 18) return "density-normal";
+    if (rowCount <= 26) return "density-compact";
+    return "density-dense";
+  }
+
+  function buildPrintRowHTML(r,globalIndex){
+    return `
+      <tr>
+        <td>${globalIndex}</td>
+        <td>${escapeHTML(formatDateWithWeekday(r.registeredAt))}</td>
+        <td>${escapeHTML(r.memberKey)}</td>
+        <td class="name-cell">${escapeHTML(r.name)}</td>
+        <td>${escapeHTML(r.phone)}</td>
+        <td>${escapeHTML(r.sex)}</td>
+        <td>${escapeHTML(r.age)}</td>
+        <td>${escapeHTML(r.nationality)}</td>
+        <td class="small-text">${escapeHTML(r.counselType)}</td>
+        <td class="small-text">${escapeHTML(r.status)}</td>
+        <td class="small-text">${escapeHTML(r.session)}</td>
+      </tr>
+    `;
+  }
+
+  function buildPrintPages(rows){
+    const totalPages=Math.ceil(rows.length/PRINT_ROWS_PER_PAGE);
+    const conditionText=els.printMeta.textContent || "상담 리스트";
+
+    const pages=[];
+
+    for(let pageIndex=0; pageIndex<totalPages; pageIndex++){
+      const start=pageIndex*PRINT_ROWS_PER_PAGE;
+      const chunk=rows.slice(start,start+PRINT_ROWS_PER_PAGE);
+      const density=printDensityClass(chunk.length);
+
+      const bodyRows=chunk.map((r,i)=>buildPrintRowHTML(r,start+i+1)).join("");
+
+      pages.push(`
+        <section class="print-page ${density}">
+          <div class="print-list-watermark" aria-hidden="true">중요 보안 문서 유출 금지</div>
+
+          <header class="print-list-header">
+            <h1 class="print-list-title">상담 리스트</h1>
+          </header>
+
+          <main class="print-list-content">
+            <div class="print-list-section-title">상담 대상자 LIST</div>
+            <div class="print-list-meta">
+              <span>${escapeHTML(conditionText)}</span>
+              <span class="print-page-number">${pageIndex+1} / ${totalPages}</span>
+            </div>
+
+            <div class="print-table-box">
+              <table class="print-table" aria-label="상담 대상자 출력 목록">
+                <colgroup>
+                  <col class="no"><col class="regdate"><col class="memberkey"><col class="name">
+                  <col class="phone"><col class="sex"><col class="age"><col class="nationality">
+                  <col class="type"><col class="status-col"><col class="session">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>NO</th>
+                    <th>등록일</th>
+                    <th>회원 KEY</th>
+                    <th>이름</th>
+                    <th>전화번호</th>
+                    <th>성별</th>
+                    <th>나이</th>
+                    <th>국적</th>
+                    <th>상담종류</th>
+                    <th>진행상태</th>
+                    <th>최종회기</th>
+                  </tr>
+                </thead>
+                <tbody>${bodyRows}</tbody>
+              </table>
+            </div>
+          </main>
+
+          <footer class="print-list-footer">
+            <div class="print-list-footer-rights">이 문서의 저작권은 마음:시나브로심리상담연구소에 있습니다.</div>
+            <div class="print-list-footer-rule"></div>
+            <div class="print-list-footer-company">마음:시나브로 심리상담연구소</div>
+          </footer>
+        </section>
+      `);
+    }
+
+    els.printPages.innerHTML=pages.join("");
+    els.printPages.setAttribute("aria-hidden","false");
+  }
+
   els.memberKey.addEventListener("input",() => formatMemberKeyInput(els.memberKey));
   els.phone.addEventListener("input",() => formatPhoneInput(els.phone));
   els.searchBtn.addEventListener("click",search);
@@ -602,21 +1005,24 @@ html[data-print-density="compact"]{--print-row-h:6.2mm;--print-font:9.55pt}html[
       alert("PDF로 저장할 조회 결과가 없습니다.");
       return;
     }
-    if (lastRows.length > 34){
-      alert(`현재 조회 결과는 ${lastRows.length}명입니다.\nA4 세로 1페이지에서 가독성을 유지하기 위한 최대 출력 기준은 34명입니다.\n기간·이름·전화번호·상담종류 조건을 좁혀 다시 조회해 주세요.`);
-      return;
-    }
 
-    const density = lastRows.length <= 18 ? "normal" : (lastRows.length <= 26 ? "compact" : "dense");
-    document.documentElement.dataset.printDensity = density;
+    // 최대 34명씩 A4 세로 페이지로 자동 분할한다.
+    buildPrintPages(lastRows);
 
-    const oldTitle = document.title;
-    const today = new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-    document.title = `상담리스트_${today}`;
+    const oldTitle=document.title;
+    const today=new Intl.DateTimeFormat("en-CA",{
+      timeZone:"Asia/Seoul",
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit"
+    }).format(new Date());
+
+    document.title=`상담리스트_${today}`;
     window.print();
-    setTimeout(() => {
-      document.title = oldTitle;
-      delete document.documentElement.dataset.printDensity;
+
+    setTimeout(()=>{
+      document.title=oldTitle;
+      els.printPages.setAttribute("aria-hidden","true");
     },800);
   });
 
