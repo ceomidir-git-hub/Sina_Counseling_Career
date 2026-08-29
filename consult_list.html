@@ -515,6 +515,112 @@ col.session{width:11%}
   line-height:1.55;
 }
 
+
+/* ==========================================================
+   FINAL SEARCH UI FIX 2026-08-29
+   - 첨부 이미지 기준 과대 크기 -2px
+   - 초기화 바로 오른쪽에 조회
+   - 기존 .search-btn grid-column 충돌 제거
+   ========================================================== */
+.search-grid{
+  grid-template-columns:1.05fr 1.05fr 1fr 1.1fr!important;
+  gap:3.2mm 3mm!important;
+  margin:3.5mm 4mm 0!important;
+}
+
+.field label,
+.radio-label{
+  margin-bottom:5px!important;
+  font-size:11.5px!important;       /* 13.5 -> 11.5 */
+  font-weight:850!important;
+}
+
+.field input{
+  height:38px!important;            /* 40 -> 38 */
+  padding:0 9px!important;
+  border-width:1.2px!important;
+  font-size:11.5px!important;       /* 13.5 -> 11.5 */
+  font-weight:700!important;
+}
+
+.field input::placeholder{
+  font-size:11.5px!important;
+  font-weight:650!important;
+}
+
+.radio-wrap{
+  height:38px!important;            /* 40 -> 38 */
+  gap:12px!important;
+  padding:0 10px!important;
+  border-width:1.2px!important;
+}
+
+.radio-option{
+  gap:5px!important;
+  font-size:10.8px!important;       /* 12.8 -> 10.8 */
+  font-weight:800!important;
+}
+
+.radio-option input{
+  width:15px!important;
+  height:15px!important;
+}
+
+.search-actions{
+  grid-column:4!important;
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:7px!important;
+  align-items:end!important;
+}
+
+/* 기존 전역 .search-btn{grid-column:4} 규칙을 이 영역에서 무효화 */
+.search-actions .search-btn,
+.search-actions .reset-search-btn{
+  grid-column:auto!important;
+  width:100%!important;
+  height:38px!important;            /* 40 -> 38 */
+  padding:0 8px!important;
+  font-size:10.8px!important;       /* 12.8 -> 10.8 */
+  font-weight:900!important;
+  line-height:1!important;
+  align-self:end!important;
+}
+
+.search-note{
+  margin:2.6mm 4mm 3.4mm!important;
+  font-size:10.5px!important;       /* 이전 요청 +1은 유지 */
+  font-weight:650!important;
+  line-height:1.5!important;
+}
+
+@media(max-width:760px){
+  .search-actions{
+    grid-column:1/-1!important;
+  }
+}
+
+
+/* ===== FINAL 2026-08-29 : 조회 결과 메시지 LIST 제목 오른쪽 표시 ===== */
+.result-title-row{
+  justify-content:space-between!important;
+  gap:12px;
+}
+.result-inline-msg{
+  margin-left:auto;
+  color:#334155;
+  font-size:12px;
+  font-weight:850;
+  line-height:1;
+  white-space:nowrap;
+}
+.result-inline-msg.has-result{
+  color:#1457a6;
+}
+@media print{
+  .result-inline-msg{display:none!important;}
+}
+
 </style>
 </head>
 <body>
@@ -567,8 +673,8 @@ col.session{width:11%}
         </div>
       </div>
       <div class="search-actions">
-        <button type="button" class="search-btn" id="searchBtn">조회</button>
         <button type="button" class="reset-search-btn" id="resetSearchBtn">초기화</button>
+        <button type="button" class="search-btn" id="searchBtn">조회</button>
       </div>
     </div>
     <p class="search-note">
@@ -578,7 +684,10 @@ col.session{width:11%}
   </section>
 
   <section class="section result-section">
-    <h2 class="section-title">2. 상담 대상자 LIST</h2>
+    <h2 class="section-title result-title-row">
+      <span>2. 상담 대상자 LIST</span>
+      <span id="resultInlineMsg" class="result-inline-msg"></span>
+    </h2>
     <div class="print-meta" id="printMeta"></div>
     <div class="table-box">
       <div class="table-scroll">
@@ -640,7 +749,7 @@ col.session{width:11%}
   const els = {
     dateFrom:$("dateFrom"), dateTo:$("dateTo"), memberKey:$("memberKeyQuery"), name:$("nameQuery"), phone:$("phoneQuery"),
     searchBtn:$("searchBtn"), resetSearchBtn:$("resetSearchBtn"), body:$("resultBody"), resultCount:$("resultCount"),
-    status:$("statusBox"), loading:$("loading"), loadingText:$("loadingText"),
+    status:$("statusBox"), resultInlineMsg:$("resultInlineMsg"), loading:$("loading"), loadingText:$("loadingText"),
     backBtn:$("backBtn"), pdfBtn:$("pdfBtn"), printMeta:$("printMeta"), printPages:$("printPages")
   };
 
@@ -670,6 +779,16 @@ col.session{width:11%}
   function clearStatus(){
     els.status.className = "status";
     els.status.textContent = "";
+  }
+  function setResultInlineMessage(count){
+    if(!els.resultInlineMsg) return;
+    if(Number(count) > 0){
+      els.resultInlineMsg.textContent = `${count}명의 상담 대상자가 조회되었습니다.`;
+      els.resultInlineMsg.classList.add("has-result");
+    }else{
+      els.resultInlineMsg.textContent = "";
+      els.resultInlineMsg.classList.remove("has-result");
+    }
   }
   function setLoading(show,msg){
     els.loading.classList.toggle("show",show);
@@ -898,6 +1017,7 @@ col.session{width:11%}
 
   async function search(){
     clearStatus();
+    setResultInlineMessage(0);
     if (!validatePeriod() || !validateMemberKey()) return;
     if (!sb){
       showStatus("error","Supabase 연결을 사용할 수 없습니다.");
@@ -993,11 +1113,18 @@ col.session{width:11%}
       cond.push(`상담종류 ${type==="PC"?"심리상담":type==="CC"?"진로상담":"전체"}`);
       els.printMeta.textContent = `검색조건: ${cond.join(" / ")} · 출력일: ${new Date().toLocaleDateString("ko-KR")}`;
 
-      showStatus("info",out.length ? `${out.length}명의 상담 대상자가 조회되었습니다.` : "조회 조건에 해당하는 상담 대상자가 없습니다.");
+      if(out.length){
+        setResultInlineMessage(out.length);
+        clearStatus();
+      }else{
+        setResultInlineMessage(0);
+        showStatus("info","조회 조건에 해당하는 상담 대상자가 없습니다.");
+      }
     }catch(err){
       console.error(err);
       lastRows = [];
       renderRows([]);
+      setResultInlineMessage(0);
       showStatus("error","조회 중 오류가 발생했습니다: " + (err?.message || String(err)));
     }finally{
       setLoading(false);
@@ -1147,6 +1274,7 @@ col.session{width:11%}
 
     lastRows=[];
     els.resultCount.textContent="0";
+    setResultInlineMessage(0);
     els.body.innerHTML=
       '<tr class="empty-row"><td colspan="10">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>';
     els.printMeta.textContent="";
