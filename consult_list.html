@@ -84,22 +84,24 @@ tbody td{
   vertical-align:middle;
 }
 
-/* 한 줄 가독성을 위한 열 폭 재조정 */
+/* 한 줄 가독성을 위한 열 폭 재조정
+   요청 가중치: NO4 / 등록일12 / KEY9 / 이름12 / 전화12 / 성별5 / 나이5 / 국적11 / 상담종류10 / 최종회기9
+   합계 89를 브라우저가 전체 폭에 비례 배분하도록 사용 */
 col.no{width:4%}
-col.regdate{width:13%}
+col.regdate{width:12%}
 col.memberkey{width:9%}
-col.name{width:8%}
+col.name{width:12%}
 col.phone{width:12%}
 col.sex{width:5%}
 col.age{width:5%}
-col.nationality{width:7%}
-col.type{width:14%}
-col.status-col{width:12%}
-col.session{width:11%}
+col.nationality{width:11%}
+col.type{width:10%}
+col.session{width:9%}
 
-/* 화면 바닥글: 확정 형식 */
+/* 화면 바닥글: 확정 형식
+   기존 표 화면행 높이 33px × 2행 = 66px 만큼 추가 하향 */
 .document-footer{
-  margin-top:8mm;
+  margin-top:calc(8mm + 66px);
   padding:0 1mm 2mm;
   text-align:center;
 }
@@ -233,13 +235,14 @@ col.session{width:11%}
     display:flex!important;
     align-items:center!important;
     justify-content:space-between!important;
-    color:#4b5563!important;
-    font-size:8pt!important;
+    color:#374151!important;
+    font-size:9pt!important;
+    font-weight:900!important;
     line-height:1!important;
   }
   .print-page-number{
     color:#123f78!important;
-    font-size:9pt!important;
+    font-size:8pt!important;
     font-weight:900!important;
     white-space:nowrap!important;
   }
@@ -254,6 +257,22 @@ col.session{width:11%}
     border-collapse:collapse!important;
     table-layout:fixed!important;
   }
+
+  /* PDF 열 폭 수치 계산
+     본문폭 = 210 - 7 - 7 = 196mm
+     요청 가중치 합 = 89
+     1단위 = 196 / 89 = 2.202247mm */
+  .print-table col.no{width:8.809mm!important}
+  .print-table col.regdate{width:26.427mm!important}
+  .print-table col.memberkey{width:19.820mm!important}
+  .print-table col.name{width:26.427mm!important}
+  .print-table col.phone{width:26.427mm!important}
+  .print-table col.sex{width:11.011mm!important}
+  .print-table col.age{width:11.011mm!important}
+  .print-table col.nationality{width:24.225mm!important}
+  .print-table col.type{width:22.022mm!important}
+  .print-table col.session{width:19.820mm!important}
+
   .print-table th{
     height:7mm!important;
     padding:.7mm .5mm!important;
@@ -288,10 +307,21 @@ col.session{width:11%}
   .print-table tr:last-child td{
     border-bottom:0!important;
   }
-  .print-table td.name-cell{
+  .print-table td.name-cell,
+  .print-table td.nationality-cell{
     text-align:left!important;
     padding-left:1.2mm!important;
   }
+
+
+  /* A4 세로 1페이지 행수 계산
+     사용가능 본문높이 = 297 - 24(top) - 27(bottom) = 246mm
+     검색조건/출력일 메타 = 6mm
+     표 머리 = 7mm
+     44행 = 44 × 5.25 = 231mm
+     합계 = 6 + 7 + 231 = 244mm
+     잔여 = 246 - 244 = 2mm
+     45행 = 249.25mm > 246mm 이므로 최대 44행 */
 
   /* 페이지별 행 밀도 */
   .print-page.density-normal .print-table td{
@@ -303,7 +333,7 @@ col.session{width:11%}
     font-size:8.8pt!important;
   }
   .print-page.density-dense .print-table td{
-    height:5.35mm!important;
+    height:5.25mm!important;
     font-size:8.25pt!important;
   }
   .print-table td.small-text{
@@ -369,7 +399,7 @@ col.session{width:11%}
   <header class="page-head">
     <div>
       <h1 class="page-title">상담 리스트</h1>
-      <p class="page-sub">시나브로 Counselling &amp; Career Plus Center · 상담 대상자 · 진행상태 · 최종회기</p>
+      <p class="page-sub">시나브로 Counselling &amp; Career Plus Center · 상담 대상자 · 최종회기</p>
     </div>
     <div class="head-right">
       <div class="result-count">조회 <span id="resultCount">0</span>명</div>
@@ -429,7 +459,7 @@ col.session{width:11%}
         <table aria-label="상담 대상자 목록">
           <colgroup>
             <col class="no"><col class="regdate"><col class="memberkey"><col class="name"><col class="phone"><col class="sex">
-            <col class="age"><col class="nationality"><col class="type"><col class="status-col"><col class="session">
+            <col class="age"><col class="nationality"><col class="type"><col class="session">
           </colgroup>
           <thead>
             <tr>
@@ -442,12 +472,11 @@ col.session{width:11%}
               <th>나이</th>
               <th>국적</th>
               <th>상담종류</th>
-              <th>진행상태</th>
               <th>최종회기</th>
             </tr>
           </thead>
           <tbody id="resultBody">
-            <tr class="empty-row"><td colspan="11">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
+            <tr class="empty-row"><td colspan="10">검색조건을 선택한 후 조회 버튼을 눌러주세요.</td></tr>
           </tbody>
         </table>
       </div>
@@ -478,7 +507,7 @@ col.session{width:11%}
   const PSYCH_TABLE = "DB_psychological_counseling";
   const CAREER_TABLE = "DB_career_counseling";
   const PAGE_SIZE = 1000;
-  const PRINT_ROWS_PER_PAGE = 34;
+  const PRINT_ROWS_PER_PAGE = 44;
   const IDLE_LIMIT_MS = 10 * 60 * 1000;
 
   const $ = id => document.getElementById(id);
@@ -866,7 +895,7 @@ col.session{width:11%}
   function renderRows(rows){
     els.resultCount.textContent = String(rows.length);
     if (!rows.length){
-      els.body.innerHTML = '<tr class="empty-row"><td colspan="11">조회 결과가 없습니다.</td></tr>';
+      els.body.innerHTML = '<tr class="empty-row"><td colspan="10">조회 결과가 없습니다.</td></tr>';
       return;
     }
     els.body.innerHTML = rows.map((r,i) => {
@@ -881,9 +910,8 @@ col.session{width:11%}
         <td>${escapeHTML(r.phone)}</td>
         <td>${escapeHTML(r.sex)}</td>
         <td>${escapeHTML(r.age)}</td>
-        <td>${escapeHTML(r.nationality)}</td>
+        <td class="nationality-cell">${escapeHTML(r.nationality)}</td>
         <td>${escapeHTML(r.counselType)}</td>
-        <td><span class="badge ${badgeClass(r.status)}">${escapeHTML(r.status)}</span></td>
         <td>${escapeHTML(r.session)}</td>
       </tr>
     `;
@@ -907,9 +935,8 @@ col.session{width:11%}
         <td>${escapeHTML(r.phone)}</td>
         <td>${escapeHTML(r.sex)}</td>
         <td>${escapeHTML(r.age)}</td>
-        <td>${escapeHTML(r.nationality)}</td>
+        <td class="nationality-cell">${escapeHTML(r.nationality)}</td>
         <td class="small-text">${escapeHTML(r.counselType)}</td>
-        <td class="small-text">${escapeHTML(r.status)}</td>
         <td class="small-text">${escapeHTML(r.session)}</td>
       </tr>
     `;
@@ -937,7 +964,6 @@ col.session{width:11%}
           </header>
 
           <main class="print-list-content">
-            <div class="print-list-section-title">상담 대상자 LIST</div>
             <div class="print-list-meta">
               <span>${escapeHTML(conditionText)}</span>
               <span class="print-page-number">${pageIndex+1} / ${totalPages}</span>
@@ -948,7 +974,7 @@ col.session{width:11%}
                 <colgroup>
                   <col class="no"><col class="regdate"><col class="memberkey"><col class="name">
                   <col class="phone"><col class="sex"><col class="age"><col class="nationality">
-                  <col class="type"><col class="status-col"><col class="session">
+                  <col class="type"><col class="session">
                 </colgroup>
                 <thead>
                   <tr>
@@ -961,7 +987,6 @@ col.session{width:11%}
                     <th>나이</th>
                     <th>국적</th>
                     <th>상담종류</th>
-                    <th>진행상태</th>
                     <th>최종회기</th>
                   </tr>
                 </thead>
