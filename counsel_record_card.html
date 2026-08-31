@@ -3,389 +3,545 @@
 <head>
 <meta charset="UTF-8">
 <title>상담기록카드</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-  * { box-sizing: border-box; }
+  @page { size:A4 portrait; margin:0; }
+  * { box-sizing:border-box; }
   body {
-    font-family: "맑은 고딕", "Malgun Gothic", "Noto Sans KR", sans-serif;
-    color: #1a1a1a;
-    margin: 0;
-    padding: 0;
-    background: #f2f2f2;
+    font-family:"맑은 고딕","Malgun Gothic","Noto Sans KR",sans-serif;
+    color:#1a1a1a; margin:0; padding:0; background:#f2f2f2;
   }
   .toolbar {
-    width: 210mm;
-    margin: 8mm auto 0 auto;
-    display: flex;
-    justify-content: flex-end;
+    width:210mm; margin:8mm auto 0 auto; display:flex;
+    justify-content:space-between; align-items:center; gap:8px;
   }
+  .lookup-area { display:flex; align-items:center; gap:6px; }
+  .lookup-area label { font-size:10pt; font-weight:700; }
+  .lookup-area input {
+    width:120px; height:34px; border:1px solid #b8c0cc; border-radius:6px;
+    padding:0 8px; font-family:inherit; font-size:10pt; background:#fffef2;
+  }
+  .lookup-btn {
+    height:34px; background:#0f766e; color:#fff; border:none; border-radius:6px;
+    padding:0 14px; font-size:10pt; font-weight:700; font-family:inherit; cursor:pointer;
+  }
+  #loadMessage { font-size:9pt; color:#475569; white-space:nowrap; }
   .pdf-save-btn {
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 18px;
-    font-size: 11pt;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  .pdf-save-btn:hover {
-    background: #1d4ed8;
-  }
-  @media print {
-    .toolbar {
-      display: none;
-    }
+    background:#2563eb; color:#fff; border:none; border-radius:6px; padding:8px 18px;
+    font-size:11pt; font-weight:700; font-family:inherit; cursor:pointer;
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
   }
   .page {
-    position: relative;
-    width: 210mm;
-    height: 297mm;
-    margin: 10mm auto;
-    background: #ffffff;
-    padding: 0 14mm;
-    box-shadow: 0 0 8px rgba(0,0,0,0.15);
+    position:relative; width:210mm; height:297mm; margin:10mm auto; background:#fff;
+    padding:0 14mm; box-shadow:0 0 8px rgba(0,0,0,.15);
   }
-  /* 머릿글: 페이지 상단에 고정 */
-  .header-fixed {
-    position: absolute;
-    top: 12mm;
-    left: 14mm;
-    right: 14mm;
-  }
+  .header-fixed { position:absolute; top:12mm; left:14mm; right:14mm; }
   .header-date {
-    position: relative;
-    font-size: 9pt;
-    color: #333;
-    margin: 0 0 2mm 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    position:relative; font-size:9pt; color:#333; margin:0 0 2mm 0;
+    display:flex; justify-content:space-between; align-items:baseline;
   }
   .header-date .center-item {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 9pt;
-    white-space: nowrap;
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    font-size:9pt; white-space:nowrap;
   }
   .approval-table {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 34mm;
-    margin: 0;
-    border-collapse: collapse;
+    position:absolute; top:0; right:0; width:34mm; margin:0; border-collapse:collapse;
   }
   .approval-table td {
-    border: 1px solid #999;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 8pt;
-    height: 7mm;
-    padding: 1px 2px;
+    border:1px solid #999; text-align:center; vertical-align:middle; font-size:8pt;
+    height:7mm; padding:1px 2px;
   }
-  .approval-table td.sign-row {
-    height: 14mm;
-  }
-  .approval-table .label {
-    background: #f4f4f4;
-    font-weight: 700;
-    font-size: 9pt;
-  }
-  .approval-table .placeholder {
-    color: #bbb;
-    font-size: 7pt;
-  }
-  /* 안내문구: 바닥글 바로 위에 고정 */
-  .notice-fixed {
-    position: absolute;
-    bottom: 18mm;
-    left: 14mm;
-    right: 14mm;
-  }
-  /* 바닥글: 페이지 하단에 고정 */
+  .approval-table td.sign-row { height:14mm; }
+  .approval-table .label { background:#f4f4f4; font-weight:700; font-size:9pt; }
+  .approval-table .placeholder { color:#bbb; font-size:7pt; }
+  .notice-fixed { position:absolute; bottom:18mm; left:14mm; right:14mm; }
   .footer-fixed {
-    position: absolute;
-    bottom: 10mm;
-    left: 14mm;
-    right: 14mm;
-    text-align: center;
-    font-size: 15pt;
-    font-weight: 700;
-    color: #555;
+    position:absolute; bottom:10mm; left:14mm; right:14mm; text-align:center;
+    font-size:15pt; font-weight:700; color:#555;
   }
-  .content-body {
-    padding-top: 42mm;
-    padding-bottom: 12mm;
-  }
-  h1.title {
-    text-align: center;
-    font-size: 18pt;
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin: 0;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 3mm;
-    table-layout: fixed;
-  }
-  table.section-table {
-    margin-bottom: 3.8mm;
-  }
+  .content-body { padding-top:42mm; padding-bottom:12mm; }
+  h1.title { text-align:center; font-size:18pt; font-weight:700; letter-spacing:3px; margin:0; }
+  table { width:100%; border-collapse:collapse; margin-bottom:3mm; table-layout:fixed; }
+  table.section-table { margin-bottom:3.8mm; }
   td, th {
-    border: 1px solid #999;
-    padding: 2px 4px;
-    font-size: 9pt;
-    vertical-align: middle;
-    height: 7.3mm;
-    word-break: keep-all;
+    border:1px solid #999; padding:2px 4px; font-size:9pt; vertical-align:middle;
+    height:7.3mm; word-break:keep-all;
   }
-  .label {
-    background: #f4f4f4;
-    text-align: center;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .label .en {
-    display: block;
-    font-weight: 400;
-    font-size: 8.5pt;
-    color: #555;
-  }
-  .label.same-line .en {
-    display: inline;
-    margin-left: 3px;
-  }
-  .value {
-    text-align: center;
-  }
+  .label { background:#f4f4f4; text-align:center; font-weight:600; white-space:nowrap; }
+  .label .en { display:block; font-weight:400; font-size:8.5pt; color:#555; }
+  .value { text-align:center; }
   .section-title {
-    background: #d9d9d9 !important;
-    text-align: left !important;
-    font-weight: 700;
-    font-size: 10.5pt;
-    padding-left: 6px;
+    background:#d9d9d9 !important; text-align:left !important; font-weight:700;
+    font-size:10.5pt; padding-left:6px;
   }
-  .section-title .en {
-    font-weight: 400;
-    font-size: 9pt;
-    color: #333;
-    display: inline;
+  .section-title .en { font-weight:400; font-size:9pt; color:#333; display:inline; }
+  .fillable { min-height:6mm; }
+  .small-note { font-size:8.5pt; color:#777; text-align:right; margin-top:3mm; }
+  .photo-wrap {
+    width:28mm; height:35mm; margin:0 auto; border:1px dashed #999; display:flex;
+    align-items:center; justify-content:center; overflow:hidden; background:#fff; color:#999;
   }
-  .photo-box {
-    text-align: center;
-    font-size: 9pt;
-    color: #666;
-  }
-  .photo-inner {
-    width: 28mm;
-    height: 35mm;
-    margin: 0 auto;
-    border: 1px dashed #999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #999;
-  }
-  .fillable {
-    min-height: 6mm;
-  }
-  .small-note {
-    font-size: 8.5pt;
-    color: #777;
-    text-align: right;
-    margin-top: 3mm;
-  }
-
+  .photo-wrap img { width:100%; height:100%; object-fit:cover; display:none; }
+  .history-content { text-align:left; line-height:1.25; }
   @media print {
-    body { background: #fff; }
-    .page {
-      margin: 0 auto;
-      box-shadow: none;
-    }
+    body { background:#fff; }
+    .toolbar { display:none; }
+    .page { margin:0 auto; box-shadow:none; }
   }
 </style>
 </head>
 <body>
-<div class="toolbar">
-  <button class="pdf-save-btn" onclick="window.print()">PDF 저장</button>
-  <button type="button" onclick="history.back()" style="margin-left:8px;background:#64748b;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:11pt;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.2);">이전화면</button>
-</div>
-<div class="page">
 
+<div class="toolbar">
+  <div class="lookup-area">
+    <label for="memberKeySearch">회원 Key</label>
+    <input id="memberKeySearch" type="text" value="26082501">
+    <button type="button" class="lookup-btn" id="memberSearchBtn">조회</button>
+    <span id="loadMessage"></span>
+  </div>
+  <div>
+    <button class="pdf-save-btn" onclick="window.print()">PDF 저장</button>
+    <button type="button" onclick="history.back()"
+      style="margin-left:8px;background:#64748b;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:11pt;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.2);">이전화면</button>
+  </div>
+</div>
+
+<div class="page">
   <div class="header-fixed">
     <table class="approval-table">
-      <tr>
-        <td class="label">담 당</td>
-        <td class="label">대 표</td>
-      </tr>
-      <tr>
-        <td class="placeholder sign-row">&nbsp;</td>
-        <td class="placeholder sign-row">&nbsp;</td>
-      </tr>
-      <tr>
-        <td class="placeholder">&nbsp;</td>
-        <td class="placeholder">&nbsp;</td>
-      </tr>
+      <tr><td class="label">담 당</td><td class="label">대 표</td></tr>
+      <tr><td class="placeholder sign-row">&nbsp;</td><td class="placeholder sign-row">&nbsp;</td></tr>
+      <tr><td class="placeholder">&nbsp;</td><td class="placeholder">&nbsp;</td></tr>
     </table>
     <h1 class="title">상담기록카드</h1>
   </div>
 
   <div class="content-body">
+    <div class="header-date">
+      <span id="writtenDate">작성일 : __________ 년 ______ 월 ______ 일</span>
+      <span class="center-item" id="memberKeyDisplay">회원 Key : ___________________</span>
+    </div>
 
-  <div class="header-date">
-    <span>작성일 : __________ 년 ______ 월 ______ 일</span>
-    <span class="center-item">회원 Key : ___________________</span>
+    <table style="width:182mm;">
+      <colgroup>
+        <col style="width:32mm">
+        <col style="width:24mm">
+        <col style="width:50.5mm">
+        <col style="width:21mm">
+        <col style="width:54.5mm">
+      </colgroup>
+      <tr>
+        <td class="label" rowspan="5">
+          <div class="photo-wrap">
+            <span id="photoPlaceholder">사 진<br><span class="en">(Photo)</span></span>
+            <img id="clientPhoto" alt="회원 사진">
+          </div>
+        </td>
+        <td class="label">성 명<span class="en">(Name)</span></td>
+        <td class="value fillable" id="clientName">&nbsp;</td>
+        <td class="label">영 문<span class="en">(English)</span></td>
+        <td class="value fillable" id="englishName">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="label">소속회사<span class="en">(Company)</span></td>
+        <td class="value fillable" id="companyName">&nbsp;</td>
+        <td class="label">성 별<span class="en">(Sex)</span></td>
+        <td class="value fillable" id="sex">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="label">입사일자<span class="en">(Hire Date)</span></td>
+        <td class="value fillable" id="hireDate">&nbsp;</td>
+        <td class="label">업무명<span class="en">(Dept.)</span></td>
+        <td class="value fillable" id="deptName">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="label">전화번호<span class="en">(Phone)</span></td>
+        <td class="value fillable" id="phone">&nbsp;</td>
+        <td class="label">생년월일<span class="en">(D.O.B)</span></td>
+        <td class="value fillable" id="birthDate">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="label">체류지주소<span class="en">(Address)</span></td>
+        <td class="value fillable" id="address">&nbsp;</td>
+        <td class="label">나 이<span class="en">(Age)</span></td>
+        <td class="value fillable" id="age">&nbsp;</td>
+      </tr>
+    </table>
+
+    <table class="section-table">
+      <colgroup>
+        <col style="width:15mm">
+        <col style="width:20mm">
+        <col style="width:20mm">
+        <col style="width:27mm">
+        <col style="width:100mm">
+      </colgroup>
+      <tr>
+        <td class="section-title" colspan="5">• 상담이력 <span class="en">(Counseling History)</span></td>
+      </tr>
+      <tr>
+        <td class="label">NO</td>
+        <td class="label">상담구분</td>
+        <td class="label">상담주제</td>
+        <td class="label">상담일자</td>
+        <td class="label">상담내용</td>
+      </tr>
+      <tbody id="counselHistoryBody"></tbody>
+    </table>
   </div>
 
-  <!-- 기본 인적사항 -->
-  <table style="width:182mm;">
-    <colgroup>
-      <col style="width:32mm">
-      <col style="width:24mm">
-      <col style="width:50.5mm">
-      <col style="width:21mm">
-      <col style="width:54.5mm">
-    </colgroup>
-    <tr>
-      <td class="label" rowspan="5">사 진<br><span class="en">(Photo)</span></td>
-      <td class="label">성 명<span class="en">(Name)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">영 문<span class="en">(English)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="label">소속회사<span class="en">(Company)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">성 별<span class="en">(Sex)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="label">입사일자<span class="en">(Hire Date)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">업무명<span class="en">(Dept.)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="label">전화번호<span class="en">(Phone)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">생년월일<span class="en">(D.O.B)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="label">체류지주소<span class="en">(Address)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">나 이<span class="en">(Age)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-  </table>
-
-  <!-- 상담이력 -->
-  <table class="section-table">
-    <colgroup>
-      <col style="width:15mm">
-      <col style="width:20mm">
-      <col style="width:20mm">
-      <col style="width:27mm">
-      <col style="width:100mm">
-    </colgroup>
-    <tr>
-      <td class="section-title" colspan="5">• 상담이력 <span class="en">(Counseling History)</span></td>
-    </tr>
-    <tr>
-      <td class="label">NO</td>
-      <td class="label">상담구분</td>
-      <td class="label">상담내역</td>
-      <td class="label">상담일자</td>
-      <td class="label">상담내역</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-  </table>
-
-  </div><!-- /content-body -->
-
   <div class="notice-fixed">
-    <div class="small-note" style="text-align:left; font-weight:400;">
+    <div class="small-note" style="text-align:left;font-weight:400;">
       ※ 본 기록카드는 사실에 근거하여 정확하게 작성해 주시기 바랍니다. 기재된 개인정보는 마음:시나브로심리상담연구소의 회원 관리(전산 등록 포함) 및 상담 서비스 제공 목적으로만 사용되며, 관계 법령에 따라 안전하게 관리됩니다. 본 기록카드를 작성하시는 것으로 마음:시나브로심리상담연구소의 개인정보 관리(전산 등록 포함)에 동의하신 것으로 간주합니다.
     </div>
-    <div class="small-note" style="text-align:left; font-weight:400; margin-top:1.5mm; color:#999;">
+    <div class="small-note" style="text-align:left;font-weight:400;margin-top:1.5mm;color:#999;">
       ※ Please fill out this record card accurately and truthfully. The personal information provided will be used solely for member management (including system registration) by Ma-eum: Sinabro Psychological Counseling Institute and for providing counseling services, and will be securely managed in accordance with applicable laws. By completing this record card, you are deemed to have agreed to the institute's management of your personal information (including system registration).
     </div>
   </div>
 
   <div class="footer-fixed">마음:시나브로 심리상담연구소</div>
-
 </div>
+
+<script>
+(() => {
+  'use strict';
+
+  const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      storage: window.sessionStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+
+  const $ = id => document.getElementById(id);
+  let topicMap = Object.create(null);
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[ch]));
+  }
+
+  function blankValue(value) {
+    return value === null || value === undefined ? "" : String(value);
+  }
+
+  function put(id, value) {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = blankValue(value);
+  }
+
+  function dateOnly(value) {
+    if (!value) return "";
+    const text = String(value);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+    const d = new Date(text);
+    if (Number.isNaN(d.getTime())) return "";
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone:"Asia/Seoul", year:"numeric", month:"2-digit", day:"2-digit"
+    }).format(d);
+  }
+
+  function kstTodayParts() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone:"Asia/Seoul", year:"numeric", month:"2-digit", day:"2-digit"
+    }).formatToParts(new Date());
+    const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+    return { year:Number(map.year), month:Number(map.month), day:Number(map.day) };
+  }
+
+  function calcAge(birthDate) {
+    if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(String(birthDate))) return "";
+    const [by,bm,bd] = String(birthDate).split("-").map(Number);
+    const t = kstTodayParts();
+    let age = t.year - by;
+    if (t.month < bm || (t.month === bm && t.day < bd)) age--;
+    return age >= 0 ? `${age}세` : "";
+  }
+
+  function sexLabel(code) {
+    const v = String(code || "").toUpperCase();
+    if (["M","MALE","남","남성"].includes(v)) return "남";
+    if (["F","FEMALE","여","여성"].includes(v)) return "여";
+    return blankValue(code);
+  }
+
+  function topicName(value) {
+    const v = blankValue(value).trim();
+    if (!v) return "";
+    return topicMap[v] || v;
+  }
+
+  function joinTopics(...values) {
+    const names = values.map(topicName).filter(Boolean);
+    return [...new Set(names)].join(" / ");
+  }
+
+  function setWrittenDate() {
+    const t = kstTodayParts();
+    $("writtenDate").textContent =
+      `작성일 : ${t.year} 년 ${String(t.month).padStart(2,"0")} 월 ${String(t.day).padStart(2,"0")} 일`;
+  }
+
+  function blankRows(count) {
+    return Array.from({length:count}, () => `
+      <tr>
+        <td class="value fillable">&nbsp;</td>
+        <td class="value fillable">&nbsp;</td>
+        <td class="value fillable">&nbsp;</td>
+        <td class="value fillable">&nbsp;</td>
+        <td class="value fillable">&nbsp;</td>
+      </tr>`).join("");
+  }
+
+  function renderHistory(rows) {
+    const body = $("counselHistoryBody");
+    const html = rows.map((r, index) => `
+      <tr>
+        <td class="value fillable">${index + 1}</td>
+        <td class="value fillable">${escapeHtml(r.type)}</td>
+        <td class="value fillable">${escapeHtml(r.topic)}</td>
+        <td class="value fillable">${escapeHtml(r.date)}</td>
+        <td class="value fillable history-content">${escapeHtml(r.content)}</td>
+      </tr>`).join("");
+
+    body.innerHTML = html + blankRows(Math.max(0, 9 - rows.length));
+  }
+
+  function clearPhoto() {
+    const img = $("clientPhoto");
+    img.removeAttribute("src");
+    img.style.display = "none";
+    $("photoPlaceholder").style.display = "";
+  }
+
+  function clearCard() {
+    $("memberKeyDisplay").textContent = "회원 Key : ";
+    ["clientName","englishName","companyName","sex","hireDate","deptName","phone","birthDate","address","age"]
+      .forEach(id => put(id, ""));
+    clearPhoto();
+    renderHistory([]);
+  }
+
+  async function loadTopicMap() {
+    const { data, error } = await db.from("counsel_topic").select("code,name");
+    if (error) {
+      console.warn("상담주제 코드 조회 실패:", error);
+      topicMap = Object.create(null);
+      return;
+    }
+    topicMap = Object.create(null);
+    (data || []).forEach(row => {
+      if (row.code) topicMap[row.code] = row.name || row.code;
+    });
+  }
+
+  function groupRowsByReceipt(rows, type) {
+    const groups = new Map();
+    for (const row of rows) {
+      const receiptKey = row.receipt_at || (type === "PC" ? row.receipt_date : "") || `row:${row.id}`;
+      if (!groups.has(receiptKey)) groups.set(receiptKey, { key:receiptKey, type, rows:[] });
+      groups.get(receiptKey).rows.push(row);
+    }
+    return [...groups.values()].sort((a,b) => String(a.key).localeCompare(String(b.key)));
+  }
+
+  function buildPsychHistory(rows) {
+    const result = [];
+    for (const group of groupRowsByReceipt(rows, "PC")) {
+      const ordered = [...group.rows].sort((a,b) =>
+        String(a.created_at || "").localeCompare(String(b.created_at || ""))
+      );
+      const receiptSource = ordered.find(r => r.record_active === true) || ordered[0];
+      if (receiptSource) {
+        result.push({
+          type:"심리상담",
+          topic:joinTopics(receiptSource.topic_code, receiptSource.application_topic_1, receiptSource.application_topic_2),
+          date:dateOnly(receiptSource.receipt_at || receiptSource.receipt_date || receiptSource.application_date),
+          content:blankValue(receiptSource.application_content)
+        });
+      }
+
+      const sessions = ordered
+        .filter(r => r.session_no !== null && r.session_no !== undefined)
+        .sort((a,b) => Number(a.session_no) - Number(b.session_no));
+
+      for (const r of sessions) {
+        result.push({
+          type:"심리상담",
+          topic:joinTopics(r.session_topic_1, r.session_topic_2, r.topic_code),
+          date:dateOnly(r.session_start_at || r.visit_date),
+          content:blankValue(r.session_content)
+        });
+      }
+    }
+    return result;
+  }
+
+  function buildCareerHistory(rows) {
+    const result = [];
+    for (const group of groupRowsByReceipt(rows, "CC")) {
+      const ordered = [...group.rows].sort((a,b) =>
+        String(a.created_at || "").localeCompare(String(b.created_at || ""))
+      );
+
+      // 현재 DB 구조에서 진로 접수내용은 counseling_content에 저장된다.
+      // 1회기 등록 시 같은 컬럼이 회기 상담내용으로 갱신되므로,
+      // session_no가 NULL인 접수 전용 행이 있을 때만 접수내용을 정확히 읽을 수 있다.
+      const receiptOnly = ordered.find(r => r.session_no === null || r.session_no === undefined);
+      const receiptBase = receiptOnly || ordered[0];
+      if (receiptBase) {
+        result.push({
+          type:"진로상담",
+          topic:joinTopics(receiptBase.topic_code, receiptOnly ? receiptOnly.career_topic_1 : ""),
+          date:dateOnly(receiptBase.receipt_at),
+          content:receiptOnly ? blankValue(receiptOnly.counseling_content) : ""
+        });
+      }
+
+      const sessions = ordered
+        .filter(r => r.session_no !== null && r.session_no !== undefined)
+        .sort((a,b) => Number(a.session_no) - Number(b.session_no));
+
+      for (const r of sessions) {
+        result.push({
+          type:"진로상담",
+          topic:joinTopics(r.career_topic_1, r.career_topic_2, r.topic_code),
+          date:dateOnly(r.session_start_at || r.counseling_date),
+          content:blankValue(r.counseling_content)
+        });
+      }
+    }
+    return result;
+  }
+
+  async function loadPhoto(clientId) {
+    clearPhoto();
+    const { data:meta, error:metaError } = await db
+      .from("counsel_record_photos")
+      .select("bucket_id,object_path")
+      .eq("db_basic_id", clientId)
+      .order("created_at", { ascending:false })
+      .limit(1)
+      .maybeSingle();
+
+    if (metaError || !meta) return;
+
+    const { data, error } = await db.storage
+      .from(meta.bucket_id)
+      .createSignedUrl(meta.object_path, 300);
+
+    if (error || !data?.signedUrl) return;
+    $("clientPhoto").src = data.signedUrl;
+    $("clientPhoto").style.display = "block";
+    $("photoPlaceholder").style.display = "none";
+  }
+
+  async function loadMember(memberKey) {
+    const msg = $("loadMessage");
+    clearCard();
+    msg.textContent = "조회 중...";
+    msg.style.color = "#475569";
+
+    const { data:member, error:memberError } = await db
+      .from("DB_basic")
+      .select("id,member_key,counsel_type,client_name,english_name,company_name,sex_code,birth_date,client_phone,client_address,department_name")
+      .eq("member_key", memberKey)
+      .maybeSingle();
+
+    if (memberError) {
+      console.error(memberError);
+      msg.textContent = "회원 조회 오류";
+      msg.style.color = "#b91c1c";
+      return;
+    }
+    if (!member) {
+      msg.textContent = "해당 회원 Key가 없습니다.";
+      msg.style.color = "#b91c1c";
+      return;
+    }
+
+    $("memberKeyDisplay").textContent = `회원 Key : ${blankValue(member.member_key)}`;
+    put("clientName", member.client_name);
+    put("englishName", member.english_name);
+    put("companyName", member.company_name);
+    put("sex", sexLabel(member.sex_code));
+    put("hireDate", "");
+    put("deptName", member.department_name);
+    put("phone", member.client_phone);
+    put("birthDate", dateOnly(member.birth_date));
+    put("address", member.client_address);
+    put("age", calcAge(member.birth_date));
+
+    const [psych, career] = await Promise.all([
+      db.from("DB_psychological_counseling")
+        .select("id,client_id,receipt_at,receipt_date,application_date,application_topic_1,application_topic_2,topic_code,application_content,visit_date,session_no,session_topic_1,session_topic_2,session_content,session_start_at,record_active,created_at")
+        .eq("client_id", member.id)
+        .order("created_at", { ascending:true }),
+      db.from("DB_career_counseling")
+        .select("id,client_id,receipt_at,topic_code,career_topic_1,career_topic_2,counseling_content,counseling_date,session_no,session_start_at,record_active,created_at")
+        .eq("client_id", member.id)
+        .order("created_at", { ascending:true })
+    ]);
+
+    if (psych.error) console.error("심리상담 조회 오류:", psych.error);
+    if (career.error) console.error("진로상담 조회 오류:", career.error);
+
+    const history = [
+      ...buildPsychHistory(psych.data || []),
+      ...buildCareerHistory(career.data || [])
+    ];
+
+    // 상담유형별 접수 → 해당 회기 순서를 유지하고,
+    // 서로 다른 접수건은 접수일 기준으로 정렬한다.
+    history.sort((a,b) => {
+      const da = a.date || "9999-12-31";
+      const dbb = b.date || "9999-12-31";
+      return da.localeCompare(dbb);
+    });
+
+    renderHistory(history);
+    loadPhoto(member.id);
+
+    msg.textContent = `${blankValue(member.client_name)} 조회 완료 · 상담이력 ${history.length}건`;
+    msg.style.color = "#166534";
+  }
+
+  $("memberSearchBtn").addEventListener("click", () => {
+    const key = $("memberKeySearch").value.trim();
+    if (!key) {
+      clearCard();
+      $("loadMessage").textContent = "회원 Key를 입력하세요.";
+      $("loadMessage").style.color = "#b91c1c";
+      return;
+    }
+    loadMember(key);
+  });
+
+  $("memberKeySearch").addEventListener("keydown", e => {
+    if (e.key === "Enter") $("memberSearchBtn").click();
+  });
+
+  async function init() {
+    setWrittenDate();
+    clearCard();
+    await loadTopicMap();
+    // 김상담 테스트 기본값: 회원 Key 26082501
+    await loadMember("26082501");
+  }
+
+  init().catch(err => {
+    console.error("상담기록카드 초기화 오류:", err);
+    $("loadMessage").textContent = "초기화 오류";
+    $("loadMessage").style.color = "#b91c1c";
+  });
+})();
+</script>
 </body>
 </html>
