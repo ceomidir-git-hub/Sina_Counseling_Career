@@ -31,10 +31,13 @@
     font-size:11pt; font-weight:700; font-family:inherit; cursor:pointer;
     box-shadow:0 2px 4px rgba(0,0,0,.2);
   }
+
+  /* 상단 버튼 영역과 문서 사이 간격 축소: 기존 10mm -> 3mm */
   .page {
-    position:relative; width:210mm; height:297mm; margin:10mm auto; background:#fff;
+    position:relative; width:210mm; height:297mm; margin:3mm auto 10mm; background:#fff;
     padding:0 14mm; box-shadow:0 0 8px rgba(0,0,0,.15);
   }
+
   .header-fixed { position:absolute; top:12mm; left:14mm; right:14mm; }
   .header-date {
     position:relative; font-size:9pt; color:#333; margin:0 0 2mm 0;
@@ -83,6 +86,14 @@
   }
   .photo-wrap img { width:100%; height:100%; object-fit:cover; display:none; }
   .history-content { text-align:left; line-height:1.25; }
+
+  /* 상담일자: 25.5mm 폭에서 요일 포함 날짜가 한 줄로 보이도록 최적화 */
+  .history-date {
+    white-space:nowrap;
+    font-size:8.5pt;
+    font-variant-numeric:tabular-nums;
+  }
+
   @media print {
     body { background:#fff; }
     .toolbar { display:none; }
@@ -170,18 +181,21 @@
 
     <table class="section-table">
       <colgroup>
-        <col style="width:15mm">
+        <!-- NO: 기존 15mm에서 30% 축소 = 10.5mm -->
+        <col style="width:10.5mm">
         <col style="width:20mm">
         <col style="width:20mm">
-        <col style="width:27mm">
-        <col style="width:100mm">
+        <!-- 상담일자: 요일 포함 한 줄 표기를 고려해 25.5mm로 최적화 -->
+        <col style="width:25.5mm">
+        <!-- 전체 182mm 유지: 10.5 + 20 + 20 + 25.5 + 106 = 182 -->
+        <col style="width:106mm">
       </colgroup>
       <tr>
         <td class="section-title" colspan="5">• 상담이력 <span class="en">(Counseling History)</span></td>
       </tr>
       <tr>
         <td class="label">NO</td>
-        <td class="label">상담구분</td>
+        <td class="label">상담대상</td>
         <td class="label">상담주제</td>
         <td class="label">상담일자</td>
         <td class="label">상담내용</td>
@@ -220,6 +234,7 @@
 
   const $ = id => document.getElementById(id);
   let topicMap = Object.create(null);
+  let clientTypeMap = Object.create(null);
 
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, ch => ({
@@ -246,6 +261,25 @@
     return new Intl.DateTimeFormat("en-CA", {
       timeZone:"Asia/Seoul", year:"numeric", month:"2-digit", day:"2-digit"
     }).format(d);
+  }
+
+  // 상담일자 표기: YYYY.MM.DD(요일)
+  function dateWithWeekday(value) {
+    const iso = dateOnly(value);
+    if (!iso) return "";
+
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return iso;
+
+    const year = Number(m[1]);
+    const month = Number(m[2]);
+    const day = Number(m[3]);
+    const date = new Date(year, month - 1, day, 12, 0, 0);
+
+    if (Number.isNaN(date.getTime())) return iso;
+
+    const dayNames = ["일","월","화","수","목","금","토"];
+    return `${m[1]}.${m[2]}.${m[3]}(${dayNames[date.getDay()]})`;
   }
 
   function kstTodayParts() {
@@ -283,6 +317,12 @@
     return [...new Set(names)].join(" / ");
   }
 
+  function clientTypeName(value) {
+    const v = blankValue(value).trim();
+    if (!v) return "";
+    return clientTypeMap[v] || v;
+  }
+
   function setWrittenDate() {
     const t = kstTodayParts();
     $("writtenDate").textContent =
@@ -305,9 +345,9 @@
     const html = rows.map((r, index) => `
       <tr>
         <td class="value fillable">${index + 1}</td>
-        <td class="value fillable">${escapeHtml(r.type)}</td>
+        <td class="value fillable">${escapeHtml(r.target)}</td>
         <td class="value fillable">${escapeHtml(r.topic)}</td>
-        <td class="value fillable">${escapeHtml(r.date)}</td>
+        <td class="value fillable history-date">${escapeHtml(r.date)}</td>
         <td class="value fillable history-content">${escapeHtml(r.content)}</td>
       </tr>`).join("");
 
@@ -342,6 +382,19 @@
     });
   }
 
+  async function loadClientTypeMap() {
+    const { data, error } = await db.from("counsel_client_type").select("code,name");
+    if (error) {
+      console.warn("상담대상 코드 조회 실패:", error);
+      clientTypeMap = Object.create(null);
+      return;
+    }
+    clientTypeMap = Object.create(null);
+    (data || []).forEach(row => {
+      if (row.code) clientTypeMap[row.code] = row.name || row.code;
+    });
+  }
+
   function groupRowsByReceipt(rows, type) {
     const groups = new Map();
     for (const row of rows) {
@@ -354,16 +407,33 @@
 
   function buildPsychHistory(rows) {
     const result = [];
+
     for (const group of groupRowsByReceipt(rows, "PC")) {
       const ordered = [...group.rows].sort((a,b) =>
         String(a.created_at || "").localeCompare(String(b.created_at || ""))
       );
+
       const receiptSource = ordered.find(r => r.record_active === true) || ordered[0];
+
       if (receiptSource) {
         result.push({
-          type:"심리상담",
-          topic:joinTopics(receiptSource.topic_code, receiptSource.application_topic_1, receiptSource.application_topic_2),
-          date:dateOnly(receiptSource.receipt_at || receiptSource.receipt_date || receiptSource.application_date),
+          target:clientTypeName(receiptSource.client_type_code),
+          topic:joinTopics(
+            receiptSource.topic_code,
+            receiptSource.application_topic_1,
+            receiptSource.application_topic_2
+          ),
+          date:dateWithWeekday(
+            receiptSource.receipt_at ||
+            receiptSource.receipt_date ||
+            receiptSource.application_date
+          ),
+          sortDate:dateOnly(
+            receiptSource.receipt_at ||
+            receiptSource.receipt_date ||
+            receiptSource.application_date
+          ),
+          // 접수상담등록의 접수상담내용
           content:blankValue(receiptSource.application_content)
         });
       }
@@ -374,34 +444,44 @@
 
       for (const r of sessions) {
         result.push({
-          type:"심리상담",
+          target:clientTypeName(r.client_type_code || receiptSource?.client_type_code),
           topic:joinTopics(r.session_topic_1, r.session_topic_2, r.topic_code),
-          date:dateOnly(r.session_start_at || r.visit_date),
+          date:dateWithWeekday(r.session_start_at || r.visit_date),
+          sortDate:dateOnly(r.session_start_at || r.visit_date),
           content:blankValue(r.session_content)
         });
       }
     }
+
     return result;
   }
 
   function buildCareerHistory(rows) {
     const result = [];
+
     for (const group of groupRowsByReceipt(rows, "CC")) {
       const ordered = [...group.rows].sort((a,b) =>
         String(a.created_at || "").localeCompare(String(b.created_at || ""))
       );
 
-      // 현재 DB 구조에서 진로 접수내용은 counseling_content에 저장된다.
-      // 1회기 등록 시 같은 컬럼이 회기 상담내용으로 갱신되므로,
-      // session_no가 NULL인 접수 전용 행이 있을 때만 접수내용을 정확히 읽을 수 있다.
       const receiptOnly = ordered.find(r => r.session_no === null || r.session_no === undefined);
       const receiptBase = receiptOnly || ordered[0];
+
       if (receiptBase) {
         result.push({
-          type:"진로상담",
-          topic:joinTopics(receiptBase.topic_code, receiptOnly ? receiptOnly.career_topic_1 : ""),
-          date:dateOnly(receiptBase.receipt_at),
-          content:receiptOnly ? blankValue(receiptOnly.counseling_content) : ""
+          target:clientTypeName(receiptBase.client_type_code),
+          topic:joinTopics(
+            receiptBase.topic_code,
+            receiptBase.career_topic_1
+          ),
+          date:dateWithWeekday(receiptBase.receipt_at),
+          sortDate:dateOnly(receiptBase.receipt_at),
+
+          // 접수상담등록 진로상담의 상담내용은 counseling_content에 저장된다.
+          // 별도 접수행이 있으면 그 행의 값을 사용하고,
+          // 별도 접수행이 없으면 해당 접수그룹의 최초 DB 실제값을 그대로 사용한다.
+          // 임의 문구나 추정값은 생성하지 않는다.
+          content:blankValue((receiptOnly || receiptBase).counseling_content)
         });
       }
 
@@ -411,18 +491,21 @@
 
       for (const r of sessions) {
         result.push({
-          type:"진로상담",
+          target:clientTypeName(r.client_type_code || receiptBase?.client_type_code),
           topic:joinTopics(r.career_topic_1, r.career_topic_2, r.topic_code),
-          date:dateOnly(r.session_start_at || r.counseling_date),
+          date:dateWithWeekday(r.session_start_at || r.counseling_date),
+          sortDate:dateOnly(r.session_start_at || r.counseling_date),
           content:blankValue(r.counseling_content)
         });
       }
     }
+
     return result;
   }
 
   async function loadPhoto(clientId) {
     clearPhoto();
+
     const { data:meta, error:metaError } = await db
       .from("counsel_record_photos")
       .select("bucket_id,object_path")
@@ -438,6 +521,7 @@
       .createSignedUrl(meta.object_path, 300);
 
     if (error || !data?.signedUrl) return;
+
     $("clientPhoto").src = data.signedUrl;
     $("clientPhoto").style.display = "block";
     $("photoPlaceholder").style.display = "none";
@@ -446,12 +530,13 @@
   async function loadMember(memberKey) {
     const msg = $("loadMessage");
     clearCard();
+
     msg.textContent = "조회 중...";
     msg.style.color = "#475569";
 
     const { data:member, error:memberError } = await db
       .from("DB_basic")
-      .select("id,member_key,counsel_type,client_name,english_name,company_name,sex_code,birth_date,client_phone,client_address,department_name")
+      .select("id,member_key,counsel_type,client_name,english_name,company_name,sex_code,birth_date,client_phone,client_address,major_career")
       .eq("member_key", memberKey)
       .maybeSingle();
 
@@ -461,6 +546,7 @@
       msg.style.color = "#b91c1c";
       return;
     }
+
     if (!member) {
       msg.textContent = "해당 회원 Key가 없습니다.";
       msg.style.color = "#b91c1c";
@@ -468,12 +554,16 @@
     }
 
     $("memberKeyDisplay").textContent = `회원 Key : ${blankValue(member.member_key)}`;
+
     put("clientName", member.client_name);
     put("englishName", member.english_name);
     put("companyName", member.company_name);
     put("sex", sexLabel(member.sex_code));
     put("hireDate", "");
-    put("deptName", member.department_name);
+
+    // 업무명 = 접수상담등록의 주요경력(DB_basic.major_career)
+    put("deptName", member.major_career);
+
     put("phone", member.client_phone);
     put("birthDate", dateOnly(member.birth_date));
     put("address", member.client_address);
@@ -481,11 +571,12 @@
 
     const [psych, career] = await Promise.all([
       db.from("DB_psychological_counseling")
-        .select("id,client_id,receipt_at,receipt_date,application_date,application_topic_1,application_topic_2,topic_code,application_content,visit_date,session_no,session_topic_1,session_topic_2,session_content,session_start_at,record_active,created_at")
+        .select("id,client_id,receipt_at,receipt_date,application_date,client_type_code,application_topic_1,application_topic_2,topic_code,application_content,visit_date,session_no,session_topic_1,session_topic_2,session_content,session_start_at,record_active,created_at")
         .eq("client_id", member.id)
         .order("created_at", { ascending:true }),
+
       db.from("DB_career_counseling")
-        .select("id,client_id,receipt_at,topic_code,career_topic_1,career_topic_2,counseling_content,counseling_date,session_no,session_start_at,record_active,created_at")
+        .select("id,client_id,receipt_at,client_type_code,topic_code,career_topic_1,career_topic_2,counseling_content,counseling_date,session_no,session_start_at,record_active,created_at")
         .eq("client_id", member.id)
         .order("created_at", { ascending:true })
     ]);
@@ -498,11 +589,9 @@
       ...buildCareerHistory(career.data || [])
     ];
 
-    // 상담유형별 접수 → 해당 회기 순서를 유지하고,
-    // 서로 다른 접수건은 접수일 기준으로 정렬한다.
     history.sort((a,b) => {
-      const da = a.date || "9999-12-31";
-      const dbb = b.date || "9999-12-31";
+      const da = a.sortDate || "9999-12-31";
+      const dbb = b.sortDate || "9999-12-31";
       return da.localeCompare(dbb);
     });
 
@@ -515,12 +604,14 @@
 
   $("memberSearchBtn").addEventListener("click", () => {
     const key = $("memberKeySearch").value.trim();
+
     if (!key) {
       clearCard();
       $("loadMessage").textContent = "회원 Key를 입력하세요.";
       $("loadMessage").style.color = "#b91c1c";
       return;
     }
+
     loadMember(key);
   });
 
@@ -531,7 +622,12 @@
   async function init() {
     setWrittenDate();
     clearCard();
-    await loadTopicMap();
+
+    await Promise.all([
+      loadTopicMap(),
+      loadClientTypeMap()
+    ]);
+
     // 김상담 테스트 기본값: 회원 Key 26082501
     await loadMember("26082501");
   }
