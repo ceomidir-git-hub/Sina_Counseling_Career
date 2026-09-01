@@ -94,6 +94,11 @@
     font-variant-numeric:tabular-nums;
   }
 
+  .section-table td:nth-child(4),
+  .section-table tr:nth-child(2) td:nth-child(4) {
+    white-space:nowrap;
+  }
+
   @media print {
     body { background:#fff; }
     .toolbar { display:none; }
@@ -181,22 +186,27 @@
 
     <table class="section-table">
       <colgroup>
-        <!-- NO: 기존 15mm에서 30% 축소 = 10.5mm -->
+        <!-- 전체 폭 182mm 고정 -->
+        <!-- NO: 기존 15mm 대비 30% 축소 -->
         <col style="width:10.5mm">
-        <col style="width:20mm">
-        <col style="width:20mm">
-        <!-- 상담일자: 요일 포함 한 줄 표기를 고려해 25.5mm로 최적화 -->
+        <!-- 상담대상/상담주제: 9pt 한글 제목 + 좌우 padding을 고려해 17mm로 축소 -->
+        <col style="width:17mm">
+        <col style="width:17mm">
+        <!-- 회기: 접수 / 1회기 / 2회기 표기에 필요한 폭 -->
+        <col style="width:13mm">
+        <!-- 상담일자: YYYY.MM.DD(요일) 한 줄 표기 -->
         <col style="width:25.5mm">
-        <!-- 전체 182mm 유지: 10.5 + 20 + 20 + 25.5 + 106 = 182 -->
-        <col style="width:106mm">
+        <!-- 10.5 + 17 + 17 + 13 + 25.5 + 99 = 182mm -->
+        <col style="width:99mm">
       </colgroup>
       <tr>
-        <td class="section-title" colspan="5">• 상담이력 <span class="en">(Counseling History)</span></td>
+        <td class="section-title" colspan="6">• 상담이력 <span class="en">(Counseling History)</span></td>
       </tr>
       <tr>
         <td class="label">NO</td>
         <td class="label">상담대상</td>
         <td class="label">상담주제</td>
+        <td class="label">회기</td>
         <td class="label">상담일자</td>
         <td class="label">상담내용</td>
       </tr>
@@ -337,6 +347,7 @@
         <td class="value fillable">&nbsp;</td>
         <td class="value fillable">&nbsp;</td>
         <td class="value fillable">&nbsp;</td>
+        <td class="value fillable">&nbsp;</td>
       </tr>`).join("");
   }
 
@@ -347,6 +358,7 @@
         <td class="value fillable">${index + 1}</td>
         <td class="value fillable">${escapeHtml(r.target)}</td>
         <td class="value fillable">${escapeHtml(r.topic)}</td>
+        <td class="value fillable">${escapeHtml(r.sessionLabel)}</td>
         <td class="value fillable history-date">${escapeHtml(r.date)}</td>
         <td class="value fillable history-content">${escapeHtml(r.content)}</td>
       </tr>`).join("");
@@ -423,6 +435,8 @@
             receiptSource.application_topic_1,
             receiptSource.application_topic_2
           ),
+          sessionLabel:"접수",
+          sessionOrder:0,
           date:dateWithWeekday(
             receiptSource.receipt_at ||
             receiptSource.receipt_date ||
@@ -446,6 +460,8 @@
         result.push({
           target:clientTypeName(r.client_type_code || receiptSource?.client_type_code),
           topic:joinTopics(r.session_topic_1, r.session_topic_2, r.topic_code),
+          sessionLabel:`${Number(r.session_no)}회기`,
+          sessionOrder:Number(r.session_no),
           date:dateWithWeekday(r.session_start_at || r.visit_date),
           sortDate:dateOnly(r.session_start_at || r.visit_date),
           content:blankValue(r.session_content)
@@ -474,6 +490,8 @@
             receiptBase.topic_code,
             receiptBase.career_topic_1
           ),
+          sessionLabel:"접수",
+          sessionOrder:0,
           date:dateWithWeekday(receiptBase.receipt_at),
           sortDate:dateOnly(receiptBase.receipt_at),
 
@@ -493,6 +511,8 @@
         result.push({
           target:clientTypeName(r.client_type_code || receiptBase?.client_type_code),
           topic:joinTopics(r.career_topic_1, r.career_topic_2, r.topic_code),
+          sessionLabel:`${Number(r.session_no)}회기`,
+          sessionOrder:Number(r.session_no),
           date:dateWithWeekday(r.session_start_at || r.counseling_date),
           sortDate:dateOnly(r.session_start_at || r.counseling_date),
           content:blankValue(r.counseling_content)
@@ -592,7 +612,12 @@
     history.sort((a,b) => {
       const da = a.sortDate || "9999-12-31";
       const dbb = b.sortDate || "9999-12-31";
-      return da.localeCompare(dbb);
+      const dateCompare = da.localeCompare(dbb);
+      if (dateCompare !== 0) return dateCompare;
+
+      const sa = Number.isFinite(a.sessionOrder) ? a.sessionOrder : 9999;
+      const sb = Number.isFinite(b.sessionOrder) ? b.sessionOrder : 9999;
+      return sa - sb;
     });
 
     renderHistory(history);
