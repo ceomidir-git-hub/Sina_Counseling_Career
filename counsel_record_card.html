@@ -81,10 +81,28 @@
   .fillable { min-height:6mm; }
   .small-note { font-size:8.5pt; color:#777; text-align:right; margin-top:3mm; }
   .photo-wrap {
+    position:relative;
     width:28mm; height:35mm; margin:0 auto; border:1px dashed #999; display:flex;
     align-items:center; justify-content:center; overflow:hidden; background:#fff; color:#999;
   }
-  .photo-wrap img { width:100%; height:100%; object-fit:cover; display:none; }
+  .photo-wrap img {
+    width:100%; height:100%; object-fit:contain; display:none;
+    background:#fff;
+  }
+  .photo-controls {
+    position:absolute; right:1.2mm; bottom:1.2mm; z-index:3;
+    display:flex; gap:1mm;
+  }
+  .photo-control-btn {
+    width:6mm; height:6mm; min-width:6mm; padding:0;
+    border:1px solid rgba(71,85,105,.8); border-radius:50%;
+    background:rgba(255,255,255,.92); color:#334155;
+    font-family:inherit; font-size:9pt; font-weight:800; line-height:1;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .photo-control-btn:hover { background:#f8fafc; }
+  .photo-control-btn:disabled { opacity:.4; cursor:not-allowed; }
+  .photo-file-input { display:none; }
   .history-content { text-align:left; line-height:1.25; }
 
   /* 상담일자: 25.5mm 폭에서 요일 포함 날짜가 한 줄로 보이도록 최적화 */
@@ -102,6 +120,7 @@
   @media print {
     body { background:#fff; }
     .toolbar { display:none; }
+    .photo-controls { display:none !important; }
     .page { margin:0 auto; box-shadow:none; }
   }
 </style>
@@ -111,7 +130,7 @@
 <div class="toolbar">
   <div class="lookup-area">
     <label for="memberKeySearch">회원 Key</label>
-    <input id="memberKeySearch" type="text" value="26082501">
+    <input id="memberKeySearch" type="text" value="">
     <button type="button" class="lookup-btn" id="memberSearchBtn">조회</button>
     <span id="loadMessage"></span>
   </div>
@@ -151,6 +170,12 @@
           <div class="photo-wrap">
             <span id="photoPlaceholder">사 진<br><span class="en">(Photo)</span></span>
             <img id="clientPhoto" alt="회원 사진">
+            <div class="photo-controls" aria-label="사진 관리">
+              <button type="button" class="photo-control-btn" id="photoAddBtn" title="사진 추가">+</button>
+              <button type="button" class="photo-control-btn" id="photoDeleteBtn" title="사진 삭제">−</button>
+            </div>
+            <input id="photoFileInput" class="photo-file-input" type="file"
+                   accept="image/jpeg,image/png,image/webp">
           </div>
         </td>
         <td class="label">성 명<span class="en">(Name)</span></td>
@@ -246,6 +271,15 @@
   let topicMap = Object.create(null);
   let clientTypeMap = Object.create(null);
 
+  const PHOTO_BUCKET = "counsel-record-photos";
+  const PHOTO_TABLE = "counsel_record_photos";
+  const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+  const PHOTO_ALLOWED_TYPES = new Set(["image/jpeg","image/png","image/webp"]);
+
+  let currentMemberId = null;
+  let currentMemberKey = "";
+  let currentPhotoMeta = null;
+
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, ch => ({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -339,18 +373,6 @@
       `작성일 : ${t.year} 년 ${String(t.month).padStart(2,"0")} 월 ${String(t.day).padStart(2,"0")} 일`;
   }
 
-  function blankRows(count) {
-    return Array.from({length:count}, () => `
-      <tr>
-        <td class="value fillable">&nbsp;</td>
-        <td class="value fillable">&nbsp;</td>
-        <td class="value fillable">&nbsp;</td>
-        <td class="value fillable">&nbsp;</td>
-        <td class="value fillable">&nbsp;</td>
-        <td class="value fillable">&nbsp;</td>
-      </tr>`).join("");
-  }
-
   function renderHistory(rows) {
     const body = $("counselHistoryBody");
     const html = rows.map((r, index) => `
@@ -363,22 +385,62 @@
         <td class="value fillable history-content">${escapeHtml(r.content)}</td>
       </tr>`).join("");
 
-    body.innerHTML = html + blankRows(Math.max(0, 9 - rows.length));
+    body.innerHTML = html;
   }
 
-  function clearPhoto() {
+  function clearPhoto(clearMeta = true) {
     const img = $("clientPhoto");
     img.removeAttribute("src");
     img.style.display = "none";
     $("photoPlaceholder").style.display = "";
+    if (clearMeta) currentPhotoMeta = null;
+    updatePhotoButtons();
+  }
+
+  function updatePhotoButtons() {
+    const addBtn = $("photoAddBtn");
+    const delBtn = $("photoDeleteBtn");
+    if (!addBtn || !delBtn) return;
+
+    const hasMember = !!currentMemberId && !!currentMemberKey;
+    addBtn.disabled = !hasMember;
+    delBtn.disabled = !hasMember || !currentPhotoMeta;
+  }
+
+  function photoErrorMessage(error, fallback) {
+    const message = String(error?.message || error || "").trim();
+    if (/row-level security|rls|policy|permission|not authorized|unauthorized/i.test(message)) {
+      return "사진 저장 권한(RLS 정책)이 설정되어 있지 않아 처리할 수 없습니다.";
+    }
+    return message ? `${fallback}: ${message}` : fallback;
+  }
+
+  function safeFileName(name) {
+    const original = String(name || "photo").trim();
+    const cleaned = original
+      .normalize("NFKC")
+      .replace(/[^0-9A-Za-z._-]+/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_+|_+$/g, "");
+    return cleaned || "photo";
+  }
+
+  async function getAuthUserId() {
+    const { data, error } = await db.auth.getUser();
+    if (error) return null;
+    return data?.user?.id || null;
   }
 
   function clearCard() {
+    currentMemberId = null;
+    currentMemberKey = "";
+    currentPhotoMeta = null;
     $("memberKeyDisplay").textContent = "회원 Key : ";
     ["clientName","englishName","companyName","sex","hireDate","deptName","phone","birthDate","address","age"]
       .forEach(id => put(id, ""));
     clearPhoto();
     renderHistory([]);
+    updatePhotoButtons();
   }
 
   async function loadTopicMap() {
@@ -527,25 +589,189 @@
     clearPhoto();
 
     const { data:meta, error:metaError } = await db
-      .from("counsel_record_photos")
-      .select("bucket_id,object_path")
+      .from(PHOTO_TABLE)
+      .select("id,bucket_id,object_path,original_file_name,mime_type,file_size_bytes,created_at")
       .eq("db_basic_id", clientId)
       .order("created_at", { ascending:false })
       .limit(1)
       .maybeSingle();
 
-    if (metaError || !meta) return;
+    if (metaError) {
+      console.error("사진 메타 조회 오류:", metaError);
+      updatePhotoButtons();
+      return;
+    }
+
+    if (!meta) {
+      currentPhotoMeta = null;
+      updatePhotoButtons();
+      return;
+    }
+
+    currentPhotoMeta = meta;
+    updatePhotoButtons();
 
     const { data, error } = await db.storage
-      .from(meta.bucket_id)
+      .from(meta.bucket_id || PHOTO_BUCKET)
       .createSignedUrl(meta.object_path, 300);
 
-    if (error || !data?.signedUrl) return;
+    if (error || !data?.signedUrl) {
+      console.error("사진 URL 생성 오류:", error);
+      return;
+    }
 
     $("clientPhoto").src = data.signedUrl;
     $("clientPhoto").style.display = "block";
     $("photoPlaceholder").style.display = "none";
   }
+
+  async function uploadPhoto(file) {
+    const msg = $("loadMessage");
+
+    if (!currentMemberId || !currentMemberKey) {
+      msg.textContent = "먼저 회원 Key를 조회하세요.";
+      msg.style.color = "#b91c1c";
+      return;
+    }
+
+    if (!file) return;
+
+    if (!PHOTO_ALLOWED_TYPES.has(file.type)) {
+      msg.textContent = "사진은 JPG, PNG, WEBP 형식만 등록할 수 있습니다.";
+      msg.style.color = "#b91c1c";
+      return;
+    }
+
+    if (file.size > PHOTO_MAX_BYTES) {
+      msg.textContent = "사진 파일은 5MB 이하만 등록할 수 있습니다.";
+      msg.style.color = "#b91c1c";
+      return;
+    }
+
+    $("photoAddBtn").disabled = true;
+    $("photoDeleteBtn").disabled = true;
+    msg.textContent = "사진 등록 중...";
+    msg.style.color = "#475569";
+
+    const extMatch = safeFileName(file.name).match(/\.([A-Za-z0-9]+)$/);
+    const ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
+    const objectPath = `${currentMemberKey}/${crypto.randomUUID()}.${ext}`;
+
+    try {
+      const { error:uploadError } = await db.storage
+        .from(PHOTO_BUCKET)
+        .upload(objectPath, file, {
+          cacheControl:"3600",
+          upsert:false,
+          contentType:file.type
+        });
+
+      if (uploadError) throw uploadError;
+
+      const uploadedBy = await getAuthUserId();
+
+      const { error:metaError } = await db
+        .from(PHOTO_TABLE)
+        .insert([{
+          db_basic_id:currentMemberId,
+          member_key:currentMemberKey,
+          bucket_id:PHOTO_BUCKET,
+          object_path:objectPath,
+          original_file_name:file.name,
+          mime_type:file.type,
+          file_size_bytes:file.size,
+          uploaded_by:uploadedBy
+        }]);
+
+      if (metaError) {
+        // 메타 저장 실패 시 방금 올린 Storage 파일을 정리한다.
+        await db.storage.from(PHOTO_BUCKET).remove([objectPath]);
+        throw metaError;
+      }
+
+      await loadPhoto(currentMemberId);
+      msg.textContent = "사진이 등록되었습니다.";
+      msg.style.color = "#166534";
+
+    } catch (error) {
+      console.error("사진 등록 오류:", error);
+      msg.textContent = photoErrorMessage(error, "사진 등록 오류");
+      msg.style.color = "#b91c1c";
+    } finally {
+      $("photoFileInput").value = "";
+      updatePhotoButtons();
+    }
+  }
+
+  async function deletePhoto() {
+    const msg = $("loadMessage");
+
+    if (!currentMemberId || !currentMemberKey) {
+      msg.textContent = "먼저 회원 Key를 조회하세요.";
+      msg.style.color = "#b91c1c";
+      return;
+    }
+
+    if (!currentPhotoMeta) {
+      msg.textContent = "삭제할 사진이 없습니다.";
+      msg.style.color = "#b91c1c";
+      return;
+    }
+
+    const confirmed = window.confirm("현재 등록된 사진을 삭제하시겠습니까?");
+    if (!confirmed) return;
+
+    $("photoAddBtn").disabled = true;
+    $("photoDeleteBtn").disabled = true;
+    msg.textContent = "사진 삭제 중...";
+    msg.style.color = "#475569";
+
+    const photo = { ...currentPhotoMeta };
+
+    try {
+      const { error:storageError } = await db.storage
+        .from(photo.bucket_id || PHOTO_BUCKET)
+        .remove([photo.object_path]);
+
+      if (storageError) throw storageError;
+
+      const { error:metaError } = await db
+        .from(PHOTO_TABLE)
+        .delete()
+        .eq("id", photo.id)
+        .eq("db_basic_id", currentMemberId);
+
+      if (metaError) throw metaError;
+
+      clearPhoto();
+      msg.textContent = "사진이 삭제되었습니다.";
+      msg.style.color = "#166534";
+
+    } catch (error) {
+      console.error("사진 삭제 오류:", error);
+      msg.textContent = photoErrorMessage(error, "사진 삭제 오류");
+      msg.style.color = "#b91c1c";
+      await loadPhoto(currentMemberId);
+    } finally {
+      updatePhotoButtons();
+    }
+  }
+
+  $("photoAddBtn").addEventListener("click", () => {
+    if (!currentMemberId || !currentMemberKey) {
+      $("loadMessage").textContent = "먼저 회원 Key를 조회하세요.";
+      $("loadMessage").style.color = "#b91c1c";
+      return;
+    }
+    $("photoFileInput").click();
+  });
+
+  $("photoDeleteBtn").addEventListener("click", deletePhoto);
+
+  $("photoFileInput").addEventListener("change", e => {
+    const file = e.target.files?.[0] || null;
+    if (file) uploadPhoto(file);
+  });
 
   async function loadMember(memberKey) {
     const msg = $("loadMessage");
@@ -572,6 +798,11 @@
       msg.style.color = "#b91c1c";
       return;
     }
+
+    currentMemberId = member.id;
+    currentMemberKey = blankValue(member.member_key).trim();
+    currentPhotoMeta = null;
+    updatePhotoButtons();
 
     $("memberKeyDisplay").textContent = `회원 Key : ${blankValue(member.member_key)}`;
 
@@ -621,7 +852,7 @@
     });
 
     renderHistory(history);
-    loadPhoto(member.id);
+    await loadPhoto(member.id);
 
     msg.textContent = `${blankValue(member.client_name)} 조회 완료 · 상담이력 ${history.length}건`;
     msg.style.color = "#166534";
@@ -653,8 +884,10 @@
       loadClientTypeMap()
     ]);
 
-    // 김상담 테스트 기본값: 회원 Key 26082501
-    await loadMember("26082501");
+    // 최초 진입 시 회원 Key 기본값 및 자동 조회 없음.
+    $("memberKeySearch").value = "";
+    $("loadMessage").textContent = "";
+    updatePhotoButtons();
   }
 
   init().catch(err => {
