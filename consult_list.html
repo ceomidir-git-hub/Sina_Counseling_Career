@@ -986,14 +986,27 @@ col.session{width:11%}
   }
   function sessionText(psychRows,careerRows,type){
     const parts = [];
+
+    // 접수 데이터는 존재하지만 1회기 이상 상담기록(session_no)이 아직 없으면
+    // 최종회기를 "-"가 아니라 "접수"로 표시한다.
     if (type !== "CC" && psychRows.length){
       const n = maxSession(psychRows);
-      parts.push(type === "ALL" && careerRows.length ? `심리 ${n ? n+"회" : "-"}` : (n ? `${n}회기` : "-"));
+      parts.push(
+        type === "ALL" && careerRows.length
+          ? `심리 ${n ? n+"회" : "접수"}`
+          : (n ? `${n}회기` : "접수")
+      );
     }
+
     if (type !== "PC" && careerRows.length){
       const n = maxSession(careerRows);
-      parts.push(type === "ALL" && psychRows.length ? `진로 ${n ? n+"회" : "-"}` : (n ? `${n}회기` : "-"));
+      parts.push(
+        type === "ALL" && psychRows.length
+          ? `진로 ${n ? n+"회" : "접수"}`
+          : (n ? `${n}회기` : "접수")
+      );
     }
+
     return parts.length ? parts.join(" · ") : "-";
   }
   function typeText(psychRows,careerRows,type){
