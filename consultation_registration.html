@@ -75,20 +75,19 @@
   /* ===== FINAL 2026-08-29 : 이전상담 요약 정식 표기 ===== */
   .receipt-summary-row{
     grid-column:1 / -1;
-    display:grid;
-    grid-template-columns:27mm minmax(0,1fr);
-    align-items:start;
-    gap:2.5mm;
+    display:block;
     margin-top:3.2mm;
   }
   .receipt-summary-label{
-    padding-top:9px;
+    margin:0 0 1.6mm;
+    padding:0;
     font-size:12.5px;
     font-weight:850;
     color:#252b34;
     white-space:nowrap;
   }
   .receipt-summary-box{
+    width:100%;
     min-height:24mm;
     padding:9px 10px;
     border:1px solid #cfd6df;
@@ -179,7 +178,7 @@
   }
 
   @media(max-width:760px){
-    .receipt-summary-row{grid-template-columns:90px minmax(0,1fr)}
+    .receipt-summary-row{display:block}
   }
 
   /* PDF 전용 문서폼: 화면 입력 컨트롤을 직접 인쇄하지 않고 값만 문서칸으로 변환 */
@@ -434,14 +433,13 @@
 
   /* 주소 아래 '이전상담 요약' - 화면과 동일한 정식 항목 */
   .print-summary-row{
-    display:grid!important;
-    grid-template-columns:27mm minmax(0,1fr)!important;
-    align-items:start!important;
-    gap:2.5mm!important;
+    display:block!important;
     margin-top:2.2mm!important;
   }
   .print-summary-row .print-label{
-    padding-top:2mm!important;
+    display:block!important;
+    margin:0 0 1.4mm!important;
+    padding:0!important;
   }
   .print-summary-box{
     min-height:15mm!important;
@@ -541,17 +539,18 @@
   }
 
   .print-summary-row{
-    display:flex!important;
-    align-items:flex-start!important;
-    gap:2.5mm!important;
+    display:block!important;
+    margin-top:3mm!important;
   }
   .print-summary-row > .print-label{
-    flex:0 0 27mm!important;
-    width:27mm!important;
+    display:block!important;
+    width:auto!important;
+    margin:0 0 1.4mm!important;
+    padding:0!important;
   }
   .print-summary-row > .print-summary-box{
-    flex:1 1 auto!important;
-    width:auto!important;
+    display:flex!important;
+    width:100%!important;
   }
 }
 
@@ -627,7 +626,8 @@
     margin-top:3mm!important;
   }
   .print-summary-row .print-label{
-    padding-top:2.3mm!important;
+    margin:0 0 1.4mm!important;
+    padding:0!important;
   }
   .print-summary-box{
     min-height:27mm!important;
@@ -848,6 +848,19 @@ function updateDuration(){const s=combineDateTime($("startDate").value,$("startT
 ["startDate","startTime","endDate","endTime"].forEach(id=>$(id).addEventListener("change",updateDuration));
 ["startDate","endDate","nextReservationDate"].forEach(id=>{
   $(id).addEventListener("change",updateAllDateWeekdayChips);
+});
+
+// 실시일 시작 날짜를 입력/변경하면 실시일 종료 날짜도 같은 날짜로 자동 연결한다.
+// 전체 폼 구조는 그대로 두고 날짜 값만 동기화한다.
+$("startDate").addEventListener("change",()=>{
+  const startDateValue=$("startDate").value;
+  if(startDateValue){
+    $("endDate").value=startDateValue;
+  }else{
+    $("endDate").value="";
+  }
+  updateAllDateWeekdayChips();
+  updateDuration();
 });
 let sessionDuplicateBlocked=false;
 
@@ -1167,10 +1180,7 @@ function populateFromReceipt(item){
   const topic=item.topic||"-";
 
   $("receiptMeta").textContent=
-    `이전상담 : ${stageLabel}\n`+
-    `상담종류 : ${typeLabel}\n`+
-    `상담일시 : ${item.dateText||"-"}\n`+
-    `상담주제 : ${topic}\n`+
+    `이전상담 : ${stageLabel}   |   상담종류 : ${typeLabel}   |   상담일시 : ${item.dateText||"-"}   |   상담주제 : ${topic}\n`+
     `상담내용 : ${content}`;
 
   expectedNextSessionNo=Number(item.maxSessionNo||0)+1;
