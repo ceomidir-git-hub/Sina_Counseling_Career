@@ -178,6 +178,24 @@
   .value {
     text-align: center;
   }
+  .sign-cell {
+    position: relative;
+    padding-right: 10mm;
+  }
+  .sign-cell .sign-mark {
+    position: absolute;
+    right: 3mm;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 700;
+    font-size: 9pt;
+    color: #999;
+    white-space: nowrap;
+  }
+  .sign-cell .sign-mark.en-sign {
+    font-size: 7.5pt;
+    font-weight: 600;
+  }
   .section-title {
     background: #d9d9d9 !important;
     text-align: left !important;
@@ -273,9 +291,9 @@
     <tr>
       <td class="label" rowspan="5">사 진<br><span class="en">(Photo)</span></td>
       <td class="label">성 명<span class="en">(Name)</span></td>
-      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable sign-cell">&nbsp;<span class="sign-mark">인</span></td>
       <td class="label">영 문<span class="en">(English)</span></td>
-      <td class="value fillable">&nbsp;</td>
+      <td class="value fillable sign-cell">&nbsp;<span class="sign-mark en-sign">Sign</span></td>
     </tr>
     <tr>
       <td class="label">소속회사<span class="en">(Company)</span></td>
