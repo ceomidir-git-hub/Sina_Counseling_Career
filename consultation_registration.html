@@ -72,7 +72,7 @@
   @media(max-width:760px){.a4-page{width:calc(100vw - 16px);padding:18px 14px}.top-row{margin-bottom:16px}.grid-2,.tests{grid-template-columns:1fr}.form-pair.full{grid-column:auto}.actions{width:100%;gap:8px}}
 
 
-  /* ===== FINAL 2026-08-29 : 접수상담 요약 정식 표기 ===== */
+  /* ===== FINAL 2026-08-29 : 이전상담 요약 정식 표기 ===== */
   .receipt-summary-row{
     grid-column:1 / -1;
     display:grid;
@@ -295,7 +295,7 @@
 /* ==========================================================
    FINAL 2026-08-29 : 상담등록 화면/PDF 동일 구성
    - 머릿글/바닥글: 접수상담등록 확정 형식과 동일
-   - 접수상담 요약: 주소 아래 정식 항목
+   - 이전상담 요약: 주소 아래 정식 항목
    - 상세 상담내용: 제목 다음 행 전체 폭
    - A4 세로 1페이지 유지
    ========================================================== */
@@ -432,7 +432,7 @@
     overflow-wrap:anywhere!important;
   }
 
-  /* 주소 아래 '접수상담 요약' - 화면과 동일한 정식 항목 */
+  /* 주소 아래 '이전상담 요약' - 화면과 동일한 정식 항목 */
   .print-summary-row{
     display:grid!important;
     grid-template-columns:27mm minmax(0,1fr)!important;
@@ -620,7 +620,7 @@
     overflow:hidden!important;
   }
 
-  /* 접수상담 요약:
+  /* 이전상담 요약:
      고정 15mm + overflow:hidden 제거가 핵심.
      내용이 여러 줄이어도 프레임 안에서 정상 표시한다. */
   .print-summary-row{
@@ -673,20 +673,20 @@
 <div id="statusMsg" class="statusMsg"></div>
 <form id="consultForm" autocomplete="off">
 <section class="section">
-<div class="section-head"><h2>1. 내담자 정보</h2><button type="button" class="lookup-btn no-print" id="lookupBtn">⌕ 접수상담조회</button></div>
+<div class="section-head"><h2>1. 내담자 정보</h2><button type="button" class="lookup-btn no-print" id="lookupBtn">⌕ 이전상담조회</button></div>
 <div class="section-body">
 <div class="grid-2">
 <div class="form-pair"><label for="clientName">내담자명</label><input type="text" id="clientName" placeholder="내담자명 입력"></div>
 <div class="form-pair"><label for="clientPhone">연락처</label><input type="text" id="clientPhone" placeholder="010-0000-0000" maxlength="13" inputmode="numeric"></div>
-<div class="form-pair"><label for="gender">성별</label><input type="text" id="gender" readonly placeholder="접수상담조회 후 자동"></div>
-<div class="form-pair"><label for="birthDate">생년월일</label><input type="text" id="birthDate" readonly placeholder="접수상담조회 후 자동"></div>
+<div class="form-pair"><label for="gender">성별</label><input type="text" id="gender" readonly placeholder="이전상담조회 후 자동"></div>
+<div class="form-pair"><label for="birthDate">생년월일</label><input type="text" id="birthDate" readonly placeholder="이전상담조회 후 자동"></div>
 <div class="form-pair"><label for="age">나이</label><input type="text" id="age" readonly placeholder="자동 계산"></div>
-<div class="form-pair"><label for="job">직업</label><input type="text" id="job" readonly placeholder="접수상담조회 후 자동"></div>
-<div class="form-pair full"><label for="address">주소</label><input type="text" id="address" readonly placeholder="접수상담조회 후 자동"></div>
+<div class="form-pair"><label for="job">직업</label><input type="text" id="job" readonly placeholder="이전상담조회 후 자동"></div>
+<div class="form-pair full"><label for="address">주소</label><input type="text" id="address" readonly placeholder="이전상담조회 후 자동"></div>
 </div>
 <div class="receipt-summary-row">
-  <div class="receipt-summary-label">접수상담 요약</div>
-  <div id="receiptMeta" class="receipt-summary-box">접수상담조회 후 자동으로 표시됩니다.</div>
+  <div class="receipt-summary-label">이전상담 요약</div>
+  <div id="receiptMeta" class="receipt-summary-box">이전상담조회 후 자동으로 표시됩니다.</div>
 </div>
 </div>
 </section>
@@ -745,9 +745,9 @@
 
 <div class="modal-backdrop no-print" id="lookupModalBackdrop" aria-hidden="true">
 <section class="modal" role="dialog" aria-modal="true" aria-labelledby="lookupModalTitle">
-<div class="modal-head"><h3 id="lookupModalTitle">회원 Key 조회</h3><button type="button" class="modal-x" id="lookupCloseBtn">×</button></div>
+<div class="modal-head"><h3 id="lookupModalTitle">이전상담 조회 · 회원 KEY</h3><button type="button" class="modal-x" id="lookupCloseBtn">×</button></div>
 <div class="modal-search"><input type="text" id="lookupMemberKey" placeholder="회원 Key 입력" autocomplete="off"><button type="button" id="lookupSearchBtn">조회</button></div>
-<div class="lookup-results" id="lookupResults"><div class="lookup-empty">회원 Key로 접수상담을 조회하세요.</div></div>
+<div class="lookup-results" id="lookupResults"><div class="lookup-empty">회원 KEY를 입력하면 접수 및 이전 회기를 조회합니다.</div></div>
 </section>
 </div>
 
@@ -759,7 +759,7 @@ const SUPABASE_URL="https://fafdxaifluftnertbpvr.supabase.co";
 const SUPABASE_KEY="sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 const BASIC_TABLE="DB_basic",PSYCH_TABLE="DB_psychological_counseling",CAREER_TABLE="DB_career_counseling";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true}});
-let currentEmployee=null,selectedReceipt=null,sexMap={},jobMap={},targetMap={},topicMap={},toolMap={};
+let currentEmployee=null,selectedReceipt=null,expectedNextSessionNo=null,sexMap={},jobMap={},targetMap={},topicMap={},toolMap={};
 const $=id=>document.getElementById(id),form=$("consultForm"),statusMsg=$("statusMsg"),submitBtn=$("submitBtn"),modalBackdrop=$("lookupModalBackdrop"),lookupResults=$("lookupResults");
 
 function showStatus(type,message){statusMsg.className="statusMsg show "+type;statusMsg.textContent=message;statusMsg.scrollIntoView({behavior:"smooth",block:"nearest"})}
@@ -850,14 +850,38 @@ function updateDuration(){const s=combineDateTime($("startDate").value,$("startT
   $(id).addEventListener("change",updateAllDateWeekdayChips);
 });
 let sessionDuplicateBlocked=false;
+
+function ensureSessionOption(sessionNo){
+  const n=Number(sessionNo);
+  if(!Number.isFinite(n)||n<=0) return;
+  const el=$("sessionNo");
+  if(!Array.from(el.options).some(o=>Number(o.value)===n)){
+    const option=document.createElement("option");
+    option.value=String(n);
+    option.textContent=`${n}회기`;
+    el.appendChild(option);
+  }
+}
+
 async function checkSelectedSessionDuplicate(){
   sessionDuplicateBlocked=false;
   const n=Number($("sessionNo").value);
-  $("nextSessionNo").value=Number.isFinite(n)&&n>0&&n<10?`${n+1}회기`:"";
+  $("nextSessionNo").value=Number.isFinite(n)&&n>0?`${n+1}회기`:"";
   markInvalid($("sessionNo"), false);
 
   if(!selectedReceipt || !Number.isFinite(n) || n<=0){
     if(currentEmployee?.permission!=="조회자") submitBtn.disabled=false;
+    return;
+  }
+
+  if(Number.isFinite(expectedNextSessionNo) && expectedNextSessionNo>0 && n!==expectedNextSessionNo){
+    sessionDuplicateBlocked=true;
+    markInvalid($("sessionNo"), true);
+    submitBtn.disabled=true;
+    showStatus(
+      "error",
+      `회기 누락 방지를 위해 금회 회기는 ${expectedNextSessionNo}회기로 자동 연결됩니다. ${n}회기로 변경할 수 없습니다.`
+    );
     return;
   }
 
@@ -868,11 +892,11 @@ async function checkSelectedSessionDuplicate(){
       sessionDuplicateBlocked=true;
       markInvalid($("sessionNo"), true);
       submitBtn.disabled=true;
-      showStatus("error",`선택한 ${n}회기는 이미 등록되어 있습니다. 다른 회기를 선택해주세요.`);
+      showStatus("error",`선택한 ${n}회기는 이미 등록되어 있습니다. 이전 상담 이력을 다시 조회해주세요.`);
     }else{
       if(statusMsg.classList.contains("error") && statusMsg.textContent.includes("회기")) hideStatus();
       if(currentEmployee?.permission!=="조회자") submitBtn.disabled=false;
-      showStatus("info",`${n}회기는 등록 가능합니다.`);
+      showStatus("info",`${n}회기가 금회 회기로 자동 설정되었습니다.`);
     }
   }catch(err){
     console.error("회기 중복 확인 오류:",err);
@@ -889,22 +913,153 @@ async function loadLookups(){try{const [s,j,t,tp,tools]=await Promise.all([loadC
 
 async function guardLogin(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){alert("로그인이 필요한 화면입니다. 메인화면으로 이동합니다.");location.href="index.html";return false}const {data:employee,error}=await sb.from("employee").select("name,position,permission,active").eq("auth_user_id",session.user.id).maybeSingle();if(error||!employee||!employee.active){alert("사용자 권한을 확인할 수 없습니다. 메인화면으로 이동합니다.");location.href="index.html";return false}currentEmployee=employee;if(employee.permission==="조회자"){submitBtn.disabled=true;submitBtn.title="조회자는 상담 등록 권한이 없습니다.";showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")}return true}
 
-function openLookup(){$("lookupMemberKey").value="";lookupResults.innerHTML='<div class="lookup-empty">회원 Key로 접수상담을 조회하세요.</div>';modalBackdrop.classList.add("show");modalBackdrop.setAttribute("aria-hidden","false");setTimeout(()=>$("lookupMemberKey").focus(),0)}
+function openLookup(){$("lookupMemberKey").value="";lookupResults.innerHTML='<div class="lookup-empty">회원 KEY를 입력하면 접수 및 이전 회기를 조회합니다.</div>';modalBackdrop.classList.add("show");modalBackdrop.setAttribute("aria-hidden","false");setTimeout(()=>$("lookupMemberKey").focus(),0)}
 function closeLookup(){modalBackdrop.classList.remove("show");modalBackdrop.setAttribute("aria-hidden","true")}
 $("lookupBtn").addEventListener("click",openLookup);$("lookupCloseBtn").addEventListener("click",closeLookup);modalBackdrop.addEventListener("click",e=>{if(e.target===modalBackdrop)closeLookup()});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLookup()});
 
-async function getReceiptRows(client){const ps="id,client_id,receptionist_name,receptionist_phone,receptionist_relationship,receipt_at,visit_at,client_type_code,topic_code,application_content,session_no,record_active";const cs="id,client_id,receptionist_name,receptionist_phone,receptionist_relationship,receipt_at,appointment_at,client_type_code,topic_code,counseling_content,session_no,record_active";const [p,c]=await Promise.all([sb.from(PSYCH_TABLE).select(ps).eq("client_id",client.id).eq("record_active",true).order("receipt_at",{ascending:false,nullsFirst:false}),sb.from(CAREER_TABLE).select(cs).eq("client_id",client.id).eq("record_active",true).order("receipt_at",{ascending:false,nullsFirst:false})]);if(p.error)throw p.error;if(c.error)throw c.error;const rows=[];(p.data||[]).forEach(row=>rows.push({type:"PC",client,row}));(c.data||[]).forEach(row=>rows.push({type:"CC",client,row}));return rows.sort((a,b)=>new Date(b.row.receipt_at||0)-new Date(a.row.receipt_at||0))}
-function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
+async function getHistoryRows(client){
+  const ps=[
+    "id","client_id","receptionist_name","receptionist_phone","receptionist_relationship",
+    "receipt_at","receipt_date","visit_at","visit_date","client_type_code","topic_code",
+    "application_content","session_no","session_topic_1","session_content",
+    "session_start_at","session_end_at","next_session_date","next_session_at",
+    "session_status","assessment_tool","record_active","created_at","updated_at","contact_method"
+  ].join(",");
+
+  const cs=[
+    "id","client_id","receptionist_name","receptionist_phone","receptionist_relationship",
+    "receipt_at","appointment_at","counseling_date","client_type_code","topic_code",
+    "counseling_content","session_no","career_topic_1",
+    "session_start_at","session_end_at","next_session_date","next_session_at",
+    "session_status","assessment_tool","record_active","created_at","updated_at","contact_method"
+  ].join(",");
+
+  const [p,c]=await Promise.all([
+    sb.from(PSYCH_TABLE).select(ps).eq("client_id",client.id),
+    sb.from(CAREER_TABLE).select(cs).eq("client_id",client.id)
+  ]);
+
+  if(p.error) throw p.error;
+  if(c.error) throw c.error;
+
+  return {PC:(p.data||[]),CC:(c.data||[])};
+}
+
+function escapeHtml(v){
+  return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
+function historyDateText(type,row,stage){
+  if(stage==="receipt") return formatKST(row.receipt_at);
+  if(row.session_start_at) return formatKST(row.session_start_at);
+  const dateValue=type==="PC"?(row.visit_date||""):(row.counseling_date||"");
+  return dateValue?formatDateWithWeekday(dateValue):"-";
+}
+
+function receiptContentOf(type,row){
+  return type==="PC"
+    ? String(row.application_content||"").trim()
+    : String(row.counseling_content||"").trim();
+}
+
+function sessionContentOf(type,row){
+  return type==="PC"
+    ? String(row.session_content||"").trim()
+    : String(row.counseling_content||"").trim();
+}
+
+function receiptTopicOf(row){
+  return topicMap[row.topic_code]||row.topic_code||"-";
+}
+
+function sessionTopicOf(type,row){
+  if(type==="PC") return row.session_topic_1||topicMap[row.topic_code]||row.topic_code||"-";
+  return row.career_topic_1||topicMap[row.topic_code]||row.topic_code||"-";
+}
+
+function compactPreview(value,maxLen=110){
+  const oneLine=String(value||"").replace(/\s+/g," ").trim();
+  if(!oneLine) return "-";
+  return oneLine.length>maxLen?oneLine.slice(0,maxLen)+"…":oneLine;
+}
+
+function pickReceiptRow(rows){
+  if(!rows.length) return null;
+
+  const pureReceipt=rows
+    .filter(r=>r.session_no==null)
+    .sort((a,b)=>String(a.receipt_at||a.created_at||"").localeCompare(String(b.receipt_at||b.created_at||"")))[0];
+
+  if(pureReceipt) return pureReceipt;
+
+  return rows.slice().sort((a,b)=>{
+    const da=String(a.receipt_at||a.created_at||"");
+    const db=String(b.receipt_at||b.created_at||"");
+    if(da!==db) return da.localeCompare(db);
+    return Number(a.session_no||999)-Number(b.session_no||999);
+  })[0];
+}
+
+function buildHistoryItems(type,client,rows){
+  if(!rows.length) return [];
+
+  const receiptRow=pickReceiptRow(rows);
+  const maxSessionNo=rows.reduce((max,row)=>{
+    const n=Number(row.session_no);
+    return Number.isFinite(n)&&n>max?n:max;
+  },0);
+
+  const items=[];
+
+  if(receiptRow){
+    items.push({
+      type,client,row:receiptRow,receiptRow,
+      stage:"receipt",stageLabel:"접수",sessionNo:0,maxSessionNo,
+      topic:receiptTopicOf(receiptRow),
+      content:receiptContentOf(type,receiptRow),
+      dateText:historyDateText(type,receiptRow,"receipt")
+    });
+  }
+
+  const bySession=new Map();
+  rows.forEach(row=>{
+    const n=Number(row.session_no);
+    if(!Number.isFinite(n)||n<=0) return;
+
+    const previous=bySession.get(n);
+    if(!previous){
+      bySession.set(n,row);
+      return;
+    }
+
+    const oldTime=String(previous.updated_at||previous.created_at||"");
+    const newTime=String(row.updated_at||row.created_at||"");
+    if(newTime>oldTime) bySession.set(n,row);
+  });
+
+  Array.from(bySession.keys()).sort((a,b)=>a-b).forEach(n=>{
+    const row=bySession.get(n);
+    items.push({
+      type,client,row,receiptRow:receiptRow||row,
+      stage:"session",stageLabel:`${n}회기`,sessionNo:n,maxSessionNo,
+      topic:sessionTopicOf(type,row),
+      content:sessionContentOf(type,row),
+      dateText:historyDateText(type,row,"session")
+    });
+  });
+
+  return items;
+}
 
 async function searchReceipts(){
   const memberKey=$("lookupMemberKey").value.trim();
 
   if(!memberKey){
-    lookupResults.innerHTML='<div class="lookup-empty">회원 Key를 입력해주세요.</div>';
+    lookupResults.innerHTML='<div class="lookup-empty">회원 KEY를 입력해주세요.</div>';
     return;
   }
 
-  lookupResults.innerHTML='<div class="lookup-empty">조회 중...</div>';
+  lookupResults.innerHTML='<div class="lookup-empty">접수 및 이전 상담 이력을 조회 중입니다...</div>';
 
   try{
     const {data:client,error}=await sb
@@ -916,31 +1071,44 @@ async function searchReceipts(){
     if(error) throw error;
 
     if(!client){
-      lookupResults.innerHTML='<div class="lookup-empty">일치하는 회원 Key의 내담자 기본정보가 없습니다.</div>';
+      lookupResults.innerHTML='<div class="lookup-empty">일치하는 회원 KEY의 내담자 기본정보가 없습니다.</div>';
       return;
     }
 
-    const candidates=await getReceiptRows(client);
+    const history=await getHistoryRows(client);
+    const candidates=[
+      ...buildHistoryItems("PC",client,history.PC),
+      ...buildHistoryItems("CC",client,history.CC)
+    ];
 
     if(!candidates.length){
-      lookupResults.innerHTML='<div class="lookup-empty">해당 회원 Key의 활성 접수상담 기록이 없습니다.</div>';
+      lookupResults.innerHTML='<div class="lookup-empty">해당 회원 KEY의 접수 또는 이전 상담 이력이 없습니다.</div>';
       return;
     }
+
+    candidates.sort((a,b)=>{
+      if(a.type!==b.type) return a.type==="PC"?-1:1;
+      return a.sessionNo-b.sessionNo;
+    });
 
     lookupResults.innerHTML="";
 
     candidates.forEach(item=>{
       const typeLabel=item.type==="PC"?"심리상담":"진로상담";
-      const appt=item.type==="PC"?item.row.visit_at:item.row.appointment_at;
       const card=document.createElement("div");
 
       card.className="lookup-card";
       card.innerHTML=
-        `<div class="lookup-card-top"><strong>${escapeHtml(item.client.client_name)} · ${escapeHtml(formatPhone(item.client.client_phone))}</strong><span class="type-badge">${typeLabel}</span></div>`+
-        `<p>회원 Key : ${escapeHtml(item.client.member_key||memberKey)}</p>`+
-        `<p>접수일시 : ${escapeHtml(formatKST(item.row.receipt_at))}</p>`+
-        `<p>예약일시 : ${escapeHtml(formatKST(appt))}</p>`+
-        `<p>상담대상 : ${escapeHtml(targetMap[item.row.client_type_code]||item.row.client_type_code||"-")} · 상담주제 : ${escapeHtml(topicMap[item.row.topic_code]||item.row.topic_code||"-")}</p>`;
+        `<div class="lookup-card-top">`+
+          `<strong>${escapeHtml(item.stageLabel)} · ${escapeHtml(item.client.client_name)}</strong>`+
+          `<span class="type-badge">${typeLabel}</span>`+
+        `</div>`+
+        `<p>회원 KEY : ${escapeHtml(item.client.member_key||memberKey)} · 상담단계 : ${escapeHtml(item.stageLabel)}</p>`+
+        `<p>일시 : ${escapeHtml(item.dateText||"-")}</p>`+
+        `<p>상담주제 : ${escapeHtml(item.topic||"-")}</p>`+
+        `<p>내용 : ${escapeHtml(compactPreview(item.content))}</p>`+
+        `<p>현재 DB 최종회기 : ${item.maxSessionNo>0?escapeHtml(item.maxSessionNo+"회기"):"접수"} · `+
+        `금회 자동회기 : ${escapeHtml((item.maxSessionNo+1)+"회기")}</p>`;
 
       card.addEventListener("click",()=>{
         selectedReceipt=item;
@@ -956,12 +1124,17 @@ async function searchReceipts(){
     lookupResults.innerHTML=`<div class="lookup-empty">조회 중 오류가 발생했습니다.<br>${escapeHtml(err.message||String(err))}</div>`;
   }
 }
+
 $("lookupSearchBtn").addEventListener("click",searchReceipts);
-$("lookupMemberKey").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchReceipts();}});
+$("lookupMemberKey").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    searchReceipts();
+  }
+});
 
 function populateFromReceipt(item){
   const {client,row,type}=item;
-  const appt=isoToLocalParts(type==="PC"?row.visit_at:row.appointment_at);
 
   $("clientName").value=client.client_name||"";
   $("clientPhone").value=formatPhone(client.client_phone||"");
@@ -971,21 +1144,39 @@ function populateFromReceipt(item){
   $("job").value=jobMap[client.job_code]||client.job_code||"";
   $("address").value=client.client_address||"";
 
-  $("reservationDate").value=appt.date||"";
-  $("reservationTime").value=appt.time||"";
+  let reservation={date:"",time:""};
+
+  if(item.stage==="receipt"){
+    const originalAppointment=type==="PC"?row.visit_at:row.appointment_at;
+    reservation=isoToLocalParts(originalAppointment);
+  }else if(row.next_session_at){
+    reservation=isoToLocalParts(row.next_session_at);
+  }else if(row.next_session_date){
+    reservation={date:row.next_session_date,time:""};
+  }
+
+  $("reservationDate").value=reservation.date||"";
+  $("reservationTime").value=reservation.time||"";
 
   $("consultationTarget").value=row.client_type_code||"";
   $("consultationTopic").value=row.topic_code||"";
 
   const typeLabel=type==="PC"?"심리상담":"진로상담";
-  const receiptContent=type==="PC"?(row.application_content||"-"):(row.counseling_content||"-");
+  const stageLabel=item.stageLabel||"접수";
+  const content=item.content||"-";
+  const topic=item.topic||"-";
 
   $("receiptMeta").textContent=
-    `${typeLabel} 접수 연결
-`+
-    `접수일시 : ${formatKST(row.receipt_at)}
-`+
-    `접수내용 : ${receiptContent}`;
+    `이전상담 : ${stageLabel}\n`+
+    `상담종류 : ${typeLabel}\n`+
+    `상담일시 : ${item.dateText||"-"}\n`+
+    `상담주제 : ${topic}\n`+
+    `상담내용 : ${content}`;
+
+  expectedNextSessionNo=Number(item.maxSessionNo||0)+1;
+  ensureSessionOption(expectedNextSessionNo);
+  $("sessionNo").value=String(expectedNextSessionNo);
+  $("nextSessionNo").value=`${expectedNextSessionNo+1}회기`;
 
   const today=new Intl.DateTimeFormat("en-CA",{
     timeZone:"Asia/Seoul",
@@ -995,8 +1186,13 @@ function populateFromReceipt(item){
   if(!$("startDate").value)$("startDate").value=today;
 
   updateAllDateWeekdayChips();
-  hideStatus();
-  showStatus("success",`${typeLabel} 접수기록을 상담등록 화면에 불러왔습니다.`);
+  checkSelectedSessionDuplicate();
+
+  showStatus(
+    "success",
+    `${typeLabel} ${stageLabel}을 이전상담으로 불러왔습니다. `+
+    `DB 최종회기를 기준으로 금회 회기는 ${expectedNextSessionNo}회기로 자동 설정되었습니다.`
+  );
 }
 
 const markInvalid=(el,invalid)=>el.classList.toggle("invalid",!!invalid);
@@ -1076,7 +1272,7 @@ function assertSavedSessionTiming(savedRow, expectedPayload){
     );
   }
 }
-function validateForm(){let ok=true;[$("clientName"),$("clientPhone"),$("sessionNo"),$("startDate"),$("startTime"),$("endDate"),$("endTime"),$("consultationTarget"),$("consultationTopic"),$("counselDetail")].forEach(el=>{const invalid=!String(el.value||"").trim();markInvalid(el,invalid);if(invalid)ok=false});const s=combineDateTime($("startDate").value,$("startTime").value),e=combineDateTime($("endDate").value,$("endTime").value);if(s&&e&&e<=s){markInvalid($("endDate"),true);markInvalid($("endTime"),true);ok=false;showStatus("error","실시일 종료는 시작보다 늦어야 합니다.")}if(!selectedReceipt){ok=false;showStatus("error","먼저 접수상담조회를 통해 등록할 접수기록을 선택해주세요.")}if(sessionDuplicateBlocked){ok=false;showStatus("error","선택한 회기는 이미 등록되어 있습니다. 다른 회기를 선택해주세요.")}return ok}
+function validateForm(){let ok=true;[$("clientName"),$("clientPhone"),$("sessionNo"),$("startDate"),$("startTime"),$("endDate"),$("endTime"),$("consultationTarget"),$("consultationTopic"),$("counselDetail")].forEach(el=>{const invalid=!String(el.value||"").trim();markInvalid(el,invalid);if(invalid)ok=false});const s=combineDateTime($("startDate").value,$("startTime").value),e=combineDateTime($("endDate").value,$("endTime").value);if(s&&e&&e<=s){markInvalid($("endDate"),true);markInvalid($("endTime"),true);ok=false;showStatus("error","실시일 종료는 시작보다 늦어야 합니다.")}if(!selectedReceipt){ok=false;showStatus("error","먼저 이전상담조회를 통해 접수 또는 이전 회기를 선택해주세요.")}if(sessionDuplicateBlocked){ok=false;showStatus("error","선택한 회기는 이미 등록되어 있습니다. 다른 회기를 선택해주세요.")}return ok}
 
 form.addEventListener("submit",async e=>{
   e.preventDefault();
@@ -1106,71 +1302,63 @@ form.addEventListener("submit",async e=>{
     }
 
     const sessionPayload=buildSessionPayload();
-    const receiptRow=selectedReceipt.row;
+    const receiptRow=selectedReceipt.receiptRow||selectedReceipt.row;
     let savedRow=null;
 
-    if(receiptRow.session_no==null){
-      // 최초 접수 레코드를 1회기 상담 레코드로 갱신
-      const {data,error}=await sb
-        .from(tableName)
-        .update(sessionPayload)
-        .eq("id",receiptRow.id)
-        .select("id,session_no,session_start_at,session_end_at,next_session_at,next_session_date,session_status,updated_at")
-        .single();
+    // 접수 원본 레코드는 그대로 보존하고, 1회기부터 모든 상담회기는 별도 행으로 저장한다.
+    let newRow;
 
-      if(error) throw error;
-      savedRow=data;
-      selectedReceipt.row={...selectedReceipt.row,...data};
+    if(type==="PC"){
+      newRow={
+        client_id:selectedReceipt.client.id,
+        receptionist_name:receiptRow.receptionist_name,
+        receptionist_phone:receiptRow.receptionist_phone,
+        receptionist_relationship:receiptRow.receptionist_relationship,
+        receipt_at:receiptRow.receipt_at,
+        receipt_date:receiptRow.receipt_date||null,
+        visit_at:receiptRow.visit_at,
+        client_type_code:$("consultationTarget").value||receiptRow.client_type_code||null,
+        topic_code:$("consultationTopic").value||receiptRow.topic_code||null,
+        application_content:receiptRow.application_content||null,
+        contact_method:receiptRow.contact_method||null,
+        record_active:true,
+        ...sessionPayload
+      };
     }else{
-      // 2회기 이상 신규 상담 레코드
-      let newRow;
-
-      if(type==="PC"){
-        newRow={
-          client_id:selectedReceipt.client.id,
-          receptionist_name:receiptRow.receptionist_name,
-          receptionist_phone:receiptRow.receptionist_phone,
-          receptionist_relationship:receiptRow.receptionist_relationship,
-          receipt_at:receiptRow.receipt_at,
-          visit_at:receiptRow.visit_at,
-          client_type_code:receiptRow.client_type_code,
-          topic_code:receiptRow.topic_code,
-          application_content:receiptRow.application_content,
-          record_active:false,
-          ...sessionPayload
-        };
-      }else{
-        newRow={
-          client_id:selectedReceipt.client.id,
-          receptionist_name:receiptRow.receptionist_name,
-          receptionist_phone:receiptRow.receptionist_phone,
-          receptionist_relationship:receiptRow.receptionist_relationship,
-          receipt_at:receiptRow.receipt_at,
-          appointment_at:receiptRow.appointment_at,
-          client_type_code:receiptRow.client_type_code,
-          topic_code:receiptRow.topic_code,
-          record_active:false,
-          ...sessionPayload
-        };
-      }
-
-      const {data,error}=await sb
-        .from(tableName)
-        .insert([newRow])
-        .select("id,session_no,session_start_at,session_end_at,next_session_at,next_session_date,session_status,updated_at")
-        .single();
-
-      if(error) throw error;
-      savedRow=data;
+      newRow={
+        client_id:selectedReceipt.client.id,
+        receptionist_name:receiptRow.receptionist_name,
+        receptionist_phone:receiptRow.receptionist_phone,
+        receptionist_relationship:receiptRow.receptionist_relationship,
+        receipt_at:receiptRow.receipt_at,
+        appointment_at:receiptRow.appointment_at,
+        client_type_code:$("consultationTarget").value||receiptRow.client_type_code||null,
+        topic_code:$("consultationTopic").value||receiptRow.topic_code||null,
+        contact_method:receiptRow.contact_method||null,
+        record_active:true,
+        ...sessionPayload
+      };
     }
+
+    const {data,error}=await sb
+      .from(tableName)
+      .insert([newRow])
+      .select("id,session_no,session_start_at,session_end_at,next_session_at,next_session_date,session_status,record_active,updated_at")
+      .single();
+
+    if(error) throw error;
+    savedRow=data;
+    selectedReceipt.maxSessionNo=sessionNo;
 
     // 저장 직후 DB의 시간값을 다시 비교하여 누락 저장을 차단
     assertSavedSessionTiming(savedRow,sessionPayload);
 
+    expectedNextSessionNo=sessionNo+1;
+
     showStatus(
       "success",
       `${type==="PC"?"심리상담":"진로상담"} ${sessionNo}회기가 정상적으로 등록되었습니다. `+
-      `실시 시작·종료 및 차기 예약시간까지 DB 저장을 확인했습니다.`
+      `접수 원본은 유지되며, 실시 시작·종료 및 차기 예약시간까지 DB 저장을 확인했습니다.`
     );
   }catch(err){
     console.error(err);
@@ -1181,7 +1369,7 @@ form.addEventListener("submit",async e=>{
   }
 });
 
-form.addEventListener("reset",()=>setTimeout(()=>{selectedReceipt=null;sessionDuplicateBlocked=false;$("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";$("receiptMeta").textContent="접수상담조회 후 자동으로 표시됩니다.";updateAllDateWeekdayChips();document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));hideStatus();submitBtn.disabled=currentEmployee?.permission==="조회자";if(currentEmployee?.permission==="조회자")showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")},0));
+form.addEventListener("reset",()=>setTimeout(()=>{selectedReceipt=null;expectedNextSessionNo=null;sessionDuplicateBlocked=false;$("charCount").textContent="0";$("duration").value="";$("nextSessionNo").value="";$("receiptMeta").textContent="이전상담조회 후 자동으로 표시됩니다.";updateAllDateWeekdayChips();document.querySelectorAll(".invalid").forEach(el=>el.classList.remove("invalid"));hideStatus();submitBtn.disabled=currentEmployee?.permission==="조회자";if(currentEmployee?.permission==="조회자")showStatus("info","현재 권한은 조회자입니다. 조회와 PDF 저장만 사용할 수 있습니다.")},0));
 
 // 10분 미사용 자동 로그아웃
 const IDLE_LOGOUT_MS=10*60*1000;
@@ -1238,7 +1426,7 @@ function buildPrintDocument(){
             <div class="print-pair full"><div class="print-label">주소</div><div class="print-box">${escapeHtml(printable($("address").value))}</div></div>
           </div>
           <div class="print-summary-row">
-            <div class="print-label">접수상담 요약</div>
+            <div class="print-label">이전상담 요약</div>
             <div class="print-box print-summary-box">${escapeHtml(printable($("receiptMeta").textContent))}</div>
           </div>
         </div>
