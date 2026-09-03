@@ -1850,8 +1850,12 @@
       </div>
       <div class="nav-submenu" id="counselManagementSubmenu" aria-label="상담 관리 하위메뉴">
         <a class="nav-subitem" id="counselRecordCardMenu" href="counsel_record_card.html">
-          <span class="nav-subicon">└</span>
+          <span class="nav-subicon">├</span>
           <span>상담기록카드</span>
+        </a>
+        <a class="nav-subitem" id="counselProgressChartMenu" href="counseling_progress_chart.html">
+          <span class="nav-subicon">└</span>
+          <span>상담진행챠트</span>
         </a>
       </div>
       <div class="nav-item"><span class="nav-icon">♙</span><span>구직자 관리</span></div>
@@ -2714,6 +2718,7 @@
   const counselManagementNav = document.getElementById("counselManagementNav");
   const counselManagementSubmenu = document.getElementById("counselManagementSubmenu");
   const counselRecordCardMenu = document.getElementById("counselRecordCardMenu");
+  const counselProgressChartMenu = document.getElementById("counselProgressChartMenu");
 
   function setCounselManagementOpen(open){
     if (!counselManagementNav || !counselManagementSubmenu) return;
@@ -2730,6 +2735,12 @@
 
   counselRecordCardMenu?.addEventListener("click", () => {
     counselRecordCardMenu.classList.add("active");
+    counselProgressChartMenu?.classList.remove("active");
+  });
+
+  counselProgressChartMenu?.addEventListener("click", () => {
+    counselProgressChartMenu.classList.add("active");
+    counselRecordCardMenu?.classList.remove("active");
   });
 
   /* 문서관리 → 회원기록카드 하위메뉴 */
