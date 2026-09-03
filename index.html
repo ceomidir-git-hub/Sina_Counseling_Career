@@ -1772,9 +1772,9 @@
         </form>
 
         <div class="sina-help">
-          관리자가 사용자등록에서 신규 Auth 연결을 완료한 직원은 이메일을 입력한 뒤
-          <b>신규 사용자</b>를 누르세요. 기존 사용자가 비밀번호를 잊은 경우에는
-          <b>비밀번호 설정 / 재설정</b>을 사용합니다.
+          관리자 화면의 사용자등록에 사전 등록된 신규 직원은 이메일을 입력한 뒤
+          <b>신규 사용자</b>를 누르세요. 신규 사용자는 초대 메일을 통해 최초 비밀번호를 설정합니다.
+          기존 사용자가 비밀번호를 잊은 경우에만 <b>비밀번호 설정 / 재설정</b>을 사용합니다.
         </div>
       </div>
 
@@ -1800,7 +1800,7 @@
 
           <div class="sina-password-rule" id="sinaPasswordRuleBox">
             <div style="font-weight:850;color:#5e6b7f;margin-bottom:6px;">
-              새 비밀번호는 <b>기존 비밀번호와 반드시 달라야 합니다.</b>
+              안전한 새 비밀번호를 설정해 주세요. <b>기존 사용자는 이전 비밀번호와 다른 값을 사용해야 합니다.</b>
             </div>
             <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:5px;">
               <span>비밀번호 강도</span>
@@ -2908,9 +2908,23 @@
 
   const initialHash = new URLSearchParams(location.hash.replace(/^#/, ""));
   const initialSearch = new URLSearchParams(location.search);
+  const initialAuthType =
+    initialHash.get("type") ||
+    initialSearch.get("type") ||
+    "";
+
+  // recovery = 기존 사용자 비밀번호 재설정
+  // invite   = 신규 사용자 최초 비밀번호 설정
   let recoveryMode =
-    initialHash.get("type") === "recovery" ||
-    initialSearch.get("type") === "recovery";
+    initialAuthType === "recovery" ||
+    initialAuthType === "invite";
+
+  let passwordSettingType =
+    initialAuthType === "invite"
+      ? "invite"
+      : initialAuthType === "recovery"
+        ? "recovery"
+        : "";
 
   // =========================================================
   // 고정형 팝업 메시지
@@ -3066,6 +3080,7 @@
 
   function showLogin() {
     recoveryMode = false;
+    passwordSettingType = "";
     isAuthenticatedInApp = false;
     currentAccessToken = null;
     clearIdleLogoutTimer();
@@ -3095,9 +3110,18 @@
     loginView.classList.remove("active");
     passwordView.classList.add("active");
 
-    titleBox.querySelector("small").textContent = "PASSWORD SETTING";
-    titleBox.querySelector("h2").textContent = "새 비밀번호 설정";
-    titleBox.querySelector("p").textContent = "새 비밀번호를 입력한 뒤 저장해 주세요.";
+    const isInvite = passwordSettingType === "invite";
+
+    titleBox.querySelector("small").textContent =
+      isInvite ? "NEW USER PASSWORD SETTING" : "PASSWORD RESET";
+
+    titleBox.querySelector("h2").textContent =
+      isInvite ? "신규 사용자 비밀번호 설정" : "비밀번호 재설정";
+
+    titleBox.querySelector("p").textContent =
+      isInvite
+        ? "초대받은 신규 사용자의 최초 비밀번호를 설정해 주세요."
+        : "새 비밀번호를 입력한 뒤 저장해 주세요.";
   }
 
   function showApp(employee) {
@@ -3357,6 +3381,15 @@
   client.auth.onAuthStateChange((event, session) => {
     if (event === "PASSWORD_RECOVERY") {
       recoveryMode = true;
+      passwordSettingType = "recovery";
+      showPasswordSetting();
+      return;
+    }
+
+    // invite 링크 검증 후 Supabase가 세션을 생성하면 SIGNED_IN이 발생할 수 있다.
+    // URL에서 invite로 판정된 경우 로그인 대시보드로 넘기지 않고 최초 비밀번호 설정 화면을 유지한다.
+    if (event === "SIGNED_IN" && passwordSettingType === "invite") {
+      recoveryMode = true;
       showPasswordSetting();
     }
   });
@@ -3548,7 +3581,7 @@
       showMessage(
         loginMessage,
         result.message ||
-          "신규 사용자 확인 및 비밀번호 설정 메일 발송 요청이 접수되었습니다. 받은편지함과 스팸함을 확인해 주세요.",
+          "신규 사용자 초대 메일 발송 요청이 접수되었습니다. 받은편지함과 스팸함을 확인해 주세요.",
         "success"
       );
 
@@ -3748,7 +3781,7 @@
   // 비밀번호 복구 링크: 로그아웃하지 않고 recovery 세션을 유지
   // ---------------------------------------------------------
   (async () => {
-    // 비밀번호 재설정 메일의 recovery URL은 인증 세션이 필요하므로 유지
+    // 신규 사용자 초대(invite) 및 비밀번호 재설정(recovery) URL은 인증 세션이 필요하므로 유지
     if (recoveryMode) {
       showPasswordSetting();
       return;
