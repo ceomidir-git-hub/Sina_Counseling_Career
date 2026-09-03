@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>상담 진행현황 그래프</title>
+<style>
+  :root{
+    --bg:#f4f6f8;
+    --panel:#ffffff;
+    --line:#d9dee5;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --blue:#2563eb;
+    --black:#222222;
+    --green:#16a34a;
+    --red:#dc2626;
+    --yellow:#fff9cf;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  .page{
+    max-width:1480px;
+    margin:0 auto;
+    padding:12px 16px;
+  }
+  .header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    margin-bottom:7px;
+  }
+  .title h1{
+    margin:0;
+    font-size:24px;
+    letter-spacing:-0.5px;
+  }
+  .title p{
+    margin:4px 0 0;
+    font-size:14px;
+    color:var(--muted);
+  }
+  .summary{
+    font-size:14px;
+    font-weight:700;
+    color:#374151;
+    white-space:nowrap;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.04);
+  }
+  .search{
+    display:grid;
+    grid-template-columns: 180px 180px 180px 180px auto;
+    gap:10px;
+    align-items:end;
+    padding:12px;
+    margin-bottom:10px;
+  }
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .field input,.field select{
+    width:100%;
+    height:34px;
+    border:1px solid #b8c0cc;
+    border-radius:7px;
+    padding:0 10px;
+    background:var(--yellow);
+    font-size:14px;
+  }
+  .buttons{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+  }
+  button{
+    height:34px;
+    min-width:76px;
+    border:0;
+    border-radius:7px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  #btnSearch{background:#1f4f82;color:#fff}
+  #btnReset{background:#e5e7eb;color:#222}
+  #btnBack{background:#64748b;color:#fff}
+  #btnPdf{background:#0f766e;color:#fff}
+  .chart-panel{padding:12px}
+  .chart-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .chart-top strong{font-size:17px}
+  .hint{
+    font-size:13px;
+    color:var(--muted);
+  }
+  .legend{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    padding:5px 0 9px;
+    font-size:13px;
+  }
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{
+    width:11px;height:11px;border-radius:50%;display:inline-block
+  }
+
+  .chart-wrap{
+    position:relative;
+    border:1px solid #cbd2dc;
+    border-radius:10px;
+    background:#fff;
+    overflow:hidden;
+  }
+  .chart-scroll{
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding-left:92px;
+    scrollbar-width:none;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
+  }
+  .chart-scroll::-webkit-scrollbar{display:none}
+  .chart-scroll.dragging{cursor:grabbing}
+  .chart-stage{
+    position:relative;
+    min-height:390px;
+    min-width:1200px;
+  }
+  .y-axis{
+    position:absolute;
+    left:0;
+    top:0;
+    width:92px;
+    height:390px;
+    background:#fafbfc;
+    border-right:1px solid #bfc7d2;
+    z-index:5;
+  }
+  .y-label{
+    position:absolute;
+    left:0;
+    width:100%;
+    transform:translateY(-50%);
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:#374151;
+  }
+  .grid-row{
+    position:absolute;
+    left:0;
+    right:0;
+    border-top:1px solid #e2e6ec;
+  }
+  .client-col{
+    position:absolute;
+    top:0;
+    width:120px;
+    height:390px;
+  }
+  .client-name{
+    position:absolute;
+    bottom:8px;
+    left:0;
+    width:120px;
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:#111827;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .point{
+    position:absolute;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    border:2px solid #fff;
+    box-shadow:0 0 0 1px rgba(0,0,0,.16);
+    cursor:pointer;
+    z-index:3;
+  }
+  .point.completed{background:var(--black)}
+  .point.current{background:var(--blue); width:17px;height:17px}
+  .point.closed{background:var(--green); width:17px;height:17px}
+  .point.stopped{background:var(--red); width:17px;height:17px}
+  .vline{
+    position:absolute;
+    left:50%;
+    width:3px;
+    transform:translateX(-50%);
+    background:#555;
+    z-index:1;
+    border-radius:2px;
+  }
+  .tooltip{
+    position:fixed;
+    z-index:9999;
+    display:none;
+    min-width:230px;
+    max-width:340px;
+    padding:10px 12px;
+    border-radius:8px;
+    background:#111827;
+    color:#fff;
+    font-size:13px;
+    line-height:1.55;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+    pointer-events:none;
+  }
+  .tooltip strong{font-size:14px}
+  .empty{
+    padding:80px 20px;
+    text-align:center;
+    color:#6b7280;
+    font-weight:700;
+  }
+  @media(max-width:900px){
+    .search{grid-template-columns:1fr 1fr}
+    .buttons{justify-content:flex-start}
+    .header{align-items:flex-start;flex-direction:column}
+  }
+
+  .print-footer{
+    display:none;
+  }
+
+  @page{
+    size:A4 landscape;
+    margin:10mm 10mm 18mm 10mm;
+  }
+
+  @media print{
+    html,body{
+      background:#fff !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+
+    body{
+      margin:0 !important;
+    }
+
+    .page{
+      max-width:none !important;
+      width:100% !important;
+      margin:0 !important;
+      padding:0 !important;
+      background:#fff !important;
+    }
+
+    .search{
+      grid-template-columns: 150px 150px 150px 150px auto !important;
+      gap:7px !important;
+      padding:8px !important;
+      margin-bottom:7px !important;
+    }
+
+    .chart-panel{
+      padding:8px !important;
+      box-shadow:none !important;
+    }
+
+    .panel{
+      box-shadow:none !important;
+    }
+
+    .chart-wrap{
+      overflow:hidden !important;
+    }
+
+    .chart-scroll{
+      overflow:hidden !important;
+      padding-left:80px !important;
+      cursor:default !important;
+    }
+
+    .y-axis{
+      width:80px !important;
+    }
+
+    button{
+      display:none !important;
+    }
+
+    .hint{
+      display:none !important;
+    }
+
+    .print-footer{
+      display:block !important;
+      position:fixed;
+      left:10mm;
+      right:10mm;
+      bottom:5mm;
+      text-align:center;
+      color:#444;
+      background:#fff;
+      line-height:1.35;
+    }
+
+    .print-footer .copyright{
+      font-size:10pt;
+      margin-bottom:2mm;
+      font-weight:600;
+    }
+
+    .print-footer .org-name{
+      font-size:10.5pt;
+      font-weight:700;
+    }
+  }
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="title">
+      <h1>상담 진행현황 그래프</h1>
+      <p>접수부터 현재 회기까지의 진행상태를 내담자별로 확인합니다.</p>
+    </div>
+    <div class="summary" id="summaryText"></div>
+  </div>
+
+  <div class="panel search">
+    <div class="field">
+      <label>회원 KEY</label>
+      <input type="text" id="memberKey" placeholder="예: 26090101" />
+    </div>
+    <div class="field">
+      <label>이름</label>
+      <input type="text" id="clientName" placeholder="내담자명" />
+    </div>
+    <div class="field">
+      <label>상담구분</label>
+      <select id="consultType">
+        <option value="">전체</option>
+        <option value="심리상담">심리상담</option>
+        <option value="진로상담">진로상담</option>
+        <option value="통합상담">통합상담</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>진행상태</label>
+      <select id="status">
+        <option value="">전체</option>
+        <option value="진행중">진행중</option>
+        <option value="종결">종결</option>
+      </select>
+    </div>
+    <div class="buttons">
+      <button id="btnSearch">조회</button>
+      <button id="btnReset">초기화</button>
+      <button id="btnBack">이전화면</button>
+      <button id="btnPdf">PDF 저장</button>
+    </div>
+  </div>
+
+  <div class="panel chart-panel">
+    <div class="chart-top">
+      <strong>내담자별 상담 진행상태</strong>
+      <span class="hint">마우스로 그래프를 잡아 좌우 이동 · 마우스 휠로 표시 범위 확대/축소</span>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:#222"></i> 완료된 회기</span>
+      <span><i style="background:#2563eb"></i> 현재 진행중</span>
+      <span><i style="background:#16a34a"></i> 종결</span>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="y-axis" id="yAxis"></div>
+      <div class="chart-scroll" id="chartScroll">
+        <div class="chart-stage" id="chartStage"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="print-footer">
+    <div class="copyright">이 문서의 저작권은 마음:시나브로 심리상담연구소에 있다. 무단반출 금지.</div>
+    <div class="org-name">마음:시나브로 심리상담연구소</div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth:{
+      storage:window.sessionStorage,
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true
+    }
+  }
+);
+
+let clients = [];
+let MAX_STEP = 0;
+let labels = ["접수"];
+let currentFilteredData = [];
+
+const stage = document.getElementById("chartStage");
+const yAxis = document.getElementById("yAxis");
+const tooltip = document.getElementById("tooltip");
+const summaryText = document.getElementById("summaryText");
+
+const CHART_TOP = 26;
+const CHART_BOTTOM = 42;
+const STAGE_H = 390;
+const INNER_H = STAGE_H - CHART_TOP - CHART_BOTTOM;
+const DEFAULT_COL_W = 120;
+const MIN_COL_W = 70;
+const MAX_COL_W = 210;
+let colWidth = DEFAULT_COL_W;
+
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
+
+function counselTypeLabel(code){
+  if(code === "PC") return "심리상담";
+  if(code === "CC") return "진로상담";
+  if(code === "BOTH") return "통합상담";
+  return code || "";
+}
+
+function formatKstDateTime(value){
+  if(!value) return "";
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return String(value);
+
+  const parts = new Intl.DateTimeFormat("ko-KR",{
+    timeZone:"Asia/Seoul",
+    year:"numeric",
+    month:"2-digit",
+    day:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit",
+    hour12:false
+  }).formatToParts(d);
+
+  const map = {};
+  parts.forEach(p => {
+    if(p.type !== "literal") map[p.type] = p.value;
+  });
+
+  return `${map.year}.${map.month}.${map.day} ${map.hour}:${map.minute}`;
+}
+
+function formatDateOnly(value){
+  if(!value) return "";
+  const s = String(value);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[1]}.${m[2]}.${m[3]}` : s;
+}
+
+function rowDate(row, type){
+  if(type === "심리상담"){
+    return row.session_start_at
+      ? formatKstDateTime(row.session_start_at)
+      : formatDateOnly(row.visit_date || row.receipt_date);
+  }
+
+  return row.session_start_at
+    ? formatKstDateTime(row.session_start_at)
+    : formatDateOnly(row.counseling_date);
+}
+
+function receiptDate(row){
+  return row?.receipt_at
+    ? formatKstDateTime(row.receipt_at)
+    : formatDateOnly(row?.receipt_date || "");
+}
+
+function makeReceiptContent(row, type){
+  if(!row) return "";
+  if(type === "심리상담") return row.application_content || "";
+  return "";
+}
+
+function makeSessionContent(row, type){
+  if(type === "심리상담") return row.session_content || "";
+  return row.counseling_content || "";
+}
+
+function recalcAxes(){
+  MAX_STEP = Math.max(
+    0,
+    ...clients.flatMap(c => c.sessions.map(s => Number(s.step) || 0))
+  );
+  labels = Array.from(
+    {length:MAX_STEP + 1},
+    (_,i) => i === 0 ? "접수" : `${i}회기`
+  );
+}
+
+function yFor(step){
+  const intervals = Math.max(1, MAX_STEP + 1);
+  return CHART_TOP + INNER_H - ((step + 1) / intervals) * INNER_H;
+}
+
+function blankRowY(){
+  return CHART_TOP + INNER_H;
+}
+
+function buildYAxis(){
+  yAxis.innerHTML = "";
+  labels.forEach((lab, step)=>{
+    const el = document.createElement("div");
+    el.className = "y-label";
+    el.style.top = `${yFor(step)}px`;
+    el.textContent = lab;
+    yAxis.appendChild(el);
+  });
+}
+
+function groupByClient(rows){
+  const map = new Map();
+  (rows || []).forEach(row => {
+    const key = row.client_id;
+    if(!key) return;
+    if(!map.has(key)) map.set(key, []);
+    map.get(key).push(row);
+  });
+  return map;
+}
+
+function buildClientFromRows(basic, rows, type){
+  const sorted = [...(rows || [])].sort((a,b)=>{
+    const sa = Number(a.session_no || 0);
+    const sb = Number(b.session_no || 0);
+    if(sa !== sb) return sa - sb;
+    return String(a.created_at || "").localeCompare(String(b.created_at || ""));
+  });
+
+  if(!sorted.length) return null;
+
+  const sessions = [];
+  const receiptSource = sorted.find(r => r.receipt_at || r.receipt_date) || sorted[0];
+
+  sessions.push({
+    step:0,
+    label:"접수",
+    date:receiptDate(receiptSource),
+    content:makeReceiptContent(receiptSource, type)
+  });
+
+  sorted.forEach(row => {
+    const sessionNo = Number(row.session_no);
+    if(!Number.isInteger(sessionNo) || sessionNo <= 0) return;
+
+    const session = {
+      step:sessionNo,
+      label:`${sessionNo}회기`,
+      date:rowDate(row, type),
+      content:makeSessionContent(row, type)
+    };
+
+    const existingIndex = sessions.findIndex(s => s.step === sessionNo);
+    if(existingIndex >= 0){
+      sessions[existingIndex] = session;
+    }else{
+      sessions.push(session);
+    }
+  });
+
+  sessions.sort((a,b)=>a.step-b.step);
+
+  const statusRow = [...sorted]
+    .filter(r => Number(r.session_no) > 0)
+    .sort((a,b)=>{
+      const s = Number(b.session_no || 0) - Number(a.session_no || 0);
+      if(s !== 0) return s;
+      return String(b.updated_at || b.created_at || "").localeCompare(
+        String(a.updated_at || a.created_at || "")
+      );
+    })[0] || sorted[sorted.length - 1];
+
+  const status = statusRow?.session_status === "종결" ? "종결" : "진행중";
+
+  return {
+    id:basic.id,
+    key:basic.member_key || "",
+    name:basic.client_name || "",
+    type,
+    status,
+    sessions
+  };
+}
+
+async function loadClientsFromDb(){
+  summaryText.textContent = "DB 연결 중...";
+
+  const {data:{session}, error:sessionError} = await db.auth.getSession();
+
+  if(sessionError){
+    throw new Error(`로그인 세션 확인 오류: ${sessionError.message}`);
+  }
+
+  if(!session?.user){
+    alert("로그인 세션이 없습니다. 대시보드에서 로그인 후 다시 이용해 주세요.");
+    location.href = "index.html";
+    return;
+  }
+
+  const [basicResult, psychResult, careerResult] = await Promise.all([
+    db
+      .from("DB_basic")
+      .select("id,member_key,client_name,counsel_type,created_at")
+      .order("member_key",{ascending:true}),
+    db
+      .from("DB_psychological_counseling")
+      .select("client_id,receipt_at,receipt_date,visit_date,session_no,session_start_at,session_end_at,session_status,application_content,session_content,record_active,created_at,updated_at")
+      .eq("record_active",true)
+      .order("created_at",{ascending:true}),
+    db
+      .from("DB_career_counseling")
+      .select("client_id,receipt_at,counseling_date,session_no,session_start_at,session_end_at,session_status,counseling_content,record_active,created_at,updated_at")
+      .eq("record_active",true)
+      .order("created_at",{ascending:true})
+  ]);
+
+  if(basicResult.error) throw basicResult.error;
+  if(psychResult.error) throw psychResult.error;
+  if(careerResult.error) throw careerResult.error;
+
+  const psychByClient = groupByClient(psychResult.data);
+  const careerByClient = groupByClient(careerResult.data);
+
+  const result = [];
+
+  (basicResult.data || []).forEach(basic => {
+    if(basic.counsel_type === "PC"){
+      const item = buildClientFromRows(
+        basic,
+        psychByClient.get(basic.id) || [],
+        "심리상담"
+      );
+      if(item) result.push(item);
+      return;
+    }
+
+    if(basic.counsel_type === "CC"){
+      const item = buildClientFromRows(
+        basic,
+        careerByClient.get(basic.id) || [],
+        "진로상담"
+      );
+      if(item) result.push(item);
+      return;
+    }
+
+    if(basic.counsel_type === "BOTH"){
+      const combinedRows = [
+        ...(psychByClient.get(basic.id) || []).map(r => ({...r, _type:"심리상담"})),
+        ...(careerByClient.get(basic.id) || []).map(r => ({...r, _type:"진로상담"}))
+      ];
+
+      const normalized = combinedRows.map(r => {
+        if(r._type === "심리상담"){
+          return {
+            ...r,
+            counseling_date:r.visit_date || null,
+            counseling_content:r.session_content || null
+          };
+        }
+        return r;
+      });
+
+      const item = buildClientFromRows(basic, normalized, "통합상담");
+      if(item) result.push(item);
+    }
+  });
+
+  result.sort((a,b)=>{
+    const ak = a.key || "99999999";
+    const bk = b.key || "99999999";
+    const cmp = ak.localeCompare(bk);
+    return cmp !== 0 ? cmp : a.name.localeCompare(b.name,"ko");
+  });
+
+  clients = result;
+  currentFilteredData = clients;
+  recalcAxes();
+  buildYAxis();
+  render(clients);
+}
+
+function render(data){
+  currentFilteredData = data;
+  stage.innerHTML = "";
+
+  if(!data.length){
+    stage.style.minWidth = "900px";
+    stage.innerHTML = `<div class="empty">조회 조건에 해당하는 내담자가 없습니다.</div>`;
+    updateSummary(data);
+    return;
+  }
+
+  const stageWidth = Math.max(1100, data.length * colWidth + 60);
+  stage.style.minWidth = `${stageWidth}px`;
+
+  labels.forEach((_,step)=>{
+    const row = document.createElement("div");
+    row.className = "grid-row";
+    row.style.top = `${yFor(step)}px`;
+    stage.appendChild(row);
+  });
+
+  const blankRow = document.createElement("div");
+  blankRow.className = "grid-row";
+  blankRow.style.top = `${blankRowY()}px`;
+  stage.appendChild(blankRow);
+
+  data.forEach((client, idx)=>{
+    const col = document.createElement("div");
+    col.className = "client-col";
+    col.style.left = `${idx * colWidth + 20}px`;
+    col.style.width = `${colWidth}px`;
+
+    const name = document.createElement("div");
+    name.className = "client-name";
+    name.style.width = `${colWidth}px`;
+    name.textContent = client.name || "-";
+    name.title = `${client.name || "-"} (${client.key || "-"})`;
+    col.appendChild(name);
+
+    if(client.sessions.length > 1){
+      const minStep = Math.min(...client.sessions.map(s=>s.step));
+      const maxStep = Math.max(...client.sessions.map(s=>s.step));
+      const line = document.createElement("div");
+      line.className = "vline";
+      const top = yFor(maxStep);
+      const bottom = yFor(minStep);
+      line.style.top = `${top}px`;
+      line.style.height = `${Math.max(2, bottom-top)}px`;
+      col.appendChild(line);
+    }
+
+    client.sessions.forEach((session, sIdx)=>{
+      const p = document.createElement("div");
+      const isLast = sIdx === client.sessions.length - 1;
+      let stateClass = "completed";
+
+      if(isLast){
+        stateClass = client.status === "종결" ? "closed" : "current";
+      }
+
+      p.className = `point ${stateClass}`;
+      p.style.top = `${yFor(session.step)}px`;
+
+      const contentText = session.content || "";
+      const dateText = session.date || "";
+
+      p.dataset.html = `
+        <strong>${escapeHtml(client.name || "-")} · ${escapeHtml(session.label)}</strong><br>
+        회원 KEY: ${escapeHtml(client.key || "-")}<br>
+        상담구분: ${escapeHtml(client.type)}<br>
+        상담일: ${escapeHtml(dateText)}<br>
+        상담내용: ${escapeHtml(contentText)}<br>
+        진행상태: ${escapeHtml(client.status)}
+      `;
+
+      p.addEventListener("mouseenter", showTooltip);
+      p.addEventListener("mousemove", moveTooltip);
+      p.addEventListener("mouseleave", hideTooltip);
+      col.appendChild(p);
+    });
+
+    stage.appendChild(col);
+  });
+
+  updateSummary(data);
+}
+
+function showTooltip(e){
+  if(typeof panState !== "undefined" && panState.active) return;
+  tooltip.innerHTML = e.currentTarget.dataset.html;
+  tooltip.style.display = "block";
+  moveTooltip(e);
+}
+
+function moveTooltip(e){
+  const pad = 16;
+  const w = tooltip.offsetWidth || 280;
+  const h = tooltip.offsetHeight || 150;
+  let x = e.clientX + 14;
+  let y = e.clientY + 14;
+
+  if(x + w + pad > window.innerWidth) x = e.clientX - w - 14;
+  if(y + h + pad > window.innerHeight) y = e.clientY - h - 14;
+
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top = `${y}px`;
+}
+
+function hideTooltip(){
+  tooltip.style.display = "none";
+}
+
+function updateSummary(data){
+  const progressing = data.filter(c=>c.status==="진행중").length;
+  const closed = data.filter(c=>c.status==="종결").length;
+  summaryText.textContent = `전체 ${data.length}명  |  진행중 ${progressing}명  |  종결 ${closed}명`;
+}
+
+function search(){
+  const key = document.getElementById("memberKey").value.trim();
+  const name = document.getElementById("clientName").value.trim();
+  const type = document.getElementById("consultType").value;
+  const status = document.getElementById("status").value;
+
+  const filtered = clients.filter(c =>
+    (!key || c.key.includes(key)) &&
+    (!name || c.name.includes(name)) &&
+    (!type || c.type === type) &&
+    (!status || c.status === status)
+  );
+
+  render(filtered);
+  document.getElementById("chartScroll").scrollLeft = 0;
+}
+
+document.getElementById("btnSearch").addEventListener("click", search);
+
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  document.getElementById("memberKey").value="";
+  document.getElementById("clientName").value="";
+  document.getElementById("consultType").value="";
+  document.getElementById("status").value="";
+  colWidth = DEFAULT_COL_W;
+  render(clients);
+  document.getElementById("chartScroll").scrollLeft = 0;
+});
+
+document.getElementById("btnBack").addEventListener("click", ()=>{
+  history.back();
+});
+
+document.getElementById("btnPdf").addEventListener("click", ()=>{
+  window.print();
+});
+
+const chartWrap = document.querySelector(".chart-wrap");
+const chartScroll = document.getElementById("chartScroll");
+
+const panState = {
+  active:false,
+  pointerId:null,
+  startX:0,
+  startScrollLeft:0
+};
+
+chartScroll.addEventListener("pointerdown",(e)=>{
+  if(e.button !== undefined && e.button !== 0) return;
+
+  panState.active = true;
+  panState.pointerId = e.pointerId;
+  panState.startX = e.clientX;
+  panState.startScrollLeft = chartScroll.scrollLeft;
+
+  chartScroll.classList.add("dragging");
+  chartScroll.setPointerCapture(e.pointerId);
+  hideTooltip();
+  e.preventDefault();
+});
+
+chartScroll.addEventListener("pointermove",(e)=>{
+  if(!panState.active || e.pointerId !== panState.pointerId) return;
+  const deltaX = e.clientX - panState.startX;
+  chartScroll.scrollLeft = panState.startScrollLeft - deltaX;
+  e.preventDefault();
+});
+
+function endPan(e){
+  if(!panState.active) return;
+
+  panState.active = false;
+
+  try{
+    if(panState.pointerId !== null){
+      chartScroll.releasePointerCapture(panState.pointerId);
+    }
+  }catch(err){}
+
+  panState.pointerId = null;
+  chartScroll.classList.remove("dragging");
+
+  if(e) e.preventDefault();
+}
+
+chartScroll.addEventListener("pointerup", endPan);
+chartScroll.addEventListener("pointercancel", endPan);
+
+chartWrap.addEventListener("wheel",(e)=>{
+  if(!e.deltaY) return;
+  e.preventDefault();
+
+  const oldWidth = colWidth;
+  const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+  const newWidth = Math.max(
+    MIN_COL_W,
+    Math.min(MAX_COL_W, Math.round(oldWidth * zoomFactor))
+  );
+
+  if(newWidth === oldWidth) return;
+
+  const rect = chartScroll.getBoundingClientRect();
+  const mouseX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+  const contentXBefore = chartScroll.scrollLeft + mouseX;
+  const dataRatio = contentXBefore / oldWidth;
+
+  colWidth = newWidth;
+  render(currentFilteredData);
+
+  requestAnimationFrame(()=>{
+    chartScroll.scrollLeft = Math.max(0, dataRatio * newWidth - mouseX);
+  });
+},{passive:false});
+
+(async ()=>{
+  try{
+    await loadClientsFromDb();
+  }catch(err){
+    console.error("상담 진행현황 DB 조회 오류:", err);
+    clients = [];
+    currentFilteredData = [];
+    recalcAxes();
+    buildYAxis();
+    stage.innerHTML = `<div class="empty">상담 데이터를 불러오지 못했습니다.<br>${escapeHtml(err?.message || "DB 조회 오류")}</div>`;
+    summaryText.textContent = "DB 조회 오류";
+  }
+})();
+</script>
+</body>
+</html>
