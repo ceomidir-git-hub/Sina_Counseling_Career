@@ -63,7 +63,7 @@ button{font:inherit}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:0;min-height:0}
 
 /* ===== LEFT : CALENDAR ===== */
-.calendar-card{display:grid;grid-template-rows:70px minmax(0,1fr) 110px 28px;overflow:hidden}
+.calendar-card{display:grid;grid-template-rows:70px minmax(0,1fr) 82px;overflow:hidden}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border-bottom:1px solid var(--line2)}
 .calendar-title-wrap{display:flex;align-items:center;gap:10px;flex:0 0 auto}.calendar-title{font-size:18px;font-weight:400;letter-spacing:-.4px;white-space:nowrap}.calendar-back-btn{height:32px;padding:0 11px;border:1px solid #b8c4d3;border-radius:7px;background:#fff;color:#26364d;font-size:11px;font-weight:400;cursor:pointer;white-space:nowrap}.calendar-back-btn:hover{background:#f7f9fc}
 .legend{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:13.2px;color:#334155;font-weight:400;white-space:nowrap}
@@ -78,26 +78,26 @@ button{font:inherit}
 .week-head{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--line2);border-top:1px solid var(--line2)}
 .week-head div{display:grid;place-items:center;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);font-size:16.5px;font-weight:800!important;background:#e4ebf4;color:#1f2937}
 .week-head .sun{color:var(--red)}.week-head .sat{color:#0b63df}
-.cal-grid{min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,minmax(0,1fr));border-left:1px solid var(--line2)}
-.day-cell{position:relative;min-width:0;min-height:0;padding:7px 8px 5px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);background:#fff;overflow:hidden;cursor:pointer;transition:.12s ease}
+.cal-grid{min-height:0;display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--line2)}
+.day-cell{position:relative;min-width:0;min-height:0;padding:4px 6px 3px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);background:#fff;overflow:hidden;cursor:pointer;transition:.12s ease}
 .day-cell:hover{background:#f8fbff}.day-cell.other{background:#f5f6f8;color:#8b95a5}.day-cell.selected{background:#f8fbff;box-shadow:inset 0 0 0 2px var(--blue);z-index:1}
 .day-cell.has-data{background:#fffaf0}
 
-.day-num{font-size:14px;font-weight:950;line-height:1.05;margin-bottom:6px}.day-cell.sun .day-num{color:var(--red)}.day-cell.sat .day-num{color:#0b63df}.day-cell.other .day-num{color:#8b95a5}.day-cell.today .day-num{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;margin-top:-2px}
-.day-events{display:grid;gap:4px;min-width:0}
-.day-event{display:grid;grid-template-columns:6px 37px minmax(0,1fr);align-items:center;gap:4px;font-size:11.5px;line-height:1.05;min-width:0}
+.day-num{font-size:14px;font-weight:950;line-height:1.05;margin-bottom:2px}.day-cell.sun .day-num{color:var(--red)}.day-cell.sat .day-num{color:#0b63df}.day-cell.other .day-num{color:#8b95a5}.day-cell.today .day-num{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;margin-top:-2px}
+.day-events{display:grid;gap:2px;min-width:0}
+.day-event{display:grid;grid-template-columns:6px 37px minmax(0,1fr);align-items:center;gap:4px;font-size:11.5px;line-height:1;min-width:0}
 .day-event i{width:6px;height:6px;border-radius:50%}.day-event .time{font-weight:850;color:#1f2937}.day-event .name{font-weight:750;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .day-cell.other .day-event{opacity:.45}.more-event{margin-left:10px;color:#1d4ed8;font-size:11px;font-weight:850;white-space:nowrap}
 
-.status-summary{border-top:1px solid var(--line2);padding:10px 14px 12px;display:grid;grid-template-rows:22px minmax(0,1fr);gap:6px}
-.summary-title{display:flex;align-items:center;gap:10px;font-size:13.2px;font-weight:400}.summary-title small{font-size:11px;color:var(--muted);font-weight:400}
+.status-summary{border-top:1px solid var(--line2);padding:9px 14px 10px;display:block}
+
 .summary-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
 .summary-box{border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;align-content:center;gap:3px;background:#fbfcfe}
 .summary-box small{font-size:16.5px;font-weight:400}.summary-box strong{font-size:18.7px;line-height:1;font-weight:400}.summary-box.received small,.summary-box.received strong{color:var(--receipt)}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.progress small,.summary-box.progress strong{color:#d65d0b}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
-.calendar-foot{display:flex;align-items:center;padding:0 14px;color:#4b5563;font-size:9.5px;font-weight:750;border-top:1px solid var(--line2);background:#fbfcfe}
+
 
 /* ===== RIGHT : DAY TIMELINE ===== */
-.timeline-card{display:grid;grid-template-rows:60px minmax(0,1fr) 122px;overflow:hidden}
+.timeline-card{display:grid;grid-template-rows:60px minmax(0,1fr);overflow:hidden}
 .timeline-head{display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line2)}
 .timeline-head h2{font-size:16px;margin:0;font-weight:950;letter-spacing:-.35px}.total-badge{border:1px solid #b9d2fa;background:#f3f7ff;color:#245fd0;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:400}
 .timeline-scroll{min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#aeb7c4 #f5f7fa;padding:0 14px 14px 17px;scroll-behavior:smooth;position:relative}
@@ -130,7 +130,7 @@ button{font:inherit}
 @media print{
   @page{size:A4 landscape;margin:7mm}
   html,body{min-width:0;height:auto;overflow:visible;background:#fff}
-  .app{height:auto;display:block}.topbar{height:50px;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}.logout-btn{display:none}.workspace{height:690px;padding:8px;grid-template-columns:2fr 1fr}.card{box-shadow:none}.timeline-card{grid-template-rows:54px minmax(0,1fr) 105px}.calendar-card{grid-template-rows:62px minmax(0,1fr) 95px 24px}.timeline-scroll{overflow:hidden}.loading-cover,.toast{display:none!important}
+  .app{height:auto;display:block}.topbar{height:50px;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}.logout-btn{display:none}.workspace{height:690px;padding:8px;grid-template-columns:2fr 1fr}.card{box-shadow:none}.timeline-card{grid-template-rows:54px minmax(0,1fr)}.calendar-card{grid-template-rows:62px minmax(0,1fr) 72px}.timeline-scroll{overflow:hidden}.loading-cover,.toast{display:none!important}
 }
 </style>
 </head>
@@ -179,7 +179,6 @@ button{font:inherit}
       </div>
 
       <div class="status-summary">
-        <div class="summary-title">당월 상담 일정 요약 <small id="summaryDate">-</small></div>
         <div class="summary-grid">
           <div class="summary-box received"><small>접수</small><strong id="sumReceived">0건</strong></div>
           <div class="summary-box planned"><small>예정</small><strong id="sumPlanned">0건</strong></div>
@@ -190,7 +189,6 @@ button{font:inherit}
           <div class="summary-box total"><small>총 일정</small><strong id="sumTotal">0건</strong></div>
         </div>
       </div>
-      <div class="calendar-foot">ⓘ 접수일(receipt_at)도 별도 “접수” 일정으로 표시하며, 날짜 칸에는 시간순으로 최대 3건까지 표시합니다.</div>
     </section>
 
     <aside class="card timeline-card">
@@ -200,13 +198,6 @@ button{font:inherit}
       </div>
       <div class="timeline-scroll" id="timelineScroll">
         <div class="empty">날짜를 선택하면 해당 날짜의 상담 일정이 시간순으로 표시됩니다.</div>
-      </div>
-      <div class="type-summary">
-        <h3>상담유형 일정 요약 (선택일)</h3>
-        <div class="type-grid">
-          <div class="type-row"><strong>심리상담</strong><b id="psychCount">0건</b></div>
-          <div class="type-row"><strong>진로상담</strong><b id="careerCount">0건</b></div>
-        </div>
       </div>
     </aside>
   </main>
@@ -248,16 +239,15 @@ button{font:inherit}
   });
 
   const IDLE_MS = 10 * 60 * 1000;
-  const MAX_CELL_ITEMS = 3;
+  const MAX_CELL_ITEMS = 4;
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
   const els = {
     userName: document.getElementById('userName'), userRole: document.getElementById('userRole'),
     monthLabel: document.getElementById('monthLabel'), calGrid: document.getElementById('calGrid'),
-    summaryDate: document.getElementById('summaryDate'), timelineDate: document.getElementById('timelineDate'),
+    timelineDate: document.getElementById('timelineDate'),
     timelineTotal: document.getElementById('timelineTotal'), timelineScroll: document.getElementById('timelineScroll'),
     loading: document.getElementById('loadingCover'), toast: document.getElementById('toast'),
-    psychCount: document.getElementById('psychCount'), careerCount: document.getElementById('careerCount'),
     sumReceived: document.getElementById('sumReceived'),
     sumPlanned: document.getElementById('sumPlanned'), sumProgress: document.getElementById('sumProgress'),
     sumDone: document.getElementById('sumDone'), sumMissed: document.getElementById('sumMissed'),
@@ -471,24 +461,32 @@ button{font:inherit}
     }finally{ showLoading(false); }
   }
 
-  function sixWeekCells(y,m){
+  function monthGridCells(y,m){
     const first=new Date(Date.UTC(y,m-1,1));
     const firstWeekday=first.getUTCDay();
+    const daysInMonth=new Date(Date.UTC(y,m,0)).getUTCDate();
+    const weekCount=Math.ceil((firstWeekday+daysInMonth)/7);
     const gridStart=new Date(Date.UTC(y,m-1,1-firstWeekday));
     const cells=[];
-    for(let i=0;i<42;i++){
+    const totalCells=weekCount*7;
+
+    for(let i=0;i<totalCells;i++){
       const d=new Date(gridStart.getTime()+i*86400000);
       const yy=d.getUTCFullYear(), mm=d.getUTCMonth()+1, dd=d.getUTCDate();
       cells.push({y:yy,m:mm,d:dd,key:ymd(yy,mm,dd),other:mm!==m,weekday:d.getUTCDay()});
     }
-    return cells;
+
+    return {cells,weekCount};
   }
 
   function renderCalendar(){
     els.monthLabel.textContent=`${state.viewYear}년 ${state.viewMonth}월`;
     els.calGrid.textContent='';
     const today=todayYmd();
-    for(const c of sixWeekCells(state.viewYear,state.viewMonth)){
+    const calendarData=monthGridCells(state.viewYear,state.viewMonth);
+    els.calGrid.style.gridTemplateRows=`repeat(${calendarData.weekCount},minmax(0,1fr))`;
+
+    for(const c of calendarData.cells){
       const cell=document.createElement('div');
       cell.className=`day-cell${c.other?' other':''}${c.weekday===0?' sun':''}${c.weekday===6?' sat':''}${c.key===today?' today':''}${c.key===state.selectedDate?' selected':''}`;
       cell.dataset.date=c.key;
@@ -524,7 +522,6 @@ button{font:inherit}
     }
     const monthCount=countStatuses(monthlyItems);
 
-    els.summaryDate.textContent=`${state.viewYear}년 ${state.viewMonth}월`;
     els.sumReceived.textContent=`${monthCount.received}건`;
     els.sumPlanned.textContent=`${monthCount.planned}건`;
     els.sumProgress.textContent=`${monthCount.progress}건`;
@@ -539,10 +536,6 @@ button{font:inherit}
     els.timelineDate.textContent=formatKoreanDate(state.selectedDate);
     els.timelineTotal.textContent=`총 ${selectedCount.total}건`;
 
-    const psych=selectedItems.filter(x=>x.source==='psych').length;
-    const career=selectedItems.filter(x=>x.source==='career').length;
-    els.psychCount.textContent=`${psych}건`;
-    els.careerCount.textContent=`${career}건`;
   }
 
   function renderCalendarSelectionOnly(){
