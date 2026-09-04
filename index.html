@@ -50,40 +50,83 @@
       overflow:hidden;
     }
 
-    /* ---------------- Sidebar: 기존 구조 유지 ---------------- */
+    /* ---------------- Sidebar: 보조 모니터 대응 압축형 ----------------
+       - 제목/메뉴 간격을 축소하여 세로 공간 확보
+       - 상단 제목 / 메뉴 / 하단 사용자 영역을 3구역으로 분리
+       - 메뉴가 길어져도 사용자 정보와 겹치지 않도록 nav 내부에서만 스크롤
+       --------------------------------------------------------- */
     .sidebar{
       background:linear-gradient(180deg,var(--navy) 0%,#122038 100%);
-      color:#fff;padding:10px 10px;height:100vh;overflow:hidden;
+      color:#fff;
+      padding:8px 8px;
+      height:100vh;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
     }
-    .brand{height:96px;padding:5px 6px 12px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:10px}
-    .brand-title{font-size:17px;font-weight:900;line-height:1.22;letter-spacing:-1.0px}
+    .brand{
+      height:72px;
+      flex:0 0 72px;
+      padding:4px 5px 8px;
+      border-bottom:1px solid rgba(255,255,255,.09);
+      margin-bottom:6px;
+      display:flex;
+      align-items:flex-start;
+    }
+    .brand-title{font-size:15.5px;font-weight:900;line-height:1.14;letter-spacing:-.9px}
     .brand-title .brand-line{display:block;white-space:nowrap}
     .brand-sub{display:none}
-    .nav{display:grid;gap:4px}
-    .nav-item{
-      height:44px;border-radius:8px;padding:0 10px;display:flex;align-items:center;gap:9px;
-      color:#d4deec;font-size:13.5px;font-weight:700;cursor:pointer;transition:.18s ease;
+    .nav{
+      display:grid;
+      grid-auto-rows:max-content;
+      align-content:start;
+      gap:2px;
+      flex:1 1 auto;
+      min-height:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding-right:2px;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(190,204,226,.38) transparent;
     }
-    .nav-item:hover{transform:translateX(3px);background:rgba(255,255,255,.09);color:#fff}
-    .nav-item.active{background:linear-gradient(135deg,#7466ef,#5d58d8);color:#fff;box-shadow:0 6px 14px rgba(102,90,226,.25)}
-    
-.nav-icon{width:20px;text-align:center;font-size:13.5px}
+    .nav::-webkit-scrollbar{width:4px}
+    .nav::-webkit-scrollbar-track{background:transparent}
+    .nav::-webkit-scrollbar-thumb{background:rgba(190,204,226,.35);border-radius:999px}
+    .nav-item{
+      height:38px;
+      border-radius:8px;
+      padding:0 9px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#d4deec;
+      font-size:12.8px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s ease;
+      flex:0 0 auto;
+    }
+    .nav-item:hover{transform:translateX(2px);background:rgba(255,255,255,.09);color:#fff}
+    .nav-item.active{background:linear-gradient(135deg,#7466ef,#5d58d8);color:#fff;box-shadow:0 5px 12px rgba(102,90,226,.22)}
 
-/* 시스템 설정 하위메뉴
-   - 좌측 프레임 폭/높이는 변경하지 않음
+.nav-icon{width:19px;text-align:center;font-size:12.8px}
+
+/* 하위메뉴
+   - 한 번에 하나의 그룹만 열림(JS에서 제어)
    - 사용자등록은 관리자에게만 표시
    - 상담항목등록은 관리자/사용자/조회자에게 표시 */
 .nav-item.has-submenu{
   position:relative;
-  padding-right:30px;
+  padding-right:27px;
 }
 .nav-menu-arrow{
   position:absolute;
-  right:11px;
+  right:10px;
   top:50%;
   transform:translateY(-50%) rotate(0deg);
   color:#9fb0c8;
-  font-size:10px;
+  font-size:9px;
   transition:transform .18s ease,color .18s ease;
 }
 .nav-item.has-submenu.open .nav-menu-arrow{
@@ -92,21 +135,21 @@
 }
 .nav-submenu{
   display:none;
-  margin:2px 0 4px 29px;
-  padding:3px 4px;
+  margin:1px 0 2px 25px;
+  padding:1px 3px;
   border-left:1px solid rgba(255,255,255,.16);
 }
 .nav-submenu.open{display:block}
 .nav-subitem{
-  height:32px;
-  padding:0 8px;
+  height:27px;
+  padding:0 7px;
   display:flex;
   align-items:center;
-  gap:7px;
-  border-radius:7px;
+  gap:6px;
+  border-radius:6px;
   color:#cbd7e7;
   text-decoration:none;
-  font-size:11.5px;
+  font-size:10.8px;
   font-weight:750;
   white-space:nowrap;
   transition:.16s ease;
@@ -122,10 +165,32 @@
 }
 .nav-subitem[hidden]{display:none !important}
 .nav-subicon{
-  width:13px;
+  width:12px;
   text-align:center;
   color:#8fa6c6;
-  font-size:10px;
+  font-size:9px;
+}
+
+/* 높이가 작은 보조 모니터/브라우저 확대 환경에서 추가 압축 */
+@media (max-height:820px){
+  .sidebar{padding:7px 8px}
+  .brand{height:58px;flex-basis:58px;padding:2px 4px 6px;margin-bottom:4px}
+  .brand-title{font-size:14.2px;line-height:1.10;letter-spacing:-.8px}
+  .nav{gap:1px}
+  .nav-item{height:33px;padding:0 8px;gap:7px;font-size:11.9px}
+  .nav-icon{width:18px;font-size:12px}
+  .nav-item.has-submenu{padding-right:25px}
+  .nav-menu-arrow{right:9px;font-size:8.5px}
+  .nav-submenu{margin:1px 0 1px 23px;padding:1px 2px}
+  .nav-subitem{height:23px;padding:0 6px;gap:5px;font-size:10.2px}
+  .nav-subicon{width:11px;font-size:8.5px}
+}
+
+@media (max-height:700px){
+  .brand{height:52px;flex-basis:52px;margin-bottom:3px}
+  .brand-title{font-size:13.5px;line-height:1.08}
+  .nav-item{height:31px;font-size:11.4px}
+  .nav-subitem{height:22px;font-size:9.9px}
 }
 
 
@@ -1612,20 +1677,22 @@
   #sinaAppView{display:none}
   #sinaAppView.is-authenticated{display:block}
 
-  /* 좌측 하단 로그인 사용자 / 로그아웃 */
+  /* 좌측 하단 로그인 사용자 / 로그아웃
+     - absolute 고정 제거: nav와 절대 겹치지 않음
+     - sidebar flex의 마지막 구역으로 고정 */
   .sina-user-box{
-    position:absolute;
-    left:10px;
-    right:10px;
-    bottom:12px;
-    padding:9px 9px 8px;
+    position:static;
+    flex:0 0 auto;
+    min-width:0;
+    margin-top:6px;
+    padding:7px 6px 3px;
     border-top:1px solid rgba(255,255,255,.12);
   }
   .sina-user-info{
     color:#dce6f4;
-    font-size:10.5px;
-    line-height:1.45;
-    margin-bottom:6px;
+    font-size:9.6px;
+    line-height:1.35;
+    margin-bottom:4px;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -1633,18 +1700,30 @@
   .sina-user-info strong{color:#fff}
   .sina-logout-btn{
     width:100%;
-    height:29px;
+    height:27px;
     border:1px solid rgba(255,255,255,.17);
     border-radius:7px;
     background:rgba(255,255,255,.07);
     color:#e7edf7;
     font-family:inherit;
-    font-size:10px;
+    font-size:9.6px;
     font-weight:800;
     cursor:pointer;
   }
   .sina-logout-btn:hover{background:rgba(255,255,255,.13)}
   .sidebar{position:relative}
+
+  @media(max-height:820px){
+    .sina-user-box{margin-top:4px;padding:5px 5px 2px}
+    .sina-user-info{font-size:9px;line-height:1.28;margin-bottom:3px}
+    .sina-logout-btn{height:24px;font-size:9.2px}
+  }
+
+  @media(max-height:700px){
+    .sina-user-box{margin-top:3px;padding-top:4px}
+    .sina-user-info{font-size:8.7px}
+    .sina-logout-btn{height:23px}
+  }
 
   /* 비밀번호 설정 화면: 내용 증가를 수치적으로 흡수 */
   .sina-login-shell.is-password-mode{
@@ -2733,30 +2812,103 @@
   loadWeather();
   setInterval(loadWeather, 10 * 60 * 1000);
 
-  document.querySelectorAll(".nav-item").forEach(item =>
-    item.addEventListener("click", () => {
-      document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
-      item.classList.add("active");
-    })
-  );
+  /* =========================================================
+     좌측 메뉴 동작
+     - 다른 메뉴 클릭 시 열려 있던 하위메뉴 자동 닫힘
+     - 상담 관리 / 문서관리 / 시스템 설정 중 항상 1개만 열림
+     - 일반 메뉴 클릭 시 모든 하위메뉴 닫힘
+     ========================================================= */
 
-  /* 상담 관리 → 상담기록카드 하위메뉴 */
+  /* 상담 관리 → 상담기록카드 / 상담진행챠트 */
   const counselManagementNav = document.getElementById("counselManagementNav");
   const counselManagementSubmenu = document.getElementById("counselManagementSubmenu");
   const counselRecordCardMenu = document.getElementById("counselRecordCardMenu");
   const counselProgressChartMenu = document.getElementById("counselProgressChartMenu");
 
+  /* 문서관리 → 회원기록카드 */
+  const documentManagementNav = document.getElementById("documentManagementNav");
+  const documentManagementSubmenu = document.getElementById("documentManagementSubmenu");
+  const memberRecordCardMenu = document.getElementById("memberRecordCardMenu");
+
+  /* 시스템 설정 → 사용자등록 / 상담항목등록 / 로그인 확인 */
+  const systemSettingsNav = document.getElementById("systemSettingsNav");
+  const systemSettingsSubmenu = document.getElementById("systemSettingsSubmenu");
+  const employeeRegisterMenu = document.getElementById("employeeRegisterMenu");
+  const consultationItemsMenu = document.getElementById("consultationItemsMenu");
+  const loginAuditMenu = document.getElementById("loginAuditMenu");
+
   function setCounselManagementOpen(open){
     if (!counselManagementNav || !counselManagementSubmenu) return;
-    counselManagementNav.classList.toggle("open", Boolean(open));
-    counselManagementSubmenu.classList.toggle("open", Boolean(open));
-    counselManagementNav.setAttribute("aria-expanded", open ? "true" : "false");
+    const value = Boolean(open);
+    counselManagementNav.classList.toggle("open", value);
+    counselManagementSubmenu.classList.toggle("open", value);
+    counselManagementNav.setAttribute("aria-expanded", value ? "true" : "false");
   }
 
+  function setDocumentManagementOpen(open){
+    if (!documentManagementNav || !documentManagementSubmenu) return;
+    const value = Boolean(open);
+    documentManagementNav.classList.toggle("open", value);
+    documentManagementSubmenu.classList.toggle("open", value);
+    documentManagementNav.setAttribute("aria-expanded", value ? "true" : "false");
+  }
+
+  function setSystemSettingsOpen(open){
+    if (!systemSettingsNav || !systemSettingsSubmenu) return;
+    const value = Boolean(open);
+    systemSettingsNav.classList.toggle("open", value);
+    systemSettingsSubmenu.classList.toggle("open", value);
+    systemSettingsNav.setAttribute("aria-expanded", value ? "true" : "false");
+  }
+
+  function closeAllSidebarSubmenus(except = ""){
+    if (except !== "counsel") setCounselManagementOpen(false);
+    if (except !== "document") setDocumentManagementOpen(false);
+    if (except !== "system") setSystemSettingsOpen(false);
+  }
+
+  function activateTopNav(item){
+    document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
+    item?.classList.add("active");
+  }
+
+  // 대시보드/구직자/구인기업/매칭/통계 등 일반 메뉴를 누르면
+  // 현재 열려 있는 모든 하위메뉴를 즉시 닫는다.
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.addEventListener("click", () => {
+      activateTopNav(item);
+      if (!item.classList.contains("has-submenu")) {
+        closeAllSidebarSubmenus();
+      }
+    });
+  });
+
   counselManagementNav?.addEventListener("click", () => {
-    setCounselManagementOpen(
-      !counselManagementSubmenu.classList.contains("open")
-    );
+    const willOpen = !counselManagementSubmenu.classList.contains("open");
+    closeAllSidebarSubmenus("counsel");
+    setCounselManagementOpen(willOpen);
+  });
+
+  documentManagementNav?.addEventListener("click", () => {
+    const willOpen = !documentManagementSubmenu.classList.contains("open");
+    closeAllSidebarSubmenus("document");
+    setDocumentManagementOpen(willOpen);
+  });
+
+  systemSettingsNav?.addEventListener("click", () => {
+    const canOpen =
+      (employeeRegisterMenu && !employeeRegisterMenu.hidden) ||
+      (consultationItemsMenu && !consultationItemsMenu.hidden) ||
+      (loginAuditMenu && !loginAuditMenu.hidden);
+
+    if (!canOpen) {
+      closeAllSidebarSubmenus();
+      return;
+    }
+
+    const willOpen = !systemSettingsSubmenu.classList.contains("open");
+    closeAllSidebarSubmenus("system");
+    setSystemSettingsOpen(willOpen);
   });
 
   counselRecordCardMenu?.addEventListener("click", () => {
@@ -2769,41 +2921,9 @@
     counselRecordCardMenu?.classList.remove("active");
   });
 
-  /* 문서관리 → 회원기록카드 하위메뉴 */
-  const documentManagementNav = document.getElementById("documentManagementNav");
-  const documentManagementSubmenu = document.getElementById("documentManagementSubmenu");
-  const memberRecordCardMenu = document.getElementById("memberRecordCardMenu");
-
-  function setDocumentManagementOpen(open){
-    if (!documentManagementNav || !documentManagementSubmenu) return;
-    documentManagementNav.classList.toggle("open", Boolean(open));
-    documentManagementSubmenu.classList.toggle("open", Boolean(open));
-    documentManagementNav.setAttribute("aria-expanded", open ? "true" : "false");
-  }
-
-  documentManagementNav?.addEventListener("click", () => {
-    setDocumentManagementOpen(
-      !documentManagementSubmenu.classList.contains("open")
-    );
-  });
-
   memberRecordCardMenu?.addEventListener("click", () => {
     memberRecordCardMenu.classList.add("active");
   });
-
-  /* 시스템 설정 → 사용자등록 / 상담항목등록 하위메뉴 */
-  const systemSettingsNav = document.getElementById("systemSettingsNav");
-  const systemSettingsSubmenu = document.getElementById("systemSettingsSubmenu");
-  const employeeRegisterMenu = document.getElementById("employeeRegisterMenu");
-  const consultationItemsMenu = document.getElementById("consultationItemsMenu");
-  const loginAuditMenu = document.getElementById("loginAuditMenu");
-
-  function setSystemSettingsOpen(open){
-    if (!systemSettingsNav || !systemSettingsSubmenu) return;
-    systemSettingsNav.classList.toggle("open", Boolean(open));
-    systemSettingsSubmenu.classList.toggle("open", Boolean(open));
-    systemSettingsNav.setAttribute("aria-expanded", open ? "true" : "false");
-  }
 
   function applySystemSettingsPermission(employee){
     const permission = employee?.permission || "";
@@ -2831,7 +2951,6 @@
       loginAuditMenu.hidden = !admin;
     }
 
-    // 표시 가능한 하위메뉴가 하나도 없을 때만 닫음.
     const canOpen =
       (employeeRegisterMenu && !employeeRegisterMenu.hidden) ||
       (consultationItemsMenu && !consultationItemsMenu.hidden) ||
@@ -2839,19 +2958,6 @@
 
     if (!canOpen) setSystemSettingsOpen(false);
   }
-
-  systemSettingsNav?.addEventListener("click", () => {
-    const canOpen =
-      (employeeRegisterMenu && !employeeRegisterMenu.hidden) ||
-      (consultationItemsMenu && !consultationItemsMenu.hidden) ||
-      (loginAuditMenu && !loginAuditMenu.hidden);
-
-    if (!canOpen) return;
-
-    setSystemSettingsOpen(
-      !systemSettingsSubmenu.classList.contains("open")
-    );
-  });
 
   employeeRegisterMenu?.addEventListener("click", () => {
     employeeRegisterMenu.classList.add("active");
