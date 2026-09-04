@@ -3,6 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: https:;
+    font-src 'self' data:;
+    connect-src 'self'
+      https://fafdxaifluftnertbpvr.supabase.co
+      wss://fafdxaifluftnertbpvr.supabase.co
+      https://api.bigdatacloud.net
+      https://ipapi.co
+      https://api.open-meteo.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    upgrade-insecure-requests;
+  " />
   <title>마음:시나브로심리상담연구소 PC-ARC</title>
   <style>
     :root{
@@ -1256,7 +1274,7 @@
     }
 
   </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
 
 <style>
   /* =========================================================
@@ -1884,8 +1902,12 @@
           <span>사용자등록</span>
         </a>
         <a class="nav-subitem" id="consultationItemsMenu" href="system_edit_consultation_items.html">
-          <span class="nav-subicon">└</span>
+          <span class="nav-subicon">├</span>
           <span>상담항목등록</span>
+        </a>
+        <a class="nav-subitem" id="loginAuditMenu" href="login_check.html" hidden>
+          <span class="nav-subicon">└</span>
+          <span>로그인 확인</span>
         </a>
       </div>
     </nav>
@@ -2590,6 +2612,10 @@
     const fileBase = `${config.label}_${getKoreaDateString()}`;
     const printWindow = window.open("", "_blank", "width=1200,height=800");
 
+    if (printWindow) {
+      try { printWindow.opener = null; } catch (_) {}
+    }
+
     if (!printWindow){
       alert("PDF 변환 창을 열 수 없습니다. 브라우저의 팝업 차단을 허용해 주세요.");
       return;
@@ -2770,6 +2796,7 @@
   const systemSettingsSubmenu = document.getElementById("systemSettingsSubmenu");
   const employeeRegisterMenu = document.getElementById("employeeRegisterMenu");
   const consultationItemsMenu = document.getElementById("consultationItemsMenu");
+  const loginAuditMenu = document.getElementById("loginAuditMenu");
 
   function setSystemSettingsOpen(open){
     if (!systemSettingsNav || !systemSettingsSubmenu) return;
@@ -2799,10 +2826,16 @@
       consultationItemsMenu.hidden = !canViewConsultationItems;
     }
 
+    // 로그인 확인: 관리자만 표시
+    if (loginAuditMenu) {
+      loginAuditMenu.hidden = !admin;
+    }
+
     // 표시 가능한 하위메뉴가 하나도 없을 때만 닫음.
     const canOpen =
       (employeeRegisterMenu && !employeeRegisterMenu.hidden) ||
-      (consultationItemsMenu && !consultationItemsMenu.hidden);
+      (consultationItemsMenu && !consultationItemsMenu.hidden) ||
+      (loginAuditMenu && !loginAuditMenu.hidden);
 
     if (!canOpen) setSystemSettingsOpen(false);
   }
@@ -2810,7 +2843,8 @@
   systemSettingsNav?.addEventListener("click", () => {
     const canOpen =
       (employeeRegisterMenu && !employeeRegisterMenu.hidden) ||
-      (consultationItemsMenu && !consultationItemsMenu.hidden);
+      (consultationItemsMenu && !consultationItemsMenu.hidden) ||
+      (loginAuditMenu && !loginAuditMenu.hidden);
 
     if (!canOpen) return;
 
@@ -2822,11 +2856,19 @@
   employeeRegisterMenu?.addEventListener("click", () => {
     employeeRegisterMenu.classList.add("active");
     consultationItemsMenu?.classList.remove("active");
+    loginAuditMenu?.classList.remove("active");
   });
 
   consultationItemsMenu?.addEventListener("click", () => {
     consultationItemsMenu.classList.add("active");
     employeeRegisterMenu?.classList.remove("active");
+    loginAuditMenu?.classList.remove("active");
+  });
+
+  loginAuditMenu?.addEventListener("click", () => {
+    loginAuditMenu.classList.add("active");
+    employeeRegisterMenu?.classList.remove("active");
+    consultationItemsMenu?.classList.remove("active");
   });
 </script>
 
@@ -3129,12 +3171,23 @@
     sessionStorage.setItem("sina_employee", JSON.stringify(employee));
 
     if (userInfo) {
-      userInfo.innerHTML =
-        `<strong>${employee.name || "-"} ${employee.position || ""} · ${employee.permission || "-"} · ${employee.employee_code || "-"}</strong><br>` +
-        `<span id="sinaUsageTime">사용시간 : 00:00:00</span>`;
+      // DB 문자열을 HTML로 해석하지 않고 순수 텍스트로만 출력한다.
+      // 이름/직책 등에 HTML 또는 script 문자열이 들어 있어도 실행되지 않는다.
+      const strongEl = document.createElement("strong");
+      const displayName = employee.name || "-";
+      const displayPosition = employee.position ? ` ${employee.position}` : "";
+      strongEl.textContent =
+        `${displayName}${displayPosition} · ${employee.permission || "-"} · ${employee.employee_code || "-"}`;
+
+      const brEl = document.createElement("br");
+      const usageEl = document.createElement("span");
+      usageEl.id = "sinaUsageTime";
+      usageEl.textContent = "사용시간 : 00:00:00";
+
+      userInfo.replaceChildren(strongEl, brEl, usageEl);
     }
 
-    // innerHTML 갱신 후 사용시간 DOM 참조 재연결
+    // 사용자 정보 DOM 갱신 후 사용시간 DOM 참조 재연결
     usageTimeEl = document.getElementById("sinaUsageTime");
 
     loginLayer.classList.add("is-hidden");
@@ -3378,6 +3431,45 @@
   }
 
 
+  // =========================================================
+  // 로그인 성공 기록
+  // - 성공한 이메일/비밀번호 로그인만 기록
+  // - 서버 Edge Function에서 JWT + employee.active를 다시 검증
+  // - IP/국가/국내·해외 구분은 서버에서 기록
+  // - 기록 저장 장애가 로그인 자체를 차단하지는 않음
+  // =========================================================
+  async function recordLoginAudit(session) {
+    const accessToken = session?.access_token || "";
+    if (!accessToken) return false;
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/record-login-audit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Authorization": `Bearer ${accessToken}`
+        },
+        body: "{}"
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        console.warn("로그인 기록 저장 실패:", {
+          status: response.status,
+          error: result?.error || ""
+        });
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.warn("로그인 기록 서버 연결 실패:", error);
+      return false;
+    }
+  }
+
+
   client.auth.onAuthStateChange((event, session) => {
     if (event === "PASSWORD_RECOVERY") {
       recoveryMode = true;
@@ -3428,6 +3520,10 @@
 
       // 창/탭 종료 시 서버 로그아웃 요청을 위해 현재 세션 토큰만 메모리에 보관.
       currentAccessToken = data.session?.access_token || null;
+
+      // 성공한 로그인 1건을 서버에 기록.
+      // 기록 서버 장애가 있더라도 사용자의 정상 로그인은 계속 진행한다.
+      await recordLoginAudit(data.session);
 
       // 로그인 성공: 별도 성공 문구 없이 즉시 메인화면 표시
       showApp(employee);
