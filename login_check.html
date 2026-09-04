@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>로그인 확인 | PC-ARC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
+  <style>
+    :root{
+      --navy:#172742; --blue:#315d96; --bg:#f4f7fb; --line:#dbe3ee;
+      --text:#24324a; --muted:#7d899a; --white:#fff; --danger:#c2413b;
+      --green:#227a46; --orange:#a35c16;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+    }
+    .page{max-width:1180px;margin:0 auto;padding:22px}
+    .top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:14px;
+    }
+    h1{margin:0;font-size:22px;letter-spacing:-.6px}
+    .sub{margin-top:5px;color:var(--muted);font-size:13px}
+    button{
+      border:0;border-radius:8px;padding:9px 15px;font:inherit;font-weight:800;
+      cursor:pointer;
+    }
+    .back{background:#64748b;color:white}
+    .refresh{background:var(--blue);color:white}
+    .card{
+      background:white;border:1px solid var(--line);border-radius:12px;
+      padding:14px;box-shadow:0 5px 16px rgba(32,48,76,.06);
+    }
+    .filters{
+      display:grid;grid-template-columns:180px 180px 1fr 100px;gap:8px;
+      margin-bottom:12px;
+    }
+    input,select{
+      width:100%;height:38px;border:1px solid #ccd6e3;border-radius:8px;
+      padding:0 10px;background:white;font:inherit;font-size:13px;
+    }
+    .summary{
+      display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;
+    }
+    .chip{
+      border:1px solid var(--line);background:#f9fbfd;border-radius:999px;
+      padding:6px 10px;font-size:12px;font-weight:800;
+    }
+    .table-wrap{
+      overflow:auto;border:1px solid var(--line);border-radius:10px;background:white;
+    }
+    table{width:100%;border-collapse:collapse;min-width:980px;font-size:12.5px}
+    th,td{
+      padding:9px 8px;border-bottom:1px solid #e8edf3;text-align:center;
+      white-space:nowrap;
+    }
+    th{background:#eef3f8;color:#3c4c63;font-weight:900;position:sticky;top:0}
+    td.left{text-align:left}
+    tr:hover td{background:#f8fbff}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:900}
+    .domestic{background:#e9f7ef;color:var(--green)}
+    .overseas{background:#fff2e4;color:var(--orange)}
+    .unknown{background:#eef1f5;color:#657082}
+    .status{padding:18px;text-align:center;color:var(--muted);font-size:13px}
+    .status.error{color:var(--danger);font-weight:800}
+    @media(max-width:760px){
+      .page{padding:12px}
+      .top{align-items:flex-start}
+      .filters{grid-template-columns:1fr 1fr}
+      .filters input{grid-column:1/-1}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="top">
+      <div>
+        <h1>로그인 확인</h1>
+        <div class="sub">성공적으로 로그인한 기록만 표시합니다. 관리자 전용 화면입니다.</div>
+      </div>
+      <button class="back" id="backBtn">이전화면</button>
+    </div>
+
+    <section class="card">
+      <div class="filters">
+        <select id="period">
+          <option value="7">최근 7일</option>
+          <option value="30" selected>최근 30일</option>
+          <option value="90">최근 90일</option>
+          <option value="365">최근 1년</option>
+        </select>
+        <select id="region">
+          <option value="">국내/해외 전체</option>
+          <option value="국내">국내</option>
+          <option value="해외">해외</option>
+          <option value="확인불가">확인불가</option>
+        </select>
+        <input id="keyword" placeholder="이름 또는 이메일 검색">
+        <button class="refresh" id="searchBtn">조회</button>
+      </div>
+
+      <div class="summary">
+        <span class="chip" id="totalChip">전체 0건</span>
+        <span class="chip" id="domesticChip">국내 0건</span>
+        <span class="chip" id="overseasChip">해외 0건</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>로그인 일시</th>
+              <th>사용자</th>
+              <th>이메일</th>
+              <th>권한</th>
+              <th>IP</th>
+              <th>국가</th>
+              <th>구분</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="8" class="status">조회 중입니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+<script>
+(() => {
+  const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+
+  const sb = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth:{
+        storage:window.sessionStorage,
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:false
+      }
+    }
+  );
+
+  const tbody = document.getElementById("tbody");
+  const period = document.getElementById("period");
+  const region = document.getElementById("region");
+  const keyword = document.getElementById("keyword");
+  const searchBtn = document.getElementById("searchBtn");
+  const totalChip = document.getElementById("totalChip");
+  const domesticChip = document.getElementById("domesticChip");
+  const overseasChip = document.getElementById("overseasChip");
+
+  const esc = value => String(value ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;")
+    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+  function formatKST(value){
+    if(!value) return "-";
+    return new Intl.DateTimeFormat("ko-KR",{
+      timeZone:"Asia/Seoul",
+      year:"numeric",month:"2-digit",day:"2-digit",
+      weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",
+      hour12:false
+    }).format(new Date(value));
+  }
+
+  function regionBadge(value){
+    const cls = value==="국내" ? "domestic" : value==="해외" ? "overseas" : "unknown";
+    return `<span class="badge ${cls}">${esc(value || "확인불가")}</span>`;
+  }
+
+  async function guardAdmin(){
+    const {data:{user},error:userError} = await sb.auth.getUser();
+    if(userError || !user){
+      location.replace("index.html");
+      return false;
+    }
+
+    const {data:employee,error} = await sb
+      .from("employee")
+      .select("permission,active")
+      .eq("auth_user_id",user.id)
+      .maybeSingle();
+
+    if(error || !employee || employee.active!==true || employee.permission!=="관리자"){
+      alert("관리자만 로그인 확인 화면을 사용할 수 있습니다.");
+      location.replace("index.html");
+      return false;
+    }
+    return true;
+  }
+
+  async function load(){
+    tbody.innerHTML = `<tr><td colspan="8" class="status">조회 중입니다.</td></tr>`;
+    searchBtn.disabled = true;
+
+    try{
+      const days = Number(period.value || 30);
+      const from = new Date(Date.now() - days*24*60*60*1000).toISOString();
+
+      let query = sb
+        .from("login_audit_log")
+        .select("id,employee_name,email,permission,login_at,ip_address,country_code,country_name,access_region")
+        .gte("login_at",from)
+        .order("login_at",{ascending:false})
+        .limit(500);
+
+      if(region.value) query = query.eq("access_region",region.value);
+
+      const {data,error} = await query;
+      if(error) throw error;
+
+      const q = keyword.value.trim().toLowerCase();
+      const rows = (data || []).filter(row => {
+        if(!q) return true;
+        return String(row.employee_name||"").toLowerCase().includes(q) ||
+               String(row.email||"").toLowerCase().includes(q);
+      });
+
+      const domestic = rows.filter(r=>r.access_region==="국내").length;
+      const overseas = rows.filter(r=>r.access_region==="해외").length;
+      totalChip.textContent = `전체 ${rows.length}건`;
+      domesticChip.textContent = `국내 ${domestic}건`;
+      overseasChip.textContent = `해외 ${overseas}건`;
+
+      if(!rows.length){
+        tbody.innerHTML = `<tr><td colspan="8" class="status">조회 결과가 없습니다.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map((row,index)=>{
+        const country = row.country_name
+          ? `${esc(row.country_name)}${row.country_code ? ` (${esc(row.country_code)})` : ""}`
+          : (row.country_code ? esc(row.country_code) : "확인불가");
+
+        return `
+          <tr>
+            <td>${index+1}</td>
+            <td>${esc(formatKST(row.login_at))}</td>
+            <td>${esc(row.employee_name || "-")}</td>
+            <td class="left">${esc(row.email || "-")}</td>
+            <td>${esc(row.permission || "-")}</td>
+            <td>${esc(row.ip_address || "-")}</td>
+            <td>${country}</td>
+            <td>${regionBadge(row.access_region)}</td>
+          </tr>
+        `;
+      }).join("");
+    }catch(error){
+      console.error(error);
+      tbody.innerHTML = `<tr><td colspan="8" class="status error">조회 중 오류가 발생했습니다: ${esc(error.message || error)}</td></tr>`;
+    }finally{
+      searchBtn.disabled = false;
+    }
+  }
+
+  searchBtn.addEventListener("click",load);
+  keyword.addEventListener("keydown",e=>{ if(e.key==="Enter") load(); });
+  document.getElementById("backBtn").addEventListener("click",()=>{
+    location.href="index.html";
+  });
+
+  guardAdmin().then(ok=>{ if(ok) load(); });
+})();
+</script>
+</body>
+</html>
