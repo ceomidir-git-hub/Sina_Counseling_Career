@@ -427,6 +427,149 @@
       white-space:nowrap;
     }
 
+    /* ===== 오늘 요약 : DB 실데이터 + 회원요약 팝업 ===== */
+    .counsel-summary-card.summary-clickable{
+      cursor:pointer;
+      transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+    }
+    .counsel-summary-card.summary-clickable:hover{
+      transform:translateY(-2px);
+      border-color:#b9c8e4;
+      box-shadow:0 10px 22px rgba(32,48,76,.12);
+    }
+    .counsel-summary-card.summary-clickable:focus-visible{
+      outline:2px solid #7da4da;
+      outline-offset:2px;
+    }
+    .counsel-summary-meta{
+      min-width:0;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:9px;
+      white-space:nowrap;
+    }
+    .counsel-summary-meta span{
+      font-size:9.375px;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .counsel-summary-meta b{
+      padding-left:9px;
+      border-left:1px solid #dce3ee;
+      color:#315da7;
+      font-size:9.6px;
+      font-weight:900;
+    }
+    .member-summary-modal{
+      position:fixed;
+      inset:0;
+      z-index:100020;
+      display:none;
+      place-items:center;
+      padding:20px;
+      background:rgba(15,23,42,.38);
+      backdrop-filter:blur(2px);
+    }
+    .member-summary-modal.open{display:grid}
+    .member-summary-dialog{
+      width:min(780px,calc(100vw - 40px));
+      max-height:calc(100vh - 40px);
+      padding:16px 18px 18px;
+      border:1px solid #d7dee9;
+      border-radius:14px;
+      background:#fff;
+      box-shadow:0 24px 60px rgba(15,23,42,.24);
+      overflow:auto;
+    }
+    .member-summary-head{
+      height:32px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:9px;
+    }
+    .member-summary-head strong{
+      color:#172742;
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:-.5px;
+    }
+    .member-summary-head span{
+      margin-left:auto;
+      color:#7f8a9c;
+      font-size:10px;
+      font-weight:800;
+    }
+    .member-summary-close{
+      width:30px;
+      height:30px;
+      border:1px solid #dbe3ee;
+      border-radius:8px;
+      background:#f8fafc;
+      color:#475569;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .member-summary-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      color:#111827;
+      background:#fff;
+    }
+    .member-summary-table col.summary-six{width:14.25%}
+    .member-summary-table col.summary-total{width:14.5%}
+    .member-summary-table th,
+    .member-summary-table td{
+      height:48px;
+      border:1px solid #596273;
+      text-align:center;
+      vertical-align:middle;
+      padding:4px 5px;
+    }
+    .member-summary-table thead tr:first-child th{
+      height:46px;
+      font-size:18px;
+      font-weight:800;
+      background:#fbfcfe;
+    }
+    .member-summary-table thead tr:nth-child(2) th{
+      height:42px;
+      font-size:15px;
+      font-weight:800;
+      background:#f8fafc;
+    }
+    .member-summary-table tbody td{
+      height:52px;
+      font-size:20px;
+      font-weight:900;
+      color:#244f91;
+    }
+    .member-summary-table .total-cell{
+      font-size:22px;
+      color:#172742;
+    }
+    .member-summary-foot{
+      margin-top:8px;
+      color:#7a8596;
+      font-size:9.5px;
+      line-height:1.5;
+      text-align:right;
+    }
+
+    @media(max-width:760px){
+      .member-summary-dialog{padding:13px 12px 14px}
+      .member-summary-head strong{font-size:16px}
+      .member-summary-table thead tr:first-child th{font-size:14px}
+      .member-summary-table thead tr:nth-child(2) th{font-size:12px}
+      .member-summary-table tbody td{font-size:16px}
+      .counsel-summary-meta{gap:5px}
+      .counsel-summary-meta b{padding-left:5px}
+    }
+
     .counsel-bottom-grid{
       min-height:0;
       display:grid;
@@ -440,15 +583,27 @@
     .counsel-note-nav{
       height:34px;
       display:grid;
-      grid-template-columns:76px 1fr 76px;
+      /* 하단 카드가 2분할되어도 날짜가 한 줄에 유지되도록 버튼 폭 축소 */
+      grid-template-columns:48px minmax(0,1fr) 48px;
       align-items:center;
-      gap:6px;
+      gap:4px;
       margin-bottom:8px;
     }
-    .counsel-note-nav b{text-align:center;font-size:11.55px;color:#0b4ea2}
+    .counsel-note-nav b{
+      min-width:0;
+      text-align:center;
+      font-size:10.8px;
+      color:#0b4ea2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
     .counsel-note-nav button{
-      height:32px;border:1px solid #dbe4f0;border-radius:999px;
-      background:#f8fafc;color:#334155;font-size:9.9px;font-weight:850;
+      min-width:0;
+      padding:0 3px;
+      height:30px;border:1px solid #dbe4f0;border-radius:999px;
+      background:#f8fafc;color:#334155;font-size:8.9px;font-weight:850;
+      white-space:nowrap;
     }
     .counsel-note-nav button:disabled{opacity:.4}
     .counsel-note-body{
@@ -2097,17 +2252,20 @@
           </a>
         </div>
 
-        <div class="counsel-summary-card">
+        <div class="counsel-summary-card summary-clickable" id="counselSummaryCard" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="memberSummaryModal" title="클릭하면 회원수 기준 회원요약을 표시합니다.">
           <div class="counsel-section-title">
             <strong>📌 오늘 요약</strong>
-            <span>2026년 8월 기준</span>
+            <div class="counsel-summary-meta">
+              <span id="counselSummaryPeriod">기준일 확인 중</span>
+              <b id="counselSummaryMembers">총인원 -명</b>
+            </div>
           </div>
           <div class="counsel-summary-grid">
-            <div class="counsel-stat"><small>년전체</small><strong>1,263</strong><span>건</span></div>
-            <div class="counsel-stat"><small>당월전체</small><strong>342</strong><span>건</span></div>
-            <div class="counsel-stat"><small>심리진행중</small><strong>38</strong><span>건</span></div>
-            <div class="counsel-stat"><small>진로진행중</small><strong>-</strong><span>건</span></div>
-            <div class="counsel-stat"><small>완료</small><strong>921</strong><span>건</span></div>
+            <div class="counsel-stat"><small>년전체</small><strong id="summaryYearTotal">-</strong><span>건</span></div>
+            <div class="counsel-stat"><small>당월전체</small><strong id="summaryMonthTotal">-</strong><span>건</span></div>
+            <div class="counsel-stat"><small>심리진행중</small><strong id="summaryPsychProgress">-</strong><span>건</span></div>
+            <div class="counsel-stat"><small>진로진행중</small><strong id="summaryCareerProgress">-</strong><span>건</span></div>
+            <div class="counsel-stat"><small>완료</small><strong id="summaryCompleted">-</strong><span>건</span></div>
           </div>
         </div>
 
@@ -2259,6 +2417,49 @@
 </div>
 
 </div><!-- /#sinaAppView -->
+
+<!-- 오늘 요약 클릭 시 표시되는 회원수 기준 회원요약 -->
+<div class="member-summary-modal" id="memberSummaryModal" role="dialog" aria-modal="true" aria-labelledby="memberSummaryTitle" aria-hidden="true">
+  <section class="member-summary-dialog">
+    <div class="member-summary-head">
+      <strong id="memberSummaryTitle">* 회원요약</strong>
+      <span id="memberSummaryPeriod">-</span>
+      <button type="button" class="member-summary-close" id="memberSummaryClose" aria-label="회원요약 닫기">×</button>
+    </div>
+
+    <table class="member-summary-table" aria-label="상담 유형별 회원수 요약">
+      <colgroup>
+        <col class="summary-six"><col class="summary-six"><col class="summary-six">
+        <col class="summary-six"><col class="summary-six"><col class="summary-six">
+        <col class="summary-total">
+      </colgroup>
+      <thead>
+        <tr>
+          <th colspan="3">심리상담</th>
+          <th colspan="3">진로상담</th>
+          <th rowspan="2">총인원</th>
+        </tr>
+        <tr>
+          <th>진행중</th><th>완료</th><th>총원</th>
+          <th>진행중</th><th>완료</th><th>총원</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="memberPsychProgress">-</td>
+          <td id="memberPsychCompleted">-</td>
+          <td id="memberPsychTotal">-</td>
+          <td id="memberCareerProgress">-</td>
+          <td id="memberCareerCompleted">-</td>
+          <td id="memberCareerTotal">-</td>
+          <td class="total-cell" id="memberGrandTotal">-</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="member-summary-foot">회원수 기준 · 동일 회원의 여러 회기는 1명으로 계산</div>
+  </section>
+</div>
 
 <script>
   /* =========================================================
@@ -3014,6 +3215,303 @@
 
   window.sinaSupabase = client;
 
+  // =========================================================
+  // 오늘 요약 / 회원요약 DB 계산
+  // ---------------------------------------------------------
+  // 메인 오늘 요약 = 건수 기준
+  //   · 접수는 동일 회원 + 동일 접수일시 중복을 1건으로 계산
+  //   · 상담 회기는 DB의 각 활성 회기 레코드를 각각 1건으로 계산
+  //   · 예: 접수 + 1회기 + 2회기 = 3건
+  // 회원요약 팝업 = 회원수 기준
+  //   · 같은 회원의 회기 수와 관계없이 client_id 1명으로 계산
+  // =========================================================
+  const SUMMARY_PAGE_SIZE = 1000;
+  const COMPLETE_STATUSES = new Set(["완료", "종결", "종료"]);
+  const PROGRESS_STATUSES = new Set(["진행", "진행중"]);
+
+  const summaryEls = {
+    card: document.getElementById("counselSummaryCard"),
+    period: document.getElementById("counselSummaryPeriod"),
+    members: document.getElementById("counselSummaryMembers"),
+    yearTotal: document.getElementById("summaryYearTotal"),
+    monthTotal: document.getElementById("summaryMonthTotal"),
+    psychProgress: document.getElementById("summaryPsychProgress"),
+    careerProgress: document.getElementById("summaryCareerProgress"),
+    completed: document.getElementById("summaryCompleted"),
+    modal: document.getElementById("memberSummaryModal"),
+    modalClose: document.getElementById("memberSummaryClose"),
+    modalPeriod: document.getElementById("memberSummaryPeriod"),
+    memberPsychProgress: document.getElementById("memberPsychProgress"),
+    memberPsychCompleted: document.getElementById("memberPsychCompleted"),
+    memberPsychTotal: document.getElementById("memberPsychTotal"),
+    memberCareerProgress: document.getElementById("memberCareerProgress"),
+    memberCareerCompleted: document.getElementById("memberCareerCompleted"),
+    memberCareerTotal: document.getElementById("memberCareerTotal"),
+    memberGrandTotal: document.getElementById("memberGrandTotal")
+  };
+
+  function formatCount(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n.toLocaleString("ko-KR") : "-";
+  }
+
+  function getSeoulYearMonth() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit"
+    }).formatToParts(new Date());
+    const map = {};
+    parts.forEach(part => { if (part.type !== "literal") map[part.type] = part.value; });
+    return { year: Number(map.year), month: Number(map.month) };
+  }
+
+  function getSeoulDateParts(value) {
+    if (!value) return null;
+    const raw = String(value);
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(raw)
+      ? new Date(`${raw}T00:00:00+09:00`)
+      : new Date(raw);
+    if (Number.isNaN(date.getTime())) return null;
+
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(date);
+    const map = {};
+    parts.forEach(part => { if (part.type !== "literal") map[part.type] = part.value; });
+    return { year: Number(map.year), month: Number(map.month), day: Number(map.day) };
+  }
+
+  function eventTimeValue(value) {
+    if (!value) return Number.NEGATIVE_INFINITY;
+    const raw = String(value);
+    const d = /^\d{4}-\d{2}-\d{2}$/.test(raw)
+      ? new Date(`${raw}T00:00:00+09:00`)
+      : new Date(raw);
+    const t = d.getTime();
+    return Number.isFinite(t) ? t : Number.NEGATIVE_INFINITY;
+  }
+
+  async function fetchAllSummaryRows(table, columns, applyActiveFilter = false) {
+    const rows = [];
+    let from = 0;
+
+    while (true) {
+      let query = client.from(table).select(columns).range(from, from + SUMMARY_PAGE_SIZE - 1);
+      if (applyActiveFilter) query = query.eq("record_active", true);
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const page = Array.isArray(data) ? data : [];
+      rows.push(...page);
+      if (page.length < SUMMARY_PAGE_SIZE) break;
+      from += SUMMARY_PAGE_SIZE;
+    }
+
+    return rows;
+  }
+
+  function normalizeCounselType(value) {
+    const text = String(value || "").trim().toUpperCase();
+    if (["PC", "PSYCHOLOGICAL", "심리", "심리상담"].includes(text)) return "PC";
+    if (["CC", "CAREER", "진로", "진로상담"].includes(text)) return "CC";
+    return text;
+  }
+
+  function buildCounselEvents(rows, type) {
+    const receiptKeys = new Set();
+    const events = [];
+
+    rows.forEach(row => {
+      const clientId = row.client_id || "";
+      if (!clientId) return;
+
+      const receiptAt = type === "PC"
+        ? (row.receipt_at || row.receipt_date || null)
+        : (row.receipt_at || null);
+
+      if (receiptAt) {
+        // 동일 회기 레코드에 반복 저장된 같은 접수정보는 1건만 계산.
+        // 같은 회원이 다른 접수일시로 다시 접수된 경우에는 별도 1건으로 계산.
+        const receiptKey = `${clientId}|${String(receiptAt)}`;
+        if (!receiptKeys.has(receiptKey)) {
+          receiptKeys.add(receiptKey);
+          events.push({ clientId, type, kind: "receipt", eventAt: receiptAt });
+        }
+      }
+
+      const sessionAt = type === "PC"
+        ? (row.session_start_at || row.visit_at || row.visit_date || row.created_at || null)
+        : (row.session_start_at || row.counseling_date || row.created_at || null);
+
+      // 활성 상담 레코드 1행 = 회기 1건.
+      if (sessionAt) events.push({ clientId, type, kind: "session", eventAt: sessionAt });
+    });
+
+    return events;
+  }
+
+  function latestStatusMap(rows, type) {
+    const map = new Map();
+
+    rows.forEach(row => {
+      const clientId = row.client_id || "";
+      if (!clientId) return;
+
+      const statusAt = type === "PC"
+        ? (row.session_start_at || row.visit_at || row.visit_date || row.updated_at || row.created_at || null)
+        : (row.session_start_at || row.counseling_date || row.updated_at || row.created_at || null);
+      const time = eventTimeValue(statusAt);
+      const current = map.get(clientId);
+
+      if (!current || time >= current.time) {
+        map.set(clientId, {
+          status: String(row.session_status || "").trim(),
+          time
+        });
+      }
+    });
+
+    return map;
+  }
+
+  function countEventsByClientStatus(events, statusMap, allowedStatuses) {
+    return events.reduce((sum, event) => {
+      const status = statusMap.get(event.clientId)?.status || "";
+      return sum + (allowedStatuses.has(status) ? 1 : 0);
+    }, 0);
+  }
+
+  function countMembersByStatus(statusMap, allowedStatuses) {
+    let count = 0;
+    statusMap.forEach(value => {
+      if (allowedStatuses.has(value.status)) count += 1;
+    });
+    return count;
+  }
+
+  function renderSummaryData(summary) {
+    const periodText = `${summary.year}년 ${summary.month}월 기준`;
+
+    if (summaryEls.period) summaryEls.period.textContent = periodText;
+    if (summaryEls.members) summaryEls.members.textContent = `총인원 ${formatCount(summary.memberTotal)}명`;
+    if (summaryEls.yearTotal) summaryEls.yearTotal.textContent = formatCount(summary.yearTotal);
+    if (summaryEls.monthTotal) summaryEls.monthTotal.textContent = formatCount(summary.monthTotal);
+    if (summaryEls.psychProgress) summaryEls.psychProgress.textContent = formatCount(summary.psychProgressEvents);
+    if (summaryEls.careerProgress) summaryEls.careerProgress.textContent = formatCount(summary.careerProgressEvents);
+    if (summaryEls.completed) summaryEls.completed.textContent = formatCount(summary.completedEvents);
+
+    if (summaryEls.modalPeriod) summaryEls.modalPeriod.textContent = periodText;
+    if (summaryEls.memberPsychProgress) summaryEls.memberPsychProgress.textContent = formatCount(summary.psychProgressMembers);
+    if (summaryEls.memberPsychCompleted) summaryEls.memberPsychCompleted.textContent = formatCount(summary.psychCompletedMembers);
+    if (summaryEls.memberPsychTotal) summaryEls.memberPsychTotal.textContent = formatCount(summary.psychMemberTotal);
+    if (summaryEls.memberCareerProgress) summaryEls.memberCareerProgress.textContent = formatCount(summary.careerProgressMembers);
+    if (summaryEls.memberCareerCompleted) summaryEls.memberCareerCompleted.textContent = formatCount(summary.careerCompletedMembers);
+    if (summaryEls.memberCareerTotal) summaryEls.memberCareerTotal.textContent = formatCount(summary.careerMemberTotal);
+    if (summaryEls.memberGrandTotal) summaryEls.memberGrandTotal.textContent = formatCount(summary.memberTotal);
+  }
+
+  async function loadCounselDashboardSummary() {
+    const [{ year, month }, basicRows, careerRows, psychRows] = await Promise.all([
+      Promise.resolve(getSeoulYearMonth()),
+      fetchAllSummaryRows("DB_basic", "id,member_key,counsel_type"),
+      fetchAllSummaryRows(
+        "DB_career_counseling",
+        "id,client_id,receipt_at,counseling_date,session_start_at,session_status,created_at,updated_at,record_active",
+        true
+      ),
+      fetchAllSummaryRows(
+        "DB_psychological_counseling",
+        "id,client_id,receipt_at,receipt_date,visit_at,visit_date,session_start_at,session_status,created_at,updated_at,record_active",
+        true
+      )
+    ]);
+
+    const careerEvents = buildCounselEvents(careerRows, "CC");
+    const psychEvents = buildCounselEvents(psychRows, "PC");
+    const allEvents = [...careerEvents, ...psychEvents];
+
+    const careerStatus = latestStatusMap(careerRows, "CC");
+    const psychStatus = latestStatusMap(psychRows, "PC");
+
+    let yearTotal = 0;
+    let monthTotal = 0;
+    allEvents.forEach(event => {
+      const parts = getSeoulDateParts(event.eventAt);
+      if (!parts) return;
+      if (parts.year === year) yearTotal += 1;
+      if (parts.year === year && parts.month === month) monthTotal += 1;
+    });
+
+    const psychProgressEvents = countEventsByClientStatus(psychEvents, psychStatus, PROGRESS_STATUSES);
+    const careerProgressEvents = countEventsByClientStatus(careerEvents, careerStatus, PROGRESS_STATUSES);
+    const psychCompletedEvents = countEventsByClientStatus(psychEvents, psychStatus, COMPLETE_STATUSES);
+    const careerCompletedEvents = countEventsByClientStatus(careerEvents, careerStatus, COMPLETE_STATUSES);
+
+    const memberTotal = new Set(basicRows.map(row => row.id).filter(Boolean)).size;
+    const psychMemberTotal = new Set(
+      basicRows.filter(row => normalizeCounselType(row.counsel_type) === "PC").map(row => row.id).filter(Boolean)
+    ).size;
+    const careerMemberTotal = new Set(
+      basicRows.filter(row => normalizeCounselType(row.counsel_type) === "CC").map(row => row.id).filter(Boolean)
+    ).size;
+
+    const summary = {
+      year,
+      month,
+      memberTotal,
+      yearTotal,
+      monthTotal,
+      psychProgressEvents,
+      careerProgressEvents,
+      completedEvents: psychCompletedEvents + careerCompletedEvents,
+      psychProgressMembers: countMembersByStatus(psychStatus, PROGRESS_STATUSES),
+      psychCompletedMembers: countMembersByStatus(psychStatus, COMPLETE_STATUSES),
+      psychMemberTotal,
+      careerProgressMembers: countMembersByStatus(careerStatus, PROGRESS_STATUSES),
+      careerCompletedMembers: countMembersByStatus(careerStatus, COMPLETE_STATUSES),
+      careerMemberTotal
+    };
+
+    renderSummaryData(summary);
+    return summary;
+  }
+
+  function openMemberSummaryModal() {
+    if (!summaryEls.modal) return;
+    summaryEls.modal.classList.add("open");
+    summaryEls.modal.setAttribute("aria-hidden", "false");
+    summaryEls.modalClose?.focus();
+  }
+
+  function closeMemberSummaryModal() {
+    if (!summaryEls.modal) return;
+    summaryEls.modal.classList.remove("open");
+    summaryEls.modal.setAttribute("aria-hidden", "true");
+    summaryEls.card?.focus();
+  }
+
+  summaryEls.card?.addEventListener("click", openMemberSummaryModal);
+  summaryEls.card?.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openMemberSummaryModal();
+    }
+  });
+  summaryEls.modalClose?.addEventListener("click", closeMemberSummaryModal);
+  summaryEls.modal?.addEventListener("click", event => {
+    if (event.target === summaryEls.modal) closeMemberSummaryModal();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && summaryEls.modal?.classList.contains("open")) {
+      closeMemberSummaryModal();
+    }
+  });
+
   const loginLayer = document.getElementById("sinaLoginLayer");
   const loginShell = document.getElementById("sinaLoginShell");
   const appView = document.getElementById("sinaAppView");
@@ -3320,6 +3818,12 @@
     isAuthenticatedInApp = true;
     startUsageTimeCounter();
     startOrResetIdleTimer();
+
+    // 로그인 완료 후에만 RLS가 적용된 상담 DB를 읽어 오늘 요약을 갱신한다.
+    loadCounselDashboardSummary().catch(error => {
+      console.error("오늘 요약 DB 계산 실패:", error);
+      if (summaryEls.period) summaryEls.period.textContent = "DB 조회 확인 필요";
+    });
   }
 
   function formatUsageTime(elapsedMs) {
