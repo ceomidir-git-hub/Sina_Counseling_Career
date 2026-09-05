@@ -204,10 +204,10 @@
     .date-control button{width:36px;height:36px;border:0;background:#fff;color:#59667c;font-size:12px;font-weight:900;cursor:pointer}
     #dateLabel{width:140px;text-align:center;font-size:11.8125px;font-weight:800}
 
-    /* 상담·구직 40% : 기업·매칭·취업 60% 분할 */
+    /* 상담·구직 44% : 기업·매칭·취업 56% 분할 */
     .split-dashboard{
       min-height:0;height:100%;display:grid;
-      grid-template-columns:minmax(0,2fr) minmax(0,3fr);
+      grid-template-columns:minmax(0,11fr) minmax(0,14fr);
       gap:12px;
     }
 
@@ -1155,21 +1155,20 @@
        - 직무내용: 탐색 핵심 정보이므로 전체 폭의 30.7% 확보
     */
     /* 구인공고: job_search.html 항목 기준, 가로 스크롤 사용 */
-    .job-posting-table.mode-employer{width:1596px;min-width:1596px}
-    .job-posting-table.mode-employer col:nth-child(1){width:82px}   /* 조사일 */
-    .job-posting-table.mode-employer col:nth-child(2){width:82px}   /* 게시일 */
-    .job-posting-table.mode-employer col:nth-child(3){width:82px}   /* 마감일 */
-    .job-posting-table.mode-employer col:nth-child(4){width:68px}   /* 잔여일수 */
-    .job-posting-table.mode-employer col:nth-child(5){width:150px}  /* 회사명 */
-    .job-posting-table.mode-employer col:nth-child(6){width:210px}  /* 모집직종 */
-    .job-posting-table.mode-employer col:nth-child(7){width:68px}   /* 채용인원 */
-    .job-posting-table.mode-employer col:nth-child(8){width:130px}  /* 지역 */
-    .job-posting-table.mode-employer col:nth-child(9){width:130px}  /* 경력 */
-    .job-posting-table.mode-employer col:nth-child(10){width:130px} /* 학력 */
-    .job-posting-table.mode-employer col:nth-child(11){width:160px} /* 급여 */
-    .job-posting-table.mode-employer col:nth-child(12){width:130px} /* 출처 */
-    .job-posting-table.mode-employer col:nth-child(13){width:92px}  /* 공고URL */
-    .job-posting-table.mode-employer col:nth-child(14){width:82px}  /* 공고상태 */
+    .job-posting-table.mode-employer{width:1514px;min-width:1514px}
+    .job-posting-table.mode-employer col:nth-child(1){width:82px}   /* 게시일 */
+    .job-posting-table.mode-employer col:nth-child(2){width:82px}   /* 마감일 */
+    .job-posting-table.mode-employer col:nth-child(3){width:68px}   /* 잔여일수 */
+    .job-posting-table.mode-employer col:nth-child(4){width:150px}  /* 회사명 */
+    .job-posting-table.mode-employer col:nth-child(5){width:210px}  /* 모집직종 */
+    .job-posting-table.mode-employer col:nth-child(6){width:68px}   /* 채용인원 */
+    .job-posting-table.mode-employer col:nth-child(7){width:130px}  /* 지역 */
+    .job-posting-table.mode-employer col:nth-child(8){width:130px}  /* 경력 */
+    .job-posting-table.mode-employer col:nth-child(9){width:130px}  /* 학력 */
+    .job-posting-table.mode-employer col:nth-child(10){width:160px} /* 급여 */
+    .job-posting-table.mode-employer col:nth-child(11){width:130px} /* 출처 */
+    .job-posting-table.mode-employer col:nth-child(12){width:92px}  /* 공고URL */
+    .job-posting-table.mode-employer col:nth-child(13){width:82px}  /* 공고상태 */
 
     /* 구직공고: 총 926px, 주소·직종 탐색을 위해 가로 스크롤 사용 */
     .job-posting-table.mode-seeker{width:926px;min-width:926px}
@@ -2585,7 +2584,6 @@
      - 프레임 크기 고정, 표 내부에만 가로/세로 스크롤 발생
      ========================================================= */
   const employerColumns = [
-    { key:"surveyDate", label:"조사일" },
     { key:"postedDate", label:"게시일" },
     { key:"deadline", label:"마감일" },
     { key:"remainingDays", label:"잔여일수" },
@@ -2614,16 +2612,16 @@
   ];
 
   const employerPostingData = [
-    {surveyDate:"2026-09-05",postedDate:"2026-09-04",deadline:"미확인",remainingDays:"미확인",company:"효성중공업(주) 창원1공장",position:"CAD(설계) 계약직",count:"1명",region:"경남 창원시",career:"경력무관(신입 포함)",education:"고졸 이상(예정자 가능)",salary:"월급 271만원",source:"사람인",url:"https://m.saramin.co.kr/job-search/view?rec_idx=54944217",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-03",deadline:"2026-10-31",remainingDays:"56일",company:"(주)제이이엔지",position:"제어기술팀 신입/경력 사원",count:"1명",region:"경남 김해시",career:"신입·경력(목록 제목)",education:"미확인",salary:"회사 내규(목록 표기)",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=KOS&infoTypeGroup=tb_workinfogubun&wantedAuthNo=230161",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-03",deadline:"2026-10-03",remainingDays:"28일",company:"두산에너빌리티(주)",position:"가스/스팀터빈 제어 시운전 계약직",count:"1명",region:"경남 창원시(목록 표기)",career:"미확인",education:"미확인",salary:"회사 내규(목록 표기)",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=CSI&infoTypeGroup=tb_workinfogubun&wantedAuthNo=54928364",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-03",deadline:"2026-09-21",remainingDays:"16일",company:"한국카본",position:"전기 공무(현장직)",count:"1명",region:"경남 밀양시 본사",career:"신입 또는 경력(2~3년)",education:"고졸 이상",salary:"회사 내규",source:"기업 공식 채용",url:"https://www.hcarbon.com/ko/recruit/jobDetail.do?idx=388",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-02",deadline:"2026-11-01",remainingDays:"57일",company:"(주)성진단조",position:"전기·공무 관리자(열간 단조)",count:"1명",region:"경남 함안군",career:"경력자(상세 연수 미확인)",education:"학력무관(재게시 자료)",salary:"연봉 5,000만원 이상 / 협의 가능",source:"고용24 재게시·Indeed",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=K131112609020034",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-02",deadline:"2026-11-01",remainingDays:"57일",company:"(주)한성전장",position:"전기·전자 분야 단순 종사원",count:"1명",region:"경남 양산시",career:"미확인",education:"미확인",salary:"시급 10,320원 이상",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=KF10512609020001",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-01",deadline:"2026-09-30",remainingDays:"25일",company:"(주)인터전기",position:"배전반·자동제어 설계 / PLC·SCADA 영업·기술",count:"1명",region:"경남 김해시 대동면",career:"신입·경력(3년 이상 표기)",education:"대졸 이상",salary:"연봉 4,000만원 이상 / 면접 후 결정",source:"잡코리아",url:"https://www.jobkorea.co.kr/Recruit/GI_Read/49897666?Oem_Code=C1&PageGbn=ST&sc=225",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-01",deadline:"2026-09-15",remainingDays:"10일",company:"롯데칠성음료(주)",position:"생산(기계·전기·전자) 신입",count:"1명",region:"경남 양산시(안성도 모집지역 포함)",career:"신입",education:"대졸 이상(졸업예정자 가능)",salary:"회사 내규",source:"잡코리아",url:"https://www.jobkorea.co.kr/Recruit/GI_Read/49927213?Oem_Code=C1",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-01",deadline:"2026-10-30",remainingDays:"55일",company:"에너비스 주식회사",position:"전기·전자·통신 제품 개발 연구원",count:"1명",region:"경남 거제시",career:"경력무관(재게시 자료)",education:"미확인(자료 간 불일치)",salary:"연봉 4,000만원 이상 / 면접 후 협의",source:"고용24 재게시·인비원·직행",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=K131522609010001",status:"원문 재확인 필요"},
-    {surveyDate:"2026-09-05",postedDate:"2026-09-01",deadline:"2026-09-15",remainingDays:"10일",company:"원강산업주식회사",position:"설비보수·전기 공무",count:"1명",region:"경남 함안군",career:"미확인",education:"미확인",salary:"연봉 4,500만~5,500만원",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=K131112609010042",status:"원문 재확인 필요"}
+    {postedDate:"2026-09-04",deadline:"미확인",remainingDays:"미확인",company:"효성중공업(주) 창원1공장",position:"CAD(설계) 계약직",count:"1명",region:"경남 창원시",career:"경력무관(신입 포함)",education:"고졸 이상(예정자 가능)",salary:"월급 271만원",source:"사람인",url:"https://m.saramin.co.kr/job-search/view?rec_idx=54944217",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-03",deadline:"2026-10-31",remainingDays:"56일",company:"(주)제이이엔지",position:"제어기술팀 신입/경력 사원",count:"1명",region:"경남 김해시",career:"신입·경력(목록 제목)",education:"미확인",salary:"회사 내규(목록 표기)",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=KOS&infoTypeGroup=tb_workinfogubun&wantedAuthNo=230161",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-03",deadline:"2026-10-03",remainingDays:"28일",company:"두산에너빌리티(주)",position:"가스/스팀터빈 제어 시운전 계약직",count:"1명",region:"경남 창원시(목록 표기)",career:"미확인",education:"미확인",salary:"회사 내규(목록 표기)",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=CSI&infoTypeGroup=tb_workinfogubun&wantedAuthNo=54928364",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-03",deadline:"2026-09-21",remainingDays:"16일",company:"한국카본",position:"전기 공무(현장직)",count:"1명",region:"경남 밀양시 본사",career:"신입 또는 경력(2~3년)",education:"고졸 이상",salary:"회사 내규",source:"기업 공식 채용",url:"https://www.hcarbon.com/ko/recruit/jobDetail.do?idx=388",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-02",deadline:"2026-11-01",remainingDays:"57일",company:"(주)성진단조",position:"전기·공무 관리자(열간 단조)",count:"1명",region:"경남 함안군",career:"경력자(상세 연수 미확인)",education:"학력무관(재게시 자료)",salary:"연봉 5,000만원 이상 / 협의 가능",source:"고용24 재게시·Indeed",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=K131112609020034",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-02",deadline:"2026-11-01",remainingDays:"57일",company:"(주)한성전장",position:"전기·전자 분야 단순 종사원",count:"1명",region:"경남 양산시",career:"미확인",education:"미확인",salary:"시급 10,320원 이상",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=KF10512609020001",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-01",deadline:"2026-09-30",remainingDays:"25일",company:"(주)인터전기",position:"배전반·자동제어 설계 / PLC·SCADA 영업·기술",count:"1명",region:"경남 김해시 대동면",career:"신입·경력(3년 이상 표기)",education:"대졸 이상",salary:"연봉 4,000만원 이상 / 면접 후 결정",source:"잡코리아",url:"https://www.jobkorea.co.kr/Recruit/GI_Read/49897666?Oem_Code=C1&PageGbn=ST&sc=225",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-01",deadline:"2026-09-15",remainingDays:"10일",company:"롯데칠성음료(주)",position:"생산(기계·전기·전자) 신입",count:"1명",region:"경남 양산시(안성도 모집지역 포함)",career:"신입",education:"대졸 이상(졸업예정자 가능)",salary:"회사 내규",source:"잡코리아",url:"https://www.jobkorea.co.kr/Recruit/GI_Read/49927213?Oem_Code=C1",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-01",deadline:"2026-10-30",remainingDays:"55일",company:"에너비스 주식회사",position:"전기·전자·통신 제품 개발 연구원",count:"1명",region:"경남 거제시",career:"경력무관(재게시 자료)",education:"미확인(자료 간 불일치)",salary:"연봉 4,000만원 이상 / 면접 후 협의",source:"고용24 재게시·인비원·직행",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=K131522609010001",status:"원문 재확인 필요"},
+    {postedDate:"2026-09-01",deadline:"2026-09-15",remainingDays:"10일",company:"원강산업주식회사",position:"설비보수·전기 공무",count:"1명",region:"경남 함안군",career:"미확인",education:"미확인",salary:"연봉 4,500만~5,500만원",source:"고용24 재게시 목록",url:"https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet&wantedAuthNo=K131112609010042",status:"원문 재확인 필요"}
   ];
 
   const seekerPostingData = [
@@ -2660,7 +2658,7 @@
       // A4 가로 인쇄용 비율. 합계는 각각 100%.
       printWidths: isSeeker
         ? [9,7,11,11,10,13,8,8,23]
-        : [5,5,5,4,9,13,4,8,8,8,10,8,6,7]
+        : [6,6,5,10,14,5,9,9,9,11,8,7,7]
     };
   }
 
