@@ -1513,12 +1513,21 @@
     z-index:99999;
     display:grid;
     place-items:center;
+    /* 초기 세션 확인 전에는 로그인 화면을 숨겨 깜빡임을 방지 */
+    visibility:hidden;
+    opacity:0;
+    pointer-events:none;
     padding:20px;
     overflow:auto;
     background:
       radial-gradient(circle at 18% 12%,rgba(108,99,232,.14),transparent 34%),
       radial-gradient(circle at 85% 78%,rgba(78,144,248,.13),transparent 34%),
       linear-gradient(135deg,#edf2f8 0%,#f8fafc 48%,#eaf0f7 100%);
+  }
+  #sinaLoginLayer.is-visible{
+    visibility:visible;
+    opacity:1;
+    pointer-events:auto;
   }
   #sinaLoginLayer.is-hidden{display:none}
 
@@ -3750,6 +3759,7 @@
       setSystemSettingsOpen(false);
     }
     loginLayer.classList.remove("is-hidden");
+    loginLayer.classList.add("is-visible");
     loginView.classList.add("active");
     passwordView.classList.remove("active");
 
@@ -3766,6 +3776,7 @@
     loginShell?.classList.add("is-password-mode");
     appView.classList.remove("is-authenticated");
     loginLayer.classList.remove("is-hidden");
+    loginLayer.classList.add("is-visible");
     loginView.classList.remove("active");
     passwordView.classList.add("active");
 
@@ -3807,6 +3818,7 @@
     // 사용자 정보 DOM 갱신 후 사용시간 DOM 참조 재연결
     usageTimeEl = document.getElementById("sinaUsageTime");
 
+    loginLayer.classList.remove("is-visible");
     loginLayer.classList.add("is-hidden");
     appView.classList.add("is-authenticated");
 
@@ -4487,8 +4499,9 @@
 
   // 초기 진입
   // ---------------------------------------------------------
-  // 정상 접속: 기존 브라우저 세션을 현재 세션에서 제거하고 로그인 화면 고정
-  // 비밀번호 복구 링크: 로그아웃하지 않고 recovery 세션을 유지
+  // 정상 접속: 로그인 화면을 먼저 노출하지 않고 기존 세션을 우선 확인
+  // 세션이 있으면 즉시 메인 화면, 없을 때만 로그인 화면 표시
+  // 비밀번호 복구 링크: recovery 세션을 유지
   // ---------------------------------------------------------
   (async () => {
     // 신규 사용자 초대(invite) 및 비밀번호 재설정(recovery) URL은 인증 세션이 필요하므로 유지
