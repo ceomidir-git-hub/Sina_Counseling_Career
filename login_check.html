@@ -34,7 +34,7 @@
       padding:14px;box-shadow:0 5px 16px rgba(32,48,76,.06);
     }
     .filters{
-      display:grid;grid-template-columns:180px 180px 1fr 100px;gap:8px;
+      display:grid;grid-template-columns:150px 150px 150px 1fr 100px;gap:8px;
       margin-bottom:12px;
     }
     input,select{
@@ -78,7 +78,7 @@
     <div class="top">
       <div>
         <h1>로그인 확인</h1>
-        <div class="sub">성공적으로 로그인한 기록만 표시합니다. 관리자 전용 화면입니다.</div>
+        <div class="sub">로그인 성공과 실패 시도를 함께 확인합니다. 관리자 전용 화면입니다.</div>
       </div>
       <button class="back" id="backBtn">이전화면</button>
     </div>
@@ -90,6 +90,11 @@
           <option value="30" selected>최근 30일</option>
           <option value="90">최근 90일</option>
           <option value="365">최근 1년</option>
+        </select>
+        <select id="resultFilter">
+          <option value="">성공/실패 전체</option>
+          <option value="성공">성공</option>
+          <option value="실패">실패</option>
         </select>
         <select id="region">
           <option value="">국내/해외 전체</option>
@@ -103,6 +108,8 @@
 
       <div class="summary">
         <span class="chip" id="totalChip">전체 0건</span>
+        <span class="chip" id="successChip">성공 0건</span>
+        <span class="chip" id="failureChip">실패 0건</span>
         <span class="chip" id="domesticChip">국내 0건</span>
         <span class="chip" id="overseasChip">해외 0건</span>
       </div>
@@ -112,17 +119,19 @@
           <thead>
             <tr>
               <th>No.</th>
-              <th>로그인 일시</th>
+              <th>시도 일시</th>
+              <th>결과</th>
               <th>사용자</th>
               <th>이메일</th>
               <th>권한</th>
+              <th>실패 사유</th>
               <th>IP</th>
               <th>국가</th>
               <th>구분</th>
             </tr>
           </thead>
           <tbody id="tbody">
-            <tr><td colspan="8" class="status">조회 중입니다.</td></tr>
+            <tr><td colspan="10" class="status">조회 중입니다.</td></tr>
           </tbody>
         </table>
       </div>
@@ -149,10 +158,13 @@
 
   const tbody = document.getElementById("tbody");
   const period = document.getElementById("period");
+  const resultFilter = document.getElementById("resultFilter");
   const region = document.getElementById("region");
   const keyword = document.getElementById("keyword");
   const searchBtn = document.getElementById("searchBtn");
   const totalChip = document.getElementById("totalChip");
+  const successChip = document.getElementById("successChip");
+  const failureChip = document.getElementById("failureChip");
   const domesticChip = document.getElementById("domesticChip");
   const overseasChip = document.getElementById("overseasChip");
 
@@ -198,7 +210,7 @@
   }
 
   async function load(){
-    tbody.innerHTML = `<tr><td colspan="8" class="status">조회 중입니다.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="status">조회 중입니다.</td></tr>`;
     searchBtn.disabled = true;
 
     try{
@@ -207,11 +219,12 @@
 
       let query = sb
         .from("login_audit_log")
-        .select("id,employee_name,email,permission,login_at,ip_address,country_code,country_name,access_region")
+        .select("id,employee_name,email,permission,login_at,ip_address,country_code,country_name,access_region,login_result,failure_code,failure_reason")
         .gte("login_at",from)
         .order("login_at",{ascending:false})
         .limit(500);
 
+      if(resultFilter.value) query = query.eq("login_result",resultFilter.value);
       if(region.value) query = query.eq("access_region",region.value);
 
       const {data,error} = await query;
@@ -224,14 +237,18 @@
                String(row.email||"").toLowerCase().includes(q);
       });
 
+      const success = rows.filter(r=>r.login_result==="성공").length;
+      const failure = rows.filter(r=>r.login_result==="실패").length;
       const domestic = rows.filter(r=>r.access_region==="국내").length;
       const overseas = rows.filter(r=>r.access_region==="해외").length;
       totalChip.textContent = `전체 ${rows.length}건`;
+      successChip.textContent = `성공 ${success}건`;
+      failureChip.textContent = `실패 ${failure}건`;
       domesticChip.textContent = `국내 ${domestic}건`;
       overseasChip.textContent = `해외 ${overseas}건`;
 
       if(!rows.length){
-        tbody.innerHTML = `<tr><td colspan="8" class="status">조회 결과가 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="status">조회 결과가 없습니다.</td></tr>`;
         return;
       }
 
@@ -244,9 +261,11 @@
           <tr>
             <td>${index+1}</td>
             <td>${esc(formatKST(row.login_at))}</td>
+            <td><span class="badge ${row.login_result === "실패" ? "overseas" : "domestic"}">${esc(row.login_result || "성공")}</span></td>
             <td>${esc(row.employee_name || "-")}</td>
             <td class="left">${esc(row.email || "-")}</td>
             <td>${esc(row.permission || "-")}</td>
+            <td class="left">${esc(row.failure_reason || "-")}</td>
             <td>${esc(row.ip_address || "-")}</td>
             <td>${country}</td>
             <td>${regionBadge(row.access_region)}</td>
@@ -255,7 +274,7 @@
       }).join("");
     }catch(error){
       console.error(error);
-      tbody.innerHTML = `<tr><td colspan="8" class="status error">조회 중 오류가 발생했습니다: ${esc(error.message || error)}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" class="status error">조회 중 오류가 발생했습니다: ${esc(error.message || error)}</td></tr>`;
     }finally{
       searchBtn.disabled = false;
     }
