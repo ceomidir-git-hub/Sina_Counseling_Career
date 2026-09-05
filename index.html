@@ -4055,41 +4055,45 @@
 
 
   // =========================================================
-  // 로그인 성공 기록
-  // - 성공한 이메일/비밀번호 로그인만 기록
-  // - 서버 Edge Function에서 JWT + employee.active를 다시 검증
-  // - IP/국가/국내·해외 구분은 서버에서 기록
-  // - 기록 저장 장애가 로그인 자체를 차단하지는 않음
+  // 로그인 + 감사기록 통합 서버 호출
+  // - 성공/실패 시도를 서버에서 모두 기록
+  // - 비밀번호는 DB에 저장하지 않음
+  // - IP/국가/국내·해외/실패사유는 서버에서 기록
+  // - 인증 성공 후 서버가 반환한 세션을 현재 브라우저 sessionStorage에 설정
   // =========================================================
-  async function recordLoginAudit(session) {
-    const accessToken = session?.access_token || "";
-    if (!accessToken) return false;
+  async function loginWithAudit(email, password) {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/login-with-audit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY
+      },
+      body: JSON.stringify({ email, password })
+    });
 
-    try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/record-login-audit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_PUBLISHABLE_KEY,
-          "Authorization": `Bearer ${accessToken}`
-        },
-        body: "{}"
-      });
+    const result = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        const result = await response.json().catch(() => ({}));
-        console.warn("로그인 기록 저장 실패:", {
-          status: response.status,
-          error: result?.error || ""
-        });
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.warn("로그인 기록 서버 연결 실패:", error);
-      return false;
+    if (!response.ok || !result?.ok || !result?.session?.access_token || !result?.session?.refresh_token) {
+      const error = new Error(result?.error || "로그인에 실패했습니다. 이메일 주소와 비밀번호를 다시 확인해 주세요.");
+      error.code = result?.code || "login_failed";
+      error.status = response.status;
+      throw error;
     }
+
+    const { data: sessionData, error: sessionError } = await client.auth.setSession({
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token
+    });
+
+    if (sessionError || !sessionData?.session) {
+      console.error("로그인 세션 설정 오류:", sessionError);
+      throw new Error("로그인 인증은 완료되었지만 브라우저 세션을 설정하지 못했습니다. 다시 시도해 주세요.");
+    }
+
+    return {
+      session: sessionData.session,
+      employee: result.employee || null
+    };
   }
 
 
@@ -4125,28 +4129,15 @@
     loginBtn.textContent = "로그인 확인 중...";
 
     try {
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password
-      });
+      const loginResult = await loginWithAudit(email, password);
+      const employee = loginResult.employee;
 
-      if (error || !data.user) {
-        console.error("로그인 오류:", {
-          code: error?.code,
-          status: error?.status,
-          message: error?.message
-        });
-        throw new Error(getAuthErrorMessage(error, "login"));
+      if (!employee || employee.active !== true) {
+        throw new Error("현재 접속이 허용되지 않은 계정입니다. 관리자에게 문의하세요.");
       }
 
-      const employee = await getEmployee(data.user.id);
-
       // 창/탭 종료 시 서버 로그아웃 요청을 위해 현재 세션 토큰만 메모리에 보관.
-      currentAccessToken = data.session?.access_token || null;
-
-      // 성공한 로그인 1건을 서버에 기록.
-      // 기록 서버 장애가 있더라도 사용자의 정상 로그인은 계속 진행한다.
-      await recordLoginAudit(data.session);
+      currentAccessToken = loginResult.session?.access_token || null;
 
       // 로그인 성공: 별도 성공 문구 없이 즉시 메인화면 표시
       showApp(employee);
