@@ -13,11 +13,9 @@
     h2{margin:0;font-size:16px}
     .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
     .back{height:32px;padding:0 11px;border:1px solid #bfc9d5;border-radius:6px;background:#fff;color:#334155;font-size:13px;font-weight:700;cursor:pointer}
-    .search-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.2fr auto;gap:10px;align-items:end}
+    .search-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr auto;gap:10px;align-items:end}
     label{display:block;margin-bottom:5px;font-size:13px;font-weight:800;color:#344154}
     input,select{width:100%;height:36px;border:1px solid #cbd5e1;border-radius:6px;padding:0 10px;background:#fffde8;color:#1f2937;font-size:14px}
-    .date-range{display:grid;grid-template-columns:1fr 18px 1fr;gap:5px;align-items:center}
-    .tilde{text-align:center;color:#64748b}
     .buttons{display:flex;gap:6px}
     button.primary,button.secondary{height:36px;padding:0 14px;border-radius:6px;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
     button.primary{border:1px solid #1f2937;background:#1f2937;color:#fff}
@@ -41,14 +39,6 @@
         <button class="back" type="button" onclick="window.close()">닫기</button>
       </div>
       <div class="search-grid">
-        <div>
-          <label for="dateFrom">게시일 기준 기간</label>
-          <div class="date-range">
-            <input id="dateFrom" type="date">
-            <span class="tilde">~</span>
-            <input id="dateTo" type="date">
-          </div>
-        </div>
         <div>
           <label for="industry">업종</label>
           <input id="industry" type="text" placeholder="예: 제조업">
@@ -78,28 +68,21 @@
       <div id="googleResults" hidden>
         <div class="gcse-searchresults-only" data-gname="jobSearchResults"></div>
       </div>
-      <p class="notice">※ 게시일 기간은 검색어에 함께 표시되는 조건입니다. 실제 게시일·마감일·채용조건은 원문 공고에서 직접 확인하세요.</p>
+      <p class="notice">※ 업종·지역·직무·자격 키워드를 Google 검색어에 반영합니다. 실제 게시일·마감일·채용조건은 원문 공고에서 직접 확인하세요.</p>
     </section>
   </main>
   <script>
-    const dateFrom = document.getElementById('dateFrom');
-    const dateTo = document.getElementById('dateTo');
     const industry = document.getElementById('industry');
     const region = document.getElementById('region');
     const keyword = document.getElementById('keyword');
     const searchStatus = document.getElementById('searchStatus');
     const emptyState = document.getElementById('emptyState');
     const googleResults = document.getElementById('googleResults');
-    function koreaDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
-    dateTo.value = koreaDate();
-    dateFrom.value = new Date(Date.now() - 7 * 86400000).toISOString().slice(0,10);
     function buildQuery(){
       const terms = [region.value, industry.value.trim(), keyword.value.trim(), '채용'].filter(Boolean);
-      if (dateFrom.value || dateTo.value) terms.push((dateFrom.value || '시작일 미지정') + ' ' + (dateTo.value || '종료일 미지정'));
       return terms.join(' ');
     }
     function executeSearch(){
-      if (dateFrom.value && dateTo.value && dateFrom.value > dateTo.value){searchStatus.textContent='게시 시작일이 종료일보다 늦습니다.';return;}
       const query = buildQuery();
       if (!query || query === '채용'){searchStatus.textContent='지역·업종·직무·자격 중 한 항목을 입력하세요.';return;}
       emptyState.hidden = true;
@@ -117,7 +100,7 @@
       run();
     }
     document.getElementById('searchBtn').addEventListener('click',executeSearch);
-    document.getElementById('resetBtn').addEventListener('click',() => {dateFrom.value='';dateTo.value=koreaDate();industry.value='';region.value='';keyword.value='';googleResults.hidden=true;emptyState.hidden=false;searchStatus.textContent='검색조건을 입력하고 검색하세요.';});
+    document.getElementById('resetBtn').addEventListener('click',() => {industry.value='';region.value='';keyword.value='';googleResults.hidden=true;emptyState.hidden=false;searchStatus.textContent='검색조건을 입력하고 검색하세요.';});
     keyword.addEventListener('keydown',event=>{if(event.key==='Enter') executeSearch();});
   </script>
 </body>
