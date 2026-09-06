@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구인공고 검색</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f4f6f8;color:#1f2937;font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif;font-size:14px}
+    .wrap{max-width:1320px;margin:0 auto;padding:22px 18px 34px}
+    .card{background:#fff;border:1px solid #d9dee5;border-radius:10px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(15,23,42,.035)}
+    h1{margin:0;font-size:21px;letter-spacing:-.4px}
+    h2{margin:0;font-size:16px}
+    .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .back{height:32px;padding:0 11px;border:1px solid #bfc9d5;border-radius:6px;background:#fff;color:#334155;font-size:13px;font-weight:700;cursor:pointer}
+    .search-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.2fr auto;gap:10px;align-items:end}
+    label{display:block;margin-bottom:5px;font-size:13px;font-weight:800;color:#344154}
+    input,select{width:100%;height:36px;border:1px solid #cbd5e1;border-radius:6px;padding:0 10px;background:#fffde8;color:#1f2937;font-size:14px}
+    .date-range{display:grid;grid-template-columns:1fr 18px 1fr;gap:5px;align-items:center}
+    .tilde{text-align:center;color:#64748b}
+    .buttons{display:flex;gap:6px}
+    button.primary,button.secondary{height:36px;padding:0 14px;border-radius:6px;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
+    button.primary{border:1px solid #1f2937;background:#1f2937;color:#fff}
+    button.secondary{border:1px solid #bfc9d5;background:#fff;color:#334155}
+    .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .status{font-size:13px;color:#64748b}
+    .guide{margin:0 0 14px;padding:11px 13px;border:1px solid #cfe0f7;border-radius:7px;background:#f6faff;color:#365475;font-size:13px;line-height:1.55}
+    .empty{padding:34px 12px;text-align:center;color:#64748b;font-size:14px}
+    #googleResults{min-height:90px}
+    .notice{margin:12px 0 0;color:#64748b;font-size:12px;line-height:1.65}
+    @media (max-width:900px){.search-grid{grid-template-columns:1fr 1fr}.buttons{grid-column:1 / -1;justify-content:flex-end}}
+    @media (max-width:560px){.wrap{padding:14px 10px}.card{padding:14px}.search-grid{grid-template-columns:1fr}.buttons{grid-column:auto}.head{align-items:flex-start;flex-direction:column}}
+  </style>
+  <script async src="https://cse.google.com/cse.js?cx=7283868aa07a545a4"></script>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="head">
+        <h1>구인공고 검색</h1>
+        <button class="back" type="button" onclick="window.close()">닫기</button>
+      </div>
+      <div class="search-grid">
+        <div>
+          <label for="dateFrom">게시일 기준 기간</label>
+          <div class="date-range">
+            <input id="dateFrom" type="date">
+            <span class="tilde">~</span>
+            <input id="dateTo" type="date">
+          </div>
+        </div>
+        <div>
+          <label for="industry">업종</label>
+          <input id="industry" type="text" placeholder="예: 제조업">
+        </div>
+        <div>
+          <label for="region">지역</label>
+          <select id="region"><option value="">전체</option><option>경남</option><option>부산</option><option>울산</option></select>
+        </div>
+        <div>
+          <label for="keyword">직무·자격 키워드</label>
+          <input id="keyword" type="text" placeholder="예: 전기, 자동화설비">
+        </div>
+        <div class="buttons">
+          <button class="secondary" type="button" id="resetBtn">초기화</button>
+          <button class="primary" type="button" id="searchBtn">검색</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="result-head">
+        <h2>검색 결과</h2>
+        <span class="status" id="searchStatus">검색조건을 입력하고 검색하세요.</span>
+      </div>
+      <p class="guide">검색 결과는 Google이 제공하는 제목·간단한 설명·원문 링크만 표시합니다. 공고 내용을 수집하거나 DB·파일에 저장하지 않습니다.</p>
+      <div id="emptyState" class="empty">아직 검색 결과가 없습니다.</div>
+      <div id="googleResults" hidden>
+        <div class="gcse-searchresults-only" data-gname="jobSearchResults"></div>
+      </div>
+      <p class="notice">※ 게시일 기간은 검색어에 함께 표시되는 조건입니다. 실제 게시일·마감일·채용조건은 원문 공고에서 직접 확인하세요.</p>
+    </section>
+  </main>
+  <script>
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+    const industry = document.getElementById('industry');
+    const region = document.getElementById('region');
+    const keyword = document.getElementById('keyword');
+    const searchStatus = document.getElementById('searchStatus');
+    const emptyState = document.getElementById('emptyState');
+    const googleResults = document.getElementById('googleResults');
+    function koreaDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
+    dateTo.value = koreaDate();
+    dateFrom.value = new Date(Date.now() - 7 * 86400000).toISOString().slice(0,10);
+    function buildQuery(){
+      const terms = [region.value, industry.value.trim(), keyword.value.trim(), '채용'].filter(Boolean);
+      if (dateFrom.value || dateTo.value) terms.push((dateFrom.value || '시작일 미지정') + ' ' + (dateTo.value || '종료일 미지정'));
+      return terms.join(' ');
+    }
+    function executeSearch(){
+      if (dateFrom.value && dateTo.value && dateFrom.value > dateTo.value){searchStatus.textContent='게시 시작일이 종료일보다 늦습니다.';return;}
+      const query = buildQuery();
+      if (!query || query === '채용'){searchStatus.textContent='지역·업종·직무·자격 중 한 항목을 입력하세요.';return;}
+      emptyState.hidden = true;
+      googleResults.hidden = false;
+      searchStatus.textContent='Google 검색 중';
+      let count = 0;
+      const run = () => {
+        const api = window.google && window.google.search && window.google.search.cse && window.google.search.cse.element;
+        const element = api && api.getElement('jobSearchResults');
+        if (element){element.execute(query);searchStatus.textContent='검색어: ' + query;return;}
+        count += 1;
+        if (count < 25) setTimeout(run, 200);
+        else searchStatus.textContent='검색 화면을 불러오지 못했습니다. 인터넷 연결을 확인하세요.';
+      };
+      run();
+    }
+    document.getElementById('searchBtn').addEventListener('click',executeSearch);
+    document.getElementById('resetBtn').addEventListener('click',() => {dateFrom.value='';dateTo.value=koreaDate();industry.value='';region.value='';keyword.value='';googleResults.hidden=true;emptyState.hidden=false;searchStatus.textContent='검색조건을 입력하고 검색하세요.';});
+    keyword.addEventListener('keydown',event=>{if(event.key==='Enter') executeSearch();});
+  </script>
+</body>
+</html>
