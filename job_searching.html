@@ -78,8 +78,11 @@
       <p class="notice">※ 업종·지역·직무·자격 키워드를 Google 검색어에 반영합니다. 실제 게시일·마감일·채용조건은 원문 공고에서 직접 확인하세요.</p>
     </section>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SEARCH_API_URL = 'https://YOUR-WORKER.workers.dev/search';
+    const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const industry = document.getElementById('industry');
     const region = document.getElementById('region');
     const keyword = document.getElementById('keyword');
@@ -109,7 +112,11 @@
       if (!query || query === '채용'){searchStatus.textContent='지역·업종·직무·자격 중 한 항목을 입력하세요.';return;}
       searchBtn.disabled=true;searchStatus.textContent='검색 중';
       try{
-        const response=await fetch(SEARCH_API_URL+'?q='+encodeURIComponent(query));
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if(!session) throw new Error('로그인 후 검색할 수 있습니다.');
+        const response=await fetch(SUPABASE_URL+'/functions/v1/job-search?q='+encodeURIComponent(query),{
+          headers:{'Authorization':'Bearer '+session.access_token,'apikey':SUPABASE_PUBLISHABLE_KEY}
+        });
         const data=await response.json();
         if(!response.ok)throw new Error(data.message||'검색 요청에 실패했습니다.');
         renderResults(data.items||[]);emptyState.hidden=true;resultTable.hidden=false;searchStatus.textContent='검색어: '+query+' · '+(data.items||[]).length+'건';
