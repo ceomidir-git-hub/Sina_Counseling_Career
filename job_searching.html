@@ -24,12 +24,7 @@
     .status{font-size:13px;color:#64748b}
     .guide{margin:0 0 14px;padding:11px 13px;border:1px solid #cfe0f7;border-radius:7px;background:#f6faff;color:#365475;font-size:13px;line-height:1.55}
     .empty{padding:34px 12px;text-align:center;color:#64748b;font-size:14px}
-    .table-wrap{overflow-x:auto;border:1px solid #d9e0e8;border-radius:7px}
-    table{width:100%;min-width:860px;border-collapse:collapse}
-    th,td{padding:11px 10px;border-bottom:1px solid #e4e9ef;text-align:left;vertical-align:top;line-height:1.45}
-    th{background:#f7f9fb;color:#334155;font-size:13px;white-space:nowrap}
-    td.num{width:48px;text-align:center}td.source{width:110px;color:#475569;word-break:break-all}td.link{width:90px;white-space:nowrap}td.summary{color:#475569;min-width:280px}
-    .title{font-weight:800;color:#172554;text-decoration:none}.open-link{color:#1d4ed8;text-decoration:none;font-weight:700}
+    #googleResults{min-height:100px}
     .notice{margin:12px 0 0;color:#64748b;font-size:12px;line-height:1.65}
     @media (max-width:900px){.search-grid{grid-template-columns:1fr 1fr}.buttons{grid-column:1 / -1;justify-content:flex-end}}
     @media (max-width:560px){.wrap{padding:14px 10px}.card{padding:14px}.search-grid{grid-template-columns:1fr}.buttons{grid-column:auto}.head{align-items:flex-start;flex-direction:column}}
@@ -67,95 +62,44 @@
         <h2>검색 결과</h2>
         <span class="status" id="searchStatus">검색조건을 입력하고 검색하세요.</span>
       </div>
-      <p class="guide">검색 결과는 제목·간단한 설명·원문 링크만 표로 표시합니다. 공고 내용을 수집하거나 DB·파일에 저장하지 않습니다.</p>
+      <p class="guide">Google 검색 결과를 그대로 표시합니다. 공고 내용을 수집하거나 DB·파일에 저장하지 않습니다.</p>
       <div id="emptyState" class="empty">아직 검색 결과가 없습니다.</div>
-      <div id="resultTable" class="table-wrap" hidden>
-        <table>
-          <thead><tr><th>번호</th><th>공고명</th><th>출처</th><th>요약</th><th>원문 링크</th></tr></thead>
-          <tbody id="resultBody"></tbody>
-        </table>
-      </div>
+      <div id="googleResults" hidden></div>
       <p class="notice">※ 업종·지역·직무·자격 키워드를 Google 검색어에 반영합니다. 실제 게시일·마감일·채용조건은 원문 공고에서 직접 확인하세요.</p>
     </section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script async src="https://cse.google.com/cse.js?cx=7283868aa07a545a4"></script>
   <script>
-    const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
-    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const industry = document.getElementById('industry');
     const region = document.getElementById('region');
     const keyword = document.getElementById('keyword');
     const searchStatus = document.getElementById('searchStatus');
     const emptyState = document.getElementById('emptyState');
-    const resultTable = document.getElementById('resultTable');
-    const resultBody = document.getElementById('resultBody');
+    const googleResults = document.getElementById('googleResults');
     const searchBtn = document.getElementById('searchBtn');
-    let openerAccessToken = '';
-    let openerTokenRequest = null;
+    let googleSearchElement = null;
     function buildQuery(){
       const terms = [region.value, industry.value.trim(), keyword.value.trim(), '채용'].filter(Boolean);
       return terms.join(' ');
     }
-    async function getLoginSession(){
-      const parentClient = window.opener && window.opener.sinaSupabase;
-      if(parentClient && parentClient.auth){
-        const { data: { session }, error } = await parentClient.auth.getSession();
-        if(error) throw error;
-        if(session) return session;
+    function renderGoogleSearch(){
+      if (!window.google?.search?.cse?.element) return false;
+      if (!googleSearchElement) {
+        google.search.cse.element.render({ div: 'googleResults', tag: 'searchresults-only', gname: 'sinaJobSearch' });
+        googleSearchElement = google.search.cse.element.getElement('sinaJobSearch');
       }
-      if(window.opener){
-        if(!openerTokenRequest){
-          openerTokenRequest = new Promise(resolve => {
-            const receiveToken = event => {
-              if(event.origin !== window.location.origin || event.source !== window.opener) return;
-              if(event.data?.type !== 'sina-job-search-session') return;
-              window.clearTimeout(timeout);
-              window.removeEventListener('message', receiveToken);
-              resolve(event.data.accessToken || '');
-            };
-            const timeout = window.setTimeout(() => {window.removeEventListener('message', receiveToken);resolve('');}, 1200);
-            window.addEventListener('message', receiveToken);
-            window.opener.postMessage({ type: 'sina-job-search-session-request' }, window.location.origin);
-          });
-        }
-        openerAccessToken = await openerTokenRequest;
-        if(openerAccessToken) return { access_token: openerAccessToken };
-      }
-      const { data: { session }, error } = await supabaseClient.auth.getSession();
-      if(error) throw error;
-      return session;
+      return Boolean(googleSearchElement);
     }
-    function addCell(row,className,value){const cell=document.createElement('td');cell.className=className;cell.textContent=String(value||'');row.appendChild(cell);return cell;}
-    function renderResults(items){
-      resultBody.replaceChildren();
-      items.forEach((item,index)=>{
-        const row=document.createElement('tr');
-        addCell(row,'num',index+1);
-        const titleCell=document.createElement('td'),title=document.createElement('a');
-        title.className='title';title.href=item.link;title.target='_blank';title.rel='noopener noreferrer';title.textContent=item.title||'';titleCell.appendChild(title);row.appendChild(titleCell);
-        addCell(row,'source',item.displayLink);addCell(row,'summary',item.snippet);
-        const linkCell=document.createElement('td');linkCell.className='link';const link=document.createElement('a');link.className='open-link';link.href=item.link;link.target='_blank';link.rel='noopener noreferrer';link.textContent='공고 열기';linkCell.appendChild(link);row.appendChild(linkCell);resultBody.appendChild(row);
-      });
-    }
-    async function executeSearch(){
+    function executeSearch(){
       const query = buildQuery();
       if (!query || query === '채용'){searchStatus.textContent='지역·업종·직무·자격 중 한 항목을 입력하세요.';return;}
-      searchBtn.disabled=true;searchStatus.textContent='검색 중';
-      try{
-        const session = await getLoginSession();
-        if(!session) throw new Error('로그인 후 검색할 수 있습니다.');
-        const response=await fetch(SUPABASE_URL+'/functions/v1/job-search?q='+encodeURIComponent(query),{
-          headers:{'Authorization':'Bearer '+session.access_token,'apikey':SUPABASE_PUBLISHABLE_KEY}
-        });
-        const data=await response.json();
-        if(!response.ok)throw new Error(data.message||'검색 요청에 실패했습니다.');
-        renderResults(data.items||[]);emptyState.hidden=true;resultTable.hidden=false;searchStatus.textContent='검색어: '+query+' · '+(data.items||[]).length+'건';
-      }catch(error){resultTable.hidden=true;emptyState.hidden=false;emptyState.textContent=error.message;searchStatus.textContent='검색 실패';}
-      finally{searchBtn.disabled=false;}
+      if (!renderGoogleSearch()) { searchStatus.textContent='Google 검색 화면을 준비 중입니다. 잠시 후 다시 검색하세요.'; return; }
+      emptyState.hidden=true;googleResults.hidden=false;
+      googleSearchElement.execute(query);
+      searchStatus.textContent='검색어: '+query;
     }
     document.getElementById('searchBtn').addEventListener('click',executeSearch);
-    document.getElementById('resetBtn').addEventListener('click',() => {industry.value='';region.value='';keyword.value='';resultBody.replaceChildren();resultTable.hidden=true;emptyState.hidden=false;emptyState.textContent='아직 검색 결과가 없습니다.';searchStatus.textContent='검색조건을 입력하고 검색하세요.';});
+    document.getElementById('resetBtn').addEventListener('click',() => {industry.value='';region.value='';keyword.value='';googleResults.replaceChildren();googleSearchElement=null;googleResults.hidden=true;emptyState.hidden=false;emptyState.textContent='아직 검색 결과가 없습니다.';searchStatus.textContent='검색조건을 입력하고 검색하세요.';});
     keyword.addEventListener('keydown',event=>{if(event.key==='Enter') executeSearch();});
   </script>
 </body>
