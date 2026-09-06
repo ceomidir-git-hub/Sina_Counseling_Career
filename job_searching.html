@@ -95,6 +95,17 @@
       const terms = [region.value, industry.value.trim(), keyword.value.trim(), '채용'].filter(Boolean);
       return terms.join(' ');
     }
+    async function getLoginSession(){
+      const parentClient = window.opener && window.opener.sinaSupabase;
+      if(parentClient && parentClient.auth){
+        const { data: { session }, error } = await parentClient.auth.getSession();
+        if(error) throw error;
+        if(session) return session;
+      }
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      if(error) throw error;
+      return session;
+    }
     function addCell(row,className,value){const cell=document.createElement('td');cell.className=className;cell.textContent=String(value||'');row.appendChild(cell);return cell;}
     function renderResults(items){
       resultBody.replaceChildren();
@@ -112,7 +123,7 @@
       if (!query || query === '채용'){searchStatus.textContent='지역·업종·직무·자격 중 한 항목을 입력하세요.';return;}
       searchBtn.disabled=true;searchStatus.textContent='검색 중';
       try{
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const session = await getLoginSession();
         if(!session) throw new Error('로그인 후 검색할 수 있습니다.');
         const response=await fetch(SUPABASE_URL+'/functions/v1/job-search?q='+encodeURIComponent(query),{
           headers:{'Authorization':'Bearer '+session.access_token,'apikey':SUPABASE_PUBLISHABLE_KEY}
