@@ -91,6 +91,8 @@
     const resultTable = document.getElementById('resultTable');
     const resultBody = document.getElementById('resultBody');
     const searchBtn = document.getElementById('searchBtn');
+    let openerAccessToken = '';
+    let openerTokenRequest = null;
     function buildQuery(){
       const terms = [region.value, industry.value.trim(), keyword.value.trim(), '채용'].filter(Boolean);
       return terms.join(' ');
@@ -101,6 +103,24 @@
         const { data: { session }, error } = await parentClient.auth.getSession();
         if(error) throw error;
         if(session) return session;
+      }
+      if(window.opener){
+        if(!openerTokenRequest){
+          openerTokenRequest = new Promise(resolve => {
+            const receiveToken = event => {
+              if(event.origin !== window.location.origin || event.source !== window.opener) return;
+              if(event.data?.type !== 'sina-job-search-session') return;
+              window.clearTimeout(timeout);
+              window.removeEventListener('message', receiveToken);
+              resolve(event.data.accessToken || '');
+            };
+            const timeout = window.setTimeout(() => {window.removeEventListener('message', receiveToken);resolve('');}, 1200);
+            window.addEventListener('message', receiveToken);
+            window.opener.postMessage({ type: 'sina-job-search-session-request' }, window.location.origin);
+          });
+        }
+        openerAccessToken = await openerTokenRequest;
+        if(openerAccessToken) return { access_token: openerAccessToken };
       }
       const { data: { session }, error } = await supabaseClient.auth.getSession();
       if(error) throw error;
