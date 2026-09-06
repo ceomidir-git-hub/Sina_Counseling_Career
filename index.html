@@ -1270,6 +1270,19 @@
       cursor:pointer;
     }
     .job-type-option:has(input:checked){color:#1f5ca8}
+    .job-search-btn{
+      height:20px;
+      padding:0 7px;
+      border:1px solid #bdd8c9;
+      border-radius:5px;
+      background:#f7fbf8;
+      color:#217346;
+      font-size:8.8px;
+      font-weight:850;
+      line-height:18px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
     .job-posting-doc-meta{
       flex:0 0 auto;
       font-size:8.9px;
@@ -2342,6 +2355,7 @@
                 <input type="radio" name="postingType" value="employer" checked>
                 <span>구인공고</span>
               </label>
+              <button type="button" class="job-search-btn" id="jobSearchBtn" title="구인공고 검색 화면 열기">검색</button>
               <label class="job-type-option">
                 <input type="radio" name="postingType" value="seeker">
                 <span>구직공고</span>
@@ -2854,6 +2868,7 @@
   const postingScroll = document.getElementById("postingScroll");
   const csvExportBtn = document.getElementById("csvExportBtn");
   const pdfExportBtn = document.getElementById("pdfExportBtn");
+  const jobSearchBtn = document.getElementById("jobSearchBtn");
 
   // 현재 화면 선택값. 추후 DB 조회 결과를 renderPostingTable(type, rows)에 넘기면
   // CSV/PDF도 같은 rows를 그대로 사용한다.
@@ -3015,6 +3030,10 @@
 
   csvExportBtn?.addEventListener("click", exportCurrentPostingCSV);
   pdfExportBtn?.addEventListener("click", exportCurrentPostingPDF);
+  jobSearchBtn?.addEventListener("click", () => {
+    const popup = window.open("job_searching.html", "jobSearching", "width=1440,height=900,resizable=yes,scrollbars=yes");
+    if (!popup) alert("검색 창을 열 수 없습니다. 브라우저의 팝업 차단을 허용해 주세요.");
+  });
 
   document.querySelectorAll('input[name="postingType"]').forEach(radio => {
     radio.addEventListener("change", event => {
