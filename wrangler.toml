@@ -1,8 +1,0 @@
-name = "sina-job-search"
-main = "job-search-worker.js"
-compatibility_date = "2026-09-06"
-
-# 배포한 GitHub Pages 주소를 입력합니다. 예: https://사용자명.github.io
-[vars]
-ALLOWED_ORIGIN = "https://YOUR-GITHUB-USERNAME.github.io"
-GOOGLE_CSE_ID = "7283868aa07a545a4"
