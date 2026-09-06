@@ -3243,6 +3243,18 @@
 
   window.sinaSupabase = client;
 
+  // 같은 출처의 구인공고 검색 팝업에만 현재 로그인 토큰을 일회성으로 전달한다.
+  // 토큰은 URL·파일·브라우저 영구 저장소에 기록하지 않는다.
+  window.addEventListener("message", async (event) => {
+    if (event.origin !== window.location.origin) return;
+    if (event.data?.type !== "sina-job-search-session-request") return;
+    const { data: { session } } = await client.auth.getSession();
+    event.source?.postMessage(
+      { type: "sina-job-search-session", accessToken: session?.access_token || "" },
+      window.location.origin
+    );
+  });
+
   // =========================================================
   // 오늘 요약 / 회원요약 DB 계산
   // ---------------------------------------------------------
