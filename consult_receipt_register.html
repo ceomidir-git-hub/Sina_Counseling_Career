@@ -451,6 +451,258 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 }
 </style>
 
+
+<style id="clarity-font10-printcontent-fix">
+/* =========================================================
+   2026-09-07 최종 보정
+   1) 화면 문자 10% 확대
+   2) transform scale 대신 CSS zoom 사용 -> 글자 선명도 개선
+   3) PDF 상담내용 영역 확대 + 스크롤바 제거 -> 내용 잘림 방지
+   4) A4 세로 210 x 297mm / 화면 스크롤 없음 유지
+   ========================================================= */
+@media screen {
+  html,body{font-synthesis:none!important;text-rendering:optimizeLegibility!important;-webkit-font-smoothing:antialiased!important;}
+  .page-wrap{display:flex!important;align-items:center!important;justify-content:center!important;}
+  .a4-page{
+    position:relative!important;left:auto!important;top:auto!important;
+    transform:none!important;transform-origin:initial!important;
+    zoom:var(--screen-zoom,1)!important;
+  }
+
+  /* 현재 화면 전용 글자 크기에서 정확히 10% 확대 */
+  .title-block h1{font-size:26.4px!important;}
+  .pdf-btn{font-size:12.1px!important;}
+  .member-key-label{font-size:10.45px!important;}
+  .member-key-value{font-size:11.55px!important;}
+  .statusMsg.show{font-size:11.55px!important;}
+  .section-head h2{font-size:16.5px!important;}
+  .section-consult-label{font-size:12.1px!important;}
+  .section-head .consult-type-option{font-size:12.1px!important;}
+  .section label,.section input,.section select,.section textarea,
+  .section .subgroup-note,.section .inline-note,.section .auto-sync-note,.section .counter{font-size:12.65px!important;}
+  .field,input[type="text"],input[type="tel"],input[type="date"],input[type="email"],select{font-size:12.65px!important;}
+  .receipt-pair label{font-size:11.88px!important;}
+  .time-number-input::placeholder{font-size:10.45px!important;}
+  body:not(.career-mode) #psychInfoSection .form-pair label{font-size:11.55px!important;}
+  body.career-mode .career-subgroup-head h3{font-size:11.77px!important;}
+  body.career-mode .subgroup-note{font-size:10.45px!important;}
+  body.career-mode .compact-pair label{font-size:11px!important;}
+  body.career-mode .compact-pair input,
+  body.career-mode .compact-pair select{font-size:11.55px!important;}
+  body.career-mode .inline-note{font-size:9.57px!important;}
+  .consultation-content-section .detail-label{font-size:11.55px!important;}
+  textarea{font-size:12.65px!important;line-height:1.34!important;}
+  .counter{font-size:9.35px!important;}
+  .actions .btn{font-size:11.22px!important;}
+  .bottom-hint{font-size:10.56px!important;}
+  .screen-footer-company{font-size:23.1px!important;}
+
+  /* 확대된 글자가 입력칸 안에서 답답하지 않도록 최소 높이만 소폭 보정 */
+  :root{--field-h:8.15mm!important;}
+  .field,input[type="text"],input[type="tel"],input[type="date"],input[type="email"],select,
+  .date-inline-wrap,.date-inline-display,.radio-panel{height:8.15mm!important;}
+  body.career-mode .compact-pair input,body.career-mode .compact-pair select{height:7.95mm!important;}
+
+  /* 화면의 상담내용은 기존보다 약간 확장하되 A4 내부에서 유지 */
+  body.career-mode #details{height:46mm!important;min-height:46mm!important;max-height:46mm!important;overflow-y:auto!important;}
+  body:not(.career-mode) #details{height:90mm!important;min-height:90mm!important;max-height:90mm!important;overflow-y:auto!important;}
+}
+
+@media print {
+  /* 인쇄 문자도 기존 최종 인쇄 크기 대비 10% 확대 */
+  .top-row h1{font-size:25.3pt!important;}
+  .pdf-doc-subtitle{font-size:8.25pt!important;}
+  .section-head h2{font-size:16.5pt!important;}
+  .section-consult-label,.section-head .consult-type-option{font-size:10.56pt!important;}
+  .form-pair label,.detail-label{font-size:12.65pt!important;}
+  .field,input[type="text"],input[type="tel"],input[type="date"],input[type="email"],select{font-size:12.1pt!important;}
+  .receipt-pair label{font-size:9.9pt!important;}
+  body.career-mode .career-subgroup-head h3{font-size:10.78pt!important;}
+  body.career-mode .subgroup-note{font-size:8.8pt!important;}
+  body.career-mode .compact-pair label{font-size:9.68pt!important;}
+  body.career-mode .compact-pair input,body.career-mode .compact-pair select{font-size:9.68pt!important;}
+  .consultation-content-section .detail-label{font-size:10.45pt!important;}
+  textarea{font-size:9.9pt!important;line-height:1.26!important;overflow:hidden!important;resize:none!important;}
+  .counter{font-size:8.25pt!important;}
+  .footer-rights{font-size:18.7px!important;}
+  .footer-company{font-size:25.3pt!important;}
+
+  /* 상담 내용 인쇄 영역: textarea의 스크롤 영역을 충분히 확보해 보이는 내용만 인쇄되는 문제 방지 */
+  body.career-mode #details{
+    height:88mm!important;min-height:88mm!important;max-height:88mm!important;
+    overflow:hidden!important;white-space:pre-wrap!important;
+  }
+  body:not(.career-mode) #details{
+    height:100mm!important;min-height:100mm!important;max-height:100mm!important;
+    overflow:hidden!important;white-space:pre-wrap!important;
+  }
+
+  /* 10% 글자 확대분을 세로 간격에서 회수하여 A4 1장 유지 */
+  .top-row{height:16mm!important;min-height:16mm!important;margin-bottom:1.4mm!important;align-items:flex-end!important;}
+  .section{margin-bottom:1.3mm!important;}
+  .section-head{height:7mm!important;min-height:7mm!important;}
+  .section-body{padding-top:1.4mm!important;padding-bottom:1.4mm!important;}
+  .receipt-row-4{margin-bottom:1.1mm!important;gap:1.4mm!important;}
+  .receipt-row-2{gap:2.4mm!important;}
+  body.career-mode .career-info .section-body{padding:1.2mm 2mm!important;}
+  body.career-mode .career-subgroup{margin-bottom:1mm!important;}
+  body.career-mode .career-subgroup-head{height:5.5mm!important;min-height:5.5mm!important;}
+  body.career-mode .career-subgroup-body{padding:1.1mm 1.8mm!important;}
+  body.career-mode .personal-row-3,body.career-mode .personal-row-2,
+  body.career-mode .foreign-row-3,body.career-mode .foreign-extra-row,
+  body.career-mode .company-row-4{row-gap:.7mm!important;}
+  body.career-mode .company-row-4 + .company-row-4{margin-top:.6mm!important;}
+  .consultation-content-section .section-body{padding:1.3mm 2.4mm!important;}
+  .consultation-content-section .detail-grid{margin-top:.8mm!important;row-gap:.5mm!important;}
+}
+</style>
+
+
+<style id="request-20260907-font-plus10-width50">
+/* =========================================================
+   2026-09-07 사용자 요청 반영
+   - 전체 서체: 맑은 고딕
+   - 현재 최종본 기준 문자 크기 +10%
+   - 접수정보 '관계' 입력값 폭 50%
+   - 진로 > 개인 기본정보: 생년월일/나이/성별/직업 입력값 폭 50%
+   - A4 1장/PDF 상담내용 표시 로직 유지
+   ========================================================= */
+
+/* 1) 전체 문자 서체 통일 */
+html,body,button,input,select,textarea,option,label,span,div,p,h1,h2,h3,strong,b{
+  font-family:"Malgun Gothic","맑은 고딕",sans-serif!important;
+}
+
+/* 2) 화면 입력값 폭 50% */
+@media screen {
+  /* 접수 정보 - 관계 */
+  #receiptInfoSection #relationship{
+    width:50%!important;
+    justify-self:start!important;
+  }
+
+  /* 진로 정보 > 개인 기본정보 */
+  #careerBirthDate,
+  #careerAge,
+  #careerGender,
+  #careerJob{
+    width:50%!important;
+    justify-self:start!important;
+  }
+
+  /* 현재 최종본의 화면 문자 크기에서 다시 정확히 10% 확대 */
+  .title-block h1{font-size:29.04px!important;}
+  .pdf-doc-subtitle{font-size:8.8px!important;}
+  .pdf-btn{font-size:13.31px!important;}
+  .member-key-label{font-size:11.495px!important;}
+  .member-key-value{font-size:12.705px!important;}
+  .statusMsg.show{font-size:12.705px!important;}
+  .edit-mode-badge{font-size:12.1px!important;}
+
+  .section-head h2{font-size:18.15px!important;}
+  .section-consult-label{font-size:13.31px!important;}
+  .section-head .consult-type-option{font-size:13.31px!important;}
+
+  .section label,
+  .section input,
+  .section select,
+  .section textarea,
+  .section .subgroup-note,
+  .section .inline-note,
+  .section .auto-sync-note,
+  .section .counter{font-size:13.915px!important;}
+
+  .field,
+  input[type="text"],input[type="tel"],input[type="date"],input[type="email"],
+  select{font-size:13.915px!important;}
+
+  .receipt-pair label{font-size:13.068px!important;}
+  .time-number-input::placeholder{font-size:11.495px!important;}
+  body:not(.career-mode) #psychInfoSection .form-pair label{font-size:12.705px!important;}
+
+  body.career-mode .career-subgroup-head h3{font-size:12.947px!important;}
+  body.career-mode .subgroup-note{font-size:11.495px!important;}
+  body.career-mode .compact-pair label{font-size:12.1px!important;}
+  body.career-mode .compact-pair input,
+  body.career-mode .compact-pair select{font-size:12.705px!important;}
+  body.career-mode .inline-note{font-size:10.527px!important;}
+
+  .consultation-content-section .detail-label{font-size:12.705px!important;}
+  textarea{font-size:13.915px!important;line-height:1.34!important;}
+  .counter{font-size:10.285px!important;}
+  .actions .btn{font-size:12.342px!important;}
+  .bottom-hint{font-size:11.616px!important;}
+  .screen-footer-company{font-size:25.41px!important;}
+
+  /* 팝업/조회 결과도 같은 기준으로 10% 확대 */
+  .lookup-result-count{font-size:12.1px!important;}
+  .lookup-item-date{font-size:13.2px!important;}
+  .lookup-item-sub{font-size:12.1px!important;}
+  .foreign-modal-title,.member-lookup-head h3,.edit-confirm-head h3{font-size:18.7px!important;}
+  .foreign-field label,.modal-btn,.member-lookup-btn{font-size:13.2px!important;}
+  .member-lookup-label{font-size:13.75px!important;}
+  .member-lookup-input{font-size:16.5px!important;}
+  .member-lookup-help{font-size:12.1px!important;}
+  .member-lookup-error{font-size:12.65px!important;}
+  .edit-confirm-message,.edit-confirm-warning{font-size:15.4px!important;}
+  .edit-confirm-btn{font-size:14.3px!important;}
+}
+
+/* 3) PDF에서도 동일한 폭/서체 및 문자 +10% 반영 */
+@media print {
+  #receiptInfoSection #relationship{
+    width:50%!important;
+    justify-self:start!important;
+  }
+  #careerBirthDate,
+  #careerAge,
+  #careerGender,
+  #careerJob{
+    width:50%!important;
+    justify-self:start!important;
+  }
+
+  .top-row h1{font-size:27.83pt!important;}
+  .pdf-doc-subtitle{font-size:9.075pt!important;}
+  .section-head h2{font-size:18.15pt!important;}
+  .section-consult-label,.section-head .consult-type-option{font-size:11.616pt!important;}
+  .form-pair label,.detail-label{font-size:13.915pt!important;}
+  .field,input[type="text"],input[type="tel"],input[type="date"],input[type="email"],select{font-size:13.31pt!important;}
+  .receipt-pair label{font-size:10.89pt!important;}
+  body.career-mode .career-subgroup-head h3{font-size:11.858pt!important;}
+  body.career-mode .subgroup-note{font-size:9.68pt!important;}
+  body.career-mode .compact-pair label{font-size:10.648pt!important;}
+  body.career-mode .compact-pair input,body.career-mode .compact-pair select{font-size:10.648pt!important;}
+  .consultation-content-section .detail-label{font-size:11.495pt!important;}
+  textarea{font-size:10.89pt!important;line-height:1.23!important;overflow:hidden!important;resize:none!important;}
+  .counter{font-size:9.075pt!important;}
+  .footer-rights{font-size:20.57px!important;}
+  .footer-company{font-size:27.83pt!important;}
+
+  /* 문자 확대에 따른 세로 증가분을 간격에서 회수하여 A4 1장 유지 */
+  .top-row{height:15.2mm!important;min-height:15.2mm!important;margin-bottom:1.1mm!important;}
+  .section{margin-bottom:1.05mm!important;}
+  .section-head{height:6.7mm!important;min-height:6.7mm!important;}
+  .section-body{padding-top:1.15mm!important;padding-bottom:1.15mm!important;}
+  .receipt-row-4{margin-bottom:.9mm!important;gap:1.15mm!important;}
+  .receipt-row-2{gap:2mm!important;}
+  body.career-mode .career-info .section-body{padding:1mm 1.8mm!important;}
+  body.career-mode .career-subgroup{margin-bottom:.8mm!important;}
+  body.career-mode .career-subgroup-head{height:5.2mm!important;min-height:5.2mm!important;}
+  body.career-mode .career-subgroup-body{padding:.9mm 1.6mm!important;}
+  body.career-mode .personal-row-3,body.career-mode .personal-row-2,
+  body.career-mode .foreign-row-3,body.career-mode .foreign-extra-row,
+  body.career-mode .company-row-4{row-gap:.55mm!important;}
+  body.career-mode .company-row-4 + .company-row-4{margin-top:.45mm!important;}
+  .consultation-content-section .section-body{padding:1.05mm 2.1mm!important;}
+  .consultation-content-section .detail-grid{margin-top:.6mm!important;row-gap:.35mm!important;}
+
+  /* 기존 상담내용 확보 높이는 유지 */
+  body.career-mode #details{height:88mm!important;min-height:88mm!important;max-height:88mm!important;}
+  body:not(.career-mode) #details{height:100mm!important;min-height:100mm!important;max-height:100mm!important;}
+}
+</style>
+
 </head>
 <body>
 <div class="page-wrap">
@@ -662,21 +914,19 @@ lookupSaveBtn.addEventListener("click",openMemberLookupModal);editSaveBtn.addEve
   const MM_TO_CSS_PX = 96 / 25.4;
   const A4_W_PX = 210 * MM_TO_CSS_PX;
   const A4_H_PX = 297 * MM_TO_CSS_PX;
-  const EDGE_X = 16;  // 좌우 최소 여백 합계(px)
-  const EDGE_Y = 16;  // 상하 최소 여백 합계(px)
+  const EDGE_X = 16;
+  const EDGE_Y = 16;
 
   function fitA4ToViewport(){
     if (window.matchMedia && window.matchMedia('print').matches) return;
     const page = document.querySelector('.a4-page');
     if (!page) return;
-
     const usableW = Math.max(320, window.innerWidth - EDGE_X);
     const usableH = Math.max(320, window.innerHeight - EDGE_Y);
     const widthScale = usableW / A4_W_PX;
     const heightScale = usableH / A4_H_PX;
-    const scale = Math.min(1, widthScale, heightScale);
-
-    page.style.setProperty('--screen-scale', scale.toFixed(4));
+    const zoom = Math.min(1, widthScale, heightScale);
+    page.style.setProperty('--screen-zoom', zoom.toFixed(4));
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
   }
@@ -690,16 +940,13 @@ lookupSaveBtn.addEventListener("click",openMemberLookupModal);editSaveBtn.addEve
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', requestFit, {once:true});
-  } else {
-    requestFit();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', requestFit, {once:true});
+  else requestFit();
   window.addEventListener('resize', requestFit, {passive:true});
   window.addEventListener('orientationchange', requestFit, {passive:true});
   window.addEventListener('beforeprint', () => {
     const page = document.querySelector('.a4-page');
-    if (page) page.style.setProperty('--screen-scale', '1');
+    if (page) page.style.setProperty('--screen-zoom', '1');
   });
   window.addEventListener('afterprint', requestFit);
 })();
