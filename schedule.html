@@ -65,7 +65,7 @@ button{font:inherit}
 /* ===== LEFT : CALENDAR ===== */
 .calendar-card{display:grid;grid-template-rows:70px minmax(0,1fr) 82px;overflow:hidden}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border-bottom:1px solid var(--line2)}
-.calendar-title-wrap{display:flex;align-items:center;gap:10px;flex:0 0 auto}.calendar-title{font-size:18px;font-weight:400;letter-spacing:-.4px;white-space:nowrap}.calendar-back-btn{height:32px;padding:0 11px;border:1px solid #b8c4d3;border-radius:7px;background:#fff;color:#26364d;font-size:11px;font-weight:400;cursor:pointer;white-space:nowrap}.calendar-back-btn:hover{background:#f7f9fc}
+.calendar-title-wrap{display:flex;align-items:center;gap:10px;flex:0 0 auto}.calendar-title{font-size:18px;font-weight:400;letter-spacing:-.4px;white-space:nowrap}.calendar-back-btn{height:34px;padding:0 12px;border:1px solid #b8c4d3;border-radius:7px;background:#fff;color:#26364d;font-size:11px;font-weight:400;cursor:pointer;white-space:nowrap;flex:0 0 auto}.calendar-back-btn:hover{background:#f7f9fc}
 .legend{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:13.2px;color:#334155;font-weight:400;white-space:nowrap}
 .legend span{display:flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .dot.received{background:var(--receipt)}.dot.planned{background:var(--blue)}.dot.progress{background:var(--orange)}.dot.done{background:var(--green)}.dot.missed{background:#9ca3af}.dot.next{background:var(--violet)}
@@ -155,7 +155,6 @@ button{font:inherit}
       <div class="calendar-head">
         <div class="calendar-title-wrap">
           <div class="calendar-title">상담 스케줄 달력</div>
-          <button class="calendar-back-btn" id="backBtn" type="button">← 이전화면</button>
         </div>
         <div class="legend" aria-label="일정 상태 범례">
           <span><i class="dot received"></i>접수</span>
@@ -171,6 +170,7 @@ button{font:inherit}
           <div class="month-label" id="monthLabel">-</div>
           <button class="month-btn" id="nextBtn" type="button" aria-label="다음 달">›</button>
         </div>
+        <button class="calendar-back-btn" id="backBtn" type="button">← 이전화면</button>
       </div>
 
       <div class="calendar-body">
@@ -211,11 +211,13 @@ button{font:inherit}
   [DB 설계 원칙 - 조회 전용 스케줄]
   1) 별도 schedule 테이블을 만들지 않는다.
   2) 기본정보는 DB_basic.id = 각 상담 테이블.client_id 로 조회한다.
-  3) 심리상담 일정: DB_psychological_counseling.visit_at
-     - 실제 상담 시작/종료: session_start_at / session_end_at
+  3) 심리상담 일정: 실제 상담 시작(session_start_at)이 있으면 그 일시를 우선 사용하고,
+     실제 시작이 없을 때만 예약일시(visit_at)를 사용한다.
+     - 실제 상담 종료: session_end_at
      - 차기예약: next_session_at 우선, 없으면 next_session_date
-  4) 진로상담 일정: DB_career_counseling.appointment_at
-     - 실제 상담 시작/종료: session_start_at / session_end_at
+  4) 진로상담 일정: 실제 상담 시작(session_start_at)이 있으면 그 일시를 우선 사용하고,
+     실제 시작이 없을 때만 예약일시(appointment_at)를 사용한다.
+     - 실제 상담 종료: session_end_at
      - 차기예약: next_session_at 우선, 없으면 next_session_date
   5) 화면 표시 대상은 record_active=true 또는 이미 완료(session_end_at 존재)된 기록이다.
      - 비활성 + 미실시 기록은 상담구분 변경 과정에서 생긴 중복 접수 가능성이 있어 제외한다.
@@ -397,7 +399,7 @@ button{font:inherit}
     const orFilter=[
       `and(receipt_at.gte.${u.start},receipt_at.lt.${u.end})`,
       `and(visit_at.gte.${u.start},visit_at.lt.${u.end})`,
-      `and(visit_at.is.null,session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
+      `and(session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
       `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
       `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
     ].join(',');
@@ -412,7 +414,7 @@ button{font:inherit}
     const orFilter=[
       `and(receipt_at.gte.${u.start},receipt_at.lt.${u.end})`,
       `and(appointment_at.gte.${u.start},appointment_at.lt.${u.end})`,
-      `and(appointment_at.is.null,session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
+      `and(session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
       `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
       `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
     ].join(',');
@@ -433,7 +435,7 @@ button{font:inherit}
         if(r.record_active !== true && !r.session_end_at) continue;
         const b=basics.get(r.client_id);
         const receipt=buildReceiptEvent('psych',r,b);
-        const primary=buildPrimaryEvent('psych',r,b,r.visit_at || r.session_start_at);
+        const primary=buildPrimaryEvent('psych',r,b,r.session_start_at || r.visit_at);
         const next=buildNextEvent('psych',r,b);
         if(receipt && receipt.date>=monthStart && receipt.date<monthEnd) events.push(receipt);
         if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
@@ -443,7 +445,7 @@ button{font:inherit}
         if(r.record_active !== true && !r.session_end_at) continue;
         const b=basics.get(r.client_id);
         const receipt=buildReceiptEvent('career',r,b);
-        const primary=buildPrimaryEvent('career',r,b,r.appointment_at || r.session_start_at);
+        const primary=buildPrimaryEvent('career',r,b,r.session_start_at || r.appointment_at);
         const next=buildNextEvent('career',r,b);
         if(receipt && receipt.date>=monthStart && receipt.date<monthEnd) events.push(receipt);
         if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
@@ -508,19 +510,18 @@ button{font:inherit}
   }
 
   function countStatuses(items){
-    const c={received:0,planned:0,progress:0,done:0,missed:0,next:0,total:items.length};
-    items.forEach(x=>{ if(Object.prototype.hasOwnProperty.call(c,x.status)) c[x.status]++; });
+    const c={received:0,planned:0,progress:0,done:0,missed:0,next:0,total:0};
+    items.forEach(x=>{
+      if(['received','planned','progress','done','missed','next'].includes(x.status)) c[x.status]++;
+    });
+    c.total=c.received+c.planned+c.progress+c.done+c.missed+c.next;
     return c;
   }
 
   function renderSummary(){
-    // 하단 KPI = 현재 달력에 표시 중인 "월 전체" 일정 기준
-    const monthlyItems=[];
-    for(const dateKey of monthDayKeys(state.viewYear,state.viewMonth)){
-      const dayItems=state.byDate.get(dateKey)||[];
-      monthlyItems.push(...dayItems);
-    }
-    const monthCount=countStatuses(monthlyItems);
+    // 하단 KPI = Supabase에서 현재 조회 월로 불러온 실제 일정(state.events)을 직접 집계
+    // 접수/예정/진행중/완료/미실시/차기예약의 합계가 총 일정이 된다.
+    const monthCount=countStatuses(state.events);
 
     els.sumReceived.textContent=`${monthCount.received}건`;
     els.sumPlanned.textContent=`${monthCount.planned}건`;
