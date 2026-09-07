@@ -83,7 +83,11 @@ button{font:inherit}
 .day-cell:hover{background:#f8fbff}.day-cell.other{background:#f5f6f8;color:#8b95a5}.day-cell.selected{background:#f8fbff;box-shadow:inset 0 0 0 2px var(--blue);z-index:1}
 .day-cell.has-data{background:#fffaf0}
 
-.day-num{font-size:14px;font-weight:950;line-height:1.05;margin-bottom:2px}.day-cell.sun .day-num{color:var(--red)}.day-cell.sat .day-num{color:#0b63df}.day-cell.other .day-num{color:#8b95a5}.day-cell.today .day-num{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;margin-top:-2px}
+.day-headline{display:flex;align-items:center;gap:6px;min-width:0;height:27px;margin-bottom:2px}
+.day-num{font-size:14px;font-weight:950;line-height:1.05;flex:0 0 auto}.day-cell.sun .day-num{color:var(--red)}.day-cell.sat .day-num{color:#0b63df}.day-cell.other .day-num{color:#8b95a5}.day-cell.today .day-num{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;margin-top:-2px}
+.day-cell.holiday:not(.today) .day-num{color:var(--red)!important}
+.holiday-name{min-width:0;color:var(--red);font-size:11.2px;font-weight:850!important;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-cell.other .holiday-name{opacity:.55}
 .day-events{display:grid;gap:2px;min-width:0}
 .day-event{display:grid;grid-template-columns:6px 37px minmax(0,1fr);align-items:center;gap:4px;font-size:11.5px;line-height:1;min-width:0}
 .day-event i{width:6px;height:6px;border-radius:50%}.day-event .time{font-weight:850;color:#1f2937}.day-event .name{font-weight:750;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -301,6 +305,41 @@ button{font:inherit}
     }[status] || {label:'예정',color:'#2563eb',cls:'planned'};
   }
 
+
+  /*
+    2026년 대한민국 공휴일
+    - 공휴일은 상담 일정 건수에 포함하지 않고 달력에만 표시한다.
+    - 2026년 중 법 개정으로 추가된 노동절(5/1), 제헌절(7/17)도 반영한다.
+  */
+  const KOREA_PUBLIC_HOLIDAYS = new Map([
+    ['2026-01-01','신정'],
+    ['2026-02-16','설날 연휴'],
+    ['2026-02-17','설날'],
+    ['2026-02-18','설날 연휴'],
+    ['2026-03-01','삼일절'],
+    ['2026-03-02','삼일절 대체공휴일'],
+    ['2026-05-01','노동절'],
+    ['2026-05-05','어린이날'],
+    ['2026-05-24','부처님오신날'],
+    ['2026-05-25','부처님오신날 대체공휴일'],
+    ['2026-06-03','전국동시지방선거일'],
+    ['2026-06-06','현충일'],
+    ['2026-07-17','제헌절'],
+    ['2026-08-15','광복절'],
+    ['2026-08-17','광복절 대체공휴일'],
+    ['2026-09-24','추석 연휴'],
+    ['2026-09-25','추석'],
+    ['2026-09-26','추석 연휴'],
+    ['2026-10-03','개천절'],
+    ['2026-10-05','개천절 대체공휴일'],
+    ['2026-10-09','한글날'],
+    ['2026-12-25','성탄절']
+  ]);
+
+  function getHolidayName(dateKey){
+    return KOREA_PUBLIC_HOLIDAYS.get(dateKey) || '';
+  }
+
   function primaryStatus(row, scheduledIso){
     const start=row.session_start_at ? new Date(row.session_start_at).getTime() : NaN;
     const end=row.session_end_at ? new Date(row.session_end_at).getTime() : NaN;
@@ -489,10 +528,22 @@ button{font:inherit}
     els.calGrid.style.gridTemplateRows=`repeat(${calendarData.weekCount},minmax(0,1fr))`;
 
     for(const c of calendarData.cells){
+      const holidayName=getHolidayName(c.key);
       const cell=document.createElement('div');
-      cell.className=`day-cell${c.other?' other':''}${c.weekday===0?' sun':''}${c.weekday===6?' sat':''}${c.key===today?' today':''}${c.key===state.selectedDate?' selected':''}`;
+      cell.className=`day-cell${c.other?' other':''}${c.weekday===0?' sun':''}${c.weekday===6?' sat':''}${holidayName?' holiday':''}${c.key===today?' today':''}${c.key===state.selectedDate?' selected':''}`;
       cell.dataset.date=c.key;
-      const num=document.createElement('div'); num.className='day-num'; num.textContent=c.d; cell.appendChild(num);
+
+      const headline=document.createElement('div'); headline.className='day-headline';
+      const num=document.createElement('div'); num.className='day-num'; num.textContent=c.d; headline.appendChild(num);
+      if(holidayName){
+        const holiday=document.createElement('div');
+        holiday.className='holiday-name';
+        holiday.textContent=holidayName;
+        holiday.title=holidayName;
+        headline.appendChild(holiday);
+      }
+      cell.appendChild(headline);
+
       const holder=document.createElement('div'); holder.className='day-events';
       const events=(state.byDate.get(c.key)||[]).slice().sort((a,b)=>a.sortMs-b.sortMs);
       events.slice(0,MAX_CELL_ITEMS).forEach(ev=>{
