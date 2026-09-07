@@ -80,29 +80,6 @@
   .section-title .en { font-weight:400; font-size:9pt; color:#333; display:inline; }
   .fillable { min-height:6mm; }
   .small-note { font-size:8.5pt; color:#777; text-align:right; margin-top:3mm; }
-  .photo-wrap {
-    position:relative;
-    width:28mm; height:35mm; margin:0 auto; border:1px dashed #999; display:flex;
-    align-items:center; justify-content:center; overflow:hidden; background:#fff; color:#999;
-  }
-  .photo-wrap img {
-    width:100%; height:100%; object-fit:contain; display:none;
-    background:#fff;
-  }
-  .photo-controls {
-    position:absolute; right:1.2mm; bottom:1.2mm; z-index:3;
-    display:flex; gap:1mm;
-  }
-  .photo-control-btn {
-    width:6mm; height:6mm; min-width:6mm; padding:0;
-    border:1px solid rgba(71,85,105,.8); border-radius:50%;
-    background:rgba(255,255,255,.92); color:#334155;
-    font-family:inherit; font-size:9pt; font-weight:800; line-height:1;
-    display:flex; align-items:center; justify-content:center; cursor:pointer;
-  }
-  .photo-control-btn:hover { background:#f8fafc; }
-  .photo-control-btn:disabled { opacity:.4; cursor:not-allowed; }
-  .photo-file-input { display:none; }
   .history-content { text-align:left; line-height:1.25; }
 
   /* 상담일자: 25.5mm 폭에서 요일 포함 날짜가 한 줄로 보이도록 최적화 */
@@ -120,7 +97,6 @@
   @media print {
     body { background:#fff; }
     .toolbar { display:none; }
-    .photo-controls { display:none !important; }
     .page { margin:0 auto; box-shadow:none; }
   }
 </style>
@@ -159,25 +135,12 @@
 
     <table style="width:182mm;">
       <colgroup>
-        <col style="width:32mm">
         <col style="width:24mm">
-        <col style="width:50.5mm">
+        <col style="width:67mm">
         <col style="width:21mm">
-        <col style="width:54.5mm">
+        <col style="width:70mm">
       </colgroup>
       <tr>
-        <td class="label" rowspan="5">
-          <div class="photo-wrap">
-            <span id="photoPlaceholder">사 진<br><span class="en">(Photo)</span></span>
-            <img id="clientPhoto" alt="회원 사진">
-            <div class="photo-controls" aria-label="사진 관리">
-              <button type="button" class="photo-control-btn" id="photoAddBtn" title="사진 추가">+</button>
-              <button type="button" class="photo-control-btn" id="photoDeleteBtn" title="사진 삭제">−</button>
-            </div>
-            <input id="photoFileInput" class="photo-file-input" type="file"
-                   accept="image/jpeg,image/png,image/webp">
-          </div>
-        </td>
         <td class="label">성 명<span class="en">(Name)</span></td>
         <td class="value fillable" id="clientName">&nbsp;</td>
         <td class="label">영 문<span class="en">(English)</span></td>
@@ -271,14 +234,6 @@
   let topicMap = Object.create(null);
   let clientTypeMap = Object.create(null);
 
-  const PHOTO_BUCKET = "counsel-record-photos";
-  const PHOTO_TABLE = "counsel_record_photos";
-  const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
-  const PHOTO_ALLOWED_TYPES = new Set(["image/jpeg","image/png","image/webp"]);
-
-  let currentMemberId = null;
-  let currentMemberKey = "";
-  let currentPhotoMeta = null;
 
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, ch => ({
@@ -388,59 +343,12 @@
     body.innerHTML = html;
   }
 
-  function clearPhoto(clearMeta = true) {
-    const img = $("clientPhoto");
-    img.removeAttribute("src");
-    img.style.display = "none";
-    $("photoPlaceholder").style.display = "";
-    if (clearMeta) currentPhotoMeta = null;
-    updatePhotoButtons();
-  }
-
-  function updatePhotoButtons() {
-    const addBtn = $("photoAddBtn");
-    const delBtn = $("photoDeleteBtn");
-    if (!addBtn || !delBtn) return;
-
-    const hasMember = !!currentMemberId && !!currentMemberKey;
-    addBtn.disabled = !hasMember;
-    delBtn.disabled = !hasMember || !currentPhotoMeta;
-  }
-
-  function photoErrorMessage(error, fallback) {
-    const message = String(error?.message || error || "").trim();
-    if (/row-level security|rls|policy|permission|not authorized|unauthorized/i.test(message)) {
-      return "사진 저장 권한(RLS 정책)이 설정되어 있지 않아 처리할 수 없습니다.";
-    }
-    return message ? `${fallback}: ${message}` : fallback;
-  }
-
-  function safeFileName(name) {
-    const original = String(name || "photo").trim();
-    const cleaned = original
-      .normalize("NFKC")
-      .replace(/[^0-9A-Za-z._-]+/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^_+|_+$/g, "");
-    return cleaned || "photo";
-  }
-
-  async function getAuthUserId() {
-    const { data, error } = await db.auth.getUser();
-    if (error) return null;
-    return data?.user?.id || null;
-  }
 
   function clearCard() {
-    currentMemberId = null;
-    currentMemberKey = "";
-    currentPhotoMeta = null;
     $("memberKeyDisplay").textContent = "회원 Key : ";
     ["clientName","englishName","companyName","sex","hireDate","deptName","phone","birthDate","address","age"]
       .forEach(id => put(id, ""));
-    clearPhoto();
     renderHistory([]);
-    updatePhotoButtons();
   }
 
   async function loadTopicMap() {
@@ -479,18 +387,26 @@
     return [...groups.values()].sort((a,b) => String(a.key).localeCompare(String(b.key)));
   }
 
+  function activeRowsOnly(rows) {
+    return (rows || []).filter(r => r.record_active !== false);
+  }
+
   function buildPsychHistory(rows) {
     const result = [];
 
-    for (const group of groupRowsByReceipt(rows, "PC")) {
+    for (const group of groupRowsByReceipt(activeRowsOnly(rows), "PC")) {
       const ordered = [...group.rows].sort((a,b) =>
         String(a.created_at || "").localeCompare(String(b.created_at || ""))
       );
 
-      const receiptSource = ordered.find(r => r.record_active === true) || ordered[0];
+      // 접수행은 session_no가 없는 실제 접수기록 1건만 사용한다.
+      const receiptSource =
+        ordered.find(r => r.session_no === null || r.session_no === undefined) ||
+        ordered[0];
 
       if (receiptSource) {
         result.push({
+          type:"PC",
           target:clientTypeName(receiptSource.client_type_code),
           topic:joinTopics(
             receiptSource.topic_code,
@@ -509,17 +425,17 @@
             receiptSource.receipt_date ||
             receiptSource.application_date
           ),
-          // 접수상담등록의 접수상담내용
           content:blankValue(receiptSource.application_content)
         });
       }
 
       const sessions = ordered
-        .filter(r => r.session_no !== null && r.session_no !== undefined)
+        .filter(r => Number(r.session_no) > 0)
         .sort((a,b) => Number(a.session_no) - Number(b.session_no));
 
       for (const r of sessions) {
         result.push({
+          type:"PC",
           target:clientTypeName(r.client_type_code || receiptSource?.client_type_code),
           topic:joinTopics(r.session_topic_1, r.session_topic_2, r.topic_code),
           sessionLabel:`${Number(r.session_no)}회기`,
@@ -537,41 +453,37 @@
   function buildCareerHistory(rows) {
     const result = [];
 
-    for (const group of groupRowsByReceipt(rows, "CC")) {
+    for (const group of groupRowsByReceipt(activeRowsOnly(rows), "CC")) {
       const ordered = [...group.rows].sort((a,b) =>
         String(a.created_at || "").localeCompare(String(b.created_at || ""))
       );
 
-      const receiptOnly = ordered.find(r => r.session_no === null || r.session_no === undefined);
-      const receiptBase = receiptOnly || ordered[0];
+      // 접수행은 session_no가 없는 실제 접수기록 1건만 사용한다.
+      const receiptSource =
+        ordered.find(r => r.session_no === null || r.session_no === undefined) ||
+        ordered[0];
 
-      if (receiptBase) {
+      if (receiptSource) {
         result.push({
-          target:clientTypeName(receiptBase.client_type_code),
-          topic:joinTopics(
-            receiptBase.topic_code,
-            receiptBase.career_topic_1
-          ),
+          type:"CC",
+          target:clientTypeName(receiptSource.client_type_code),
+          topic:joinTopics(receiptSource.topic_code, receiptSource.career_topic_1),
           sessionLabel:"접수",
           sessionOrder:0,
-          date:dateWithWeekday(receiptBase.receipt_at),
-          sortDate:dateOnly(receiptBase.receipt_at),
-
-          // 접수상담등록 진로상담의 상담내용은 counseling_content에 저장된다.
-          // 별도 접수행이 있으면 그 행의 값을 사용하고,
-          // 별도 접수행이 없으면 해당 접수그룹의 최초 DB 실제값을 그대로 사용한다.
-          // 임의 문구나 추정값은 생성하지 않는다.
-          content:blankValue((receiptOnly || receiptBase).counseling_content)
+          date:dateWithWeekday(receiptSource.receipt_at),
+          sortDate:dateOnly(receiptSource.receipt_at),
+          content:blankValue(receiptSource.counseling_content)
         });
       }
 
       const sessions = ordered
-        .filter(r => r.session_no !== null && r.session_no !== undefined)
+        .filter(r => Number(r.session_no) > 0)
         .sort((a,b) => Number(a.session_no) - Number(b.session_no));
 
       for (const r of sessions) {
         result.push({
-          target:clientTypeName(r.client_type_code || receiptBase?.client_type_code),
+          type:"CC",
+          target:clientTypeName(r.client_type_code || receiptSource?.client_type_code),
           topic:joinTopics(r.career_topic_1, r.career_topic_2, r.topic_code),
           sessionLabel:`${Number(r.session_no)}회기`,
           sessionOrder:Number(r.session_no),
@@ -585,193 +497,29 @@
     return result;
   }
 
-  async function loadPhoto(clientId) {
-    clearPhoto();
+  function dedupeHistory(rows) {
+    const seen = new Set();
+    const result = [];
 
-    const { data:meta, error:metaError } = await db
-      .from(PHOTO_TABLE)
-      .select("id,bucket_id,object_path,original_file_name,mime_type,file_size_bytes,created_at")
-      .eq("db_basic_id", clientId)
-      .order("created_at", { ascending:false })
-      .limit(1)
-      .maybeSingle();
+    for (const row of rows) {
+      // 동일 접수/회기가 DB에 중복 존재하더라도 화면에는 한 번만 표시한다.
+      const key = [
+        // 접수는 상담 DB가 달라도 동일 접수내용이면 한 번만 표시한다.
+        row.sessionLabel === "접수" ? "RECEIPT" : (row.type || ""),
+        row.sessionLabel || "",
+        row.date || "",
+        row.target || "",
+        row.topic || "",
+        row.content || ""
+      ].join("|");
 
-    if (metaError) {
-      console.error("사진 메타 조회 오류:", metaError);
-      updatePhotoButtons();
-      return;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(row);
     }
 
-    if (!meta) {
-      currentPhotoMeta = null;
-      updatePhotoButtons();
-      return;
-    }
-
-    currentPhotoMeta = meta;
-    updatePhotoButtons();
-
-    const { data, error } = await db.storage
-      .from(meta.bucket_id || PHOTO_BUCKET)
-      .createSignedUrl(meta.object_path, 300);
-
-    if (error || !data?.signedUrl) {
-      console.error("사진 URL 생성 오류:", error);
-      return;
-    }
-
-    $("clientPhoto").src = data.signedUrl;
-    $("clientPhoto").style.display = "block";
-    $("photoPlaceholder").style.display = "none";
+    return result;
   }
-
-  async function uploadPhoto(file) {
-    const msg = $("loadMessage");
-
-    if (!currentMemberId || !currentMemberKey) {
-      msg.textContent = "먼저 회원 Key를 조회하세요.";
-      msg.style.color = "#b91c1c";
-      return;
-    }
-
-    if (!file) return;
-
-    if (!PHOTO_ALLOWED_TYPES.has(file.type)) {
-      msg.textContent = "사진은 JPG, PNG, WEBP 형식만 등록할 수 있습니다.";
-      msg.style.color = "#b91c1c";
-      return;
-    }
-
-    if (file.size > PHOTO_MAX_BYTES) {
-      msg.textContent = "사진 파일은 5MB 이하만 등록할 수 있습니다.";
-      msg.style.color = "#b91c1c";
-      return;
-    }
-
-    $("photoAddBtn").disabled = true;
-    $("photoDeleteBtn").disabled = true;
-    msg.textContent = "사진 등록 중...";
-    msg.style.color = "#475569";
-
-    const extMatch = safeFileName(file.name).match(/\.([A-Za-z0-9]+)$/);
-    const ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
-    const objectPath = `${currentMemberKey}/${crypto.randomUUID()}.${ext}`;
-
-    try {
-      const { error:uploadError } = await db.storage
-        .from(PHOTO_BUCKET)
-        .upload(objectPath, file, {
-          cacheControl:"3600",
-          upsert:false,
-          contentType:file.type
-        });
-
-      if (uploadError) throw uploadError;
-
-      const uploadedBy = await getAuthUserId();
-
-      const { error:metaError } = await db
-        .from(PHOTO_TABLE)
-        .insert([{
-          db_basic_id:currentMemberId,
-          member_key:currentMemberKey,
-          bucket_id:PHOTO_BUCKET,
-          object_path:objectPath,
-          original_file_name:file.name,
-          mime_type:file.type,
-          file_size_bytes:file.size,
-          uploaded_by:uploadedBy
-        }]);
-
-      if (metaError) {
-        // 메타 저장 실패 시 방금 올린 Storage 파일을 정리한다.
-        await db.storage.from(PHOTO_BUCKET).remove([objectPath]);
-        throw metaError;
-      }
-
-      await loadPhoto(currentMemberId);
-      msg.textContent = "사진이 등록되었습니다.";
-      msg.style.color = "#166534";
-
-    } catch (error) {
-      console.error("사진 등록 오류:", error);
-      msg.textContent = photoErrorMessage(error, "사진 등록 오류");
-      msg.style.color = "#b91c1c";
-    } finally {
-      $("photoFileInput").value = "";
-      updatePhotoButtons();
-    }
-  }
-
-  async function deletePhoto() {
-    const msg = $("loadMessage");
-
-    if (!currentMemberId || !currentMemberKey) {
-      msg.textContent = "먼저 회원 Key를 조회하세요.";
-      msg.style.color = "#b91c1c";
-      return;
-    }
-
-    if (!currentPhotoMeta) {
-      msg.textContent = "삭제할 사진이 없습니다.";
-      msg.style.color = "#b91c1c";
-      return;
-    }
-
-    const confirmed = window.confirm("현재 등록된 사진을 삭제하시겠습니까?");
-    if (!confirmed) return;
-
-    $("photoAddBtn").disabled = true;
-    $("photoDeleteBtn").disabled = true;
-    msg.textContent = "사진 삭제 중...";
-    msg.style.color = "#475569";
-
-    const photo = { ...currentPhotoMeta };
-
-    try {
-      const { error:storageError } = await db.storage
-        .from(photo.bucket_id || PHOTO_BUCKET)
-        .remove([photo.object_path]);
-
-      if (storageError) throw storageError;
-
-      const { error:metaError } = await db
-        .from(PHOTO_TABLE)
-        .delete()
-        .eq("id", photo.id)
-        .eq("db_basic_id", currentMemberId);
-
-      if (metaError) throw metaError;
-
-      clearPhoto();
-      msg.textContent = "사진이 삭제되었습니다.";
-      msg.style.color = "#166534";
-
-    } catch (error) {
-      console.error("사진 삭제 오류:", error);
-      msg.textContent = photoErrorMessage(error, "사진 삭제 오류");
-      msg.style.color = "#b91c1c";
-      await loadPhoto(currentMemberId);
-    } finally {
-      updatePhotoButtons();
-    }
-  }
-
-  $("photoAddBtn").addEventListener("click", () => {
-    if (!currentMemberId || !currentMemberKey) {
-      $("loadMessage").textContent = "먼저 회원 Key를 조회하세요.";
-      $("loadMessage").style.color = "#b91c1c";
-      return;
-    }
-    $("photoFileInput").click();
-  });
-
-  $("photoDeleteBtn").addEventListener("click", deletePhoto);
-
-  $("photoFileInput").addEventListener("change", e => {
-    const file = e.target.files?.[0] || null;
-    if (file) uploadPhoto(file);
-  });
 
   async function loadMember(memberKey) {
     const msg = $("loadMessage");
@@ -798,11 +546,6 @@
       msg.style.color = "#b91c1c";
       return;
     }
-
-    currentMemberId = member.id;
-    currentMemberKey = blankValue(member.member_key).trim();
-    currentPhotoMeta = null;
-    updatePhotoButtons();
 
     $("memberKeyDisplay").textContent = `회원 Key : ${blankValue(member.member_key)}`;
 
@@ -835,10 +578,23 @@
     if (psych.error) console.error("심리상담 조회 오류:", psych.error);
     if (career.error) console.error("진로상담 조회 오류:", career.error);
 
-    const history = [
-      ...buildPsychHistory(psych.data || []),
-      ...buildCareerHistory(career.data || [])
-    ];
+    let history = [];
+    const counselType = String(member.counsel_type || "").toUpperCase();
+
+    if (counselType === "PC") {
+      history = buildPsychHistory(psych.data || []);
+    } else if (counselType === "CC") {
+      history = buildCareerHistory(career.data || []);
+    } else {
+      // BOTH 또는 기존 데이터의 상담구분이 비어 있는 경우에는
+      // 두 상담 DB의 활성 기록을 합치되 동일 행은 한 번만 표시한다.
+      history = [
+        ...buildPsychHistory(psych.data || []),
+        ...buildCareerHistory(career.data || [])
+      ];
+    }
+
+    history = dedupeHistory(history);
 
     history.sort((a,b) => {
       const da = a.sortDate || "9999-12-31";
@@ -852,7 +608,6 @@
     });
 
     renderHistory(history);
-    await loadPhoto(member.id);
 
     msg.textContent = `${blankValue(member.client_name)} 조회 완료 · 상담이력 ${history.length}건`;
     msg.style.color = "#166534";
@@ -887,7 +642,6 @@
     // 최초 진입 시 회원 Key 기본값 및 자동 조회 없음.
     $("memberKeySearch").value = "";
     $("loadMessage").textContent = "";
-    updatePhotoButtons();
   }
 
   init().catch(err => {
