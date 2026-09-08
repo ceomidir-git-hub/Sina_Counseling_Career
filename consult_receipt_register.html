@@ -703,6 +703,209 @@ html,body,button,input,select,textarea,option,label,span,div,p,h1,h2,h3,strong,b
 }
 </style>
 
+
+<style id="visual-layout-20260908-final">
+/* =========================================================
+   2026-09-08 A4 세로 화면 시인성/간격 최종 보정
+   - 상단 머릿글 여백 확대
+   - 접수정보 1행 라벨/입력칸 중첩 제거
+   - 관계 입력칸: 현재 50% -> 75% (정확히 50% 확대)
+   - 접수방법 라벨/입력칸 간격 확보
+   - 진로상담 외국인정보 라벨/입력칸 간격 확보
+   - 심리/진로 모두 A4 세로 1장 구조 유지
+   - DB/조회/저장/검증 JavaScript 변경 없음
+   ========================================================= */
+
+@media screen {
+  /* A4 상단 여유를 3mm 추가 확보 */
+  .a4-page{
+    padding:8mm 6.5mm 12mm!important;
+  }
+
+  /* 제목이 종이 상단에 붙어 보이지 않도록 머릿글 자체도 여유 확보 */
+  .top-row{
+    min-height:12mm!important;
+    height:12mm!important;
+    margin:0 0 2mm!important;
+    padding:1mm 1mm 1.5mm!important;
+    align-items:center!important;
+  }
+  .title-block{align-self:center!important;}
+  .top-actions{align-self:center!important;}
+
+  /* 1. 접수 정보: 4개 칸을 동일폭으로 강제하지 않고 실제 라벨 길이에 맞게 재배분 */
+  #receiptInfoSection .section-body{
+    padding:2.5mm 2.8mm!important;
+  }
+  #receiptInfoSection .receipt-row-4{
+    grid-template-columns:1.08fr 1.18fr .92fr 1.36fr!important;
+    column-gap:2mm!important;
+    row-gap:1.8mm!important;
+    margin-bottom:2mm!important;
+  }
+  #receiptInfoSection .receipt-row-4 .receipt-pair{
+    grid-template-columns:max-content minmax(0,1fr)!important;
+    column-gap:1.6mm!important;
+    min-width:0!important;
+  }
+  #receiptInfoSection .receipt-row-4 .receipt-pair label{
+    position:relative!important;
+    z-index:1!important;
+    line-height:1.2!important;
+  }
+  #receiptInfoSection .receipt-row-4 .receipt-pair input,
+  #receiptInfoSection .receipt-row-4 .receipt-pair select{
+    min-width:0!important;
+  }
+
+  /* 관계 입력칸: 기존 50%의 1.5배 = 75% */
+  #receiptInfoSection #relationship{
+    width:75%!important;
+    min-width:22mm!important;
+    justify-self:start!important;
+  }
+
+  /* 접수방법은 라벨 뒤에 충분한 입력폭 확보 */
+  #receiptInfoSection #contactMethod{
+    width:100%!important;
+    justify-self:stretch!important;
+  }
+
+  /* 접수일시/방문일시도 라벨과 입력영역 사이 간격 확보 */
+  #receiptInfoSection .receipt-row-2{
+    column-gap:3mm!important;
+  }
+  #receiptInfoSection .receipt-row-2 .receipt-pair{
+    grid-template-columns:18mm minmax(0,1fr)!important;
+    column-gap:1.2mm!important;
+  }
+
+  /* 진로상담 - 외국인 정보: 긴 라벨(외국인번호 등)과 입력칸이 붙지 않도록 고정 라벨폭 + 여유 */
+  body.career-mode .career-foreign .career-subgroup-body{
+    padding:2.2mm 2.3mm!important;
+  }
+  body.career-mode .career-foreign .foreign-row-3{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    column-gap:3mm!important;
+    row-gap:2.2mm!important;
+    margin-bottom:0!important;
+  }
+  body.career-mode .career-foreign .foreign-extra-row{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    column-gap:3mm!important;
+    row-gap:2.2mm!important;
+    margin-top:2.2mm!important;
+  }
+  body.career-mode .career-foreign .compact-pair,
+  body.career-mode .career-foreign .foreign-extra-row .compact-pair{
+    grid-template-columns:20mm minmax(0,1fr)!important;
+    column-gap:1.5mm!important;
+    align-items:center!important;
+    min-width:0!important;
+  }
+  body.career-mode .career-foreign .compact-pair label{
+    line-height:1.2!important;
+    white-space:nowrap!important;
+  }
+  body.career-mode .career-foreign .compact-pair input,
+  body.career-mode .career-foreign .compact-pair select{
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  /* 늘어난 상단/외국인 정보 여백만큼 상담내용 높이에서 회수해 A4 1장 유지 */
+  body:not(.career-mode) #details{
+    height:86mm!important;
+    min-height:86mm!important;
+    max-height:86mm!important;
+  }
+  body.career-mode #details{
+    height:40mm!important;
+    min-height:40mm!important;
+    max-height:40mm!important;
+  }
+
+  /* 하단 버튼/안내는 기존 위치를 유지하되 상단 증가분과 충돌하지 않도록 간격 미세 조정 */
+  .actions{margin-top:2mm!important;}
+  .bottom-hint{margin-top:1.5mm!important;}
+}
+
+@media print {
+  /* PDF에서도 제목 상단 여유 확보 */
+  .a4-page{
+    padding:10mm 7mm 22mm!important;
+  }
+  .top-row{
+    min-height:15mm!important;
+    height:15mm!important;
+    padding-top:1mm!important;
+    margin-bottom:1.2mm!important;
+    align-items:center!important;
+  }
+
+  /* 접수정보 라벨/입력칸 중첩 방지 */
+  #receiptInfoSection .receipt-row-4{
+    grid-template-columns:1.08fr 1.18fr .92fr 1.36fr!important;
+    column-gap:1.8mm!important;
+    row-gap:1mm!important;
+  }
+  #receiptInfoSection .receipt-row-4 .receipt-pair{
+    grid-template-columns:max-content minmax(0,1fr)!important;
+    column-gap:1.1mm!important;
+    min-width:0!important;
+  }
+  #receiptInfoSection #relationship{
+    width:75%!important;
+    min-width:20mm!important;
+    justify-self:start!important;
+  }
+  #receiptInfoSection #contactMethod{
+    width:100%!important;
+  }
+  #receiptInfoSection .receipt-row-2 .receipt-pair{
+    grid-template-columns:17mm minmax(0,1fr)!important;
+    column-gap:1mm!important;
+  }
+
+  /* PDF 진로상담 외국인정보 간격 */
+  body.career-mode .career-foreign .career-subgroup-body{
+    padding:1.3mm 1.8mm!important;
+  }
+  body.career-mode .career-foreign .foreign-row-3{
+    column-gap:2mm!important;
+    row-gap:1mm!important;
+  }
+  body.career-mode .career-foreign .foreign-extra-row{
+    column-gap:2.5mm!important;
+    row-gap:1mm!important;
+    margin-top:1mm!important;
+  }
+  body.career-mode .career-foreign .compact-pair,
+  body.career-mode .career-foreign .foreign-extra-row .compact-pair{
+    grid-template-columns:19mm minmax(0,1fr)!important;
+    column-gap:1mm!important;
+    min-width:0!important;
+  }
+  body.career-mode .career-foreign .compact-pair input,
+  body.career-mode .career-foreign .compact-pair select{
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  /* 상단 여백 증가분을 본문에서 회수해 PDF 1장 유지 */
+  body:not(.career-mode) #details{
+    height:94mm!important;
+    min-height:94mm!important;
+    max-height:94mm!important;
+  }
+  body.career-mode #details{
+    height:82mm!important;
+    min-height:82mm!important;
+    max-height:82mm!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="page-wrap">
