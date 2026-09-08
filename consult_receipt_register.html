@@ -906,6 +906,76 @@ html,body,button,input,select,textarea,option,label,span,div,p,h1,h2,h3,strong,b
 }
 </style>
 
+
+<style id="request-20260908-gap-only-adjust">
+/* =========================================================
+   2026-09-08 추가 보정
+   - 진로상담 개인 기본정보 / 기업·직장정보 / 외국인 정보
+   - 항목(label)과 입력칸(field) 사이의 "여유"만 소폭 확대
+   - 행/열 배치 구조는 유지 (위치 이동 아님)
+   ========================================================= */
+@media screen {
+  /* ① 개인 기본정보: 항목과 입력칸 사이 여유 확대 */
+  body.career-mode #careerInfoSection .personal-row-3 .compact-pair,
+  body.career-mode #careerInfoSection .personal-row-2 .compact-pair{
+    column-gap:1.9mm!important;
+  }
+  body.career-mode #careerInfoSection .personal-row-3 .compact-pair label,
+  body.career-mode #careerInfoSection .personal-row-2 .compact-pair label{
+    white-space:nowrap!important;
+    line-height:1.2!important;
+  }
+
+  /* ② 기업·직장정보: 항목과 입력칸 사이 여유 확대 */
+  body.career-mode #careerInfoSection .company-row-4 .compact-pair{
+    column-gap:1.9mm!important;
+  }
+  body.career-mode #careerInfoSection .company-row-4 .compact-pair label{
+    white-space:nowrap!important;
+    line-height:1.2!important;
+  }
+
+  /* ③ 외국인 정보도 동일 기준으로 재보정 */
+  body.career-mode #careerInfoSection .career-foreign .compact-pair,
+  body.career-mode #careerInfoSection .career-foreign .foreign-extra-row .compact-pair{
+    column-gap:1.9mm!important;
+  }
+  body.career-mode #careerInfoSection .career-foreign .compact-pair label{
+    white-space:nowrap!important;
+    line-height:1.2!important;
+  }
+
+  /* 입력칸 좌우 내부 여백도 아주 소폭 확대 */
+  body.career-mode #careerInfoSection .compact-pair input,
+  body.career-mode #careerInfoSection .compact-pair select{
+    padding-left:1.7mm!important;
+    padding-right:1.7mm!important;
+  }
+}
+
+@media print {
+  /* PDF도 같은 원칙으로 항목-입력칸 여유만 소폭 확대 */
+  body.career-mode #careerInfoSection .personal-row-3 .compact-pair,
+  body.career-mode #careerInfoSection .personal-row-2 .compact-pair,
+  body.career-mode #careerInfoSection .company-row-4 .compact-pair,
+  body.career-mode #careerInfoSection .career-foreign .compact-pair,
+  body.career-mode #careerInfoSection .career-foreign .foreign-extra-row .compact-pair{
+    column-gap:1.15mm!important;
+  }
+
+  body.career-mode #careerInfoSection .compact-pair label{
+    white-space:nowrap!important;
+    line-height:1.15!important;
+  }
+
+  body.career-mode #careerInfoSection .compact-pair input,
+  body.career-mode #careerInfoSection .compact-pair select{
+    padding-left:1.2mm!important;
+    padding-right:1.2mm!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="page-wrap">
