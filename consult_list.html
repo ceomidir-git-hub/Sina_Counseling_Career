@@ -816,34 +816,39 @@ col.session{width:11%}
         detectSessionInUrl:true
       }
     });
-    async function secureConsultListSearch(params){
-      const {data:sessionData,error:sessionError}=await sb.auth.getSession();
-      if(sessionError) throw sessionError;
-      const accessToken=sessionData?.session?.access_token;
-      if(!accessToken) throw new Error("로그인 세션을 확인할 수 없습니다.");
-
-      const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consult-list-read`,{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":`Bearer ${accessToken}`,
-          "apikey":SUPABASE_ANON_KEY
-        },
-        body:JSON.stringify(params||{}),
-        cache:"no-store"
-      });
-
-      let result=null;
-      try{result=await response.json()}catch(_){result=null}
-
-      if(!response.ok||!result?.ok){
-        throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
-      }
-      return Array.isArray(result.data)?result.data:[];
-    }
   } catch (err) {
     console.error(err);
     showStatus("error","Supabase 연결을 초기화하지 못했습니다.");
+  }
+
+  async function secureConsultListSearch(params){
+    if(!sb) throw new Error("Supabase 연결을 사용할 수 없습니다.");
+
+    const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+    if(sessionError) throw sessionError;
+
+    const accessToken=sessionData?.session?.access_token;
+    if(!accessToken) throw new Error("로그인 세션을 확인할 수 없습니다.");
+
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consult-list-read`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${accessToken}`,
+        "apikey":SUPABASE_ANON_KEY
+      },
+      body:JSON.stringify(params||{}),
+      cache:"no-store"
+    });
+
+    let result=null;
+    try{result=await response.json()}catch(_){result=null}
+
+    if(!response.ok||!result?.ok){
+      throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
+    }
+
+    return Array.isArray(result.data)?result.data:[];
   }
 
   function showStatus(type,msg){
