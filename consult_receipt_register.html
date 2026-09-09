@@ -1017,6 +1017,7 @@ html,body,button,input,select,textarea,option,label,span,div,p,h1,h2,h3,strong,b
 <div class="edit-confirm-backdrop" id="editConfirmBackdrop" aria-hidden="true"><div class="edit-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="editConfirmTitle"><div class="edit-confirm-head"><h3 id="editConfirmTitle">수정 내용 저장 확인</h3></div><div class="edit-confirm-body"><p class="edit-confirm-message" id="editConfirmMessage">수정한 내용을 저장하시겠습니까?</p><p class="edit-confirm-warning">수정된 항목을 다시 체크해 주세요.</p></div><div class="edit-confirm-actions"><button type="button" class="edit-confirm-btn" id="editConfirmCancelBtn">취소</button><button type="button" class="edit-confirm-btn primary" id="editConfirmOkBtn">확인</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+console.info("consult_receipt_register build: 20260909-receipt-dedupe-v1");
 const DAY_KR=["일","월","화","수","목","금","토"];
 let mode="new",loadedRecordId=null,loadedClientId=null,loadedRecordType=null,loadedSessionStatus=null;
 function normalizeTimeDigits(value){let digits=String(value||"").replace(/\D/g,"").slice(0,4);if(!digits)return null;if(digits.length===3)digits="0"+digits;if(digits.length!==4)return null;const hour=parseInt(digits.slice(0,2),10),minute=parseInt(digits.slice(2,4),10);if(Number.isNaN(hour)||Number.isNaN(minute)||hour<0||hour>23||minute<0||minute>59)return null;return `${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}`}
@@ -1174,29 +1175,60 @@ async function secureReceiptRead(action,payload={}){
 function secureBundleToRecords(bundle,requestedType=""){
   const client=bundle?.basic||null;
   if(!client)return[];
+
   const lookupTypes=getAutoLookupTypes(requestedType,client.counsel_type);
-  const records=[];
+  const candidates=[];
+
   if(lookupTypes.includes("PC")){
     (Array.isArray(bundle?.psychological)?bundle.psychological:[])
       .filter(row=>row&&row.record_active!==false)
-      .forEach(row=>records.push({
+      .forEach(row=>candidates.push({
         __client:client,
         __session:row,
         __type:"PC",
         __appointmentISO:row.visit_at||null
       }));
   }
+
   if(lookupTypes.includes("CC")){
     (Array.isArray(bundle?.career)?bundle.career:[])
       .filter(row=>row&&row.record_active!==false)
-      .forEach(row=>records.push({
+      .forEach(row=>candidates.push({
         __client:client,
         __session:row,
         __type:"CC",
         __appointmentISO:row.appointment_at||null
       }));
   }
-  return records.sort((a,b)=>
+
+  /*
+    접수상담등록에서는 상담 회기별 행이 아니라 '접수 단위'만 보여야 한다.
+    상담등록 시 1회기/2회기 행에 동일한 receipt_at이 복사될 수 있으므로,
+    같은 상담종류 + 같은 receipt_at은 하나의 접수로 묶는다.
+    동일 접수 그룹에서는 가장 먼저 생성된 행을 접수 원본으로 사용한다.
+  */
+  const grouped=new Map();
+
+  candidates.forEach(record=>{
+    const row=record.__session||{};
+    const receiptKey=String(row.receipt_at||"").trim();
+    const groupKey=`${record.__type}|${receiptKey}`;
+
+    if(!grouped.has(groupKey)){
+      grouped.set(groupKey,record);
+      return;
+    }
+
+    const current=grouped.get(groupKey);
+    const currentCreated=String(current?.__session?.created_at||"");
+    const incomingCreated=String(row.created_at||"");
+
+    if(incomingCreated && (!currentCreated || incomingCreated<currentCreated)){
+      grouped.set(groupKey,record);
+    }
+  });
+
+  return Array.from(grouped.values()).sort((a,b)=>
     new Date(b.__session?.receipt_at||0).getTime()-
     new Date(a.__session?.receipt_at||0).getTime()
   );
