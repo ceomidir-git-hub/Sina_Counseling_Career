@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>상담 리스트</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -784,6 +787,7 @@ col.session{width:11%}
 <script>
 (() => {
   "use strict";
+  console.info("consult_list build: 20260909-secure-v3-inline");
 
   const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
@@ -819,36 +823,6 @@ col.session{width:11%}
   } catch (err) {
     console.error(err);
     showStatus("error","Supabase 연결을 초기화하지 못했습니다.");
-  }
-
-  async function secureConsultListSearch(params){
-    if(!sb) throw new Error("Supabase 연결을 사용할 수 없습니다.");
-
-    const {data:sessionData,error:sessionError}=await sb.auth.getSession();
-    if(sessionError) throw sessionError;
-
-    const accessToken=sessionData?.session?.access_token;
-    if(!accessToken) throw new Error("로그인 세션을 확인할 수 없습니다.");
-
-    const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consult-list-read`,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":`Bearer ${accessToken}`,
-        "apikey":SUPABASE_ANON_KEY
-      },
-      body:JSON.stringify(params||{}),
-      cache:"no-store"
-    });
-
-    let result=null;
-    try{result=await response.json()}catch(_){result=null}
-
-    if(!response.ok||!result?.ok){
-      throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
-    }
-
-    return Array.isArray(result.data)?result.data:[];
   }
 
   function showStatus(type,msg){
@@ -1115,15 +1089,38 @@ col.session{width:11%}
     setLoading(true,"상담 리스트를 보안 조회하는 중입니다.");
 
     try{
-      const serverRows=await secureConsultListSearch({
-        date_from:from||null,
-        date_to:to||null,
-        member_key:memberKeyQ||null,
-        name:nameInput||null,
-        phone:phoneInput||null,
-        counsel_type:type
+      const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+      if(sessionError) throw sessionError;
+
+      const accessToken=sessionData?.session?.access_token;
+      if(!accessToken) throw new Error("로그인 세션을 확인할 수 없습니다.");
+
+      const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consult-list-read`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":`Bearer ${accessToken}`,
+          "apikey":SUPABASE_ANON_KEY
+        },
+        body:JSON.stringify({
+          date_from:from||null,
+          date_to:to||null,
+          member_key:memberKeyQ||null,
+          name:nameInput||null,
+          phone:phoneInput||null,
+          counsel_type:type
+        }),
+        cache:"no-store"
       });
 
+      let result=null;
+      try{result=await response.json()}catch(_){result=null}
+
+      if(!response.ok||!result?.ok){
+        throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
+      }
+
+      const serverRows=Array.isArray(result.data)?result.data:[];
       const out=serverRows.map(row=>({
         id:row.id,
         registeredAt:row.registeredAt||"",
@@ -1157,7 +1154,7 @@ col.session{width:11%}
         showStatus("info","조회 조건에 해당하는 상담 대상자가 없습니다.");
       }
     }catch(err){
-      console.error(err);
+      console.error("consult_list secure search error:",err);
       lastRows=[];
       renderRows([]);
       setResultInlineMessage(0);
