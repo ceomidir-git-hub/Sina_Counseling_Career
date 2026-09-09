@@ -505,6 +505,29 @@ const CAREER_TABLE="DB_career_counseling";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
   auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true}
 });
+async function secureConsultationRead(action,payload={}){
+  const{data:sessionData,error:sessionError}=await sb.auth.getSession();
+  if(sessionError)throw sessionError;
+  const accessToken=sessionData?.session?.access_token;
+  if(!accessToken)throw new Error("로그인 세션을 확인할 수 없습니다.");
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consultation-read`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${accessToken}`,
+      "apikey":SUPABASE_KEY
+    },
+    body:JSON.stringify({action,...payload}),
+    cache:"no-store"
+  });
+  let result=null;
+  try{result=await response.json()}catch(_){result=null}
+  if(!response.ok||!result?.ok){
+    throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
+  }
+  return result.data??null;
+}
+
 
 let currentEmployee=null;
 let selectedRecord=null;
@@ -692,16 +715,15 @@ function topicCodeFromRow(row,type){
   return found?found[0]:"";
 }
 async function getSessionRows(client){
-  const ps="id,client_id,receipt_at,visit_at,visit_date,session_no,client_type_code,topic_code,session_topic_1,assessment_tool,session_content,next_session_date,session_status,record_active,session_start_at,session_end_at,next_session_at,updated_at";
-  const cs="id,client_id,receipt_at,appointment_at,counseling_date,session_no,client_type_code,topic_code,career_topic_1,assessment_tool,counseling_content,next_session_date,session_status,record_active,session_start_at,session_end_at,next_session_at,updated_at";
-  const [p,c]=await Promise.all([
-    sb.from(PSYCH_TABLE).select(ps).eq("client_id",client.id).not("session_no","is",null).order("session_no",{ascending:true}),
-    sb.from(CAREER_TABLE).select(cs).eq("client_id",client.id).not("session_no","is",null).order("session_no",{ascending:true})
-  ]);
-  if(p.error)throw p.error;if(c.error)throw c.error;
+  if(!client?.member_key)throw new Error("보안 조회에 필요한 회원 Key가 없습니다.");
+  const bundle=await secureConsultationRead("member_history",{member_key:client.member_key});
   const rows=[];
-  (p.data||[]).forEach(row=>rows.push({type:"PC",client,row}));
-  (c.data||[]).forEach(row=>rows.push({type:"CC",client,row}));
+  (Array.isArray(bundle?.PC)?bundle.PC:[])
+    .filter(row=>row&&row.session_no!=null)
+    .forEach(row=>rows.push({type:"PC",client,row}));
+  (Array.isArray(bundle?.CC)?bundle.CC:[])
+    .filter(row=>row&&row.session_no!=null)
+    .forEach(row=>rows.push({type:"CC",client,row}));
   return rows.sort((a,b)=>{
     if(a.type!==b.type)return a.type.localeCompare(b.type);
     return (a.row.session_no||0)-(b.row.session_no||0);
@@ -716,23 +738,29 @@ async function searchConsultations(){
     return;
   }
 
-  lookupResults.innerHTML='<div class="lookup-empty">조회 중...</div>';
+  lookupResults.innerHTML='<div class="lookup-empty">보안 조회 중...</div>';
 
   try{
-    const {data:client,error}=await sb
-      .from(BASIC_TABLE)
-      .select("id,member_key,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address")
-      .eq("member_key",memberKey)
-      .maybeSingle();
-
-    if(error)throw error;
+    const bundle=await secureConsultationRead("member_history",{member_key:memberKey});
+    const client=bundle?.basic||null;
 
     if(!client){
       lookupResults.innerHTML='<div class="lookup-empty">일치하는 회원 Key의 내담자 기본정보가 없습니다.</div>';
       return;
     }
 
-    const records=await getSessionRows(client);
+    const records=[];
+    (Array.isArray(bundle?.PC)?bundle.PC:[])
+      .filter(row=>row&&row.session_no!=null)
+      .forEach(row=>records.push({type:"PC",client,row}));
+    (Array.isArray(bundle?.CC)?bundle.CC:[])
+      .filter(row=>row&&row.session_no!=null)
+      .forEach(row=>records.push({type:"CC",client,row}));
+
+    records.sort((a,b)=>{
+      if(a.type!==b.type)return a.type.localeCompare(b.type);
+      return (a.row.session_no||0)-(b.row.session_no||0);
+    });
 
     if(!records.length){
       lookupResults.innerHTML='<div class="lookup-empty">해당 회원 Key에 등록된 상담 회기가 없습니다.</div>';
@@ -1114,13 +1142,21 @@ function recordActivity(e){
     const ok=await guardLogin();if(!ok)return;
     await loadLookups();resetIdleTimer();
     const params=new URLSearchParams(location.search);
-    const directId=params.get("id"),directType=params.get("type");
+    const directId=params.get("id"),directType=String(params.get("type")||"").toUpperCase();
     if(directId&&["PC","CC"].includes(directType)){
-      const table=directType==="PC"?PSYCH_TABLE:CAREER_TABLE;
-      const {data:row,error}=await sb.from(table).select("*").eq("id",directId).single();
-      if(!error&&row){
-        const {data:client}=await sb.from(BASIC_TABLE).select("id,member_key,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address").eq("id",row.client_id).single();
-        if(client){selectedRecord={type:directType,client,row};populateRecord(selectedRecord)}
+      try{
+        const direct=await secureConsultationRead("record_by_id",{record_id:directId,type:directType});
+        const client=direct?.basic||null;
+        const row=direct?.row||null;
+        if(client&&row){
+          selectedRecord={type:directType,client,row};
+          populateRecord(selectedRecord);
+        }else{
+          showStatus("error","직접 조회한 상담기록을 찾을 수 없습니다.");
+        }
+      }catch(err){
+        console.error("직접 상담기록 보안 조회 오류:",err);
+        showStatus("error","상담기록 자동조회 중 오류가 발생했습니다: "+(err.message||err));
       }
     }
   }catch(err){
