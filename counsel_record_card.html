@@ -217,6 +217,7 @@
 <script>
 (() => {
   'use strict';
+  console.info('counsel_record_card build: 20260909-secure-read-v1');
 
   const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
@@ -229,6 +230,34 @@
       detectSessionInUrl: true
     }
   });
+
+  async function secureCounselRecordRead(memberKey) {
+    const { data:sessionData, error:sessionError } = await db.auth.getSession();
+    if (sessionError) throw sessionError;
+
+    const accessToken = sessionData?.session?.access_token;
+    if (!accessToken) throw new Error("로그인 세션을 확인할 수 없습니다.");
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/secure-counsel-record-read`, {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${accessToken}`,
+        "apikey":SUPABASE_PUBLISHABLE_KEY
+      },
+      body:JSON.stringify({ member_key:memberKey }),
+      cache:"no-store"
+    });
+
+    let result = null;
+    try { result = await response.json(); } catch (_) { result = null; }
+
+    if (!response.ok || !result?.ok) {
+      throw new Error(result?.error || `보안 조회 요청에 실패했습니다. (${response.status})`);
+    }
+
+    return result.data ?? null;
+  }
 
   const $ = id => document.getElementById(id);
   let topicMap = Object.create(null);
@@ -528,89 +557,73 @@
     msg.textContent = "조회 중...";
     msg.style.color = "#475569";
 
-    const { data:member, error:memberError } = await db
-      .from("DB_basic")
-      .select("id,member_key,counsel_type,client_name,english_name,company_name,sex_code,birth_date,client_phone,client_address,major_career")
-      .eq("member_key", memberKey)
-      .maybeSingle();
+    try {
+      const bundle = await secureCounselRecordRead(memberKey);
+      const member = bundle?.basic || null;
 
-    if (memberError) {
-      console.error(memberError);
+      if (!member) {
+        msg.textContent = "해당 회원 Key가 없습니다.";
+        msg.style.color = "#b91c1c";
+        return;
+      }
+
+      $("memberKeyDisplay").textContent = `회원 Key : ${blankValue(member.member_key)}`;
+
+      put("clientName", member.client_name);
+      put("englishName", member.english_name);
+      put("companyName", member.company_name);
+      put("sex", sexLabel(member.sex_code));
+      put("hireDate", "");
+
+      // 업무명 = 접수상담등록의 주요경력(DB_basic.major_career)
+      put("deptName", member.major_career);
+
+      put("phone", member.client_phone);
+      put("birthDate", dateOnly(member.birth_date));
+      put("address", member.client_address);
+      put("age", calcAge(member.birth_date));
+
+      const psychRows = Array.isArray(bundle?.psych) ? bundle.psych : [];
+      const careerRows = Array.isArray(bundle?.career) ? bundle.career : [];
+
+      let history = [];
+      const counselType = String(member.counsel_type || "").toUpperCase();
+
+      if (counselType === "PC") {
+        history = buildPsychHistory(psychRows);
+      } else if (counselType === "CC") {
+        history = buildCareerHistory(careerRows);
+      } else {
+        // BOTH 또는 기존 데이터의 상담구분이 비어 있는 경우에는
+        // 두 상담 DB의 활성 기록을 합치되 동일 행은 한 번만 표시한다.
+        history = [
+          ...buildPsychHistory(psychRows),
+          ...buildCareerHistory(careerRows)
+        ];
+      }
+
+      history = dedupeHistory(history);
+
+      history.sort((a,b) => {
+        const da = a.sortDate || "9999-12-31";
+        const dbb = b.sortDate || "9999-12-31";
+        const dateCompare = da.localeCompare(dbb);
+        if (dateCompare !== 0) return dateCompare;
+
+        const sa = Number.isFinite(a.sessionOrder) ? a.sessionOrder : 9999;
+        const sb = Number.isFinite(b.sessionOrder) ? b.sessionOrder : 9999;
+        return sa - sb;
+      });
+
+      renderHistory(history);
+
+      msg.textContent = `${blankValue(member.client_name)} 조회 완료 · 상담이력 ${history.length}건`;
+      msg.style.color = "#166534";
+    } catch (err) {
+      console.error("상담기록카드 보안 조회 오류:", err);
       msg.textContent = "회원 조회 오류";
       msg.style.color = "#b91c1c";
-      return;
     }
-
-    if (!member) {
-      msg.textContent = "해당 회원 Key가 없습니다.";
-      msg.style.color = "#b91c1c";
-      return;
-    }
-
-    $("memberKeyDisplay").textContent = `회원 Key : ${blankValue(member.member_key)}`;
-
-    put("clientName", member.client_name);
-    put("englishName", member.english_name);
-    put("companyName", member.company_name);
-    put("sex", sexLabel(member.sex_code));
-    put("hireDate", "");
-
-    // 업무명 = 접수상담등록의 주요경력(DB_basic.major_career)
-    put("deptName", member.major_career);
-
-    put("phone", member.client_phone);
-    put("birthDate", dateOnly(member.birth_date));
-    put("address", member.client_address);
-    put("age", calcAge(member.birth_date));
-
-    const [psych, career] = await Promise.all([
-      db.from("DB_psychological_counseling")
-        .select("id,client_id,receipt_at,receipt_date,application_date,client_type_code,application_topic_1,application_topic_2,topic_code,application_content,visit_date,session_no,session_topic_1,session_topic_2,session_content,session_start_at,record_active,created_at")
-        .eq("client_id", member.id)
-        .order("created_at", { ascending:true }),
-
-      db.from("DB_career_counseling")
-        .select("id,client_id,receipt_at,client_type_code,topic_code,career_topic_1,career_topic_2,counseling_content,counseling_date,session_no,session_start_at,record_active,created_at")
-        .eq("client_id", member.id)
-        .order("created_at", { ascending:true })
-    ]);
-
-    if (psych.error) console.error("심리상담 조회 오류:", psych.error);
-    if (career.error) console.error("진로상담 조회 오류:", career.error);
-
-    let history = [];
-    const counselType = String(member.counsel_type || "").toUpperCase();
-
-    if (counselType === "PC") {
-      history = buildPsychHistory(psych.data || []);
-    } else if (counselType === "CC") {
-      history = buildCareerHistory(career.data || []);
-    } else {
-      // BOTH 또는 기존 데이터의 상담구분이 비어 있는 경우에는
-      // 두 상담 DB의 활성 기록을 합치되 동일 행은 한 번만 표시한다.
-      history = [
-        ...buildPsychHistory(psych.data || []),
-        ...buildCareerHistory(career.data || [])
-      ];
-    }
-
-    history = dedupeHistory(history);
-
-    history.sort((a,b) => {
-      const da = a.sortDate || "9999-12-31";
-      const dbb = b.sortDate || "9999-12-31";
-      const dateCompare = da.localeCompare(dbb);
-      if (dateCompare !== 0) return dateCompare;
-
-      const sa = Number.isFinite(a.sessionOrder) ? a.sessionOrder : 9999;
-      const sb = Number.isFinite(b.sessionOrder) ? b.sessionOrder : 9999;
-      return sa - sb;
-    });
-
-    renderHistory(history);
-
-    msg.textContent = `${blankValue(member.client_name)} 조회 완료 · 상담이력 ${history.length}건`;
-    msg.style.color = "#166534";
   }
 
   $("memberSearchBtn").addEventListener("click", () => {
