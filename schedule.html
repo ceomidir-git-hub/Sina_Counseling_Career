@@ -232,6 +232,7 @@ button{font:inherit}
 
 (() => {
   'use strict';
+  console.info('schedule build: 20260909-secure-read-v1');
 
   const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
@@ -243,6 +244,37 @@ button{font:inherit}
       detectSessionInUrl: true
     }
   });
+
+  async function secureScheduleMonth(year,month){
+    const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+    if(sessionError) throw sessionError;
+
+    const accessToken=sessionData?.session?.access_token;
+    if(!accessToken) throw new Error('로그인 세션을 확인할 수 없습니다.');
+
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-schedule-read`,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${accessToken}`,
+        'apikey':SUPABASE_KEY
+      },
+      body:JSON.stringify({year,month}),
+      cache:'no-store'
+    });
+
+    let result=null;
+    try{ result=await response.json(); }catch(_){ result=null; }
+
+    if(!response.ok || !result?.ok){
+      throw new Error(result?.error || `스케줄 보안 조회에 실패했습니다. (${response.status})`);
+    }
+
+    return {
+      psych:Array.isArray(result.data?.psych)?result.data.psych:[],
+      career:Array.isArray(result.data?.career)?result.data.career:[]
+    };
+  }
 
   const IDLE_MS = 10 * 60 * 1000;
   const MAX_CELL_ITEMS = 4;
@@ -425,81 +457,66 @@ button{font:inherit}
     return true;
   }
 
-  async function loadBasicMap(clientIds){
-    const ids=[...new Set(clientIds.filter(Boolean))];
-    if(!ids.length) return new Map();
-    const {data,error}=await sb.from('DB_basic').select('id,client_name,client_phone,birth_date,counsel_type').in('id',ids);
-    if(error) throw error;
-    return new Map((data||[]).map(x=>[x.id,x]));
-  }
 
-  async function queryPsych(y,m){
-    const u=monthUtcBounds(y,m), d=monthDateBounds(y,m);
-    const orFilter=[
-      `and(receipt_at.gte.${u.start},receipt_at.lt.${u.end})`,
-      `and(visit_at.gte.${u.start},visit_at.lt.${u.end})`,
-      `and(session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
-      `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
-      `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
-    ].join(',');
-    const {data,error}=await sb.from('DB_psychological_counseling')
-      .select('id,client_id,receipt_at,visit_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
-      .or(orFilter);
-    if(error) throw error; return data||[];
-  }
 
-  async function queryCareer(y,m){
-    const u=monthUtcBounds(y,m), d=monthDateBounds(y,m);
-    const orFilter=[
-      `and(receipt_at.gte.${u.start},receipt_at.lt.${u.end})`,
-      `and(appointment_at.gte.${u.start},appointment_at.lt.${u.end})`,
-      `and(session_start_at.gte.${u.start},session_start_at.lt.${u.end})`,
-      `and(next_session_at.gte.${u.start},next_session_at.lt.${u.end})`,
-      `and(next_session_at.is.null,next_session_date.gte.${d.start},next_session_date.lt.${d.end})`
-    ].join(',');
-    const {data,error}=await sb.from('DB_career_counseling')
-      .select('id,client_id,receipt_at,appointment_at,session_start_at,session_end_at,next_session_at,next_session_date,session_no,session_status,counseling_location,record_active')
-      .or(orFilter);
-    if(error) throw error; return data||[];
-  }
 
   async function loadMonth(y,m){
     showLoading(true);
     try{
-      const [psych,career]=await Promise.all([queryPsych(y,m),queryCareer(y,m)]);
-      const basics=await loadBasicMap([...psych.map(x=>x.client_id),...career.map(x=>x.client_id)]);
+      const bundle=await secureScheduleMonth(y,m);
+      const psych=bundle.psych;
+      const career=bundle.career;
       const monthStart=ymd(y,m,1), monthEnd=monthDateBounds(y,m).end;
       const events=[];
+
+      /*
+        서버에서 각 상담행에 basic 객체를 함께 반환한다.
+        개인정보는 서버에서 암호화 컬럼을 복호화한 값이며,
+        브라우저는 DB_basic을 직접 조회하지 않는다.
+      */
       for(const r of psych){
         if(r.record_active !== true && !r.session_end_at) continue;
-        const b=basics.get(r.client_id);
+        const b=r.basic||null;
         const receipt=buildReceiptEvent('psych',r,b);
         const primary=buildPrimaryEvent('psych',r,b,r.session_start_at || r.visit_at);
         const next=buildNextEvent('psych',r,b);
+
         if(receipt && receipt.date>=monthStart && receipt.date<monthEnd) events.push(receipt);
         if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
         if(next && next.date>=monthStart && next.date<monthEnd) events.push(next);
       }
+
       for(const r of career){
         if(r.record_active !== true && !r.session_end_at) continue;
-        const b=basics.get(r.client_id);
+        const b=r.basic||null;
         const receipt=buildReceiptEvent('career',r,b);
         const primary=buildPrimaryEvent('career',r,b,r.session_start_at || r.appointment_at);
         const next=buildNextEvent('career',r,b);
+
         if(receipt && receipt.date>=monthStart && receipt.date<monthEnd) events.push(receipt);
         if(primary && primary.date>=monthStart && primary.date<monthEnd) events.push(primary);
         if(next && next.date>=monthStart && next.date<monthEnd) events.push(next);
       }
+
       events.sort((a,b)=>a.date.localeCompare(b.date)||a.sortMs-b.sortMs||a.name.localeCompare(b.name,'ko'));
       state.events=events;
       state.byDate=new Map();
-      for(const ev of events){ if(!state.byDate.has(ev.date)) state.byDate.set(ev.date,[]); state.byDate.get(ev.date).push(ev); }
+
+      for(const ev of events){
+        if(!state.byDate.has(ev.date)) state.byDate.set(ev.date,[]);
+        state.byDate.get(ev.date).push(ev);
+      }
+
       renderAll();
     }catch(err){
-      console.error('스케줄 조회 오류:',err);
-      state.events=[]; state.byDate=new Map(); renderAll();
-      toast('스케줄 조회 중 오류가 발생했습니다. RLS와 DB 연결을 확인해 주세요.');
-    }finally{ showLoading(false); }
+      console.error('스케줄 보안 조회 오류:',err);
+      state.events=[];
+      state.byDate=new Map();
+      renderAll();
+      toast('스케줄 조회 중 오류가 발생했습니다. 로그인 상태와 서버 연결을 확인해 주세요.');
+    }finally{
+      showLoading(false);
+    }
   }
 
   function monthGridCells(y,m){
