@@ -495,7 +495,7 @@ textarea{height:45mm;min-height:45mm;max-height:45mm;resize:none;padding:9px 10p
 
 <script>
 (() => {
-console.info("consultation_edit_save build: 20260829-common-verify");
+console.info("consultation_edit_save build: 20260909-secure-server-write-v1");
 const SUPABASE_URL="https://fafdxaifluftnertbpvr.supabase.co";
 const SUPABASE_KEY="sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 const BASIC_TABLE="DB_basic";
@@ -528,6 +528,19 @@ async function secureConsultationRead(action,payload={}){
   return result.data??null;
 }
 
+
+
+async function secureWriteSession(action,type,id,clientId,payload){
+  const{data,error}=await sb.rpc("secure_write_session",{
+    p_action:action,
+    p_type:type,
+    p_id:id||null,
+    p_client_id:clientId||null,
+    p_payload:payload||{}
+  });
+  if(error)throw error;
+  return data||null;
+}
 
 let currentEmployee=null;
 let selectedRecord=null;
@@ -976,21 +989,13 @@ form.addEventListener("submit",async e=>{
     // FINAL 2026-08-29:
     // UPDATE 단계에서는 반환 SELECT를 붙이지 않는다.
     // 이유: PC/CC 전용 컬럼이 잘못 섞여 PostgREST 전체 UPDATE가 실패하는 것을 원천 차단한다.
-    const {error:updateError}=await sb
-      .from(tableName)
-      .update(payload)
-      .eq("id",row.id);
-
-    if(updateError) throw updateError;
-
-    // UPDATE 성공 후, 두 상담 테이블에 공통으로 존재하는 컬럼만 별도로 재조회하여 검증한다.
-    const {data:verified,error:verifyError}=await sb
-      .from(tableName)
-      .select("id,session_no,session_start_at,session_end_at,next_session_at,session_status,updated_at")
-      .eq("id",row.id)
-      .single();
-
-    if(verifyError) throw verifyError;
+    const verified=await secureWriteSession(
+      "update",
+      type,
+      row.id,
+      client.id,
+      payload
+    );
 
     // 수정 저장 직후 시간값이 실제 DB에 들어갔는지 재검증
     const normalize=v=>v?new Date(v).toISOString():null;
