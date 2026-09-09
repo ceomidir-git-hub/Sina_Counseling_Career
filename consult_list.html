@@ -36,7 +36,7 @@ button,input{font:inherit}button{cursor:pointer}
 .counsel-filter{grid-column:2/4}.search-btn{grid-column:4;height:36px;border:1px solid var(--blue);border-radius:5px;background:var(--blue);color:#fff;font-size:11.5px;font-weight:900;cursor:pointer}.search-btn:hover{background:var(--blue-dark)}
 .search-note{margin:2.5mm 4mm 3.5mm;color:#6f7b8d;font-size:9.5px;line-height:1.45}
 .status{display:none;margin:0 0 4mm;padding:8px 11px;border-radius:7px;font-size:11px;font-weight:700}.status.show{display:block}.status.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e4f9a}.status.error{background:#fff1f2;border:1px solid #fecdd3;color:#a61b2b}
-.result-section{margin-bottom:0}.result-section .table-box{margin:3.5mm 4mm 4mm}.print-meta{display:none}.table-box{border:1px solid #cbd5e1;border-radius:4px;overflow:hidden;background:#fff}.table-scroll{max-height:132mm;overflow:auto;scrollbar-width:thin;scrollbar-color:#b5bdc9 #f4f6f8}
+.result-section{margin-bottom:0}.result-section .table-box{margin:3.5mm 4mm 4mm}.print-meta{display:none}.table-box{border:1px solid #cbd5e1;border-radius:4px;overflow:hidden;background:#fff}.table-scroll{max-height:149mm;overflow:auto;scrollbar-width:thin;scrollbar-color:#b5bdc9 #f4f6f8}
 table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px}col.no{width:4%}col.regdate{width:12%}col.memberkey{width:10%}col.name{width:9%}col.phone{width:13%}col.sex{width:5%}col.age{width:5%}col.nationality{width:8%}col.type{width:12%}col.status-col{width:12%}col.session{width:10%}
 thead th{position:sticky;top:0;z-index:3;height:34px;padding:0 4px;border-right:1px solid #1248a9;border-bottom:1px solid #1248a9;background:#1e5bd7;color:#fff;text-align:center;font-size:11.5px;font-weight:900;line-height:1.2}
 tbody td{height:33px;padding:5px 4px;border-right:1px solid #d8dee8;border-bottom:1px solid #d8dee8;background:#fff;color:#303846;text-align:center;font-size:11.5px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}thead th:last-child,tbody td:last-child{border-right:0}tbody tr:nth-child(even) td{background:#fffdf6}tbody tr:hover td{background:#f5f8fd}td.left{text-align:left;padding-left:8px}.client-link{display:inline-block;color:var(--blue);font-weight:900;text-decoration:none;border-bottom:1px solid transparent;line-height:1.25;cursor:pointer}.client-link:hover{color:var(--blue-dark);border-bottom-color:var(--blue-dark)}.client-link:focus-visible{outline:2px solid rgba(20,87,166,.32);outline-offset:2px;border-radius:2px}.empty-row td{height:80px;color:#8a94a5;background:#fff!important}.badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:10.5px;font-weight:800;line-height:1.2;white-space:nowrap}.badge.progress{background:#eaf3ff;color:#275ea9}.badge.done{background:#eaf8ef;color:#197047}.badge.unknown{background:#f2f4f7;color:#667085}
@@ -101,9 +101,14 @@ col.nationality{width:12%}
 col.type{width:10.5%}
 col.session{width:11%}
 
-/* 화면 바닥글: 상담 리스트 14줄 기준 여백 최적화 */
+/* 화면 바닥글: A4 하단 고정
+   리스트 행 수와 스크롤 위치가 바뀌어도 바닥글 위치는 이동하지 않는다. */
 .document-footer{
-  margin-top:6mm;
+  position:absolute;
+  left:9mm;
+  right:9mm;
+  bottom:8mm;
+  margin:0;
   padding:0 1mm 2mm;
   text-align:center;
 }
@@ -672,6 +677,25 @@ col.session{width:11%}
   }
 }
 
+
+/* FINAL 2026-09-09 : 16행 표시 / 바닥글 이동 금지 */
+@media screen and (min-width:761px){
+  .a4-page{
+    height:297mm;
+    min-height:297mm;
+  }
+  .table-scroll{
+    max-height:149mm!important;
+  }
+  .document-footer{
+    position:absolute!important;
+    left:9mm!important;
+    right:9mm!important;
+    bottom:8mm!important;
+    margin:0!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -786,7 +810,7 @@ col.session{width:11%}
 <script>
 (() => {
   "use strict";
-  console.info("consult_list build: 20260909-secure-v4-14rows");
+  console.info("consult_list build: 20260909-secure-v5-16rows-footer-fixed");
 
   const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
