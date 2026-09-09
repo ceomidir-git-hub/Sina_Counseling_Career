@@ -411,6 +411,7 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
+console.info("counseling_progress_chart build: 20260909-secure-read-v1");
 const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 
@@ -426,6 +427,38 @@ const db = window.supabase.createClient(
     }
   }
 );
+
+async function secureProgressChartRead(){
+  const {data:sessionData,error:sessionError}=await db.auth.getSession();
+  if(sessionError) throw sessionError;
+
+  const accessToken=sessionData?.session?.access_token;
+  if(!accessToken) throw new Error("로그인 세션을 확인할 수 없습니다.");
+
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-counseling-progress-read`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${accessToken}`,
+      "apikey":SUPABASE_PUBLISHABLE_KEY
+    },
+    body:JSON.stringify({}),
+    cache:"no-store"
+  });
+
+  let result=null;
+  try{ result=await response.json(); }catch(_){ result=null; }
+
+  if(!response.ok || !result?.ok){
+    throw new Error(result?.error || `보안 조회 요청에 실패했습니다. (${response.status})`);
+  }
+
+  return {
+    basic:Array.isArray(result.data?.basic)?result.data.basic:[],
+    psych:Array.isArray(result.data?.psych)?result.data.psych:[],
+    career:Array.isArray(result.data?.career)?result.data.career:[]
+  };
+}
 
 let clients = [];
 let MAX_STEP = 0;
@@ -628,7 +661,7 @@ function buildClientFromRows(basic, rows, type){
 }
 
 async function loadClientsFromDb(){
-  summaryText.textContent = "DB 연결 중...";
+  summaryText.textContent = "보안 서버 연결 중...";
 
   const {data:{session}, error:sessionError} = await db.auth.getSession();
 
@@ -642,33 +675,17 @@ async function loadClientsFromDb(){
     return;
   }
 
-  const [basicResult, psychResult, careerResult] = await Promise.all([
-    db
-      .from("DB_basic")
-      .select("id,member_key,client_name,counsel_type,created_at")
-      .order("member_key",{ascending:true}),
-    db
-      .from("DB_psychological_counseling")
-      .select("client_id,receipt_at,receipt_date,visit_date,session_no,session_start_at,session_end_at,session_status,application_content,session_content,record_active,created_at,updated_at")
-      .eq("record_active",true)
-      .order("created_at",{ascending:true}),
-    db
-      .from("DB_career_counseling")
-      .select("client_id,receipt_at,counseling_date,session_no,session_start_at,session_end_at,session_status,counseling_content,record_active,created_at,updated_at")
-      .eq("record_active",true)
-      .order("created_at",{ascending:true})
-  ]);
+  const bundle = await secureProgressChartRead();
+  const basicRows = bundle.basic;
+  const psychRows = bundle.psych;
+  const careerRows = bundle.career;
 
-  if(basicResult.error) throw basicResult.error;
-  if(psychResult.error) throw psychResult.error;
-  if(careerResult.error) throw careerResult.error;
-
-  const psychByClient = groupByClient(psychResult.data);
-  const careerByClient = groupByClient(careerResult.data);
+  const psychByClient = groupByClient(psychRows);
+  const careerByClient = groupByClient(careerRows);
 
   const result = [];
 
-  (basicResult.data || []).forEach(basic => {
+  (basicRows || []).forEach(basic => {
     if(basic.counsel_type === "PC"){
       const item = buildClientFromRows(
         basic,
@@ -711,9 +728,6 @@ async function loadClientsFromDb(){
     }
   });
 
-  // 최근 상담/접수 데이터가 그래프의 왼쪽부터 보이도록 정렬
-  // 각 내담자의 가장 최근 회기 날짜를 우선 사용하고,
-  // 회기가 없으면 접수 날짜를 사용한다.
   function latestActivityTime(client){
     const values = (client.sessions || [])
       .map(s => String(s.date || "").trim())
@@ -732,8 +746,6 @@ async function loadClientsFromDb(){
   result.sort((a,b)=>{
     const recentDiff = latestActivityTime(b) - latestActivityTime(a);
     if(recentDiff !== 0) return recentDiff;
-
-    // 최근일이 같으면 회원 KEY 최신순
     return String(b.key || "").localeCompare(String(a.key || ""));
   });
 
