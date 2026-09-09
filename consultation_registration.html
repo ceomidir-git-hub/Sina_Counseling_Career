@@ -755,6 +755,7 @@
 
 <script>
 (() => {
+console.info("consultation_registration build: 20260909-secure-server-write-v1");
 const SUPABASE_URL="https://fafdxaifluftnertbpvr.supabase.co";
 const SUPABASE_KEY="sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 const BASIC_TABLE="DB_basic",PSYCH_TABLE="DB_psychological_counseling",CAREER_TABLE="DB_career_counseling";
@@ -780,6 +781,19 @@ async function secureConsultationHistory(memberKey){
     throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
   }
   return result.data??null;
+}
+
+
+async function secureWriteSession(action,type,id,clientId,payload){
+  const{data,error}=await sb.rpc("secure_write_session",{
+    p_action:action,
+    p_type:type,
+    p_id:id||null,
+    p_client_id:clientId||null,
+    p_payload:payload||{}
+  });
+  if(error)throw error;
+  return data||null;
 }
 
 let currentEmployee=null,selectedReceipt=null,expectedNextSessionNo=null,sexMap={},jobMap={},targetMap={},topicMap={},toolMap={};
@@ -1357,14 +1371,13 @@ form.addEventListener("submit",async e=>{
       };
     }
 
-    const {data,error}=await sb
-      .from(tableName)
-      .insert([newRow])
-      .select("id,session_no,session_start_at,session_end_at,next_session_at,next_session_date,session_status,record_active,updated_at")
-      .single();
-
-    if(error) throw error;
-    savedRow=data;
+    savedRow=await secureWriteSession(
+      "insert",
+      type,
+      null,
+      selectedReceipt.client.id,
+      newRow
+    );
     selectedReceipt.maxSessionNo=sessionNo;
 
     // 저장 직후 DB의 시간값을 다시 비교하여 누락 저장을 차단
