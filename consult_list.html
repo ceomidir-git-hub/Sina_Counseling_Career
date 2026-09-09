@@ -816,6 +816,31 @@ col.session{width:11%}
         detectSessionInUrl:true
       }
     });
+    async function secureConsultListSearch(params){
+      const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+      if(sessionError) throw sessionError;
+      const accessToken=sessionData?.session?.access_token;
+      if(!accessToken) throw new Error("로그인 세션을 확인할 수 없습니다.");
+
+      const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consult-list-read`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":`Bearer ${accessToken}`,
+          "apikey":SUPABASE_ANON_KEY
+        },
+        body:JSON.stringify(params||{}),
+        cache:"no-store"
+      });
+
+      let result=null;
+      try{result=await response.json()}catch(_){result=null}
+
+      if(!response.ok||!result?.ok){
+        throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
+      }
+      return Array.isArray(result.data)?result.data:[];
+    }
   } catch (err) {
     console.error(err);
     showStatus("error","Supabase 연결을 초기화하지 못했습니다.");
@@ -1023,17 +1048,6 @@ col.session{width:11%}
     return "unknown";
   }
 
-  async function fetchPaged(table,columns){
-    const all = [];
-    for (let from=0; ; from += PAGE_SIZE){
-      const {data,error} = await sb.from(table).select(columns).range(from,from+PAGE_SIZE-1);
-      if (error) throw error;
-      const batch = data || [];
-      all.push(...batch);
-      if (batch.length < PAGE_SIZE) break;
-    }
-    return all;
-  }
 
   async function guardLogin(){
     if (!sb) return false;
@@ -1080,100 +1094,55 @@ col.session{width:11%}
   async function search(){
     clearStatus();
     setResultInlineMessage(0);
-    if (!validatePeriod() || !validateMemberKey()) return;
-    if (!sb){
+    if(!validatePeriod() || !validateMemberKey()) return;
+    if(!sb){
       showStatus("error","Supabase 연결을 사용할 수 없습니다.");
       return;
     }
 
-    const from = els.dateFrom.value;
-    const to = els.dateTo.value;
-    const memberKeyQ = normalizeMemberKey(els.memberKey.value);
-    const nameQ = els.name.value.trim().toLowerCase();
-    const phoneQ = normalizePhone(els.phone.value);
-    const type = getCounselType();
+    const from=els.dateFrom.value;
+    const to=els.dateTo.value;
+    const memberKeyQ=normalizeMemberKey(els.memberKey.value);
+    const nameInput=els.name.value.trim();
+    const phoneInput=els.phone.value.trim();
+    const type=getCounselType();
 
-    setLoading(true,"상담 리스트를 조회하는 중입니다.");
+    setLoading(true,"상담 리스트를 보안 조회하는 중입니다.");
 
     try{
-      const [basicRows,psychRows,careerRows,sexRows] = await Promise.all([
-        fetchPaged(BASIC_TABLE,"id,member_key,client_name,client_phone,sex_code,birth_date,nationality,counsel_type"),
-        fetchPaged(PSYCH_TABLE,"id,client_id,visit_at,visit_date,receipt_at,receipt_date,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
-        fetchPaged(CAREER_TABLE,"id,client_id,counseling_date,appointment_at,receipt_at,session_start_at,session_no,session_status,record_active,created_at,updated_at"),
-        fetchPaged("sex_codes","code,name,active")
-      ]);
-
-      const sexMap = new Map((sexRows||[]).filter(r => r.active !== false).map(r => [r.code,r.name]));
-      const psychByClient = new Map();
-      const careerByClient = new Map();
-
-      psychRows.filter(r => r.record_active !== false).forEach(r => {
-        if (!psychByClient.has(r.client_id)) psychByClient.set(r.client_id,[]);
-        psychByClient.get(r.client_id).push(r);
-      });
-      careerRows.filter(r => r.record_active !== false).forEach(r => {
-        if (!careerByClient.has(r.client_id)) careerByClient.set(r.client_id,[]);
-        careerByClient.get(r.client_id).push(r);
+      const serverRows=await secureConsultListSearch({
+        date_from:from||null,
+        date_to:to||null,
+        member_key:memberKeyQ||null,
+        name:nameInput||null,
+        phone:phoneInput||null,
+        counsel_type:type
       });
 
-      const out = [];
+      const out=serverRows.map(row=>({
+        id:row.id,
+        registeredAt:row.registeredAt||"",
+        memberKey:row.memberKey||"-",
+        name:row.name||"-",
+        phone:row.phone||"-",
+        sex:row.sex||"-",
+        age:calcAge(row.birthDate)||"-",
+        nationality:foreignNationalityText(row.nationality),
+        counselType:row.counselType||"-",
+        status:row.status||"미정",
+        session:row.session||"-"
+      }));
 
-      for (const client of basicRows){
-        const memberKey = String(client.member_key || "");
-        const name = String(client.client_name || "");
-        const phone = String(client.client_phone || "");
-
-        if (memberKeyQ && memberKey !== memberKeyQ) continue;
-        if (nameQ && !name.toLowerCase().includes(nameQ)) continue;
-        if (phoneQ && !normalizePhone(phone).includes(phoneQ)) continue;
-
-        const allPsych = psychByClient.get(client.id) || [];
-        const allCareer = careerByClient.get(client.id) || [];
-
-        const matchPsych = allPsych.filter(r => inPeriod(effectivePsychDate(r),from,to));
-        const matchCareer = allCareer.filter(r => inPeriod(effectiveCareerDate(r),from,to));
-
-        let included = false;
-        if (type === "PC") included = matchPsych.length > 0;
-        else if (type === "CC") included = matchCareer.length > 0;
-        else included = matchPsych.length > 0 || matchCareer.length > 0;
-
-        if (!included) continue;
-
-        out.push({
-          id:client.id,
-          registeredAt:earliestRegistrationDate(allPsych,allCareer),
-          memberKey:memberKey || "-",
-          name:name || "-",
-          phone:phone || "-",
-          sex:sexMap.get(client.sex_code) || client.sex_code || "-",
-          age:calcAge(client.birth_date) || "-",
-          nationality:foreignNationalityText(client.nationality),
-          counselType:typeText(allPsych,allCareer,type),
-          status:statusText(allPsych,allCareer,type),
-          session:sessionText(allPsych,allCareer,type)
-        });
-      }
-
-      // 등록일 기준 최신순(내림차순) 정렬.
-      // 등록일이 같은 경우 이름순 → 전화번호순으로 안정적으로 정렬한다.
-      out.sort((a,b) => {
-        const dateCompare = String(b.registeredAt || "").localeCompare(String(a.registeredAt || ""));
-        if (dateCompare !== 0) return dateCompare;
-        const nameCompare = a.name.localeCompare(b.name,"ko");
-        if (nameCompare !== 0) return nameCompare;
-        return a.phone.localeCompare(b.phone);
-      });
-      lastRows = out;
+      lastRows=out;
       renderRows(out);
 
-      const cond = [];
-      if (from || to) cond.push(`기간 ${from || "처음"} ~ ${to || "현재"}`);
-      if (memberKeyQ) cond.push(`회원 KEY ${memberKeyQ}`);
-      if (els.name.value.trim()) cond.push(`이름 ${els.name.value.trim()}`);
-      if (els.phone.value.trim()) cond.push(`전화번호 ${els.phone.value.trim()}`);
+      const cond=[];
+      if(from||to) cond.push(`기간 ${from||"처음"} ~ ${to||"현재"}`);
+      if(memberKeyQ) cond.push(`회원 KEY ${memberKeyQ}`);
+      if(nameInput) cond.push(`이름 ${nameInput}`);
+      if(phoneInput) cond.push(`전화번호 ${phoneInput}`);
       cond.push(`상담종류 ${type==="PC"?"심리상담":type==="CC"?"진로상담":"전체"}`);
-      els.printMeta.textContent = `검색조건: ${cond.join(" / ")} · 출력일: ${new Date().toLocaleDateString("ko-KR")}`;
+      els.printMeta.textContent=`검색조건: ${cond.join(" / ")} · 출력일: ${new Date().toLocaleDateString("ko-KR")}`;
 
       if(out.length){
         setResultInlineMessage(out.length);
@@ -1184,10 +1153,10 @@ col.session{width:11%}
       }
     }catch(err){
       console.error(err);
-      lastRows = [];
+      lastRows=[];
       renderRows([]);
       setResultInlineMessage(0);
-      showStatus("error","조회 중 오류가 발생했습니다: " + (err?.message || String(err)));
+      showStatus("error","조회 중 오류가 발생했습니다: "+(err?.message||String(err)));
     }finally{
       setLoading(false);
     }
