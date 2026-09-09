@@ -759,6 +759,29 @@ const SUPABASE_URL="https://fafdxaifluftnertbpvr.supabase.co";
 const SUPABASE_KEY="sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
 const BASIC_TABLE="DB_basic",PSYCH_TABLE="DB_psychological_counseling",CAREER_TABLE="DB_career_counseling";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true}});
+async function secureConsultationHistory(memberKey){
+  const{data:sessionData,error:sessionError}=await sb.auth.getSession();
+  if(sessionError)throw sessionError;
+  const accessToken=sessionData?.session?.access_token;
+  if(!accessToken)throw new Error("로그인 세션을 확인할 수 없습니다.");
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consultation-read`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${accessToken}`,
+      "apikey":SUPABASE_KEY
+    },
+    body:JSON.stringify({member_key:memberKey}),
+    cache:"no-store"
+  });
+  let result=null;
+  try{result=await response.json()}catch(_){result=null}
+  if(!response.ok||!result?.ok){
+    throw new Error(result?.error||`보안 조회 요청에 실패했습니다. (${response.status})`);
+  }
+  return result.data??null;
+}
+
 let currentEmployee=null,selectedReceipt=null,expectedNextSessionNo=null,sexMap={},jobMap={},targetMap={},topicMap={},toolMap={};
 const $=id=>document.getElementById(id),form=$("consultForm"),statusMsg=$("statusMsg"),submitBtn=$("submitBtn"),modalBackdrop=$("lookupModalBackdrop"),lookupResults=$("lookupResults");
 
@@ -931,31 +954,12 @@ function closeLookup(){modalBackdrop.classList.remove("show");modalBackdrop.setA
 $("lookupBtn").addEventListener("click",openLookup);$("lookupCloseBtn").addEventListener("click",closeLookup);modalBackdrop.addEventListener("click",e=>{if(e.target===modalBackdrop)closeLookup()});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLookup()});
 
 async function getHistoryRows(client){
-  const ps=[
-    "id","client_id","receptionist_name","receptionist_phone","receptionist_relationship",
-    "receipt_at","receipt_date","visit_at","visit_date","client_type_code","topic_code",
-    "application_content","session_no","session_topic_1","session_content",
-    "session_start_at","session_end_at","next_session_date","next_session_at",
-    "session_status","assessment_tool","record_active","created_at","updated_at","contact_method"
-  ].join(",");
-
-  const cs=[
-    "id","client_id","receptionist_name","receptionist_phone","receptionist_relationship",
-    "receipt_at","appointment_at","counseling_date","client_type_code","topic_code",
-    "counseling_content","session_no","career_topic_1",
-    "session_start_at","session_end_at","next_session_date","next_session_at",
-    "session_status","assessment_tool","record_active","created_at","updated_at","contact_method"
-  ].join(",");
-
-  const [p,c]=await Promise.all([
-    sb.from(PSYCH_TABLE).select(ps).eq("client_id",client.id),
-    sb.from(CAREER_TABLE).select(cs).eq("client_id",client.id)
-  ]);
-
-  if(p.error) throw p.error;
-  if(c.error) throw c.error;
-
-  return {PC:(p.data||[]),CC:(c.data||[])};
+  if(!client?.member_key)throw new Error("보안 조회에 필요한 회원 KEY가 없습니다.");
+  const bundle=await secureConsultationHistory(client.member_key);
+  return {
+    PC:Array.isArray(bundle?.PC)?bundle.PC:[],
+    CC:Array.isArray(bundle?.CC)?bundle.CC:[]
+  };
 }
 
 function escapeHtml(v){
@@ -1071,24 +1075,27 @@ async function searchReceipts(){
     lookupResults.innerHTML='<div class="lookup-empty">회원 KEY를 입력해주세요.</div>';
     return;
   }
+  if(!/^\d{8}$/.test(memberKey)){
+    lookupResults.innerHTML='<div class="lookup-empty">회원 KEY는 8자리 숫자로 입력해주세요.</div>';
+    return;
+  }
 
-  lookupResults.innerHTML='<div class="lookup-empty">접수 및 이전 상담 이력을 조회 중입니다...</div>';
+  lookupResults.innerHTML='<div class="lookup-empty">접수 및 이전 상담 이력을 보안 조회 중입니다...</div>';
 
   try{
-    const {data:client,error}=await sb
-      .from(BASIC_TABLE)
-      .select("id,member_key,counsel_type,client_name,client_phone,sex_code,birth_date,job_code,client_address")
-      .eq("member_key",memberKey)
-      .maybeSingle();
-
-    if(error) throw error;
+    const bundle=await secureConsultationHistory(memberKey);
+    const client=bundle?.basic||null;
 
     if(!client){
       lookupResults.innerHTML='<div class="lookup-empty">일치하는 회원 KEY의 내담자 기본정보가 없습니다.</div>';
       return;
     }
 
-    const history=await getHistoryRows(client);
+    const history={
+      PC:Array.isArray(bundle?.PC)?bundle.PC:[],
+      CC:Array.isArray(bundle?.CC)?bundle.CC:[]
+    };
+
     const candidates=[
       ...buildHistoryItems("PC",client,history.PC),
       ...buildHistoryItems("CC",client,history.CC)
@@ -1100,7 +1107,7 @@ async function searchReceipts(){
     }
 
     candidates.sort((a,b)=>{
-      if(a.type!==b.type) return a.type==="PC"?-1:1;
+      if(a.type!==b.type)return a.type==="PC"?-1:1;
       return a.sessionNo-b.sessionNo;
     });
 
