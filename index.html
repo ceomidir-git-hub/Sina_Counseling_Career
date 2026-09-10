@@ -1022,8 +1022,8 @@
       height:61px;
       display:grid;
       /* LIVE / 날짜 / 지역 / 아이콘 / 현재 / 최고최저 / 강수 / 습도 */
-      grid-template-columns:42px 122px 94px 42px 88px 122px 88px 76px;
-      justify-content:end;
+      grid-template-columns:minmax(54px,.62fr) minmax(118px,1.12fr) minmax(92px,.92fr) minmax(48px,.56fr) minmax(88px,.88fr) minmax(116px,1.12fr) minmax(86px,.88fr) minmax(76px,.82fr);
+      justify-content:stretch;
       align-items:center;
       gap:3px;
       padding:5px 7px;
@@ -1035,9 +1035,12 @@
     }
 
     .weather-live{
+      min-width:0;
+      height:48px;
       display:flex;
       align-items:center;
       justify-content:center;
+      border-right:1px solid #e3e9f2;
       gap:4px;
       font-size:9.5px;
       font-weight:900;
@@ -1166,10 +1169,10 @@
 
     @media (max-width:1599px){
       .top-weather-area{
-        grid-template-columns:34px 108px 82px 36px 76px 106px 74px 64px;
+        grid-template-columns:minmax(44px,.62fr) minmax(106px,1.12fr) minmax(78px,.92fr) minmax(42px,.56fr) minmax(72px,.88fr) minmax(102px,1.12fr) minmax(70px,.88fr) minmax(60px,.82fr);
         gap:2px;
-        padding-left:4px;
-        padding-right:4px;
+        padding-left:5px;
+        padding-right:5px;
       }
       .weather-live{font-size:8.5px}
       .weather-item{padding-left:2px;padding-right:2px}
@@ -2318,22 +2321,13 @@
           <div class="counsel-today-card">
             <div class="counsel-section-title">
               <strong>오늘 상담 운영</strong>
-              <span>실시간 확인</span>
+              <span id="todayOperationDate">오늘 기준</span>
             </div>
             <div class="counsel-today-grid">
-              <div><small>신규상담</small><strong>38</strong></div>
-              <div><small>심리상담</small><strong>31</strong></div>
-              <div><small>진로상담</small><strong>7</strong></div>
-              <div><small>외국인상담</small><strong>9</strong></div>
-            </div>
-            <div class="counsel-progress">
-              <div class="counsel-progress-row"><span>오늘 완료율</span><b>81.6%</b></div>
-              <div class="counsel-progress-track"><i style="width:81.6%"></i></div>
-            </div>
-            <div class="counsel-mini-list">
-              <span>초기 상담 예약 <b>14건</b></span>
-              <span>심층 상담 예정 <b>11건</b></span>
-              <span>확인 대기 <b>5건</b></span>
+              <div><small>신규상담(1회기)</small><strong id="todayNewConsultations">-</strong></div>
+              <div><small>심리상담</small><strong id="todayPsychological">-</strong></div>
+              <div><small>진로상담</small><strong id="todayCareer">-</strong></div>
+              <div><small>외국인상담</small><strong id="todayForeign">-</strong></div>
             </div>
           </div>
         </div>
@@ -2526,16 +2520,16 @@
     return `${map.year}.${map.month}.${map.day} (${map.weekday})`;
   }
 
-  function weatherIconFromCode(code){
-    if (code === 0) return "☀️";
-    if ([1,2].includes(code)) return "🌤️";
-    if (code === 3) return "☁️";
-    if ([45,48].includes(code)) return "🌫️";
-    if ([51,53,55,56,57].includes(code)) return "🌦️";
-    if ([61,63,65,66,67,80,81,82].includes(code)) return "🌧️";
-    if ([71,73,75,77,85,86].includes(code)) return "🌨️";
-    if ([95,96,99].includes(code)) return "⛈️";
-    return "🌤️";
+  function weatherVisualFromCode(code){
+    if (code === 0) return {icon:"☀️", cls:"weather-sun"};
+    if ([1,2].includes(code)) return {icon:"🌤️", cls:"weather-cloud"};
+    if (code === 3) return {icon:"☁️", cls:"weather-cloud"};
+    if ([45,48].includes(code)) return {icon:"🌫️", cls:"weather-fog"};
+    if ([51,53,55,56,57].includes(code)) return {icon:"🌦️", cls:"weather-rain"};
+    if ([61,63,65,66,67,80,81,82].includes(code)) return {icon:"🌧️", cls:"weather-rain"};
+    if ([71,73,75,77,85,86].includes(code)) return {icon:"🌨️", cls:"weather-snow"};
+    if ([95,96,99].includes(code)) return {icon:"⛈️", cls:"weather-storm"};
+    return {icon:"🌤️", cls:"weather-default"};
   }
 
   function roundWeather(value, digits=0){
@@ -2634,7 +2628,9 @@
       const current = data.current || {};
       const daily = data.daily || {};
 
-      weatherEls.icon.textContent = weatherIconFromCode(Number(current.weather_code));
+      const weatherVisual = weatherVisualFromCode(Number(current.weather_code));
+      weatherEls.icon.textContent = weatherVisual.icon;
+      weatherEls.icon.className = weatherVisual.cls;
       weatherEls.temp.textContent = `${roundWeather(current.temperature_2m, 1)}℃`;
       weatherEls.highLow.textContent =
         `${roundWeather(daily.temperature_2m_max?.[0])}℃ / ${roundWeather(daily.temperature_2m_min?.[0])}℃`;
@@ -3284,7 +3280,12 @@
     memberCareerProgress: document.getElementById("memberCareerProgress"),
     memberCareerCompleted: document.getElementById("memberCareerCompleted"),
     memberCareerTotal: document.getElementById("memberCareerTotal"),
-    memberGrandTotal: document.getElementById("memberGrandTotal")
+    memberGrandTotal: document.getElementById("memberGrandTotal"),
+    todayOperationDate: document.getElementById("todayOperationDate"),
+    todayNewConsultations: document.getElementById("todayNewConsultations"),
+    todayPsychological: document.getElementById("todayPsychological"),
+    todayCareer: document.getElementById("todayCareer"),
+    todayForeign: document.getElementById("todayForeign")
   };
 
   function formatCount(value) {
@@ -3450,72 +3451,44 @@
     if (summaryEls.memberCareerCompleted) summaryEls.memberCareerCompleted.textContent = formatCount(summary.careerCompletedMembers);
     if (summaryEls.memberCareerTotal) summaryEls.memberCareerTotal.textContent = formatCount(summary.careerMemberTotal);
     if (summaryEls.memberGrandTotal) summaryEls.memberGrandTotal.textContent = formatCount(summary.memberTotal);
+
+    const today = summary.todayOperations || {};
+    if (summaryEls.todayOperationDate) {
+      summaryEls.todayOperationDate.textContent = today.date ? `${today.date} 기준` : "오늘 기준";
+    }
+    if (summaryEls.todayNewConsultations) summaryEls.todayNewConsultations.textContent = formatCount(today.newConsultations ?? 0);
+    if (summaryEls.todayPsychological) summaryEls.todayPsychological.textContent = formatCount(today.psychological ?? 0);
+    if (summaryEls.todayCareer) summaryEls.todayCareer.textContent = formatCount(today.career ?? 0);
+    if (summaryEls.todayForeign) summaryEls.todayForeign.textContent = formatCount(today.foreign ?? 0);
   }
 
   async function loadCounselDashboardSummary() {
-    const [{ year, month }, basicRows, careerRows, psychRows] = await Promise.all([
-      Promise.resolve(getSeoulYearMonth()),
-      fetchAllSummaryRows("DB_basic", "id,member_key,counsel_type"),
-      fetchAllSummaryRows(
-        "DB_career_counseling",
-        "id,client_id,receipt_at,counseling_date,session_start_at,session_status,created_at,updated_at,record_active",
-        true
-      ),
-      fetchAllSummaryRows(
-        "DB_psychological_counseling",
-        "id,client_id,receipt_at,receipt_date,visit_at,visit_date,session_start_at,session_status,created_at,updated_at,record_active",
-        true
-      )
-    ]);
+    const { data: { session }, error: sessionError } = await client.auth.getSession();
 
-    const careerEvents = buildCounselEvents(careerRows, "CC");
-    const psychEvents = buildCounselEvents(psychRows, "PC");
-    const allEvents = [...careerEvents, ...psychEvents];
+    if (sessionError) throw sessionError;
+    if (!session?.access_token) {
+      throw new Error("로그인 세션을 확인할 수 없습니다.");
+    }
 
-    const careerStatus = latestStatusMap(careerRows, "CC");
-    const psychStatus = latestStatusMap(psychRows, "PC");
-
-    let yearTotal = 0;
-    let monthTotal = 0;
-    allEvents.forEach(event => {
-      const parts = getSeoulDateParts(event.eventAt);
-      if (!parts) return;
-      if (parts.year === year) yearTotal += 1;
-      if (parts.year === year && parts.month === month) monthTotal += 1;
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/secure-dashboard-summary`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: "{}",
+      cache: "no-store"
     });
 
-    const psychProgressEvents = countEventsByClientStatus(psychEvents, psychStatus, PROGRESS_STATUSES);
-    const careerProgressEvents = countEventsByClientStatus(careerEvents, careerStatus, PROGRESS_STATUSES);
-    const psychCompletedEvents = countEventsByClientStatus(psychEvents, psychStatus, COMPLETE_STATUSES);
-    const careerCompletedEvents = countEventsByClientStatus(careerEvents, careerStatus, COMPLETE_STATUSES);
+    const result = await response.json().catch(() => ({}));
 
-    const memberTotal = new Set(basicRows.map(row => row.id).filter(Boolean)).size;
-    const psychMemberTotal = new Set(
-      basicRows.filter(row => normalizeCounselType(row.counsel_type) === "PC").map(row => row.id).filter(Boolean)
-    ).size;
-    const careerMemberTotal = new Set(
-      basicRows.filter(row => normalizeCounselType(row.counsel_type) === "CC").map(row => row.id).filter(Boolean)
-    ).size;
+    if (!response.ok || !result?.ok || !result?.summary) {
+      throw new Error(result?.error || `오늘 요약 조회 실패 (${response.status})`);
+    }
 
-    const summary = {
-      year,
-      month,
-      memberTotal,
-      yearTotal,
-      monthTotal,
-      psychProgressEvents,
-      careerProgressEvents,
-      completedEvents: psychCompletedEvents + careerCompletedEvents,
-      psychProgressMembers: countMembersByStatus(psychStatus, PROGRESS_STATUSES),
-      psychCompletedMembers: countMembersByStatus(psychStatus, COMPLETE_STATUSES),
-      psychMemberTotal,
-      careerProgressMembers: countMembersByStatus(careerStatus, PROGRESS_STATUSES),
-      careerCompletedMembers: countMembersByStatus(careerStatus, COMPLETE_STATUSES),
-      careerMemberTotal
-    };
-
-    renderSummaryData(summary);
-    return summary;
+    renderSummaryData(result.summary);
+    return result.summary;
   }
 
   function openMemberSummaryModal() {
@@ -4574,3 +4547,80 @@
 </script>
 </body>
 </html>
+
+<style>
+.top-weather-area .weather-item:first-of-type{border-left:0}
+.weather-icon-wrap{
+  overflow:visible;
+}
+.weather-icon-wrap span.weather-sun{
+  animation:weatherSun 5.8s linear infinite;
+  transform-origin:center;
+}
+.weather-icon-wrap span.weather-cloud{
+  animation:weatherCloud 3.4s ease-in-out infinite;
+}
+.weather-icon-wrap span.weather-rain{
+  animation:weatherRainIcon 1.25s ease-in-out infinite;
+}
+.weather-icon-wrap span.weather-snow{
+  animation:weatherSnowIcon 2.1s ease-in-out infinite;
+}
+.weather-icon-wrap span.weather-storm{
+  animation:weatherStormIcon .82s ease-in-out infinite;
+}
+.weather-icon-wrap span.weather-fog{
+  animation:weatherFogIcon 3.8s ease-in-out infinite;
+}
+.weather-icon-wrap span.weather-default{
+  animation:weatherIconFloat 3.2s ease-in-out infinite;
+}
+@keyframes weatherSun{
+  0%{transform:rotate(0deg) scale(1)}
+  50%{transform:rotate(180deg) scale(1.08)}
+  100%{transform:rotate(360deg) scale(1)}
+}
+@keyframes weatherCloud{
+  0%,100%{transform:translateX(-2px) translateY(1px) scale(1)}
+  50%{transform:translateX(3px) translateY(-2px) scale(1.05)}
+}
+@keyframes weatherRainIcon{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(3px) scale(1.04)}
+}
+@keyframes weatherSnowIcon{
+  0%{transform:translate(-1px,-2px) rotate(-4deg)}
+  50%{transform:translate(2px,2px) rotate(5deg)}
+  100%{transform:translate(-1px,-2px) rotate(-4deg)}
+}
+@keyframes weatherStormIcon{
+  0%,100%{transform:scale(1) translateY(0);filter:drop-shadow(0 3px 5px rgba(32,48,76,.14))}
+  45%{transform:scale(1.10) translateY(-2px);filter:drop-shadow(0 0 9px rgba(250,204,21,.75))}
+  55%{transform:scale(.98) translateY(1px);filter:drop-shadow(0 0 3px rgba(32,48,76,.14))}
+}
+@keyframes weatherFogIcon{
+  0%,100%{transform:translateX(-3px);opacity:.88}
+  50%{transform:translateX(4px);opacity:1}
+}
+</style>
+
+<style>
+.counsel-today-card .counsel-today-grid{
+  flex:1;
+  min-height:0;
+  height:calc(100% - 32px);
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  align-content:stretch;
+}
+.counsel-today-card .counsel-today-grid div{
+  min-height:0;
+  height:100%;
+}
+.counsel-today-card .counsel-today-grid small{
+  font-size:10px;
+}
+.counsel-today-card .counsel-today-grid strong{
+  font-size:18px;
+}
+</style>
