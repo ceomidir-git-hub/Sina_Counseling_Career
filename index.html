@@ -4613,3 +4613,39 @@
 }
 </style>
 
+
+<style>
+/* =========================================================
+   오늘 상담 운영 KPI 카드 크기 복원
+   - 형상/내용/하단 자료 변경 없음
+   - KPI 숫자 Supabase 실제값 연동 유지
+   - 기본 계산: 55px × 2행 + 7px gap = 117px
+   ========================================================= */
+.counsel-today-card .counsel-today-grid{
+  height:117px;
+  min-height:117px;
+  grid-template-columns:repeat(2,1fr);
+  grid-template-rows:55px 55px;
+  gap:7px;
+  align-content:start;
+}
+
+.counsel-today-card .counsel-today-grid > div{
+  height:55px;
+  min-height:55px;
+}
+
+@media (max-height:820px){
+  .counsel-today-card .counsel-today-grid{
+    height:95px;
+    min-height:95px;
+    grid-template-rows:44px 44px;
+  }
+
+  .counsel-today-card .counsel-today-grid > div{
+    height:44px;
+    min-height:44px;
+  }
+}
+</style>
+
