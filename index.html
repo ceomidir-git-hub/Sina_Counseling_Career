@@ -2321,13 +2321,22 @@
           <div class="counsel-today-card">
             <div class="counsel-section-title">
               <strong>오늘 상담 운영</strong>
-              <span id="todayOperationDate">오늘 기준</span>
+              <span id="todayOperationDate">실시간 확인</span>
             </div>
             <div class="counsel-today-grid">
               <div><small>신규상담(1회기)</small><strong id="todayNewConsultations">-</strong></div>
               <div><small>심리상담</small><strong id="todayPsychological">-</strong></div>
               <div><small>진로상담</small><strong id="todayCareer">-</strong></div>
               <div><small>외국인상담</small><strong id="todayForeign">-</strong></div>
+            </div>
+            <div class="counsel-progress">
+              <div class="counsel-progress-row"><span>오늘 완료율</span><b>81.6%</b></div>
+              <div class="counsel-progress-track"><i style="width:81.6%"></i></div>
+            </div>
+            <div class="counsel-mini-list">
+              <span>초기 상담 예약 <b>14건</b></span>
+              <span>심층 상담 예정 <b>11건</b></span>
+              <span>확인 대기 <b>5건</b></span>
             </div>
           </div>
         </div>
@@ -3454,7 +3463,7 @@
 
     const today = summary.todayOperations || {};
     if (summaryEls.todayOperationDate) {
-      summaryEls.todayOperationDate.textContent = today.date ? `${today.date} 기준` : "오늘 기준";
+      summaryEls.todayOperationDate.textContent = "실시간 확인";
     }
     if (summaryEls.todayNewConsultations) summaryEls.todayNewConsultations.textContent = formatCount(today.newConsultations ?? 0);
     if (summaryEls.todayPsychological) summaryEls.todayPsychological.textContent = formatCount(today.psychological ?? 0);
@@ -4604,23 +4613,3 @@
 }
 </style>
 
-<style>
-.counsel-today-card .counsel-today-grid{
-  flex:1;
-  min-height:0;
-  height:calc(100% - 32px);
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  grid-template-rows:repeat(2,minmax(0,1fr));
-  align-content:stretch;
-}
-.counsel-today-card .counsel-today-grid div{
-  min-height:0;
-  height:100%;
-}
-.counsel-today-card .counsel-today-grid small{
-  font-size:10px;
-}
-.counsel-today-card .counsel-today-grid strong{
-  font-size:18px;
-}
-</style>
