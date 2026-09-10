@@ -896,7 +896,8 @@
     .top-layout{
       height:61px;
       display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      /* 아래 Dashboard의 11:14(44%:56%) 분할선과 상단 경계를 동일하게 맞춤 */
+      grid-template-columns:minmax(0,11fr) minmax(0,14fr);
       gap:12px;
       align-items:stretch;
     }
@@ -960,7 +961,7 @@
       .main{grid-template-rows:55px minmax(0,1fr)}
       .top-layout{
         height:55px;
-        grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+        grid-template-columns:minmax(0,11fr) minmax(0,14fr);
         gap:10px;
       }
       .top-helper{
@@ -2152,6 +2153,7 @@
         </a>
       </div>
       <div class="nav-item"><span class="nav-icon">▥</span><span>통계 분석</span></div>
+      <div class="nav-item" id="ideaBankNav"><span class="nav-icon">💡</span><span>Idea 뱅크</span></div>
       <div class="nav-item has-submenu" id="systemSettingsNav" aria-expanded="false">
         <span class="nav-icon">⚙</span>
         <span>시스템 설정</span>
@@ -2341,11 +2343,6 @@
       <section class="dashboard-pane counsel-pane">
         <div class="pane-head counsel-pane-head">
           <h2>02. 기업 · 매칭 · 취업 Dashboard</h2>
-          <div class="pane-head-actions" aria-label="매칭 화면 바로가기">
-            <!-- 실제 파일명이 다르면 href만 변경하면 됩니다. -->
-            <a class="match-nav-btn progress" href="matching_in_progress.html" title="매칭 진행중 10건 화면으로 이동">매칭진행중 <strong id="matchingProgressCount">10건</strong></a>
-            <a class="match-nav-btn complete" href="matching_completed.html" title="매칭 완료 10건 화면으로 이동">매칭완료 <strong id="matchingCompleteCount">10건</strong></a>
-          </div>
         </div>
 
         <div class="job-posting-document" aria-label="구인 및 구직 공고 문서형 목록">
@@ -3865,7 +3862,8 @@
     // 로그인 완료 후에만 RLS가 적용된 상담 DB를 읽어 오늘 요약을 갱신한다.
     loadCounselDashboardSummary().catch(error => {
       console.error("오늘 요약 DB 계산 실패:", error);
-      if (summaryEls.period) summaryEls.period.textContent = "DB 조회 확인 필요";
+      if (summaryEls.period) summaryEls.period.textContent = "DB 조회 권한 확인 필요";
+      if (summaryEls.members) summaryEls.members.textContent = "총인원 -명";
     });
   }
 
