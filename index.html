@@ -2156,7 +2156,17 @@
         </a>
       </div>
       <div class="nav-item"><span class="nav-icon">▥</span><span>통계 분석</span></div>
-      <div class="nav-item" id="ideaBankNav"><span class="nav-icon">💡</span><span>Idea 뱅크</span></div>
+      <div class="nav-item has-submenu" id="noticeManagementNav" aria-expanded="false">
+        <span class="nav-icon">📢</span>
+        <span>공지사항</span>
+        <span class="nav-menu-arrow">▼</span>
+      </div>
+      <div class="nav-submenu" id="noticeManagementSubmenu" aria-label="공지사항 하위메뉴">
+        <a class="nav-subitem" id="noticeBoardMenu" href="notification_board.html">
+          <span class="nav-subicon">└</span>
+          <span>공지사항</span>
+        </a>
+      </div>
       <div class="nav-item has-submenu" id="systemSettingsNav" aria-expanded="false">
         <span class="nav-icon">⚙</span>
         <span>시스템 설정</span>
@@ -3074,6 +3084,11 @@
   const documentManagementSubmenu = document.getElementById("documentManagementSubmenu");
   const memberRecordCardMenu = document.getElementById("memberRecordCardMenu");
 
+  /* 공지사항 → 공지사항 */
+  const noticeManagementNav = document.getElementById("noticeManagementNav");
+  const noticeManagementSubmenu = document.getElementById("noticeManagementSubmenu");
+  const noticeBoardMenu = document.getElementById("noticeBoardMenu");
+
   /* 시스템 설정 → 사용자등록 / 상담항목등록 / 로그인 확인 */
   const systemSettingsNav = document.getElementById("systemSettingsNav");
   const systemSettingsSubmenu = document.getElementById("systemSettingsSubmenu");
@@ -3097,6 +3112,14 @@
     documentManagementNav.setAttribute("aria-expanded", value ? "true" : "false");
   }
 
+  function setNoticeManagementOpen(open){
+    if (!noticeManagementNav || !noticeManagementSubmenu) return;
+    const value = Boolean(open);
+    noticeManagementNav.classList.toggle("open", value);
+    noticeManagementSubmenu.classList.toggle("open", value);
+    noticeManagementNav.setAttribute("aria-expanded", value ? "true" : "false");
+  }
+
   function setSystemSettingsOpen(open){
     if (!systemSettingsNav || !systemSettingsSubmenu) return;
     const value = Boolean(open);
@@ -3108,6 +3131,7 @@
   function closeAllSidebarSubmenus(except = ""){
     if (except !== "counsel") setCounselManagementOpen(false);
     if (except !== "document") setDocumentManagementOpen(false);
+    if (except !== "notice") setNoticeManagementOpen(false);
     if (except !== "system") setSystemSettingsOpen(false);
   }
 
@@ -3137,6 +3161,16 @@
     const willOpen = !documentManagementSubmenu.classList.contains("open");
     closeAllSidebarSubmenus("document");
     setDocumentManagementOpen(willOpen);
+  });
+
+  noticeManagementNav?.addEventListener("click", () => {
+    const willOpen = !noticeManagementSubmenu.classList.contains("open");
+    closeAllSidebarSubmenus("notice");
+    setNoticeManagementOpen(willOpen);
+  });
+
+  noticeBoardMenu?.addEventListener("click", () => {
+    noticeBoardMenu.classList.add("active");
   });
 
   systemSettingsNav?.addEventListener("click", () => {
