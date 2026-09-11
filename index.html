@@ -3043,7 +3043,10 @@
   csvExportBtn?.addEventListener("click", exportCurrentPostingCSV);
   pdfExportBtn?.addEventListener("click", exportCurrentPostingPDF);
   jobSearchBtn?.addEventListener("click", () => {
-    const popup = window.open("job_searching.html", "jobSearching", "width=1440,height=900,resizable=yes,scrollbars=yes");
+    // GitHub Pages / 브라우저 캐시를 우회하여 항상 최신 job_searching.html을 연다.
+    // 매 클릭마다 현재 시간값을 쿼리스트링으로 붙여 이전 HTML 캐시 재사용을 방지한다.
+    const jobSearchUrl = `job_searching.html?v=${Date.now()}`;
+    const popup = window.open(jobSearchUrl, "jobSearching", "width=1440,height=900,resizable=yes,scrollbars=yes");
     if (!popup) alert("검색 창을 열 수 없습니다. 브라우저의 팝업 차단을 허용해 주세요.");
   });
 
