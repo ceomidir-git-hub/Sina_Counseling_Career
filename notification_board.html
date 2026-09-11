@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fafdxaifluftnertbpvr.supabase.co wss://fafdxaifluftnertbpvr.supabase.co; img-src 'self' data: https:; object-src 'none'; base-uri 'self'; form-action 'self';">
+<title>공지사항</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;background:#f4f7fb;color:#1d2940}
+body{padding:24px}
+.board-container{width:min(980px,100%);margin:0 auto;background:#fff;border:1px solid #dfe5ef;border-radius:12px;box-shadow:0 8px 24px rgba(32,48,76,.08);overflow:hidden}
+.board-head{height:64px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e6ebf2;background:#fbfcfe}
+.board-head h2{margin:0;font-size:20px;font-weight:900;letter-spacing:-.5px}
+.board-head .meta{font-size:11px;color:#738095;font-weight:700}
+.content{padding:18px}
+.input-row{display:grid;grid-template-columns:130px minmax(210px,1fr) minmax(260px,1.25fr);gap:8px;margin-bottom:10px}
+.input-row input{height:38px;padding:0 10px;border:1px solid #d6dee9;border-radius:7px;background:#fff;font-size:13px;outline:none}
+.input-row input:focus{border-color:#6d8fd5;box-shadow:0 0 0 3px rgba(78,144,248,.08)}
+.input-row input[readonly]{background:#f5f7fa;color:#5d687a}
+.action-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.action-buttons{display:flex;gap:7px;flex-wrap:wrap}
+button{height:34px;padding:0 15px;border-radius:7px;border:1px solid #cfd7e3;background:#fff;color:#334155;font-family:inherit;font-size:12px;font-weight:850;cursor:pointer}
+button:hover{background:#f7f9fc}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn-save{background:#315da7;border-color:#315da7;color:#fff}.btn-save:hover{background:#274d8b}
+.btn-edit{background:#f8fbff;border-color:#9eb9df;color:#315da7}
+.btn-delete{background:#fff8f8;border-color:#e3b5b5;color:#b33b3b}
+.btn-query{background:#f7fbf8;border-color:#b7d8c4;color:#26734a}
+.status{font-size:11px;color:#6f7b8f;font-weight:700;min-height:18px}
+.table-wrap{border:1px solid #dfe5ed;border-radius:8px;overflow:auto;max-height:540px}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+th,td{height:38px;padding:0 8px;border-bottom:1px solid #e7ebf1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+th{position:sticky;top:0;z-index:1;background:#f3f6fa;color:#3f4b5f;font-weight:900}
+tbody tr{cursor:pointer}tbody tr:hover td{background:#eef5ff}tbody tr.selected td{background:#e7f0ff}
+td.title{text-align:left}td a{color:#1260b8;text-decoration:none;font-weight:800}td a:hover{text-decoration:underline}
+.empty{padding:36px;text-align:center;color:#8893a5;font-size:12px}
+.foot{padding:12px 18px;border-top:1px solid #e8edf3;background:#fbfcfe;display:flex;justify-content:space-between;gap:10px;color:#7c8799;font-size:10px}
+@media(max-width:760px){body{padding:10px}.input-row{grid-template-columns:1fr}.board-head{height:auto;min-height:60px;padding:12px 14px;align-items:flex-start;flex-direction:column;gap:5px}.content{padding:12px}.action-row{align-items:flex-start;flex-direction:column}.table-wrap{overflow:auto}table{min-width:720px}}
+</style>
+</head>
+<body>
+<div class="board-container">
+  <div class="board-head">
+    <h2>공지사항</h2>
+    <div class="meta" id="userMeta">사용자 확인 중</div>
+  </div>
+
+  <div class="content">
+    <div class="input-row">
+      <input id="authorName" type="text" placeholder="작성자" maxlength="50" readonly>
+      <input id="noticeTitle" type="text" placeholder="제목" maxlength="200">
+      <input id="sourceUrl" type="url" placeholder="출처 링크 (https://...)" maxlength="1000">
+    </div>
+
+    <div class="action-row">
+      <div class="action-buttons">
+        <button type="button" class="btn-save" id="saveBtn">저장</button>
+        <button type="button" class="btn-query" id="queryBtn">조회</button>
+        <button type="button" class="btn-edit" id="editBtn">수정</button>
+        <button type="button" class="btn-delete" id="deleteBtn">삭제</button>
+        <button type="button" id="clearBtn">초기화</button>
+        <button type="button" id="backBtn">이전화면</button>
+      </div>
+      <div class="status" id="statusText">공지사항을 조회합니다.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table aria-label="공지사항 목록">
+        <colgroup><col style="width:70px"><col style="width:120px"><col style="width:110px"><col><col style="width:120px"></colgroup>
+        <thead><tr><th>번호</th><th>입력일</th><th>이름</th><th>제목</th><th>출처</th></tr></thead>
+        <tbody id="noticeBody"></tbody>
+      </table>
+      <div class="empty" id="emptyMessage" hidden>등록된 공지사항이 없습니다.</div>
+    </div>
+  </div>
+
+  <div class="foot"><span>공지사항 관리</span><span>마음:시나브로심리상담연구소</span></div>
+</div>
+
+<script>
+(() => {
+  const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { storage: window.sessionStorage, persistSession:true, autoRefreshToken:true, detectSessionInUrl:false }
+  });
+
+  const el = {
+    author: document.getElementById('authorName'), title: document.getElementById('noticeTitle'), url: document.getElementById('sourceUrl'),
+    save: document.getElementById('saveBtn'), query: document.getElementById('queryBtn'), edit: document.getElementById('editBtn'), del: document.getElementById('deleteBtn'),
+    clear: document.getElementById('clearBtn'), back: document.getElementById('backBtn'), body: document.getElementById('noticeBody'), empty: document.getElementById('emptyMessage'),
+    status: document.getElementById('statusText'), userMeta: document.getElementById('userMeta')
+  };
+
+  let employee = null;
+  let session = null;
+  let selected = null;
+  let currentRows = [];
+
+  function setStatus(text, error=false){ el.status.textContent = text; el.status.style.color = error ? '#b33b3b' : '#6f7b8f'; }
+  function esc(v){ return String(v ?? '').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c])); }
+  function fmtDate(v){ if(!v) return '-'; const d = new Date(v + (String(v).length===10 ? 'T00:00:00+09:00' : '')); if(Number.isNaN(d.getTime())) return String(v); return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(d); }
+  function canWrite(){ return ['관리자','사용자'].includes(employee?.permission); }
+  function canDelete(){ return employee?.permission === '관리자'; }
+  function canEditRow(row){ return employee?.permission === '관리자' || (employee?.permission === '사용자' && row?.created_by === session?.user?.id); }
+
+  function applyPermission(){
+    el.save.disabled = !canWrite();
+    el.edit.disabled = !selected || !canEditRow(selected);
+    el.del.disabled = !selected || !canDelete();
+    el.title.disabled = !canWrite();
+    el.url.disabled = !canWrite();
+  }
+
+  function clearForm(){ selected=null; el.title.value=''; el.url.value=''; document.querySelectorAll('#noticeBody tr').forEach(r=>r.classList.remove('selected')); applyPermission(); }
+
+  function render(rows){
+    currentRows = Array.isArray(rows) ? rows : [];
+    el.body.innerHTML = currentRows.map((r,i)=>`<tr data-id="${r.id}"><td>${i+1}</td><td>${esc(fmtDate(r.notice_date))}</td><td title="${esc(r.author_name)}">${esc(r.author_name)}</td><td class="title" title="${esc(r.title)}">${esc(r.title)}</td><td>${r.source_url ? `<a href="${esc(r.source_url)}" target="_blank" rel="noopener noreferrer">바로가기</a>` : '-'}</td></tr>`).join('');
+    el.empty.hidden = currentRows.length > 0;
+    el.body.querySelectorAll('tr').forEach(tr=>tr.addEventListener('click',()=>selectRow(Number(tr.dataset.id),tr)));
+    setStatus(`조회 완료 : ${currentRows.length}건`);
+  }
+
+  function selectRow(id,tr){
+    selected = currentRows.find(r=>Number(r.id)===id) || null;
+    document.querySelectorAll('#noticeBody tr').forEach(r=>r.classList.toggle('selected',r===tr));
+    if(selected){ el.author.value=selected.author_name || employee?.name || ''; el.title.value=selected.title || ''; el.url.value=selected.source_url || ''; }
+    applyPermission();
+  }
+
+  function validate(){
+    const title = el.title.value.trim(); const source_url = el.url.value.trim();
+    if(!title){ setStatus('제목을 입력해 주세요.',true); el.title.focus(); return null; }
+    if(source_url && !/^https?:\/\//i.test(source_url)){ setStatus('출처 링크는 http:// 또는 https:// 형식이어야 합니다.',true); el.url.focus(); return null; }
+    return {title, source_url:source_url || null};
+  }
+
+  async function loadNotices(){
+    setStatus('조회 중...');
+    const {data,error} = await client.from('notice_board').select('id,notice_date,author_name,title,source_url,created_by,created_at,updated_at').order('created_at',{ascending:false});
+    if(error){ console.error(error); setStatus(`조회 실패 : ${error.message}`,true); return; }
+    render(data || []); clearForm();
+  }
+
+  async function saveNotice(){
+    if(!canWrite()) return setStatus('현재 권한은 공지사항을 저장할 수 없습니다.',true);
+    const v=validate(); if(!v) return;
+    el.save.disabled=true; setStatus('저장 중...');
+    const payload={author_name:employee.name,title:v.title,source_url:v.source_url,created_by:session.user.id};
+    const {error}=await client.from('notice_board').insert(payload);
+    if(error){ console.error(error); setStatus(`저장 실패 : ${error.message}`,true); applyPermission(); return; }
+    setStatus('저장 완료'); await loadNotices();
+  }
+
+  async function updateNotice(){
+    if(!selected) return setStatus('수정할 공지사항을 먼저 선택해 주세요.',true);
+    if(!canEditRow(selected)) return setStatus('이 공지사항을 수정할 권한이 없습니다.',true);
+    const v=validate(); if(!v) return;
+    el.edit.disabled=true; setStatus('수정 중...');
+    const {data,error}=await client.from('notice_board').update({title:v.title,source_url:v.source_url,updated_at:new Date().toISOString()}).eq('id',selected.id).select('id');
+    if(error){ console.error(error); setStatus(`수정 실패 : ${error.message}`,true); applyPermission(); return; }
+    if(!data?.length){ setStatus('수정 대상이 없거나 권한이 없습니다.',true); applyPermission(); return; }
+    setStatus('수정 완료'); await loadNotices();
+  }
+
+  async function deleteNotice(){
+    if(!selected) return setStatus('삭제할 공지사항을 먼저 선택해 주세요.',true);
+    if(!canDelete()) return setStatus('삭제는 관리자만 가능합니다.',true);
+    if(!confirm(`선택한 공지사항을 삭제하시겠습니까?\n\n${selected.title}`)) return;
+    el.del.disabled=true; setStatus('삭제 중...');
+    const {data,error}=await client.from('notice_board').delete().eq('id',selected.id).select('id');
+    if(error){ console.error(error); setStatus(`삭제 실패 : ${error.message}`,true); applyPermission(); return; }
+    if(!data?.length){ setStatus('삭제 대상이 없거나 권한이 없습니다.',true); applyPermission(); return; }
+    setStatus('삭제 완료'); await loadNotices();
+  }
+
+  async function init(){
+    const {data:{session:s},error:sessionError}=await client.auth.getSession();
+    if(sessionError || !s?.user){ alert('로그인 세션이 없습니다. 메인 화면에서 다시 로그인해 주세요.'); location.href='index.html'; return; }
+    session=s;
+    const {data,error}=await client.from('employee').select('name,permission,employee_code,active').eq('auth_user_id',s.user.id).maybeSingle();
+    if(error || !data?.active){ alert('사용자 권한을 확인할 수 없습니다.'); location.href='index.html'; return; }
+    employee=data; el.author.value=data.name || ''; el.userMeta.textContent=`${data.name || '-'} · ${data.permission || '-'} · ${data.employee_code || '-'}`;
+    applyPermission(); await loadNotices();
+  }
+
+  el.save.addEventListener('click',saveNotice); el.query.addEventListener('click',loadNotices); el.edit.addEventListener('click',updateNotice); el.del.addEventListener('click',deleteNotice);
+  el.clear.addEventListener('click',()=>{clearForm(); el.author.value=employee?.name || ''; setStatus('입력값을 초기화했습니다.');});
+  el.back.addEventListener('click',()=>{location.href='index.html';});
+  init();
+})();
+</script>
+</body>
+</html>
