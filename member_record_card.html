@@ -1,467 +1,1063 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>회원기록카드</title>
-<style>
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "맑은 고딕", "Malgun Gothic", "Noto Sans KR", sans-serif;
-    color: #1a1a1a;
-    margin: 0;
-    padding: 0;
-    background: #f2f2f2;
-  }
-  .toolbar {
-    width: 210mm;
-    margin: 8mm auto 0 auto;
-    display: flex;
-    justify-content: flex-end;
-  }
-  .pdf-save-btn {
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 18px;
-    font-size: 11pt;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  .pdf-save-btn:hover {
-    background: #1d4ed8;
-  }
-  @media print {
-    .toolbar {
-      display: none;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원가입 - 마음:시나브로심리상담연구소</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root{
+      --line:#b8b8b8;
+      --soft:#f5f7f8;
+      --label:#f0f2f3;
+      --input:#ffffff;
+      --text:#202428;
+      --muted:#687078;
+      --primary:#294d46;
+      --primary2:#1f3d37;
+      --danger:#c0392b;
     }
-  }
-  .page {
-    position: relative;
-    width: 210mm;
-    height: 297mm;
-    margin: 10mm auto;
-    background: #ffffff;
-    padding: 0 14mm;
-    box-shadow: 0 0 8px rgba(0,0,0,0.15);
-  }
-  /* 머릿글: 페이지 상단에 고정 */
-  .header-fixed {
-    position: absolute;
-    top: 12mm;
-    left: 14mm;
-    right: 14mm;
-  }
-  .header-date {
-    position: relative;
-    font-size: 9pt;
-    color: #333;
-    margin: 0 0 2mm 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-  .header-date .center-item {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 9pt;
-    white-space: nowrap;
-  }
-  .header-date .radio-group {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    font-size: 9pt;
-    white-space: nowrap;
-  }
-  .header-date .radio-group label {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .header-date .radio-group input[type="radio"] {
-    margin: 0;
-  }
-  .approval-table {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 34mm;
-    margin: 0;
-    border-collapse: collapse;
-  }
-  .approval-table td {
-    border: 1px solid #999;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 8pt;
-    height: 7mm;
-    padding: 1px 2px;
-  }
-  .approval-table td.sign-row {
-    height: 14mm;
-  }
-  .approval-table .label {
-    background: #f4f4f4;
-    font-weight: 700;
-    font-size: 9pt;
-  }
-  .approval-table .placeholder {
-    color: #bbb;
-    font-size: 7pt;
-  }
-  /* 바닥글: 페이지 하단에 고정 */
-  .footer-fixed {
-    position: absolute;
-    bottom: 10mm;
-    left: 14mm;
-    right: 14mm;
-    text-align: center;
-    font-size: 15pt;
-    font-weight: 700;
-    color: #555;
-  }
-  .content-body {
-    padding-top: 42mm;
-    padding-bottom: 12mm;
-  }
-  h1.title {
-    text-align: center;
-    font-size: 18pt;
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin: 0;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 3mm;
-    table-layout: fixed;
-  }
-  table.section-table {
-    margin-bottom: 3.8mm;
-  }
-  td, th {
-    border: 1px solid #999;
-    padding: 2px 4px;
-    font-size: 9pt;
-    vertical-align: middle;
-    height: 7.3mm;
-    word-break: keep-all;
-  }
-  .label {
-    background: #f4f4f4;
-    text-align: center;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .label .en {
-    display: block;
-    font-weight: 400;
-    font-size: 8.5pt;
-    color: #555;
-  }
-  .label.same-line .en {
-    display: inline;
-    margin-left: 3px;
-  }
-  .value {
-    text-align: center;
-  }
-  .sign-cell {
-    position: relative;
-    padding-right: 10mm;
-  }
-  .sign-cell .sign-mark {
-    position: absolute;
-    right: 3mm;
-    top: 50%;
-    transform: translateY(-50%);
-    font-weight: 700;
-    font-size: 9pt;
-    color: #999;
-    white-space: nowrap;
-  }
-  .sign-cell .sign-mark.en-sign {
-    font-size: 7.5pt;
-    font-weight: 600;
-  }
-  .section-title {
-    background: #d9d9d9 !important;
-    text-align: left !important;
-    font-weight: 700;
-    font-size: 10.5pt;
-    padding-left: 6px;
-  }
-  .section-title .en {
-    font-weight: 400;
-    font-size: 9pt;
-    color: #333;
-    display: inline;
-  }
-  .photo-box {
-    text-align: center;
-    font-size: 9pt;
-    color: #666;
-  }
-  .photo-inner {
-    width: 28mm;
-    height: 35mm;
-    margin: 0 auto;
-    border: 1px dashed #999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #999;
-  }
-  .fillable {
-    min-height: 6mm;
-  }
-  .small-note {
-    font-size: 8.5pt;
-    color: #777;
-    text-align: right;
-    margin-top: 3mm;
-  }
+    body{
+      font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;
+      font-size:14px;
+      line-height:1.55;
+      color:var(--text);
+      background:#f3f4f5;
+      padding:24px 12px;
+    }
+    .page{
+      width:min(190mm,100%);
+      margin:0 auto;
+      background:#fff;
+      border:1px solid #d4d4d4;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+      padding:28px 34px 22px;
+    }
+    .top-actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-bottom:8px;
+    }
+    .pdf-btn{
+      min-width:110px;
+      border:0;
+      border-radius:4px;
+      padding:9px 16px;
+      background:#294d46;
+      color:#fff;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .pdf-btn:hover{
+      background:#1f3d37;
+    }
+    .brand{
+      text-align:right;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:2px;
+    }
+    h1{
+      text-align:center;
+      font-size:28px;
+      letter-spacing:3px;
+      margin-bottom:4px;
+    }
+    .subtitle{
+      text-align:center;
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:22px;
+    }
+    .type-box{
+      border:1px solid var(--line);
+      background:var(--soft);
+      padding:13px 16px;
+      margin-bottom:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:28px;
+      flex-wrap:wrap;
+    }
+    .type-box strong{ margin-right:4px; }
+    label{ cursor:pointer; }
+    input[type="radio"], input[type="checkbox"]{
+      vertical-align:middle;
+      margin-right:5px;
+      accent-color:var(--primary);
+    }
+    .section-title{
+      font-size:15px;
+      font-weight:700;
+      margin:17px 0 7px;
+      padding-left:9px;
+      border-left:4px solid var(--primary);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-bottom:12px;
+      table-layout:fixed;
+    }
+    th,td{
+      border:1px solid var(--line);
+      padding:7px 8px;
+      vertical-align:middle;
+    }
+    th,.label{
+      background:var(--label);
+      font-weight:700;
+      text-align:center;
+      white-space:nowrap;
+    }
+    .label{ width:125px; }
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    select,
+    textarea{
+      width:100%;
+      border:1px solid #c9c9c9;
+      background:#fff;
+      border-radius:2px;
+      padding:7px 8px;
+      font:inherit;
+      color:var(--text);
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 2px rgba(41,77,70,.08);
+    }
+    textarea{ min-height:64px; resize:vertical; }
+    .required{ color:var(--danger); }
+    .form-panel{ display:none; }
+    .form-panel.active{ display:block; }
+    .service-box{
+      display:flex;
+      gap:18px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .terms{
+      border:1px solid var(--line);
+      padding:15px 17px;
+      font-size:13px;
+      margin-top:14px;
+      background:#fff;
+    }
+    .terms h3{
+      font-size:14px;
+      margin:10px 0 4px;
+    }
+    .terms h3:first-child{ margin-top:0; }
+    .terms ol{ padding-left:20px; }
+    .terms li{ margin:3px 0; }
+    .notice{
+      margin-top:10px;
+      padding:10px 12px;
+      background:#f7f8f8;
+      border:1px solid #d7dbdc;
+      font-size:12.5px;
+      color:#4f575d;
+    }
+    .agree{
+      margin:16px 0 10px;
+      padding:12px;
+      text-align:center;
+      font-weight:700;
+      background:#fafafa;
+      border:1px solid #ddd;
+    }
+    .btn-area{
+      text-align:center;
+      margin-top:18px;
+    }
+    button{
+      min-width:112px;
+      border:0;
+      border-radius:4px;
+      padding:10px 20px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      margin:0 5px;
+    }
+    .save{ background:var(--primary); color:#fff; }
+    .save:hover:not(:disabled){ background:var(--primary2); }
+    .cancel{ background:#8d969b; color:#fff; }
+    button:disabled{
+      opacity:.42;
+      cursor:not-allowed;
+    }
+    .error-message{
+      display:none;
+      color:var(--danger);
+      font-size:12px;
+      margin-top:5px;
+    }
+    .error-message.show{ display:block; }
+    .error{
+      border-color:var(--danger)!important;
+      background:#fff!important;
+    }
 
-  @media print {
-    body { background: #fff; }
-    .page {
-      margin: 0 auto;
-      box-shadow: none;
+    .document-signature{
+      margin-top:18px;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:28px;
+      flex-wrap:wrap;
+      font-size:14px;
+      font-weight:600;
     }
-  }
+    .signature-line{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+    }
+    .document-signature input{
+      background:#fff !important;
+      border:0 !important;
+      border-bottom:1px solid #444 !important;
+      border-radius:0 !important;
+      padding:2px 3px !important;
+      height:25px;
+      min-height:25px;
+      box-shadow:none !important;
+      text-align:center;
+    }
+    .date-year{ width:48px !important; }
+    .date-part{ width:30px !important; }
+    .author-name{ width:110px !important; }
+
+    .footer{
+      margin-top:25px;
+      padding-top:11px;
+      border-top:1px solid #ddd;
+      text-align:center;
+      font-size:24px;
+      color:#555;
+      font-weight:700;
+    }
+    .mini{ font-size:12px; color:var(--muted); }
+    .label .mini{ display:inline-block; margin-top:2px; font-size:11px; font-weight:500; color:#6f767b; line-height:1.2; }
+
+    /* A4 세로 1장 공통 문서 레이아웃: 화면과 PDF에 동일 적용 */
+    body{
+      font-size:12.5px;
+      line-height:1.35;
+      padding:12px 8px;
+    }
+    .page{
+      width:min(190mm,100%);
+      margin:0 auto;
+      padding:14px 18px 12px;
+    }
+    .top-actions{ margin-bottom:4px; }
+    .pdf-btn{ padding:7px 14px; font-size:12px; }
+    .brand{ font-size:10.5px; margin-bottom:0; }
+    h1{ font-size:23px; line-height:1.1; margin-bottom:1px; }
+    .subtitle{ font-size:11px; margin-bottom:9px; }
+    .type-box{
+      padding:7px 10px;
+      margin-bottom:8px;
+      gap:18px;
+      min-height:34px;
+    }
+    .section-title{
+      font-size:13px;
+      margin:8px 0 4px;
+      padding-left:7px;
+    }
+    table{ margin-bottom:6px; }
+    th,td{
+      padding:3px 5px;
+      line-height:1.22;
+    }
+    .label{ width:112px; }
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    select,
+    textarea{
+      padding:3px 5px;
+      min-height:25px;
+      line-height:1.15;
+      font-size:12px;
+      background:#fff;
+    }
+    textarea{
+      min-height:38px;
+      height:38px;
+      resize:none;
+    }
+    .service-box{ gap:10px; }
+    .terms{
+      padding:8px 10px;
+      margin-top:7px;
+      font-size:10.5px;
+      line-height:1.28;
+    }
+    .terms h3{
+      font-size:11.2px;
+      margin:4px 0 1px;
+      line-height:1.2;
+    }
+    .terms ol{ padding-left:15px; }
+    .terms li{ margin:1px 0; }
+    .notice{
+      margin-top:5px;
+      padding:5px 7px;
+      font-size:10.2px;
+      line-height:1.25;
+    }
+    .agree{
+      margin:6px 0 4px;
+      padding:6px 7px;
+      font-size:10.8px;
+      line-height:1.25;
+    }
+    .document-signature{
+      margin-top:7px;
+      gap:18px;
+      font-size:11.5px;
+      line-height:1.2;
+    }
+    .document-signature input{
+      height:20px;
+      min-height:20px;
+      padding:1px 2px !important;
+    }
+    .date-year{ width:42px !important; }
+    .date-part{ width:25px !important; }
+    .author-name{ width:90px !important; }
+    .footer{
+      margin-top:7px;
+      padding-top:5px;
+      line-height:1.1;
+      white-space:nowrap;
+    }
+
+    @media(max-width:720px){
+      body{ padding:0; background:#fff; }
+      .page{ border:0; box-shadow:none; padding:20px 12px; }
+      h1{ font-size:24px; }
+      .type-box{ gap:12px 18px; justify-content:flex-start; }
+      table,tbody,tr,td,th{ display:block; width:100%!important; }
+      tr{ border:1px solid var(--line); margin-bottom:7px; }
+      td,th{ border:0; border-bottom:1px solid #ddd; }
+      tr > *:last-child{ border-bottom:0; }
+      .label{ text-align:left; }
+    }
+    @page{
+      size:A4 portrait;
+      margin:0;
+    }
+
+    @media screen and (min-width:721px){
+      body{
+        margin:0;
+        padding:14px 0;
+        background:#eceff1;
+      }
+      .page{
+        position:relative;
+        width:210mm;
+        height:297mm;
+        min-height:297mm;
+        margin:0 auto;
+        padding:10mm;
+        background:#fff;
+        border:1px solid #c9c9c9;
+        box-shadow:0 2px 10px rgba(0,0,0,.08);
+        display:flex;
+        flex-direction:column;
+        overflow:hidden;
+      }
+      .top-actions{
+        position:absolute;
+        top:5mm;
+        right:10mm;
+        margin:0;
+        z-index:5;
+      }
+      #membershipForm{ flex:0 0 auto; }
+      .document-signature{ margin-top:auto; }
+    }
+
+    /* 기업체 대표 / 내국인: A4 세로 종이작성에 맞춘 여유 있는 입력영역 */
+    .page.type-company th,
+    .page.type-company td,
+    .page.type-domestic th,
+    .page.type-domestic td{
+      padding:5px 7px;
+    }
+    .page.type-company input[type="text"],
+    .page.type-company input[type="tel"],
+    .page.type-company input[type="email"],
+    .page.type-company select,
+    .page.type-domestic input[type="text"],
+    .page.type-domestic input[type="tel"],
+    .page.type-domestic input[type="email"],
+    .page.type-domestic select{
+      min-height:30px;
+      padding:4px 6px;
+    }
+    .page.type-company textarea,
+    .page.type-domestic textarea{
+      height:52px;
+      min-height:52px;
+      padding:5px 6px;
+    }
+    .page.type-company .section-title,
+    .page.type-domestic .section-title{
+      margin:10px 0 5px;
+    }
+    .page.type-company .terms,
+    .page.type-domestic .terms{
+      padding:10px 12px;
+      margin-top:8px;
+      font-size:11px;
+      line-height:1.34;
+    }
+    .page.type-company .terms h3,
+    .page.type-domestic .terms h3{
+      font-size:11.7px;
+      margin:5px 0 2px;
+    }
+    .page.type-company .terms li,
+    .page.type-domestic .terms li{
+      margin:1.5px 0;
+    }
+    .page.type-company .notice,
+    .page.type-domestic .notice{
+      padding:6px 8px;
+      margin-top:6px;
+      font-size:10.5px;
+      line-height:1.3;
+    }
+    .page.type-company .agree,
+    .page.type-domestic .agree{
+      margin:7px 0 5px;
+      padding:7px 8px;
+      font-size:11px;
+    }
+
+    @media print{
+      html,body{
+        width:210mm;
+        height:297mm;
+        margin:0 !important;
+        padding:0 !important;
+        background:#fff !important;
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+      }
+      .page{
+        position:relative;
+        width:210mm !important;
+        height:297mm !important;
+        min-height:297mm !important;
+        margin:0 !important;
+        padding:10mm !important;
+        border:0 !important;
+        box-shadow:none !important;
+        display:flex !important;
+        flex-direction:column !important;
+        overflow:hidden !important;
+      }
+      .top-actions{ display:none !important; }
+      #membershipForm{ flex:0 0 auto; }
+      .document-signature{ margin-top:auto !important; }
+      .error-message{ display:none !important; }
+    }
+
+
+    /* measured A4 spacing optimization test */
+    @media screen and (min-width:721px), print{
+      .page{
+        width:210mm !important;
+        height:297mm !important;
+        min-height:297mm !important;
+        padding:6mm 9mm !important;
+        display:flex !important;
+        flex-direction:column !important;
+        justify-content:space-between !important;
+        overflow:hidden !important;
+      }
+      .top-actions{
+        position:absolute !important;
+        top:4mm !important;
+        left:9mm !important;
+        right:auto !important;
+        margin:0 !important;
+      }
+      .pdf-btn{min-width:104px !important; padding:7px 13px !important;}
+      .doc-header{flex:0 0 auto;}
+      .brand{margin:0 !important; font-size:10.5px !important; min-height:14px;}
+      h1{margin:1px 0 1px !important;}
+      .subtitle{margin:0 !important;}
+      #membershipForm{display:contents !important;}
+      .type-box{margin:0 !important; padding:8px 10px !important; min-height:36px !important;}
+      .form-panel.active{display:block !important; margin:0 !important;}
+      .form-panel.active .section-title{margin:0 0 8px !important;}
+      .form-panel.active table{margin:0 !important;}
+      #commonArea[style*="block"]{display:flex !important; flex-direction:column !important; gap:12px !important; margin:0 !important;}
+      #commonArea .terms{margin:0 !important;}
+      #commonArea .notice{margin:0 !important;}
+      #commonArea .agree{margin:0 !important;}
+      .document-signature{margin:0 !important;}
+      .footer{margin:0 !important; padding-top:5px !important;}
+    }
+    @media print{.top-actions{display:none !important;}}
+
+
+    /* Final A4 spacing refinement - existing frame/structure unchanged */
+    @media screen and (min-width:721px){
+      .page{
+        padding:9mm 9mm 6mm !important;
+      }
+      .top-actions{ top:6mm !important; }
+      .page.type-company .terms,
+      .page.type-domestic .terms{
+        font-size:13.2px !important;
+        line-height:1.45 !important;
+        padding:10px 12px !important;
+      }
+      .page.type-company .terms h3,
+      .page.type-domestic .terms h3{
+        font-size:14.04px !important;
+        line-height:1.35 !important;
+        margin:6px 0 3px !important;
+      }
+      .page.type-foreigner .terms{
+        font-size:12.6px !important;
+        line-height:1.45 !important;
+        padding:10px 12px !important;
+      }
+      .page.type-foreigner .terms h3{
+        font-size:13.44px !important;
+        line-height:1.35 !important;
+        margin:6px 0 3px !important;
+      }
+      .terms h3:first-child{margin-top:0 !important;}
+      .terms ol{padding-left:19px !important;}
+      .terms li{margin:2px 0 !important;}
+      .terms p{margin:0 0 3px !important;}
+      #commonArea[style*="block"]{gap:9px !important;}
+      .document-signature{
+        justify-content:center !important;
+        align-items:center !important;
+        gap:34px !important;
+      }
+    }
+    @media print{
+      .page{
+        padding:9mm 9mm 6mm !important;
+        display:flex !important;
+        flex-direction:column !important;
+        justify-content:space-between !important;
+      }
+      #membershipForm{display:contents !important;}
+      .type-box{margin:0 !important; padding:8px 10px !important; min-height:36px !important;}
+      .form-panel.active{display:block !important; margin:0 !important;}
+      .form-panel.active .section-title{margin:0 0 8px !important;}
+      .form-panel.active table{margin:0 !important;}
+      #commonArea[style*="block"]{display:flex !important; flex-direction:column !important; gap:9px !important; margin:0 !important;}
+      #commonArea .terms,#commonArea .notice,#commonArea .agree{margin:0 !important;}
+      .page.type-company .terms,
+      .page.type-domestic .terms{
+        font-size:13.2px !important;
+        line-height:1.45 !important;
+        padding:10px 12px !important;
+      }
+      .page.type-company .terms h3,
+      .page.type-domestic .terms h3{
+        font-size:14.04px !important;
+        line-height:1.35 !important;
+        margin:6px 0 3px !important;
+      }
+      .page.type-foreigner .terms{
+        font-size:12.6px !important;
+        line-height:1.45 !important;
+        padding:10px 12px !important;
+      }
+      .page.type-foreigner .terms h3{
+        font-size:13.44px !important;
+        line-height:1.35 !important;
+        margin:6px 0 3px !important;
+      }
+      .terms h3:first-child{margin-top:0 !important;}
+      .terms ol{padding-left:19px !important;}
+      .terms li{margin:2px 0 !important;}
+      .terms p{margin:0 0 3px !important;}
+      .document-signature{
+        margin:0 !important;
+        justify-content:center !important;
+        align-items:center !important;
+        gap:34px !important;
+      }
+      .footer{margin:0 !important; padding-top:5px !important;}
+    }
 </style>
 </head>
 <body>
-<div class="toolbar">
-  <button class="pdf-save-btn" onclick="window.print()">PDF 저장</button>
-  <button type="button" onclick="history.back()" style="margin-left:8px;background:#64748b;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:11pt;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.2);">이전화면</button>
-</div>
-<div class="page">
+  <main class="page type-company">
+    <div class="top-actions">
+      <button type="button" class="pdf-btn" onclick="savePdf()">PDF 저장</button>
+    </div>
+    <div class="doc-header">
+      <div class="brand" id="brandText">마음:시나브로심리상담연구소</div>
+      <h1 id="pageTitle">회원가입</h1>
+      <div class="subtitle" id="pageSubtitle">Membership Registration</div>
+    </div>
 
-  <div class="header-fixed">
-    <table class="approval-table">
-      <tr>
-        <td class="label">담 당</td>
-        <td class="label">대 표</td>
-      </tr>
-      <tr>
-        <td class="placeholder sign-row">&nbsp;</td>
-        <td class="placeholder sign-row">&nbsp;</td>
-      </tr>
-      <tr>
-        <td class="placeholder">&nbsp;</td>
-        <td class="placeholder">&nbsp;</td>
-      </tr>
-    </table>
-    <h1 class="title">회원기록카드</h1>
-  </div>
+    <form id="membershipForm" novalidate>
+      <div class="type-box">
+        <strong id="memberTypeLabel">회원 유형 <span class="required">*</span></strong>
+        <label><input type="radio" name="memberType" value="company"> <span id="typeCompanyText">기업체 대표</span></label>
+        <label><input type="radio" name="memberType" value="domestic"> <span id="typeDomesticText">내국인</span></label>
+        <label><input type="radio" name="memberType" value="foreigner"> <span id="typeForeignerText">외국인(Foreigner)</span></label>
+      </div>
+      <div id="typeError" class="error-message" style="text-align:center;margin:-8px 0 10px;">회원 유형을 선택해 주세요.</div>
 
-  <div class="content-body">
+      <!-- 기업체 대표 -->
+      <section id="companyForm" class="form-panel active" data-type="company">
+        <div class="section-title">기업체 대표 회원정보</div>
+        <table>
+          <tr>
+            <td class="label">회사명 <span class="required">*</span></td>
+            <td><input type="text" name="company_name" data-required></td>
+            <td class="label">대표자명 <span class="required">*</span></td>
+            <td><input type="text" name="company_ceo" data-required></td>
+          </tr>
+          <tr>
+            <td class="label">사업자등록번호</td>
+            <td><input type="text" name="business_no"></td>
+            <td class="label">업종</td>
+            <td><input type="text" name="business_type"></td>
+          </tr>
+          <tr>
+            <td class="label">담당자명</td>
+            <td><input type="text" name="manager_name"></td>
+            <td class="label">직책</td>
+            <td><input type="text" name="manager_position"></td>
+          </tr>
+          <tr>
+            <td class="label">연락처 <span class="required">*</span></td>
+            <td><input type="tel" name="company_phone" data-required data-phone></td>
+            <td class="label">이메일 <span class="required">*</span></td>
+            <td><input type="email" name="company_email" data-required></td>
+          </tr>
+          <tr>
+            <td class="label">회사 주소</td>
+            <td colspan="3"><input type="text" name="company_address"></td>
+          </tr>
+          <tr>
+            <td class="label">희망 서비스</td>
+            <td colspan="3">
+              <div class="service-box">
+                <label><input type="checkbox" name="company_service" value="기업상담"> 기업상담</label>
+                <label><input type="checkbox" name="company_service" value="임직원심리상담"> 임직원 심리상담</label>
+                <label><input type="checkbox" name="company_service" value="진로상담"> 진로상담</label>
+                <label><input type="checkbox" name="company_service" value="취업정보"> 진로·취업정보</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="label">요청사항</td>
+            <td colspan="3"><textarea name="company_note"></textarea></td>
+          </tr>
+        </table>
+      </section>
 
-  <div class="header-date">
-    <span>작성일 : __________ 년 ______ 월 ______ 일</span>
-    <span class="center-item">회원 Key : ___________________</span>
-    <span class="radio-group">
-      <label><input type="radio" name="consult-type" value="psych">심리상담</label>
-      <label><input type="radio" name="consult-type" value="career">진로상담</label>
-    </span>
-  </div>
+      <!-- 내국인 -->
+      <section id="domesticForm" class="form-panel" data-type="domestic">
+        <div class="section-title">내국인 회원정보</div>
+        <table>
+          <tr>
+            <td class="label">성명 <span class="required">*</span></td>
+            <td><input type="text" name="domestic_name" data-required></td>
+            <td class="label">생년월일 <span class="required">*</span></td>
+            <td><input type="text" name="domestic_birth" data-required></td>
+          </tr>
+          <tr>
+            <td class="label">성별</td>
+            <td>
+              <select name="domestic_gender">
+                <option value="" selected></option>
+                <option>남성</option>
+                <option>여성</option>
+                <option>기타</option>
+              </select>
+            </td>
+            <td class="label">연락처 <span class="required">*</span></td>
+            <td><input type="tel" name="domestic_phone" data-required data-phone></td>
+          </tr>
+          <tr>
+            <td class="label">이메일</td>
+            <td><input type="email" name="domestic_email"></td>
+            <td class="label">직업</td>
+            <td><input type="text" name="domestic_job"></td>
+          </tr>
+          <tr>
+            <td class="label">주소</td>
+            <td colspan="3"><input type="text" name="domestic_address"></td>
+          </tr>
+          <tr>
+            <td class="label">희망 서비스</td>
+            <td colspan="3">
+              <div class="service-box">
+                <label><input type="checkbox" name="domestic_service" value="심리상담"> 심리상담</label>
+                <label><input type="checkbox" name="domestic_service" value="진로상담"> 진로상담</label>
+                <label><input type="checkbox" name="domestic_service" value="진로취업정보"> 진로·취업정보</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="label">특이사항</td>
+            <td colspan="3"><textarea name="domestic_note"></textarea></td>
+          </tr>
+        </table>
+      </section>
 
-  <!-- 기본 인적사항 -->
-  <table style="width:182mm;">
-    <colgroup>
-      <col style="width:32mm">
-      <col style="width:24mm">
-      <col style="width:50.5mm">
-      <col style="width:21mm">
-      <col style="width:54.5mm">
-    </colgroup>
-    <tr>
-      <td class="label" rowspan="5">사 진<br><span class="en">(Photo)</span></td>
-      <td class="label">성 명<span class="en">(Name)</span></td>
-      <td class="value fillable sign-cell">&nbsp;<span class="sign-mark">인</span></td>
-      <td class="label">영 문<span class="en">(English)</span></td>
-      <td class="value fillable sign-cell">&nbsp;<span class="sign-mark en-sign">Sign</span></td>
-    </tr>
-    <tr>
-      <td class="label">소속회사<span class="en">(Company)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">성 별<span class="en">(Sex)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="label">입사일자<span class="en">(Hire Date)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">업무명<span class="en">(Dept.)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="label">전화번호<span class="en">(Phone)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">생년월일<span class="en">(D.O.B)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="label">체류지주소<span class="en">(Address)</span></td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="label">나 이<span class="en">(Age)</span></td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-  </table>
+      <!-- 외국인 -->
+      <section id="foreignerForm" class="form-panel" data-type="foreigner">
+        <div class="section-title">Foreigner Member Information</div>
+        <table>
+          <tr>
+            <td class="label">Name <span class="required">*</span></td>
+            <td><input type="text" name="foreigner_name" data-required></td>
+            <td class="label">English Name <span class="required">*</span></td>
+            <td><input type="text" name="foreigner_english_name" data-required></td>
+          </tr>
+          <tr>
+            <td class="label">Nationality <span class="required">*</span></td>
+            <td><input type="text" name="nationality" data-required></td>
+            <td class="label">Date of Birth <span class="required">*</span></td>
+            <td><input type="text" name="foreigner_birth" data-required></td>
+          </tr>
+          <tr>
+            <td class="label">Gender</td>
+            <td>
+              <select name="foreigner_gender">
+                <option value="" selected></option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </td>
+            <td class="label">Phone <span class="required">*</span></td>
+            <td><input type="tel" name="foreigner_phone" data-required data-phone></td>
+          </tr>
+          <tr>
+            <td class="label">Email</td>
+            <td><input type="email" name="foreigner_email"></td>
+            <td class="label">Visa</td>
+            <td><input type="text" name="visa"></td>
+          </tr>
+          <tr>
+            <td class="label">Date of Entry</td>
+            <td><input type="text" name="entry_date"></td>
+            <td class="label">Expected Departure</td>
+            <td><input type="text" name="departure_date"></td>
+          </tr>
+          <tr>
+            <td class="label">Occupation</td>
+            <td><input type="text" name="foreigner_job"></td>
+            <td class="label">Career Summary</td>
+            <td><input type="text" name="career_summary" maxlength="30"></td>
+          </tr>
+          <tr>
+            <td class="label">Address</td>
+            <td colspan="3"><input type="text" name="foreigner_address"></td>
+          </tr>
+          <tr>
+            <td class="label">Preferred Service</td>
+            <td colspan="3">
+              <div class="service-box">
+                <label><input type="checkbox" name="foreigner_service" value="심리상담"> Psychological Counseling</label>
+                <label><input type="checkbox" name="foreigner_service" value="진로상담"> Career Counseling</label>
+                <label><input type="checkbox" name="foreigner_service" value="진로취업정보"> Career & Employment Information</label>
+                <label><input type="checkbox" name="foreigner_service" value="생활정착정보"> Living & Settlement Information</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="label">Notes</td>
+            <td colspan="3"><textarea name="foreigner_note"></textarea></td>
+          </tr>
+        </table>
+      </section>
 
-  <!-- 여권사항 -->
-  <table class="section-table">
-    <colgroup>
-      <col style="width:14%">
-      <col style="width:19%">
-      <col style="width:15%">
-      <col style="width:15%">
-      <col style="width:22%">
-      <col style="width:15%">
-    </colgroup>
-    <tr>
-      <td class="section-title" colspan="6">• 여권사항 <span class="en">(Passport)</span></td>
-    </tr>
-    <tr>
-      <td class="label">국 적<span class="en">(Nationality)</span></td>
-      <td class="label">여권번호<span class="en">(Passport No.)</span></td>
-      <td class="label">발급일자<span class="en">(Issue Date)</span></td>
-      <td class="label">유효기간<span class="en">(Expiry Date)</span></td>
-      <td class="label">외국인등록번호<span class="en">(Alien Reg. No.)</span></td>
-      <td class="label">비 자<span class="en">(Visa)</span></td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-  </table>
+      <div id="commonArea" style="display:block;">
+        <div id="commonKorean">
+          <div class="terms">
+            <h3>1. 목적</h3>
+            <p>본 회원가입은 마음:시나브로심리상담연구소의 회원정보를 관리하고, 심리상담·진로상담·기업상담 및 관련 회원서비스를 제공하기 위한 것입니다.</p>
 
-  <!-- 학력 & 언어능력 -->
-  <table class="section-table">
-    <colgroup>
-      <col style="width:23%">
-      <col style="width:23%">
-      <col style="width:23%">
-      <col style="width:23%">
-    </colgroup>
-    <tr>
-      <td class="section-title" colspan="2">• 학력 <span class="en">(School Career)</span></td>
-      <td class="section-title" colspan="2" style="text-align:center !important;">• 언어능력 <span class="en">(Language)</span></td>
-    </tr>
-    <tr>
-      <td class="label same-line">기 간<span class="en">(Period)</span></td>
-      <td class="label same-line">학교명<span class="en">(School)</span></td>
-      <td class="label same-line">종 류<span class="en">(Type)</span></td>
-      <td class="label same-line">능 력<span class="en">(Ability)</span></td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value">한국어<span class="en">(Korean)</span></td>
-      <td class="value fillable">상 / 중 / 하</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value">영 어<span class="en">(English)</span></td>
-      <td class="value fillable">상 / 중 / 하</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-  </table>
+            <h3>2. 회원관리 및 서비스</h3>
+            <ol>
+              <li>회원은 가입정보를 사실에 근거하여 정확하게 작성합니다.</li>
+              <li>연구소는 회원가입 및 회원정보 관리에 별도의 가입비 또는 이용료를 받지 않습니다.</li>
+              <li>연구소는 회원 유형과 필요에 따라 심리상담, 진로상담, 기업상담, 상담일정 안내, 진로·취업정보 등 관련 서비스를 제공할 수 있습니다.</li>
+              <li>회원은 본인의 정보에 변경사항이 있는 경우 수정을 요청할 수 있으며, 회원탈퇴를 요청할 수 있습니다.</li>
+            </ol>
 
-  <!-- 가족 -->
-  <table class="section-table">
-    <colgroup>
-      <col style="width:22%">
-      <col style="width:12%">
-      <col style="width:22%">
-      <col style="width:12%">
-      <col style="width:16%">
-      <col style="width:16%">
-    </colgroup>
-    <tr>
-      <td class="section-title" colspan="6">• 가족 <span class="en">(Family)</span></td>
-    </tr>
-    <tr>
-      <td class="label">성 명<span class="en">(Name in full)</span></td>
-      <td class="label">성 별<span class="en">(Sex)</span></td>
-      <td class="label">생년월일<span class="en">(Date of Birth)</span></td>
-      <td class="label">관 계<span class="en">(Relation)</span></td>
-      <td class="label">나 이<span class="en">(Age)</span></td>
-      <td class="label">비 자<span class="en">(Visa)</span></td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-      <td class="value fillable">&nbsp;</td>
-    </tr>
-  </table>
+            <h3>3. 개인정보 보호</h3>
+            <ol>
+              <li>연구소는 회원관리 및 서비스 제공에 필요한 범위에서 개인정보를 수집·이용합니다.</li>
+              <li>수집된 정보는 회원관리, 상담 및 관련 서비스 제공을 위한 목적으로 사용합니다.</li>
+              <li>관련 법령에 따른 경우를 제외하고, 회원의 동의 없이 개인정보를 목적 외로 이용하거나 제3자에게 제공하지 않습니다.</li>
+              <li>보유 목적이 종료되거나 회원이 탈퇴한 경우에는 관련 법령에 따라 필요한 정보만 보관하고 그 외 정보는 적절히 처리합니다.</li>
+            </ol>
+          </div>
 
-  <!-- 경력사항 -->
-  <table class="section-table">
-    <colgroup>
-      <col style="width:10%">
-      <col style="width:25%">
-      <col style="width:30%">
-      <col style="width:35%">
-    </colgroup>
-    <tr>
-      <td class="section-title" colspan="4">• 경력사항 <span class="en">(Career)</span></td>
-    </tr>
-    <tr>
-      <td class="label">번 호<span class="en">(No.)</span></td>
-      <td class="label">기 간<span class="en">(Period)</span></td>
-      <td class="label">회사명<span class="en">(Company)</span></td>
-      <td class="label">경력(업무내용)<span class="en">(Job Description)</span></td>
-    </tr>
-    <tr><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td></tr>
-    <tr><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td></tr>
-    <tr><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td><td class="value fillable">&nbsp;</td></tr>
-  </table>
+          <div class="notice">
+            ※ 본 회원가입은 <strong>유료 서비스 계약이나 결제 신청이 아닙니다.</strong>
+            연구소의 회원으로 등록하여 회원정보를 관리하고 필요한 상담·진로·기업 관련 서비스를 제공하기 위한 회원등록 절차입니다.
+          </div>
+        </div>
 
-  <div class="small-note" style="text-align:left; font-weight:400; margin-top:4mm;">
-    ※ 본 기록카드는 사실에 근거하여 정확하게 작성해 주시기 바랍니다. 기재된 개인정보는 마음:시나브로심리상담연구소의 회원 관리(전산 등록 포함) 및 상담 서비스 제공 목적으로만 사용되며, 관계 법령에 따라 안전하게 관리됩니다. 본 기록카드를 작성하시는 것으로 마음:시나브로심리상담연구소의 개인정보 관리(전산 등록 포함)에 동의하신 것으로 간주합니다.
-  </div>
-  <div class="small-note" style="text-align:left; font-weight:400; margin-top:1.5mm; color:#999;">
-    ※ Please fill out this record card accurately and truthfully. The personal information provided will be used solely for member management (including system registration) by Ma-eum: Sinabro Psychological Counseling Institute and for providing counseling services, and will be securely managed in accordance with applicable laws. By completing this record card, you are deemed to have agreed to the institute's management of your personal information (including system registration).
-  </div>
+        <div id="commonEnglish" style="display:none;">
+          <div class="terms">
+            <h3>1. Purpose</h3>
+            <p>This membership registration is intended to manage member information and provide psychological counseling, career counseling, corporate counseling, and related member services through Maum:SINABRO Psychological Counseling Research Institute.</p>
 
-  </div><!-- /content-body -->
+            <h3>2. Membership Management and Services</h3>
+            <ol>
+              <li>Members must provide accurate and truthful information when registering.</li>
+              <li>No membership fee or membership management fee is charged.</li>
+              <li>Depending on the member's needs, the Institute may provide psychological counseling, career counseling, corporate counseling, appointment information, and career or employment-related information.</li>
+              <li>Members may request corrections to their information or request withdrawal from membership.</li>
+            </ol>
 
-  <div class="footer-fixed">마음:시나브로 심리상담연구소</div>
+            <h3>3. Personal Information Protection</h3>
+            <ol>
+              <li>The Institute collects and uses personal information only to the extent necessary for membership management and service provision.</li>
+              <li>Collected information is used for membership management, counseling, and related services.</li>
+              <li>Personal information will not be used for other purposes or provided to third parties without the member's consent, except where required by applicable law.</li>
+              <li>When the purpose of retention has ended or membership is withdrawn, only information required by applicable law will be retained and other information will be appropriately handled.</li>
+            </ol>
+          </div>
 
-</div>
+          <div class="notice">
+            ※ This registration is <strong>not a paid service contract or payment application.</strong>
+            It is a membership registration process for managing member information and providing counseling, career, corporate, and related support services.
+          </div>
+        </div>
+
+        <div class="agree">
+          <label>
+            <input type="checkbox" id="factConfirm">
+            <span id="agreeText">위의 내용과 본인이 작성한 정보가 사실과 다름이 없음을 확인합니다.</span>
+            <span class="required">*</span>
+          </label>
+          <div id="agreeError" class="error-message">확인란에 체크해 주세요.</div>
+        </div>
+      </div>
+    </form>
+
+
+    <div class="document-signature">
+      <div id="dateWriteLabel" class="signature-line">
+        <span>작성일 :</span>
+        <input type="text" class="date-year" inputmode="numeric" maxlength="4" aria-label="작성 연도">
+        <span>년</span>
+        <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 월">
+        <span>월</span>
+        <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 일">
+        <span>일.</span>
+      </div>
+      <div id="authorWriteLabel" class="signature-line">
+        <span>작성자 :</span>
+        <input type="text" class="author-name" aria-label="작성자">
+        <span>인</span>
+      </div>
+    </div>
+
+    <footer class="footer" id="footerText">마음:시나브로심리상담연구소</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('membershipForm');
+    const typeRadios = document.querySelectorAll('input[name="memberType"]');
+    const panels = document.querySelectorAll('.form-panel');
+    const commonArea = document.getElementById('commonArea');
+    const factConfirm = document.getElementById('factConfirm');
+    const pageShell = document.querySelector('.page');
+
+    // 화면에 표시되는 현재 회원유형.
+    // 라디오 버튼은 처음에는 선택하지 않지만 기업체 대표 양식을 기본 표시한다.
+    let activeType = 'company';
+
+    function currentType(){
+      return document.querySelector('input[name="memberType"]:checked')?.value || activeType;
+    }
+
+    function clearErrors(){
+      document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+      document.querySelectorAll('.error-message.show').forEach(el => el.classList.remove('show'));
+    }
+
+    function setLanguage(type){
+      const isForeigner = type === 'foreigner';
+
+      document.getElementById('brandText').textContent =
+        isForeigner ? 'Maum:SINABRO Psychological Counseling Research Institute' : '마음:시나브로심리상담연구소';
+
+      document.getElementById('pageTitle').textContent =
+        isForeigner ? 'Membership Registration' : '회원가입';
+
+      document.getElementById('pageSubtitle').textContent =
+        isForeigner ? 'Psychological · Career · Corporate Counseling' : 'Membership Registration';
+
+      document.getElementById('memberTypeLabel').innerHTML =
+        isForeigner ? 'Member Type <span class="required">*</span>' : '회원 유형 <span class="required">*</span>';
+
+      document.getElementById('typeCompanyText').textContent =
+        isForeigner ? 'Company Representative' : '기업체 대표';
+
+      document.getElementById('typeDomesticText').textContent =
+        isForeigner ? 'Korean' : '내국인';
+
+      document.getElementById('typeForeignerText').textContent =
+        isForeigner ? 'Foreigner' : '외국인(Foreigner)';
+
+      document.getElementById('typeError').textContent =
+        isForeigner ? 'Please select a member type.' : '회원 유형을 선택해 주세요.';
+
+      document.getElementById('commonKorean').style.display =
+        isForeigner ? 'none' : 'block';
+
+      document.getElementById('commonEnglish').style.display =
+        isForeigner ? 'block' : 'none';
+
+      document.getElementById('agreeText').textContent =
+        isForeigner
+          ? 'I confirm that the information above and the information I have entered are true and accurate.'
+          : '위의 내용과 본인이 작성한 정보가 사실과 다름이 없음을 확인합니다.';
+
+      document.getElementById('agreeError').textContent =
+        isForeigner ? 'Please check the confirmation box.' : '확인란에 체크해 주세요.';
+
+      document.getElementById('footerText').textContent =
+        isForeigner
+          ? 'Maum:SINABRO Psychological Counseling Research Institute'
+          : '마음:시나브로심리상담연구소';
+
+      document.getElementById('footerText').style.fontSize =
+        isForeigner ? '22.8px' : '24px';
+
+      const dateWriteLabel = document.getElementById('dateWriteLabel');
+      const authorWriteLabel = document.getElementById('authorWriteLabel');
+
+      if(isForeigner){
+        dateWriteLabel.innerHTML = `
+          <span>Date :</span>
+          <input type="text" class="date-year" inputmode="numeric" maxlength="4" aria-label="Year">
+          <span>Year</span>
+          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="Month">
+          <span>Month</span>
+          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="Day">
+          <span>Day.</span>
+        `;
+        authorWriteLabel.innerHTML = `
+          <span>Name :</span>
+          <input type="text" class="author-name" aria-label="Name">
+          <span>Sign</span>
+        `;
+      }else{
+        dateWriteLabel.innerHTML = `
+          <span>작성일 :</span>
+          <input type="text" class="date-year" inputmode="numeric" maxlength="4" aria-label="작성 연도">
+          <span>년</span>
+          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 월">
+          <span>월</span>
+          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 일">
+          <span>일.</span>
+        `;
+        authorWriteLabel.innerHTML = `
+          <span>작성자 :</span>
+          <input type="text" class="author-name" aria-label="작성자">
+          <span>인</span>
+        `;
+      }
+    }
+
+    function showPanel(type, resetAgreement = true){
+      activeType = type;
+      pageShell.classList.remove('type-company','type-domestic','type-foreigner');
+      pageShell.classList.add(`type-${type}`);
+
+      panels.forEach(panel => {
+        panel.classList.toggle('active', panel.dataset.type === type);
+      });
+
+      commonArea.style.display = 'block';
+
+      if(resetAgreement){
+        factConfirm.checked = false;
+      }
+
+      clearErrors();
+      setLanguage(type);
+    }
+
+    // 회원유형을 클릭하면 해당 양식으로 즉시 전환
+    typeRadios.forEach(radio => {
+      radio.addEventListener('change', () => showPanel(radio.value));
+    });
+
+    factConfirm.addEventListener('change', () => {
+      document.getElementById('agreeError')
+        .classList.toggle('show', !factConfirm.checked);
+    });
+
+    function savePdf(){
+      // 현재 보이는 회원유형 양식을 A4 세로 1장 기준으로 인쇄/PDF 저장
+      window.print();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // 라디오 버튼의 점은 모두 비선택
+      typeRadios.forEach(radio => radio.checked = false);
+
+      // 화면에는 기업체 대표 양식을 기본 표시
+      activeType = 'company';
+      pageShell.classList.remove('type-company','type-domestic','type-foreigner');
+      pageShell.classList.add('type-company');
+      panels.forEach(panel => {
+        panel.classList.toggle('active', panel.dataset.type === 'company');
+      });
+      commonArea.style.display = 'block';
+      factConfirm.checked = false;
+
+      // 화면에 표시되는 모든 작성 입력값은 빈값으로 시작
+      document.querySelectorAll(
+        'input[type="text"], input[type="tel"], input[type="email"], textarea'
+      ).forEach(el => el.value = '');
+
+      document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+      document.querySelectorAll('.date-year, .date-part').forEach(el => {
+        el.value = '';
+      });
+
+      clearErrors();
+      setLanguage('company');
+    });
+
+    form.addEventListener('input', e => {
+      if(e.target.classList.contains('error') && e.target.value.trim()){
+        e.target.classList.remove('error');
+      }
+    });
+  </script>
 </body>
 </html>
