@@ -26,7 +26,7 @@
     font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif;
   }
   .page{
-    width:min(1600px, 100%);
+    width:min(1600px,100%);
     margin:0 auto;
     background:#fff;
     min-height:100vh;
@@ -83,6 +83,16 @@
     cursor:pointer;
     font-weight:700;
   }
+  .filters button:disabled{opacity:.55;cursor:not-allowed}
+  .db-status{
+    min-width:110px;
+    font-size:11px;
+    font-weight:800;
+    color:#50626c;
+    white-space:nowrap;
+  }
+  .db-status.ok{color:#14734a}
+  .db-status.error{color:#b42318}
   .legend{
     margin-left:auto;
     display:flex;
@@ -115,7 +125,6 @@
     min-width:1380px;
     border:1px solid var(--line);
     display:grid;
-    grid-template-columns: 78px 86px 86px 92px 86px 88px 94px repeat(30, 28px);
     position:relative;
     background:#fff;
   }
@@ -198,10 +207,20 @@
     margin:-4px 0 0 -4px;
     z-index:8;
   }
+  .empty{
+    grid-column:1/-1;
+    min-height:110px;
+    display:grid;
+    place-items:center;
+    color:#71808a;
+    font-size:13px;
+    background:#fbfcfd;
+  }
   .footnote{
     padding:0 14px 18px;
     color:#61727a;
     font-size:11px;
+    line-height:1.65;
   }
   @media (max-width:900px){
     .summary{grid-template-columns:repeat(2,1fr)}
@@ -209,13 +228,14 @@
     .legend{margin-left:0;width:100%;overflow-x:auto}
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
 </head>
 <body>
 <div class="page">
   <div class="topbar">
     <div class="title">상담칸트챠트</div>
     <div>심리상담 · 진로상담 · 취업상담 통합 일정</div>
-    <div class="range">2026년 9월 1일 ~ 9월 30일</div>
+    <div class="range" id="rangeLabel">조회기간 확인 중</div>
     <a class="back-btn" href="index.html" title="대시보드로 돌아가기">이전화면</a>
   </div>
 
@@ -234,8 +254,9 @@
       <option value="보류">보류</option>
       <option value="종결">종결</option>
     </select>
-    <button onclick="render()">조회</button>
-    <button onclick="resetFilters()">초기화</button>
+    <button id="searchBtn" type="button">조회</button>
+    <button id="resetBtn" type="button">초기화</button>
+    <span class="db-status" id="dbStatus">DB 연결 중...</span>
 
     <div class="legend">
       <span><i class="dot" style="background:var(--psych)"></i>심리</span>
@@ -253,133 +274,516 @@
   </div>
 
   <div class="footnote">
-    샘플 기준: 막대는 상담 관리기간, ○는 실제 상담회기, ◆는 차기예약일을 의미합니다.
-    총 계획회기가 없는 상담은 임의 진행률을 계산하지 않습니다.
+    DB 연결 기준: DB_basic 회원 KEY + DB_psychological_counseling + DB_career_counseling 실제값을 사용합니다.
+    막대는 해당 월에 확인되는 최초 일정부터 최종 일정까지의 범위, ○는 실제 상담일, ◆는 차기예약일입니다.
+    담당상담사는 현재 상담 DB에 연결 컬럼이 없어 임의값을 생성하지 않고 “-”로 표시합니다.
   </div>
 </div>
 
 <script>
-const days = 30;
-const today = 11; // 샘플 화면 기준 2026-09-11
+(() => {
+  "use strict";
 
-const rows = [
-  {key:"26090101", name:"김상담", type:"심리", counselor:"박상담", status:"진행", receipt:"09/01", recent:"09/10", next:"09/17", start:1, end:24, sessions:[1,3,10], reserve:17},
-  {key:"26090202", name:"이진로", type:"진로", counselor:"최진로", status:"진행", receipt:"09/02", recent:"09/09", next:"09/16", start:2, end:20, sessions:[2,5,9], reserve:16},
-  {key:"26090303", name:"박취업", type:"취업", counselor:"정취업", status:"진행", receipt:"09/03", recent:"09/08", next:"09/15", start:3, end:22, sessions:[3,8], reserve:15},
-  {key:"26090404", name:"최심리", type:"심리", counselor:"박상담", status:"예정", receipt:"09/04", recent:"-", next:"09/12", start:4, end:18, sessions:[4], reserve:12},
-  {key:"26090505", name:"정진로", type:"진로", counselor:"최진로", status:"종결", receipt:"09/05", recent:"09/10", next:"-", start:5, end:10, sessions:[5,7,10], reserve:null},
-  {key:"26090606", name:"강취업", type:"취업", counselor:"정취업", status:"보류", receipt:"09/06", recent:"09/09", next:"-", start:6, end:14, sessions:[6,9], reserve:null},
-  {key:"26090707", name:"윤상담", type:"심리", counselor:"박상담", status:"진행", receipt:"09/07", recent:"09/11", next:"09/18", start:7, end:27, sessions:[7,11], reserve:18},
-  {key:"26090808", name:"한진로", type:"진로", counselor:"최진로", status:"예정", receipt:"09/08", recent:"-", next:"09/14", start:8, end:25, sessions:[8], reserve:14}
-];
+  const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+  const SECURE_SCHEDULE_URL = `${SUPABASE_URL}/functions/v1/secure-schedule-read`;
 
-function dayOfWeek(day){
-  const d = new Date(2026,8,day);
-  return d.getDay(); // 0 Sun
-}
-function typeClass(type,status){
-  if(status==="종결") return "done";
-  if(type==="심리") return "psych";
-  if(type==="진로") return "career";
-  return "job";
-}
-function filteredRows(){
-  const tf=document.getElementById("typeFilter").value;
-  const sf=document.getElementById("statusFilter").value;
-  const kw=document.getElementById("keyword").value.trim();
-  return rows.filter(r =>
-    (tf==="all" || r.type===tf) &&
-    (sf==="all" || r.status===sf) &&
-    (!kw || r.key.includes(kw) || r.name.includes(kw))
-  );
-}
-function renderSummary(data){
-  const total=data.length;
-  const psych=data.filter(x=>x.type==="심리").length;
-  const career=data.filter(x=>x.type==="진로").length;
-  const job=data.filter(x=>x.type==="취업").length;
-  const todayCount=data.filter(x=>x.sessions.includes(today) || x.reserve===today).length;
-  const items=[
-    ["조회대상", total+"명"],
-    ["심리상담", psych+"명"],
-    ["진로상담", career+"명"],
-    ["취업상담", job+"명"],
-    ["오늘 일정", todayCount+"건"]
-  ];
-  document.getElementById("summary").innerHTML=items.map(([a,b])=>`<div class="card"><small>${a}</small><b>${b}</b></div>`).join("");
-}
-function render(){
-  const data=filteredRows();
-  renderSummary(data);
-  const g=document.getElementById("gantt");
-  g.innerHTML="";
-
-  const heads=["회원KEY","이름","상담구분","담당상담사","상태","최근상담일","차기예약일"];
-  heads.forEach(h=>{
-    const c=document.createElement("div");
-    c.className="cell head";
-    c.textContent=h;
-    g.appendChild(c);
-  });
-  for(let d=1; d<=days; d++){
-    const dow=dayOfWeek(d);
-    const c=document.createElement("div");
-    c.className="cell head dayhead "+(dow===0?"sun":dow===6?"sat":"");
-    c.textContent=d;
-    g.appendChild(c);
+  if (!window.supabase) {
+    alert("Supabase 라이브러리를 불러오지 못했습니다.");
+    return;
   }
 
-  data.forEach(r=>{
-    const vals=[
-      [r.key,"muted"],
-      [r.name,"name left"],
-      [r.type+"상담",""],
-      [r.counselor,""],
-      [r.status,""],
-      [r.recent,""],
-      [r.next,""]
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth:{
+        storage:window.sessionStorage,
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    }
+  );
+
+  const els = {
+    typeFilter:document.getElementById("typeFilter"),
+    statusFilter:document.getElementById("statusFilter"),
+    keyword:document.getElementById("keyword"),
+    searchBtn:document.getElementById("searchBtn"),
+    resetBtn:document.getElementById("resetBtn"),
+    dbStatus:document.getElementById("dbStatus"),
+    summary:document.getElementById("summary"),
+    gantt:document.getElementById("gantt"),
+    rangeLabel:document.getElementById("rangeLabel")
+  };
+
+  let rows = [];
+  let displayYear = 0;
+  let displayMonth = 0;
+  let days = 30;
+  let today = null;
+
+  function getSeoulTodayParts(){
+    const parts = new Intl.DateTimeFormat("en-CA",{
+      timeZone:"Asia/Seoul",
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit"
+    }).formatToParts(new Date());
+    const map = {};
+    parts.forEach(p => { if(p.type !== "literal") map[p.type] = p.value; });
+    return {year:Number(map.year),month:Number(map.month),day:Number(map.day)};
+  }
+
+  function daysInMonth(year,month){
+    return new Date(Date.UTC(year,month,0)).getUTCDate();
+  }
+
+  function two(n){ return String(n).padStart(2,"0"); }
+
+  function dateOnly(value){
+    if(!value) return null;
+    const s=String(value);
+    const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return {year:Number(m[1]),month:Number(m[2]),day:Number(m[3]),text:`${m[1]}-${m[2]}-${m[3]}`};
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime())) return null;
+    const parts=new Intl.DateTimeFormat("en-CA",{
+      timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(d);
+    const map={};
+    parts.forEach(p=>{if(p.type!=="literal")map[p.type]=p.value;});
+    return {
+      year:Number(map.year),
+      month:Number(map.month),
+      day:Number(map.day),
+      text:`${map.year}-${map.month}-${map.day}`
+    };
+  }
+
+  function timeValue(value){
+    if(!value) return Number.NEGATIVE_INFINITY;
+    const d=new Date(value);
+    const t=d.getTime();
+    return Number.isFinite(t)?t:Number.NEGATIVE_INFINITY;
+  }
+
+  function monthStartValue(){
+    return Date.parse(`${displayYear}-${two(displayMonth)}-01T00:00:00+09:00`);
+  }
+
+  function nextMonthStartValue(){
+    let y=displayYear,m=displayMonth+1;
+    if(m===13){y+=1;m=1;}
+    return Date.parse(`${y}-${two(m)}-01T00:00:00+09:00`);
+  }
+
+  function clampToMonthDay(value){
+    if(!value) return null;
+    const d=dateOnly(value);
+    if(!d) return null;
+    if(d.year < displayYear || (d.year===displayYear && d.month<displayMonth)) return 1;
+    if(d.year > displayYear || (d.year===displayYear && d.month>displayMonth)) return days;
+    return Math.min(days,Math.max(1,d.day));
+  }
+
+  function dayIfInMonth(value){
+    const d=dateOnly(value);
+    if(!d || d.year!==displayYear || d.month!==displayMonth) return null;
+    return d.day;
+  }
+
+  function mmdd(value){
+    const d=dateOnly(value);
+    return d ? `${two(d.month)}/${two(d.day)}` : "-";
+  }
+
+  function uniqueSortedNumbers(values){
+    return [...new Set(values.filter(v=>Number.isInteger(v)))].sort((a,b)=>a-b);
+  }
+
+  function dayOfWeek(day){
+    return new Date(Date.UTC(displayYear,displayMonth-1,day)).getUTCDay();
+  }
+
+  function typeClass(type,status){
+    if(status==="종결" || status==="완료" || status==="종료") return "done";
+    if(type==="심리") return "psych";
+    if(type==="취업") return "job";
+    return "career";
+  }
+
+  function normalizeStatus(value){
+    const s=String(value||"").trim();
+    if(["종결","완료","종료"].includes(s)) return "종결";
+    if(["보류","중지"].includes(s)) return "보류";
+    if(["예정","예약"].includes(s)) return "예정";
+    if(["진행","진행중"].includes(s)) return "진행";
+    return s || "진행";
+  }
+
+  function filteredRows(){
+    const tf=els.typeFilter.value;
+    const sf=els.statusFilter.value;
+    const kw=els.keyword.value.trim().toLowerCase();
+    return rows.filter(r =>
+      (tf==="all" || r.type===tf) &&
+      (sf==="all" || r.status===sf) &&
+      (!kw || r.key.toLowerCase().includes(kw) || r.name.toLowerCase().includes(kw))
+    );
+  }
+
+  function renderSummary(data){
+    const total=data.length;
+    const psych=data.filter(x=>x.type==="심리").length;
+    const career=data.filter(x=>x.type==="진로").length;
+    const job=data.filter(x=>x.type==="취업").length;
+    const todayCount=today
+      ? data.filter(x=>x.sessions.includes(today) || x.reserves.includes(today)).length
+      : 0;
+    const items=[
+      ["조회대상", total+"명"],
+      ["심리상담", psych+"명"],
+      ["진로상담", career+"명"],
+      ["취업상담", job+"명"],
+      ["오늘 일정", todayCount+"건"]
     ];
-    vals.forEach(([v,cls],i)=>{
+    els.summary.innerHTML=items.map(([a,b])=>`<div class="card"><small>${a}</small><b>${b}</b></div>`).join("");
+  }
+
+  function render(){
+    const data=filteredRows();
+    renderSummary(data);
+
+    els.gantt.innerHTML="";
+    els.gantt.style.gridTemplateColumns=`78px 86px 86px 92px 86px 88px 94px repeat(${days},28px)`;
+    els.gantt.style.minWidth=`${624 + days*28}px`;
+
+    const heads=["회원KEY","이름","상담구분","담당상담사","상태","최근상담일","차기예약일"];
+    heads.forEach(h=>{
       const c=document.createElement("div");
-      c.className="cell "+cls;
-      if(i===4) c.innerHTML=`<span class="status">${v}</span>`;
-      else c.textContent=v;
-      g.appendChild(c);
+      c.className="cell head";
+      c.textContent=h;
+      els.gantt.appendChild(c);
     });
 
-    for(let d=1; d<=days; d++){
+    for(let d=1;d<=days;d++){
       const dow=dayOfWeek(d);
       const c=document.createElement("div");
-      c.className="cell "+((dow===0||dow===6)?"weekend-cell ":"")+(d===today?"today-col":"");
-      if(d===r.start){
-        const bar=document.createElement("div");
-        bar.className="bar "+typeClass(r.type,r.status);
-        const width=(r.end-r.start+1)*28-4;
-        bar.style.left="2px";
-        bar.style.width=width+"px";
-        c.appendChild(bar);
-      }
-      if(r.sessions.includes(d)){
-        const m=document.createElement("div");
-        m.className="session-marker";
-        c.appendChild(m);
-      }
-      if(r.reserve===d){
-        const m=document.createElement("div");
-        m.className="reserve-marker";
-        c.appendChild(m);
-      }
-      g.appendChild(c);
+      c.className="cell head dayhead "+(dow===0?"sun":dow===6?"sat":"");
+      c.textContent=d;
+      els.gantt.appendChild(c);
     }
+
+    if(!data.length){
+      const empty=document.createElement("div");
+      empty.className="empty";
+      empty.textContent="조회 조건에 해당하는 상담 일정이 없습니다.";
+      els.gantt.appendChild(empty);
+      return;
+    }
+
+    data.forEach(r=>{
+      const vals=[
+        [r.key,"muted"],
+        [r.name,"name left"],
+        [r.type+"상담",""],
+        [r.counselor,""],
+        [r.status,""],
+        [r.recent,""],
+        [r.next,""]
+      ];
+
+      vals.forEach(([v,cls],i)=>{
+        const c=document.createElement("div");
+        c.className="cell "+cls;
+        if(i===4) c.innerHTML=`<span class="status">${escapeHtml(v)}</span>`;
+        else c.textContent=v;
+        els.gantt.appendChild(c);
+      });
+
+      for(let d=1;d<=days;d++){
+        const dow=dayOfWeek(d);
+        const c=document.createElement("div");
+        c.className="cell "+((dow===0||dow===6)?"weekend-cell ":"")+(d===today?"today-col":"");
+
+        if(d===r.start){
+          const bar=document.createElement("div");
+          bar.className="bar "+typeClass(r.type,r.status);
+          const width=Math.max(24,(r.end-r.start+1)*28-4);
+          bar.style.left="2px";
+          bar.style.width=width+"px";
+          c.appendChild(bar);
+        }
+
+        if(r.sessions.includes(d)){
+          const m=document.createElement("div");
+          m.className="session-marker";
+          m.title="실제 상담";
+          c.appendChild(m);
+        }
+
+        if(r.reserves.includes(d)){
+          const m=document.createElement("div");
+          m.className="reserve-marker";
+          m.title="차기예약";
+          c.appendChild(m);
+        }
+
+        els.gantt.appendChild(c);
+      }
+    });
+  }
+
+  function escapeHtml(value){
+    return String(value??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+  }
+
+  function rowEventTime(row,type){
+    const values = type==="심리"
+      ? [row.session_start_at,row.visit_at,row.receipt_at,row.next_session_at,row.next_session_date]
+      : [row.session_start_at,row.appointment_at,row.receipt_at,row.next_session_at,row.next_session_date];
+    return Math.max(...values.map(timeValue));
+  }
+
+  function actualSessionValue(row,type){
+    if(row.session_start_at) return row.session_start_at;
+    const n=Number(row.session_no);
+    if(Number.isFinite(n) && n>0){
+      return type==="심리" ? row.visit_at : row.appointment_at;
+    }
+    return null;
+  }
+
+  function classifyCareer(row,meta){
+    if(meta?.linked_recruitment_id || meta?.linked_job_hunting_id) return "취업";
+    return "진로";
+  }
+
+  function buildRows(scheduleData,memberKeyMap,careerMetaMap){
+    const groups=new Map();
+
+    function push(type,row){
+      const meta=type==="진로" ? careerMetaMap.get(row.id) : null;
+      const finalType=type==="진로" ? classifyCareer(row,meta) : "심리";
+      const clientId=String(row.client_id||row.basic?.id||"");
+      if(!clientId) return;
+
+      const groupKey=`${finalType}|${clientId}`;
+      if(!groups.has(groupKey)){
+        groups.set(groupKey,{
+          type:finalType,
+          clientId,
+          name:String(row.basic?.client_name||"-"),
+          key:String(memberKeyMap.get(clientId)||"-"),
+          items:[]
+        });
+      }
+      groups.get(groupKey).items.push(row);
+    }
+
+    (scheduleData?.psych||[]).forEach(row=>push("심리",row));
+    (scheduleData?.career||[]).forEach(row=>push("진로",row));
+
+    const result=[];
+
+    groups.forEach(group=>{
+      const items=group.items;
+      const allDates=[];
+      const sessions=[];
+      const reserves=[];
+
+      items.forEach(r=>{
+        const type=group.type==="심리"?"심리":"진로";
+        const actual=actualSessionValue(r,type);
+        const reserve=r.next_session_at||r.next_session_date||null;
+        const primary=type==="심리" ? r.visit_at : r.appointment_at;
+
+        [r.receipt_at,primary,r.session_start_at,r.session_end_at,reserve]
+          .filter(Boolean).forEach(v=>allDates.push(v));
+
+        const sessionDay=dayIfInMonth(actual);
+        if(sessionDay) sessions.push(sessionDay);
+
+        const reserveDay=dayIfInMonth(reserve);
+        if(reserveDay) reserves.push(reserveDay);
+      });
+
+      if(!allDates.length) return;
+
+      const startRaw=allDates.reduce((a,b)=>timeValue(a)<=timeValue(b)?a:b);
+      const endRaw=allDates.reduce((a,b)=>timeValue(a)>=timeValue(b)?a:b);
+      const start=clampToMonthDay(startRaw);
+      const end=clampToMonthDay(endRaw);
+
+      const actualDates=items
+        .map(r=>actualSessionValue(r,group.type==="심리"?"심리":"진로"))
+        .filter(Boolean)
+        .sort((a,b)=>timeValue(a)-timeValue(b));
+
+      const reserveDates=items
+        .map(r=>r.next_session_at||r.next_session_date||null)
+        .filter(Boolean)
+        .sort((a,b)=>timeValue(a)-timeValue(b));
+
+      const latestItem=[...items].sort((a,b)=>{
+        return rowEventTime(b,group.type==="심리"?"심리":"진로")-
+               rowEventTime(a,group.type==="심리"?"심리":"진로");
+      })[0];
+
+      result.push({
+        key:group.key,
+        name:group.name,
+        type:group.type,
+        counselor:"-",
+        status:normalizeStatus(latestItem?.session_status),
+        recent:actualDates.length?mmdd(actualDates[actualDates.length-1]):"-",
+        next:reserveDates.length?mmdd(reserveDates[reserveDates.length-1]):"-",
+        start:Math.min(start||1,end||days),
+        end:Math.max(start||1,end||days),
+        sessions:uniqueSortedNumbers(sessions),
+        reserves:uniqueSortedNumbers(reserves)
+      });
+    });
+
+    result.sort((a,b)=>{
+      if(a.start!==b.start) return a.start-b.start;
+      return a.key.localeCompare(b.key,"ko");
+    });
+
+    return result;
+  }
+
+  async function loadMemberKeys(clientIds){
+    const ids=[...new Set(clientIds.filter(Boolean))];
+    const map=new Map();
+    if(!ids.length) return map;
+
+    const chunkSize=100;
+    for(let i=0;i<ids.length;i+=chunkSize){
+      const chunk=ids.slice(i,i+chunkSize);
+      const {data,error}=await db
+        .from("DB_basic")
+        .select("id,member_key")
+        .in("id",chunk);
+      if(error) throw error;
+      (data||[]).forEach(r=>map.set(String(r.id),r.member_key||"-"));
+    }
+    return map;
+  }
+
+  async function loadCareerMeta(careerIds){
+    const ids=[...new Set(careerIds.filter(Boolean))];
+    const map=new Map();
+    if(!ids.length) return map;
+
+    const chunkSize=100;
+    for(let i=0;i<ids.length;i+=chunkSize){
+      const chunk=ids.slice(i,i+chunkSize);
+      const {data,error}=await db
+        .from("DB_career_counseling")
+        .select("id,topic_code,linked_recruitment_id,linked_job_hunting_id")
+        .in("id",chunk);
+      if(error) throw error;
+      (data||[]).forEach(r=>map.set(String(r.id),r));
+    }
+    return map;
+  }
+
+  async function loadScheduleSecure(session){
+    const response=await fetch(SECURE_SCHEDULE_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":SUPABASE_PUBLISHABLE_KEY,
+        "Authorization":`Bearer ${session.access_token}`
+      },
+      body:JSON.stringify({year:displayYear,month:displayMonth}),
+      cache:"no-store"
+    });
+
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok || !result?.ok){
+      throw new Error(result?.error||`상담 일정 조회 실패 (${response.status})`);
+    }
+    return result.data||{psych:[],career:[]};
+  }
+
+  async function loadDb(){
+    els.searchBtn.disabled=true;
+    els.resetBtn.disabled=true;
+    els.dbStatus.className="db-status";
+    els.dbStatus.textContent="DB 연결 중...";
+
+    try{
+      const {data:{session},error:sessionError}=await db.auth.getSession();
+      if(sessionError) throw sessionError;
+
+      if(!session?.user){
+        alert("로그인 세션이 없습니다. 대시보드에서 로그인 후 다시 이용해 주세요.");
+        location.href="index.html";
+        return;
+      }
+
+      const scheduleData=await loadScheduleSecure(session);
+
+      const clientIds=[
+        ...(scheduleData.psych||[]).map(r=>r.client_id),
+        ...(scheduleData.career||[]).map(r=>r.client_id)
+      ];
+      const careerIds=(scheduleData.career||[]).map(r=>r.id);
+
+      const [memberKeyMap,careerMetaMap]=await Promise.all([
+        loadMemberKeys(clientIds),
+        loadCareerMeta(careerIds)
+      ]);
+
+      rows=buildRows(scheduleData,memberKeyMap,careerMetaMap);
+      els.dbStatus.className="db-status ok";
+      els.dbStatus.textContent=`DB 연결 완료 · ${rows.length}명`;
+      render();
+
+    }catch(err){
+      console.error("상담칸트챠트 DB 조회 오류:",err);
+      rows=[];
+      els.dbStatus.className="db-status error";
+      els.dbStatus.textContent="DB 조회 오류";
+      render();
+      alert(err?.message||"상담 일정 DB 조회 중 오류가 발생했습니다.");
+    }finally{
+      els.searchBtn.disabled=false;
+      els.resetBtn.disabled=false;
+    }
+  }
+
+  function resetFilters(){
+    els.typeFilter.value="all";
+    els.statusFilter.value="all";
+    els.keyword.value="";
+    render();
+  }
+
+  function initDate(){
+    const now=getSeoulTodayParts();
+    displayYear=now.year;
+    displayMonth=now.month;
+    days=daysInMonth(displayYear,displayMonth);
+    today=now.day;
+    els.rangeLabel.textContent=
+      `${displayYear}년 ${displayMonth}월 1일 ~ ${displayMonth}월 ${days}일`;
+  }
+
+  els.searchBtn.addEventListener("click",render);
+  els.resetBtn.addEventListener("click",resetFilters);
+  els.keyword.addEventListener("keydown",e=>{
+    if(e.key==="Enter") render();
   });
-}
-function resetFilters(){
-  document.getElementById("typeFilter").value="all";
-  document.getElementById("statusFilter").value="all";
-  document.getElementById("keyword").value="";
-  render();
-}
-render();
+
+  initDate();
+  renderSummary([]);
+  loadDb();
+})();
 </script>
 </body>
 </html>
