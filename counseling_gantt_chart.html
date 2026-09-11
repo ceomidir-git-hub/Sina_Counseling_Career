@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상담칸트챠트 - 마음:시나브로심리상담연구소</title>
+<style>
+  :root{
+    --line:#d9e0e6;
+    --head:#0f3342;
+    --sub:#eef4f7;
+    --text:#1f2d33;
+    --muted:#667780;
+    --today:#d62828;
+    --psych:#10a66a;
+    --career:#1687d9;
+    --job:#d98900;
+    --done:#7b8790;
+    --reserve:#8e44ad;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:#f4f7f9;
+    color:var(--text);
+    font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif;
+  }
+  .page{
+    width:min(1600px, 100%);
+    margin:0 auto;
+    background:#fff;
+    min-height:100vh;
+  }
+  .topbar{
+    background:linear-gradient(90deg,#0b2c3a,#0f4557);
+    color:#fff;
+    padding:12px 18px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .title{font-size:21px;font-weight:800;letter-spacing:-.5px}
+  .range{margin-left:auto;font-size:13px;opacity:.95}
+  .back-btn{
+    height:32px;
+    padding:0 12px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(255,255,255,.42);
+    border-radius:6px;
+    background:rgba(255,255,255,.10);
+    color:#fff;
+    text-decoration:none;
+    font-size:12px;
+    font-weight:800;
+    white-space:nowrap;
+  }
+  .back-btn:hover{background:rgba(255,255,255,.18)}
+  .filters{
+    display:flex;
+    gap:8px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .filters input,.filters select,.filters button{
+    height:34px;
+    border:1px solid #bfcbd2;
+    border-radius:5px;
+    background:#fff;
+    padding:0 10px;
+    font-family:inherit;
+    font-size:13px;
+  }
+  .filters button{
+    background:#163d4d;
+    color:#fff;
+    border-color:#163d4d;
+    cursor:pointer;
+    font-weight:700;
+  }
+  .legend{
+    margin-left:auto;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    font-size:12px;
+    color:#42545d;
+  }
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .summary{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(120px,1fr));
+    gap:8px;
+    padding:10px 14px 0;
+  }
+  .card{
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:9px 12px;
+    background:#fff;
+  }
+  .card b{display:block;font-size:18px;margin-top:2px}
+  .card small{color:var(--muted);font-size:11px}
+  .gantt-wrap{
+    padding:10px 14px 18px;
+    overflow:auto;
+  }
+  .gantt{
+    min-width:1380px;
+    border:1px solid var(--line);
+    display:grid;
+    grid-template-columns: 78px 86px 86px 92px 86px 88px 94px repeat(30, 28px);
+    position:relative;
+    background:#fff;
+  }
+  .cell{
+    min-height:34px;
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:4px 5px;
+    font-size:11px;
+    position:relative;
+    background:#fff;
+    z-index:1;
+  }
+  .head{
+    background:var(--head);
+    color:#fff;
+    font-weight:700;
+    min-height:42px;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  .name{font-weight:700}
+  .left{text-align:left;justify-content:flex-start}
+  .muted{color:var(--muted)}
+  .status{
+    font-size:10px;
+    padding:3px 6px;
+    border-radius:9px;
+    background:#edf2f5;
+  }
+  .dayhead{padding:0;font-size:10px}
+  .sat{background:#eaf4ff;color:#1261a0}
+  .sun{background:#fff0f0;color:#bd1f1f}
+  .weekend-cell{background:#fafcfd}
+  .today-col::after{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:2px;
+    left:50%;
+    background:rgba(214,40,40,.7);
+    pointer-events:none;
+    z-index:4;
+  }
+  .bar{
+    position:absolute;
+    height:16px;
+    border-radius:8px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:6;
+    box-shadow:0 1px 2px rgba(0,0,0,.15);
+  }
+  .psych{background:var(--psych)}
+  .career{background:var(--career)}
+  .job{background:var(--job)}
+  .done{background:var(--done)}
+  .reserve-marker{
+    width:10px;height:10px;
+    background:var(--reserve);
+    transform:rotate(45deg);
+    position:absolute;
+    top:50%;left:50%;
+    margin:-5px 0 0 -5px;
+    z-index:7;
+    border:1px solid #fff;
+  }
+  .session-marker{
+    width:8px;height:8px;
+    border-radius:50%;
+    background:#fff;
+    border:2px solid #22333a;
+    position:absolute;
+    top:50%;left:50%;
+    margin:-4px 0 0 -4px;
+    z-index:8;
+  }
+  .footnote{
+    padding:0 14px 18px;
+    color:#61727a;
+    font-size:11px;
+  }
+  @media (max-width:900px){
+    .summary{grid-template-columns:repeat(2,1fr)}
+    .range{margin-left:0;width:100%}
+    .legend{margin-left:0;width:100%;overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="title">상담칸트챠트</div>
+    <div>심리상담 · 진로상담 · 취업상담 통합 일정</div>
+    <div class="range">2026년 9월 1일 ~ 9월 30일</div>
+    <a class="back-btn" href="index.html" title="대시보드로 돌아가기">이전화면</a>
+  </div>
+
+  <div class="filters">
+    <select id="typeFilter">
+      <option value="all">전체 상담</option>
+      <option value="심리">심리상담</option>
+      <option value="진로">진로상담</option>
+      <option value="취업">취업상담</option>
+    </select>
+    <input id="keyword" type="text" placeholder="회원KEY 또는 이름">
+    <select id="statusFilter">
+      <option value="all">전체 상태</option>
+      <option value="진행">진행</option>
+      <option value="예정">예정</option>
+      <option value="보류">보류</option>
+      <option value="종결">종결</option>
+    </select>
+    <button onclick="render()">조회</button>
+    <button onclick="resetFilters()">초기화</button>
+
+    <div class="legend">
+      <span><i class="dot" style="background:var(--psych)"></i>심리</span>
+      <span><i class="dot" style="background:var(--career)"></i>진로</span>
+      <span><i class="dot" style="background:var(--job)"></i>취업</span>
+      <span><i class="dot" style="background:var(--reserve)"></i>차기예약</span>
+      <span><i class="dot" style="background:var(--done)"></i>종결</span>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="gantt-wrap">
+    <div class="gantt" id="gantt"></div>
+  </div>
+
+  <div class="footnote">
+    샘플 기준: 막대는 상담 관리기간, ○는 실제 상담회기, ◆는 차기예약일을 의미합니다.
+    총 계획회기가 없는 상담은 임의 진행률을 계산하지 않습니다.
+  </div>
+</div>
+
+<script>
+const days = 30;
+const today = 11; // 샘플 화면 기준 2026-09-11
+
+const rows = [
+  {key:"26090101", name:"김상담", type:"심리", counselor:"박상담", status:"진행", receipt:"09/01", recent:"09/10", next:"09/17", start:1, end:24, sessions:[1,3,10], reserve:17},
+  {key:"26090202", name:"이진로", type:"진로", counselor:"최진로", status:"진행", receipt:"09/02", recent:"09/09", next:"09/16", start:2, end:20, sessions:[2,5,9], reserve:16},
+  {key:"26090303", name:"박취업", type:"취업", counselor:"정취업", status:"진행", receipt:"09/03", recent:"09/08", next:"09/15", start:3, end:22, sessions:[3,8], reserve:15},
+  {key:"26090404", name:"최심리", type:"심리", counselor:"박상담", status:"예정", receipt:"09/04", recent:"-", next:"09/12", start:4, end:18, sessions:[4], reserve:12},
+  {key:"26090505", name:"정진로", type:"진로", counselor:"최진로", status:"종결", receipt:"09/05", recent:"09/10", next:"-", start:5, end:10, sessions:[5,7,10], reserve:null},
+  {key:"26090606", name:"강취업", type:"취업", counselor:"정취업", status:"보류", receipt:"09/06", recent:"09/09", next:"-", start:6, end:14, sessions:[6,9], reserve:null},
+  {key:"26090707", name:"윤상담", type:"심리", counselor:"박상담", status:"진행", receipt:"09/07", recent:"09/11", next:"09/18", start:7, end:27, sessions:[7,11], reserve:18},
+  {key:"26090808", name:"한진로", type:"진로", counselor:"최진로", status:"예정", receipt:"09/08", recent:"-", next:"09/14", start:8, end:25, sessions:[8], reserve:14}
+];
+
+function dayOfWeek(day){
+  const d = new Date(2026,8,day);
+  return d.getDay(); // 0 Sun
+}
+function typeClass(type,status){
+  if(status==="종결") return "done";
+  if(type==="심리") return "psych";
+  if(type==="진로") return "career";
+  return "job";
+}
+function filteredRows(){
+  const tf=document.getElementById("typeFilter").value;
+  const sf=document.getElementById("statusFilter").value;
+  const kw=document.getElementById("keyword").value.trim();
+  return rows.filter(r =>
+    (tf==="all" || r.type===tf) &&
+    (sf==="all" || r.status===sf) &&
+    (!kw || r.key.includes(kw) || r.name.includes(kw))
+  );
+}
+function renderSummary(data){
+  const total=data.length;
+  const psych=data.filter(x=>x.type==="심리").length;
+  const career=data.filter(x=>x.type==="진로").length;
+  const job=data.filter(x=>x.type==="취업").length;
+  const todayCount=data.filter(x=>x.sessions.includes(today) || x.reserve===today).length;
+  const items=[
+    ["조회대상", total+"명"],
+    ["심리상담", psych+"명"],
+    ["진로상담", career+"명"],
+    ["취업상담", job+"명"],
+    ["오늘 일정", todayCount+"건"]
+  ];
+  document.getElementById("summary").innerHTML=items.map(([a,b])=>`<div class="card"><small>${a}</small><b>${b}</b></div>`).join("");
+}
+function render(){
+  const data=filteredRows();
+  renderSummary(data);
+  const g=document.getElementById("gantt");
+  g.innerHTML="";
+
+  const heads=["회원KEY","이름","상담구분","담당상담사","상태","최근상담일","차기예약일"];
+  heads.forEach(h=>{
+    const c=document.createElement("div");
+    c.className="cell head";
+    c.textContent=h;
+    g.appendChild(c);
+  });
+  for(let d=1; d<=days; d++){
+    const dow=dayOfWeek(d);
+    const c=document.createElement("div");
+    c.className="cell head dayhead "+(dow===0?"sun":dow===6?"sat":"");
+    c.textContent=d;
+    g.appendChild(c);
+  }
+
+  data.forEach(r=>{
+    const vals=[
+      [r.key,"muted"],
+      [r.name,"name left"],
+      [r.type+"상담",""],
+      [r.counselor,""],
+      [r.status,""],
+      [r.recent,""],
+      [r.next,""]
+    ];
+    vals.forEach(([v,cls],i)=>{
+      const c=document.createElement("div");
+      c.className="cell "+cls;
+      if(i===4) c.innerHTML=`<span class="status">${v}</span>`;
+      else c.textContent=v;
+      g.appendChild(c);
+    });
+
+    for(let d=1; d<=days; d++){
+      const dow=dayOfWeek(d);
+      const c=document.createElement("div");
+      c.className="cell "+((dow===0||dow===6)?"weekend-cell ":"")+(d===today?"today-col":"");
+      if(d===r.start){
+        const bar=document.createElement("div");
+        bar.className="bar "+typeClass(r.type,r.status);
+        const width=(r.end-r.start+1)*28-4;
+        bar.style.left="2px";
+        bar.style.width=width+"px";
+        c.appendChild(bar);
+      }
+      if(r.sessions.includes(d)){
+        const m=document.createElement("div");
+        m.className="session-marker";
+        c.appendChild(m);
+      }
+      if(r.reserve===d){
+        const m=document.createElement("div");
+        m.className="reserve-marker";
+        c.appendChild(m);
+      }
+      g.appendChild(c);
+    }
+  });
+}
+function resetFilters(){
+  document.getElementById("typeFilter").value="all";
+  document.getElementById("statusFilter").value="all";
+  document.getElementById("keyword").value="";
+  render();
+}
+render();
+</script>
+</body>
+</html>
