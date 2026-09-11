@@ -2,105 +2,932 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>구인공고 검색</title>
   <style>
     *{box-sizing:border-box}
-    body{margin:0;background:#f4f6f8;color:#1f2937;font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif;font-size:14px}
-    .wrap{max-width:1320px;margin:0 auto;padding:22px 18px 34px}
-    .card{background:#fff;border:1px solid #d9dee5;border-radius:10px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(15,23,42,.035)}
-    h1{margin:0;font-size:21px;letter-spacing:-.4px}
-    h2{margin:0;font-size:16px}
-    .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .back{height:32px;padding:0 11px;border:1px solid #bfc9d5;border-radius:6px;background:#fff;color:#334155;font-size:13px;font-weight:700;cursor:pointer}
-    .search-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr auto;gap:10px;align-items:end}
-    label{display:block;margin-bottom:5px;font-size:13px;font-weight:800;color:#344154}
-    input,select{width:100%;height:36px;border:1px solid #cbd5e1;border-radius:6px;padding:0 10px;background:#fffde8;color:#1f2937;font-size:14px}
-    .buttons{display:flex;gap:6px}
-    button.primary,button.secondary{height:36px;padding:0 14px;border-radius:6px;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
-    button.primary{border:1px solid #1f2937;background:#1f2937;color:#fff}
-    button.secondary{border:1px solid #bfc9d5;background:#fff;color:#334155}
-    .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-    .status{font-size:13px;color:#64748b}
-    .guide{margin:0 0 14px;padding:11px 13px;border:1px solid #cfe0f7;border-radius:7px;background:#f6faff;color:#365475;font-size:13px;line-height:1.55}
-    .empty{padding:34px 12px;text-align:center;color:#64748b;font-size:14px}
-    #googleResults{min-height:100px}
-    .notice{margin:12px 0 0;color:#64748b;font-size:12px;line-height:1.65}
-    @media (max-width:900px){.search-grid{grid-template-columns:1fr 1fr}.buttons{grid-column:1 / -1;justify-content:flex-end}}
-    @media (max-width:560px){.wrap{padding:14px 10px}.card{padding:14px}.search-grid{grid-template-columns:1fr}.buttons{grid-column:auto}.head{align-items:flex-start;flex-direction:column}}
-  </style>
+
+    html{-webkit-text-size-adjust:100%}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      min-height:100dvh;
+      background:#f4f6f8;
+      color:#1f2937;
+      font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif;
+      font-size:13px;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:760px;
+      margin:0 auto;
+      padding:10px;
+      padding-left:max(10px, env(safe-area-inset-left));
+      padding-right:max(10px, env(safe-area-inset-right));
+      padding-top:max(10px, env(safe-area-inset-top));
+      padding-bottom:max(10px, env(safe-area-inset-bottom));
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid #d9dee5;
+      border-radius:10px;
+      padding:12px;
+      box-shadow:0 2px 8px rgba(15,23,42,.035);
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      line-height:1.3;
+      letter-spacing:-.3px;
+    }
+
+    .head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .title-row{
+      min-width:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:1;
+    }
+
+    .title-row h1{
+      flex:none;
+    }
+
+    .search-warning{
+      color:#dc2626;
+      font-size:11.055px;
+      font-weight:800;
+      line-height:1.45;
+      letter-spacing:-.2px;
+      word-break:keep-all;
+    }
+
+
+    .back{
+      flex:none;
+      min-width:58px;
+      min-height:40px;
+      padding:0 12px;
+      border:1px solid #bfc9d5;
+      border-radius:7px;
+      background:#fff;
+      color:#334155;
+      font-family:inherit;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      touch-action:manipulation;
+    }
+
+    .search-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      align-items:end;
+    }
+
+    .field{min-width:0}
+
+    .field > label{
+      display:block;
+      margin-bottom:6px;
+      font-size:14px;
+      line-height:1.25;
+      font-weight:800;
+      color:#344154;
+    }
+
+    .radio-box{
+      min-height:44px;
+      display:grid;
+      align-items:center;
+      gap:4px 10px;
+      padding:6px 9px;
+      border:1px solid #cbd5e1;
+      border-radius:7px;
+      background:#fffde8;
+    }
+
+    .period-box{grid-template-columns:repeat(3, auto); justify-content:start}
+    .career-box{grid-template-columns:repeat(2, minmax(0,1fr))}
+
+    .radio-option{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      min-height:30px;
+      margin:0;
+      font-size:13px;
+      font-weight:700;
+      color:#334155;
+      cursor:pointer;
+      touch-action:manipulation;
+      white-space:nowrap;
+    }
+
+    .radio-option input{
+      width:17px;
+      height:17px;
+      margin:0;
+      accent-color:#1f2937;
+      cursor:pointer;
+      flex:none;
+    }
+
+    .company-input{
+      width:100%;
+      min-height:44px;
+      border:1px solid #cbd5e1;
+      border-radius:7px;
+      padding:0 10px;
+      background:#fffde8;
+      color:#1f2937;
+      font-family:inherit;
+      font-size:14px;
+      outline:none;
+    }
+
+    .company-input:focus{border-color:#64748b}
+    .company-input::placeholder{color:#94a3b8}
+
+    .combo{
+      position:relative;
+      width:100%;
+    }
+
+    .combo-button{
+      position:relative;
+      width:100%;
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:0 82px 0 10px;
+      border:1px solid #cbd5e1;
+      border-radius:7px;
+      background:#fffde8;
+      color:#1f2937;
+      font-family:inherit;
+      font-size:14px;
+      cursor:pointer;
+      text-align:left;
+      touch-action:manipulation;
+    }
+
+    .combo-button:focus{
+      outline:none;
+      border-color:#64748b;
+    }
+
+    .combo-clear{
+      position:absolute;
+      right:42px;
+      top:50%;
+      transform:translateY(-50%);
+      width:22px;
+      height:22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #fecaca;
+      border-radius:50%;
+      background:#fff1f2;
+      color:#dc2626;
+      font-size:14px;
+      font-weight:900;
+      line-height:1;
+      cursor:pointer;
+      z-index:2;
+      touch-action:manipulation;
+    }
+
+    .combo-clear:hover{
+      background:#fee2e2;
+      border-color:#fca5a5;
+    }
+    .combo-clear[hidden]{display:none}
+
+    .combo-empty .combo-label{
+      color:#94a3b8;
+      font-weight:400;
+    }
+
+    .combo-arrow{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#2563eb;
+      font-size:15px;
+      font-weight:900;
+      line-height:1;
+      pointer-events:none;
+    }
+
+    .combo-menu{
+      position:absolute;
+      top:47px;
+      left:0;
+      right:0;
+      z-index:50;
+      display:none;
+      background:#fff;
+      border:1px solid #cbd5e1;
+      border-radius:7px;
+      box-shadow:0 8px 22px rgba(15,23,42,.13);
+      overflow:hidden;
+    }
+
+    .combo.open .combo-menu{display:block}
+
+    .combo-option{
+      width:100%;
+      min-height:42px;
+      padding:0 10px;
+      border:0;
+      border-bottom:1px solid #edf0f3;
+      background:#fff;
+      color:#1f2937;
+      font-family:inherit;
+      font-size:14px;
+      text-align:left;
+      cursor:pointer;
+      touch-action:manipulation;
+    }
+
+    .combo-option:hover{background:#f5f7fa}
+
+    .combo-input-wrap{
+      padding:8px;
+      background:#f8fafc;
+    }
+
+    .combo-input{
+      width:100%;
+      min-height:40px;
+      border:1px solid #bfc9d5;
+      border-radius:6px;
+      padding:0 9px;
+      background:#fff;
+      color:#1f2937;
+      font-family:inherit;
+      font-size:14px;
+      outline:none;
+    }
+
+    .combo-input:focus{border-color:#64748b}
+
+    .buttons{
+      grid-column:1 / -1;
+      display:grid;
+      grid-template-columns:.72fr 1fr 1.12fr;
+      gap:6px;
+      margin-top:2px;
+    }
+
+    button.primary,
+    button.secondary,
+    button.ai{
+      min-width:0;
+      min-height:44px;
+      padding:0 7px;
+      border-radius:7px;
+      font-family:inherit;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+      touch-action:manipulation;
+    }
+
+    button.primary{
+      border:1px solid #1f2937;
+      background:#1f2937;
+      color:#fff;
+    }
+
+    button.ai{
+      border:1px solid #2563eb;
+      background:#2563eb;
+      color:#fff;
+    }
+
+    button.secondary{
+      border:1px solid #bfc9d5;
+      background:#fff;
+      color:#334155;
+    }
+
+    /* 스마트폰: 한 열, 검색기간 3개를 한 줄에 배치 */
+    @media (max-width:599px){
+      .wrap{max-width:100%; padding:8px}
+      .card{padding:11px}
+      .search-grid{grid-template-columns:1fr; gap:9px}
+      .period-box{
+        grid-template-columns:repeat(3, minmax(0,1fr));
+        justify-content:stretch;
+        gap:4px 6px;
+      }
+      .buttons{grid-column:auto}
+    }
+
+    /* 매우 좁은 스마트폰 / 폴드 커버 */
+    @media (max-width:340px){
+      .period-box{grid-template-columns:1fr 1fr}
+      .buttons{grid-template-columns:.72fr 1fr}
+      .buttons .ai{grid-column:1 / -1}
+      .radio-option{font-size:12px}
+    }
+
+    /* 폴드 펼침 / 소형 태블릿 */
+    @media (min-width:600px) and (max-width:899px){
+      .wrap{max-width:680px}
+      .search-grid{grid-template-columns:1fr 1fr}
+      .buttons{grid-column:1 / -1}
+    }
+
+    /* 태블릿·PC */
+    @media (min-width:900px){
+      .wrap{max-width:760px}
+      .search-grid{grid-template-columns:1.15fr 1fr 1fr}
+      .buttons{
+        grid-column:1 / -1;
+        grid-template-columns:90px 1fr 1fr;
+      }
+    }
+  
+    @media (max-width:560px){
+      .head{
+        align-items:flex-start;
+      }
+      .title-row{
+        display:block;
+      }
+      .search-warning{
+        margin-top:5px;
+        font-size:11.055px;
+        line-height:1.45;
+      }
+    }
+
+</style>
 </head>
+
 <body>
   <main class="wrap">
     <section class="card">
       <div class="head">
-        <h1>구인공고 검색</h1>
+        <div class="title-row">
+          <h1>구인공고 검색</h1>
+          <div class="search-warning">경고 : 1회 조회 후 다시 조회하면 이전 회사는 검색이 안될 수도 있음(반드시 캡쳐할것)</div>
+        </div>
         <button class="back" type="button" onclick="window.close()">닫기</button>
       </div>
+
       <div class="search-grid">
-        <div>
-          <label for="industry">업종</label>
-          <input id="industry" type="text" placeholder="예: 제조업">
+        <!-- 검색기간 -->
+        <div class="field">
+          <label>검색기간</label>
+          <div class="radio-box period-box">
+            <label class="radio-option">
+              <input type="radio" name="period" value="2w" checked>
+              <span>2주 이내</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="period" value="1w">
+              <span>1주일 이내</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="period" value="today">
+              <span>당일</span>
+            </label>
+          </div>
         </div>
-        <div>
-          <label for="region">지역</label>
-          <select id="region"><option value="">전체</option><option>경남</option><option>부산</option><option>울산</option></select>
+
+        <!-- 신입/경력: 기본값은 신입, 사용자가 경력으로 변경 가능 -->
+        <div class="field">
+          <label>경력구분</label>
+          <div class="radio-box career-box">
+            <label class="radio-option">
+              <input type="radio" name="careerType" value="신입" checked>
+              <span>신입</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="careerType" value="경력">
+              <span>경력</span>
+            </label>
+          </div>
         </div>
-        <div>
-          <label for="keyword">직무·자격 키워드</label>
-          <input id="keyword" type="text" placeholder="예: 전기, 자동화설비">
+
+        <!-- 업체명: 선택 입력 -->
+        <div class="field">
+          <label for="companyName">업체명</label>
+          <input
+            id="companyName"
+            class="company-input"
+            type="text"
+            placeholder="예: 한화에어로스페이스">
         </div>
+
+        <!-- 업종 -->
+        <div class="field">
+          <label>업종</label>
+          <div class="combo" id="industryCombo" data-value="제조업">
+            <button type="button" class="combo-button">
+              <span class="combo-label">제조업</span>
+              <span class="combo-clear" title="삭제">×</span>
+              <span class="combo-arrow">▼</span>
+            </button>
+            <div class="combo-menu">
+              <button type="button" class="combo-option" data-value="제조업">제조업</button>
+              <div class="combo-input-wrap">
+                <input type="text" class="combo-input" placeholder="직접 입력">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 지역 -->
+        <div class="field">
+          <label>지역</label>
+          <div class="combo" id="regionCombo" data-value="창원">
+            <button type="button" class="combo-button">
+              <span class="combo-label">창원</span>
+              <span class="combo-clear" title="삭제">×</span>
+              <span class="combo-arrow">▼</span>
+            </button>
+            <div class="combo-menu">
+              <button type="button" class="combo-option" data-value="경남">경남</button>
+              <button type="button" class="combo-option" data-value="김해">김해</button>
+              <button type="button" class="combo-option" data-value="부산">부산</button>
+              <button type="button" class="combo-option" data-value="사천">사천</button>
+              <button type="button" class="combo-option" data-value="울산">울산</button>
+              <button type="button" class="combo-option" data-value="진주">진주</button>
+              <button type="button" class="combo-option" data-value="창원">창원</button>
+              <button type="button" class="combo-option" data-value="포항">포항</button>
+              <button type="button" class="combo-option" data-value="함안">함안</button>
+              <div class="combo-input-wrap">
+                <input type="text" class="combo-input" placeholder="직접 입력 (예: 양산)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 직무·자격 -->
+        <div class="field">
+          <label>직무·자격 키워드</label>
+          <div class="combo" id="keywordCombo" data-value="전기, PLC">
+            <button type="button" class="combo-button">
+              <span class="combo-label">전기, PLC</span>
+              <span class="combo-clear" title="삭제">×</span>
+              <span class="combo-arrow">▼</span>
+            </button>
+            <div class="combo-menu">
+              <button type="button" class="combo-option" data-value="전기, PLC">전기, PLC</button>
+              <button type="button" class="combo-option" data-value="자동화 설비">자동화 설비</button>
+              <button type="button" class="combo-option" data-value="3차원 측정">3차원 측정</button>
+              <button type="button" class="combo-option" data-value="5축 가공">5축 가공</button>
+              <div class="combo-input-wrap">
+                <input type="text" class="combo-input" placeholder="직접 입력">
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="buttons">
           <button class="secondary" type="button" id="resetBtn">초기화</button>
-          <button class="primary" type="button" id="searchBtn">검색</button>
+          <button class="primary" type="button" id="searchBtn">Google 검색</button>
+          <button class="ai" type="button" id="aiSearchBtn">Google AI 조사</button>
         </div>
       </div>
     </section>
-
-    <section class="card">
-      <div class="result-head">
-        <h2>검색 결과</h2>
-        <span class="status" id="searchStatus">검색조건을 입력하고 검색하세요.</span>
-      </div>
-      <p class="guide">Google 검색 결과를 그대로 표시합니다. 공고 내용을 수집하거나 DB·파일에 저장하지 않습니다.</p>
-      <div id="emptyState" class="empty">아직 검색 결과가 없습니다.</div>
-      <div id="googleResults" hidden></div>
-      <p class="notice">※ 업종·지역·직무·자격 키워드를 Google 검색어에 반영합니다. 실제 게시일·마감일·채용조건은 원문 공고에서 직접 확인하세요.</p>
-    </section>
   </main>
-  <script async src="https://cse.google.com/cse.js?cx=7283868aa07a545a4"></script>
+
   <script>
-    const industry = document.getElementById('industry');
-    const region = document.getElementById('region');
-    const keyword = document.getElementById('keyword');
-    const searchStatus = document.getElementById('searchStatus');
-    const emptyState = document.getElementById('emptyState');
-    const googleResults = document.getElementById('googleResults');
+    const searchStatus = { textContent: '' };
+    const companyName = document.getElementById('companyName');
     const searchBtn = document.getElementById('searchBtn');
-    let googleSearchElement = null;
-    function buildQuery(){
-      const terms = [region.value, industry.value.trim(), keyword.value.trim(), '채용'].filter(Boolean);
-      return terms.join(' ');
-    }
-    function renderGoogleSearch(){
-      if (!window.google?.search?.cse?.element) return false;
-      if (!googleSearchElement) {
-        google.search.cse.element.render({ div: 'googleResults', tag: 'searchresults-only', gname: 'sinaJobSearch' });
-        googleSearchElement = google.search.cse.element.getElement('sinaJobSearch');
+    const aiSearchBtn = document.getElementById('aiSearchBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function setupCombo(id){
+      const combo = document.getElementById(id);
+      const button = combo.querySelector('.combo-button');
+      const label = combo.querySelector('.combo-label');
+      const clear = combo.querySelector('.combo-clear');
+      const options = combo.querySelectorAll('.combo-option');
+      const input = combo.querySelector('.combo-input');
+
+      function refreshClearState(){
+        const hasValue = Boolean((combo.dataset.value || '').trim());
+        clear.hidden = !hasValue;
+        combo.classList.toggle('combo-empty', !hasValue);
+        if(!hasValue){
+          label.textContent = '선택 안함';
+        }
       }
-      return Boolean(googleSearchElement);
+
+      clear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        combo.dataset.value = '';
+        label.textContent = '선택 안함';
+        input.value = '';
+        combo.classList.remove('open');
+        refreshClearState();
+      });
+
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.combo.open').forEach(other => {
+          if(other !== combo) other.classList.remove('open');
+        });
+        combo.classList.toggle('open');
+        if(combo.classList.contains('open')){
+          setTimeout(() => input.focus(), 0);
+        }
+      });
+
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          const value = option.dataset.value;
+          combo.dataset.value = value;
+          label.textContent = value;
+          input.value = '';
+          combo.classList.remove('open');
+          refreshClearState();
+        });
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter'){
+          const value = input.value.trim();
+          if(value){
+            combo.dataset.value = value;
+            label.textContent = value;
+            combo.classList.remove('open');
+            refreshClearState();
+          }
+          e.preventDefault();
+        }
+      });
+
+      input.addEventListener('blur', () => {
+        const value = input.value.trim();
+        if(value){
+          combo.dataset.value = value;
+          label.textContent = value;
+          refreshClearState();
+        }
+      });
+
+      refreshClearState();
+      return combo;
     }
+
+    const industryCombo = setupCombo('industryCombo');
+    const regionCombo = setupCombo('regionCombo');
+    const keywordCombo = setupCombo('keywordCombo');
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.combo.open').forEach(combo => {
+        combo.classList.remove('open');
+      });
+    });
+
+    document.querySelectorAll('.combo-menu').forEach(menu => {
+      menu.addEventListener('click', e => e.stopPropagation());
+    });
+
+    function pad2(n){
+      return String(n).padStart(2,'0');
+    }
+
+    function formatDate(date){
+      return date.getFullYear() + '-' +
+             pad2(date.getMonth() + 1) + '-' +
+             pad2(date.getDate());
+    }
+
+    function getTodayLocal(){
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function getSelectedPeriod(){
+      return document.querySelector('input[name="period"]:checked')?.value || '2w';
+    }
+
+    function getSelectedCareerType(){
+      return document.querySelector('input[name="careerType"]:checked')?.value || '신입';
+    }
+
+    function getPeriodInfo(){
+      const today = getTodayLocal();
+      const start = new Date(today);
+      const period = getSelectedPeriod();
+      let label = '';
+      let days = 1;
+
+      // 화면/AI에 표시하는 기간은 '오늘 포함' 기준이다.
+      // 2주: 오늘 + 이전 13일 = 총 14일
+      // 1주: 오늘 + 이전 6일  = 총 7일
+      // 당일: 오늘 1일
+      if(period === '2w'){
+        start.setDate(start.getDate() - 13);
+        label = '2주 이내';
+        days = 14;
+      }else if(period === '1w'){
+        start.setDate(start.getDate() - 6);
+        label = '1주일 이내';
+        days = 7;
+      }else{
+        label = '당일';
+        days = 1;
+      }
+
+      // Google 검색 연산자의 경계값은 표시기간과 분리한다.
+      // 원하는 시작일을 포함시키기 위해 시작일의 전날을 after 경계로 둔다.
+      const googleAfter = new Date(start);
+      googleAfter.setDate(googleAfter.getDate() - 1);
+
+      // 오늘을 포함시키기 위해 내일을 before 경계로 둔다.
+      const googleBefore = new Date(today);
+      googleBefore.setDate(googleBefore.getDate() + 1);
+
+      return {
+        startDate: formatDate(start),
+        todayDate: formatDate(today),
+        googleAfterDate: formatDate(googleAfter),
+        googleBeforeDate: formatDate(googleBefore),
+        days,
+        label
+      };
+    }
+
+    function commitComboInput(combo){
+      const input = combo.querySelector('.combo-input');
+      const label = combo.querySelector('.combo-label');
+      const value = input.value.trim();
+      if(value){
+        combo.dataset.value = value;
+        label.textContent = value;
+      }
+    }
+
+    function cleanGoogleTerm(value){
+      return String(value || '').replace(/"/g, '').trim();
+    }
+
+    function exactGoogleTerm(value){
+      const cleaned = cleanGoogleTerm(value);
+      return cleaned ? '"' + cleaned + '"' : '';
+    }
+
+    function buildGoogleKeywordGroup(keywordText){
+      const cleaned = cleanGoogleTerm(keywordText);
+      if(!cleaned) return '';
+
+      // UI에 쉼표로 구분되어 있는 키워드는 각각 독립 검색어로 OR 처리한다.
+      // 예: "전기, PLC" → ("전기" OR "PLC")
+      const parts = cleaned
+        .split(',')
+        .map(part => part.trim())
+        .filter(Boolean);
+
+      if(parts.length > 1){
+        return '(' + parts.map(exactGoogleTerm).join(' OR ') + ')';
+      }
+
+      return exactGoogleTerm(cleaned);
+    }
+
+    function buildQuery(){
+      commitComboInput(industryCombo);
+      commitComboInput(regionCombo);
+      commitComboInput(keywordCombo);
+
+      const companyText = companyName.value.trim();
+      const careerType = getSelectedCareerType();
+      const industryText = industryCombo.dataset.value || '';
+      const regionText = regionCombo.dataset.value || '';
+      const keywordText = keywordCombo.dataset.value || '';
+      const periodInfo = getPeriodInfo();
+
+      const terms = [];
+
+      // 1. 업체명: 입력한 경우 정확한 회사명으로 검색한다.
+      if(companyText){
+        terms.push(exactGoogleTerm(companyText));
+      }
+
+      // 2. 지역: 화면에서 선택/입력한 지역명을 정확한 구문으로 고정한다.
+      if(regionText){
+        terms.push(exactGoogleTerm(regionText));
+      }
+
+      // 3. 경력구분: 사용자가 선택한 "신입" 또는 "경력"만 정확히 반영한다.
+      if(careerType){
+        terms.push(exactGoogleTerm(careerType));
+      }
+
+      // 4. 업종: 업체명 입력 시 기존 로직에 의해 빈칸이므로 검색식에서도 제외된다.
+      if(industryText){
+        terms.push(exactGoogleTerm(industryText));
+      }
+
+      // 5. 직무·자격:
+      //    "전기, PLC"처럼 쉼표로 구분된 값은 AND가 아니라 OR로 검색한다.
+      const keywordGroup = buildGoogleKeywordGroup(keywordText);
+      if(keywordGroup){
+        terms.push(keywordGroup);
+      }
+
+      // 6. 구인공고 성격을 나타내는 검색어는 OR로 묶는다.
+      terms.push('(채용 OR 모집 OR 구인)');
+
+      // 7. 실제 첨부 검색결과에서 확인된 SNS성 결과를 도메인 단위로 제외한다.
+      //    일반 단어(-교육/-뉴스 등)를 제외하지 않아 정상 채용공고의 과도한 누락을 줄인다.
+      terms.push('-site:threads.net');
+      terms.push('-site:instagram.com');
+      terms.push('-site:facebook.com');
+
+      // 8. 검색기간은 Google 문서 업데이트 날짜 필터이다.
+      //    화면의 시작일을 포함하도록 전날을 after 경계값으로 사용한다.
+      terms.push('after:' + periodInfo.googleAfterDate);
+      terms.push('before:' + periodInfo.googleBeforeDate);
+
+      return {
+        query: terms.join(' '),
+        periodInfo,
+        companyText,
+        careerType,
+        industryText,
+        regionText,
+        keywordText
+      };
+    }
+
     function executeSearch(){
-      const query = buildQuery();
-      if (!query || query === '채용'){searchStatus.textContent='지역·업종·직무·자격 중 한 항목을 입력하세요.';return;}
-      if (!renderGoogleSearch()) { searchStatus.textContent='Google 검색 화면을 준비 중입니다. 잠시 후 다시 검색하세요.'; return; }
-      emptyState.hidden=true;googleResults.hidden=false;
-      googleSearchElement.execute(query);
-      searchStatus.textContent='검색어: '+query;
+      const result = buildQuery();
+
+      const googleUrl =
+        'https://www.google.com/search?q=' +
+        encodeURIComponent(result.query);
+
+      searchStatus.textContent =
+        'Google 검색 · ' +
+        result.periodInfo.label + ' · ' +
+        (result.careerType ? result.careerType + ' · ' : '') +
+        (result.companyText ? result.companyText + ' · ' : '') +
+        (result.regionText ? result.regionText + ' · ' : '') +
+        (result.industryText ? result.industryText + ' · ' : '') +
+        result.keywordText;
+
+      // 모바일 인앱 브라우저에서도 안정적으로 동작하도록
+      // 새 창(_blank)이 아니라 현재 창에서 Google 검색으로 이동한다.
+      window.location.href = googleUrl;
     }
-    document.getElementById('searchBtn').addEventListener('click',executeSearch);
-    document.getElementById('resetBtn').addEventListener('click',() => {industry.value='';region.value='';keyword.value='';googleResults.replaceChildren();googleSearchElement=null;googleResults.hidden=true;emptyState.hidden=false;emptyState.textContent='아직 검색 결과가 없습니다.';searchStatus.textContent='검색조건을 입력하고 검색하세요.';});
-    keyword.addEventListener('keydown',event=>{if(event.key==='Enter') executeSearch();});
+
+    function buildAIQuestion(){
+      commitComboInput(industryCombo);
+      commitComboInput(regionCombo);
+      commitComboInput(keywordCombo);
+
+      const companyText = companyName.value.trim();
+      const careerType = getSelectedCareerType();
+      const industryText = industryCombo.dataset.value || '';
+      const regionText = regionCombo.dataset.value || '';
+      const keywordText = keywordCombo.dataset.value || '';
+      const periodInfo = getPeriodInfo();
+
+      const conditionParts = [];
+
+      if(careerType) conditionParts.push('경력구분은 ' + careerType);
+      if(regionText) conditionParts.push('지역은 ' + regionText);
+      if(industryText) conditionParts.push('업종은 ' + industryText);
+      if(keywordText) conditionParts.push('직무·자격은 ' + keywordText);
+
+      const companyCondition = companyText
+        ? '업체명은 "' + companyText.replace(/"/g, '') +
+          '"이며, 이 업체의 실제 채용공고를 최우선으로 확인해줘. '
+        : '';
+
+      const conditionSentence = conditionParts.length
+        ? '검색조건은 ' + conditionParts.join(', ') + '이다. '
+        : '';
+
+      const question =
+        '오늘 기준 ' + periodInfo.label +
+        ' (' + periodInfo.startDate + ' ~ ' + periodInfo.todayDate + ')' +
+        ' 범위에서 구인공고를 철저하게 조사해줘. ' +
+        companyCondition +
+        conditionSentence +
+
+        '한 번의 검색 결과만 보고 끝내지 말고, 동일 조건에서 ' +
+        '"채용", "모집", "구인" 표현을 각각 확인하여 공개 웹의 서로 다른 출처를 반복 확인해줘. ' +
+
+        '검색 결과에 나온 공고는 가능하면 원문 채용공고까지 확인하고, ' +
+        '게시일, 마감일, 현재 지원 가능 여부를 원문 기준으로 다시 검증해줘. ' +
+
+        '같은 회사의 같은 공고가 여러 출처에 중복 노출되면 하나로 정리하고, ' +
+        '서로 다른 모집직종은 별도 공고로 유지해줘. ' +
+
+        '조건과 직접 관련 없는 교육, 학원, 뉴스, 블로그, 단순 회사소개는 제외하고, ' +
+        '이미 마감된 공고도 제외해줘. ' +
+
+        '회사명, 모집직종, 근무지역, 경력, 학력, 급여, 게시일, 마감일, 출처, 원문 URL 순서로 정리해줘. ' +
+
+        '확인되지 않은 항목은 임의로 추정하지 말고 "확인 필요"로 표시하고, ' +
+        '원문을 확인하지 못한 공고는 "원문 확인 필요"라고 구분해줘.';
+
+      return {
+        question,
+        periodInfo,
+        companyText,
+        careerType,
+        industryText,
+        regionText,
+        keywordText
+      };
+    }
+
+    function executeAISearch(){
+      const result = buildAIQuestion();
+      const aiUrl =
+        'https://www.google.com/search?udm=50&hl=ko&q=' +
+        encodeURIComponent(result.question);
+
+      searchStatus.textContent =
+        'Google AI 조사 · ' +
+        result.periodInfo.label + ' · ' +
+        (result.careerType ? result.careerType + ' · ' : '') +
+        (result.companyText ? result.companyText + ' · ' : '') +
+        result.regionText + ' · ' +
+        result.industryText + ' · ' +
+        result.keywordText;
+
+      window.open(aiUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function setComboDefault(combo, value){
+      combo.dataset.value = value;
+      combo.querySelector('.combo-label').textContent = value || '선택 안함';
+      combo.querySelector('.combo-input').value = '';
+      combo.classList.remove('open');
+      combo.classList.toggle('combo-empty', !value);
+
+      const clear = combo.querySelector('.combo-clear');
+      if(clear) clear.hidden = !value;
+    }
+
+    function resetForm(){
+      companyName.value = '';
+      setComboDefault(industryCombo, '제조업');
+      setComboDefault(regionCombo, '창원');
+      setComboDefault(keywordCombo, '전기, PLC');
+
+      const defaultPeriod =
+        document.querySelector('input[name="period"][value="2w"]');
+      if(defaultPeriod) defaultPeriod.checked = true;
+
+      const defaultCareer =
+        document.querySelector('input[name="careerType"][value="신입"]');
+      if(defaultCareer) defaultCareer.checked = true;
+
+      searchStatus.textContent = '검색조건을 확인하고 검색하세요.';
+    }
+
+    // 업체명을 입력하면 업종은 자동으로 빈칸 처리한다.
+    // 이후 사용자가 필요하면 업종을 다시 선택하거나 직접 입력할 수 있다.
+    companyName.addEventListener('input', () => {
+      if(companyName.value.trim()){
+        setComboDefault(industryCombo, '');
+      }
+    });
+
+    companyName.addEventListener('keydown', event => {
+      if(event.key === 'Enter'){
+        executeSearch();
+      }
+    });
+
+    searchBtn.addEventListener('click', executeSearch);
+    aiSearchBtn.addEventListener('click', executeAISearch);
+    resetBtn.addEventListener('click', resetForm);
   </script>
 </body>
 </html>
