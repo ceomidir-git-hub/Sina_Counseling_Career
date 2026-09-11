@@ -759,7 +759,7 @@
     .member-list-head strong{
       min-width:0;
       color:#344154;
-      font-size:9.1px;
+      font-size:9.6px;
       font-weight:900;
       letter-spacing:-.12px;
       white-space:nowrap;
@@ -2001,7 +2001,7 @@
       display:flex;
       align-items:center;
       color:#26364f;
-      font-size:11.4px;
+      font-size:12px;
       font-weight:900;
       letter-spacing:-.22px;
       white-space:nowrap;
@@ -2018,7 +2018,7 @@
       overflow:hidden;
       color:#465365;
       background:#fff;
-      font-size:9.2px;
+      font-size:9.7px;
     }
     .counsel-ppp-table col.ppp-no{width:12%}
     .counsel-ppp-table col.ppp-data{width:24%}
@@ -2054,13 +2054,21 @@
     .counsel-ppp-table td:nth-child(3),
     .counsel-ppp-table td:nth-child(4){text-align:left}
 
+    /* PPP가 상담자 노트 카드로 이동했으므로 기존 하단용 상단 구분선/여백 제거 */
+    .ppp-partner-card .counsel-ppp-area{
+      margin-top:0;
+      padding-top:0;
+      border-top:0;
+    }
+
     @media (max-height:820px){
       .counsel-ppp-area{margin-top:7px;padding-top:6px}
-      .counsel-ppp-title{height:23px;font-size:10.6px}
-      .counsel-ppp-table{font-size:8.5px}
+      .counsel-ppp-title{height:23px;font-size:11.1px}
+      .counsel-ppp-table{font-size:8.9px}
       .counsel-ppp-table th,
       .counsel-ppp-table td{height:23px;padding:0 4px}
-      .counsel-ppp-table th{font-size:8.5px}
+      .counsel-ppp-table th{font-size:8.9px}
+      .ppp-partner-card .counsel-ppp-area{margin-top:0;padding-top:0;border-top:0}
     }
 
 </style>
@@ -2389,38 +2397,7 @@
         </div>
 
         <div class="counsel-bottom-grid">
-          <div class="counsel-note-card">
-            <div class="counsel-section-title">
-              <strong>📝 상담자 노트</strong>
-              <span id="counselTodayLabel">오늘</span>
-            </div>
-            <div class="counsel-note-nav">
-              <button type="button">◀ 이전</button>
-              <b>2026-08-23 (일)</b>
-              <button type="button" disabled>다음 ▶</button>
-            </div>
-            <div class="counsel-note-body">
-              <p>· 초기 상담 예약 대상 확인</p>
-              <p>· 심층 상담 예정자 사전 자료 검토</p>
-              <p>· 미배정 상담 건 담당자 지정</p>
-            </div>
-            <div class="counsel-note-actions">
-              <button type="button" class="secondary">작성</button>
-              <button type="button">저장</button>
-            </div>
-          </div>
-
-          <div class="counsel-today-card">
-            <div class="counsel-section-title">
-              <strong>오늘 상담 운영</strong>
-              <span id="todayOperationDate">실시간 확인</span>
-            </div>
-            <div class="counsel-today-grid">
-              <div><small>신규상담(1회기)</small><strong id="todayNewConsultations">-</strong></div>
-              <div><small>심리상담</small><strong id="todayPsychological">-</strong></div>
-              <div><small>진로상담</small><strong id="todayCareer">-</strong></div>
-              <div><small>외국인상담</small><strong id="todayForeign">-</strong></div>
-            </div>
+          <div class="counsel-note-card ppp-partner-card">
             <section class="counsel-ppp-area" aria-label="Public-Private Partnership Partner">
               <div class="counsel-ppp-title">Public-Private Partnership (PPP) Partner</div>
               <table class="counsel-ppp-table" aria-label="PPP Partner 목록">
@@ -2447,6 +2424,19 @@
                 </tbody>
               </table>
             </section>
+          </div>
+
+          <div class="counsel-today-card">
+            <div class="counsel-section-title">
+              <strong>오늘 상담 운영</strong>
+              <span id="todayOperationDate">실시간 확인</span>
+            </div>
+            <div class="counsel-today-grid">
+              <div><small>신규상담(1회기)</small><strong id="todayNewConsultations">-</strong></div>
+              <div><small>심리상담</small><strong id="todayPsychological">-</strong></div>
+              <div><small>진로상담</small><strong id="todayCareer">-</strong></div>
+              <div><small>외국인상담</small><strong id="todayForeign">-</strong></div>
+            </div>
           </div>
         </div>
       </section>
