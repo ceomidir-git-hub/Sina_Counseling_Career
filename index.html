@@ -1982,6 +1982,88 @@
   }
 </style>
 
+<style>
+
+    /* =========================================================
+       오늘 상담 운영 : PPP Partner 영역
+       - 전체 counsel-today-card 외곽 프레임/위치 변경 없음
+       - 상단 KPI 4개 및 DB 연동 ID 변경 없음
+       - 기존 완료율/예약/예정/대기 영역만 PPP 표로 교체
+       ========================================================= */
+    .counsel-ppp-area{
+      min-width:0;
+      margin-top:10px;
+      padding-top:9px;
+      border-top:1px solid #e8edf4;
+    }
+    .counsel-ppp-title{
+      height:26px;
+      display:flex;
+      align-items:center;
+      color:#26364f;
+      font-size:11.4px;
+      font-weight:900;
+      letter-spacing:-.22px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .counsel-ppp-table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      table-layout:fixed;
+      border:1px solid #dfe5ed;
+      border-radius:8px;
+      overflow:hidden;
+      color:#465365;
+      background:#fff;
+      font-size:9.2px;
+    }
+    .counsel-ppp-table col.ppp-no{width:12%}
+    .counsel-ppp-table col.ppp-data{width:24%}
+    .counsel-ppp-table col.ppp-partner{width:36%}
+    .counsel-ppp-table col.ppp-field{width:28%}
+    .counsel-ppp-table th,
+    .counsel-ppp-table td{
+      height:29px;
+      padding:0 5px;
+      border-right:1px solid #e1e6ed;
+      border-bottom:1px solid #e6eaf0;
+      text-align:center;
+      vertical-align:middle;
+      line-height:1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .counsel-ppp-table th:last-child,
+    .counsel-ppp-table td:last-child{border-right:0}
+    .counsel-ppp-table tbody tr:last-child td{border-bottom:0}
+    .counsel-ppp-table th{
+      background:#f1f4f8;
+      color:#475467;
+      font-size:9.1px;
+      font-weight:900;
+    }
+    .counsel-ppp-table td{
+      background:#fff;
+      font-weight:600;
+    }
+    .counsel-ppp-table tbody tr:nth-child(even) td{background:#fbfcfd}
+    .counsel-ppp-table td:nth-child(3),
+    .counsel-ppp-table td:nth-child(4){text-align:left}
+
+    @media (max-height:820px){
+      .counsel-ppp-area{margin-top:7px;padding-top:6px}
+      .counsel-ppp-title{height:23px;font-size:10.6px}
+      .counsel-ppp-table{font-size:8.5px}
+      .counsel-ppp-table th,
+      .counsel-ppp-table td{height:23px;padding:0 4px}
+      .counsel-ppp-table th{font-size:8.5px}
+    }
+
+</style>
 </head>
 <body>
 
@@ -2339,15 +2421,32 @@
               <div><small>진로상담</small><strong id="todayCareer">-</strong></div>
               <div><small>외국인상담</small><strong id="todayForeign">-</strong></div>
             </div>
-            <div class="counsel-progress">
-              <div class="counsel-progress-row"><span>오늘 완료율</span><b>81.6%</b></div>
-              <div class="counsel-progress-track"><i style="width:81.6%"></i></div>
-            </div>
-            <div class="counsel-mini-list">
-              <span>초기 상담 예약 <b>14건</b></span>
-              <span>심층 상담 예정 <b>11건</b></span>
-              <span>확인 대기 <b>5건</b></span>
-            </div>
+            <section class="counsel-ppp-area" aria-label="Public-Private Partnership Partner">
+              <div class="counsel-ppp-title">Public-Private Partnership (PPP) Partner</div>
+              <table class="counsel-ppp-table" aria-label="PPP Partner 목록">
+                <colgroup>
+                  <col class="ppp-no">
+                  <col class="ppp-data">
+                  <col class="ppp-partner">
+                  <col class="ppp-field">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Data</th>
+                    <th>Partner</th>
+                    <th>Field</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td>2027.01.01</td><td>부산여성일하기센타</td><td>상담</td></tr>
+                  <tr><td>2</td><td>2026.01.01</td><td>청소년 재단</td><td>상담</td></tr>
+                  <tr><td>3</td><td>2026.01.01</td><td>1388</td><td>상담</td></tr>
+                  <tr><td>4</td><td>2026.01.01</td><td>창원지방법원</td><td>상담</td></tr>
+                  <tr><td>5</td><td>2026.01.01</td><td>노인일자리센타</td><td>진로/취업</td></tr>
+                </tbody>
+              </table>
+            </section>
           </div>
         </div>
       </section>
