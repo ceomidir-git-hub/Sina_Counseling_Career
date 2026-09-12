@@ -67,8 +67,7 @@ button{font:inherit}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border-bottom:1px solid var(--line2)}
 .calendar-title-wrap{display:flex;align-items:center;gap:10px;flex:0 0 auto}.calendar-title{font-size:18px;font-weight:400;letter-spacing:-.4px;white-space:nowrap}.calendar-back-btn{height:34px;padding:0 12px;border:1px solid #b8c4d3;border-radius:7px;background:#fff;color:#26364d;font-size:11px;font-weight:400;cursor:pointer;white-space:nowrap;flex:0 0 auto}.calendar-back-btn:hover{background:#f7f9fc}
 .legend{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:13.2px;color:#334155;font-weight:400;white-space:nowrap}
-.legend span{display:flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.dot.received{background:var(--receipt)}.dot.planned{background:var(--blue)}.dot.progress{background:var(--orange)}.dot.done{background:var(--green)}.dot.missed{background:#9ca3af}.dot.next{background:var(--violet)}
+.legend span{display:flex;align-items:center;gap:5px}.legend-text{font-size:12.6px;font-weight:700!important}.legend-text.received{color:var(--receipt)}.legend-text.planned{color:var(--blue)}.legend-text.done{color:var(--green)}.legend-text.missed{color:#667085}.legend-text.next{color:var(--violet)}
 .month-tools{display:flex;align-items:center;gap:8px;white-space:nowrap}
 .month-btn,.today-btn{height:34px;border:1px solid #b8c4d3;background:#fff;border-radius:7px;color:#334155;font-weight:400;cursor:pointer}
 .month-btn{width:34px;font-size:18px}.today-btn{padding:0 12px;font-size:11px;color:#245fae}
@@ -88,16 +87,17 @@ button{font:inherit}
 .day-cell.holiday:not(.today) .day-num{color:var(--red)!important}
 .holiday-name{min-width:0;color:var(--red);font-size:11.2px;font-weight:850!important;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .day-cell.other .holiday-name{opacity:.55}
-.day-events{display:grid;gap:2px;min-width:0}
-.day-event{display:grid;grid-template-columns:6px 37px minmax(0,1fr);align-items:center;gap:4px;font-size:11.5px;line-height:1;min-width:0}
-.day-event i{width:6px;height:6px;border-radius:50%}.day-event .time{font-weight:850;color:#1f2937}.day-event .name{font-weight:750;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.day-cell.other .day-event{opacity:.45}.more-event{margin-left:10px;color:#1d4ed8;font-size:11px;font-weight:850;white-space:nowrap}
+.day-events{display:grid;gap:3px;min-width:0}
+.day-event{display:block;min-width:0;font-size:10.8px;line-height:1.12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#27364b}
+.day-event .event-text{font-weight:750!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-event.received .event-text{color:var(--receipt)}.day-event.planned .event-text{color:#245fd0}.day-event.done .event-text{color:#16823c}.day-event.missed .event-text{color:#667085}.day-event.next .event-text{color:#6c3bd4}
+.day-cell.other .day-event{opacity:.45}.more-event{margin-left:0;color:#1d4ed8;font-size:10.5px;font-weight:850;white-space:nowrap}
 
 .status-summary{border-top:1px solid var(--line2);padding:9px 14px 10px;display:block}
 
-.summary-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
 .summary-box{border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;align-content:center;gap:3px;background:#fbfcfe}
-.summary-box small{font-size:16.5px;font-weight:400}.summary-box strong{font-size:18.7px;line-height:1;font-weight:400}.summary-box.received small,.summary-box.received strong{color:var(--receipt)}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.progress small,.summary-box.progress strong{color:#d65d0b}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
+.summary-box small{font-size:16.5px;font-weight:400}.summary-box strong{font-size:18.7px;line-height:1;font-weight:400}.summary-box.received small,.summary-box.received strong{color:var(--receipt)}.summary-box.planned small,.summary-box.planned strong{color:#245fd0}.summary-box.done small,.summary-box.done strong{color:#16823c}.summary-box.missed small,.summary-box.missed strong{color:#667085}.summary-box.next small,.summary-box.next strong{color:#6c3bd4}.summary-box.total small,.summary-box.total strong{color:#26364d}
 
 
 /* ===== RIGHT : DAY TIMELINE ===== */
@@ -128,7 +128,7 @@ button{font:inherit}
 .toast{position:fixed;right:20px;bottom:18px;z-index:1000;max-width:390px;padding:11px 14px;border-radius:9px;background:#1f2937;color:#fff;font-size:11px;font-weight:750;box-shadow:0 10px 26px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateY(0)}
 
 @media(max-width:1450px){
-  html,body{min-width:1180px}.workspace{grid-template-columns:minmax(0,1.9fr) minmax(340px,.9fr);padding-left:12px;padding-right:12px}.legend{gap:8px}.calendar-head{padding-left:12px;padding-right:12px}.day-cell{padding-left:6px;padding-right:6px}.day-event{font-size:10.8px;grid-template-columns:5px 33px minmax(0,1fr)}
+  html,body{min-width:1180px}.workspace{grid-template-columns:minmax(0,1.9fr) minmax(340px,.9fr);padding-left:12px;padding-right:12px}.legend{gap:8px}.calendar-head{padding-left:12px;padding-right:12px}.day-cell{padding-left:6px;padding-right:6px}.day-event{font-size:10.2px}
 }
 
 @media print{
@@ -161,12 +161,11 @@ button{font:inherit}
           <div class="calendar-title">상담 스케줄 달력</div>
         </div>
         <div class="legend" aria-label="일정 상태 범례">
-          <span><i class="dot received"></i>접수</span>
-          <span><i class="dot planned"></i>예정</span>
-          <span><i class="dot progress"></i>진행중</span>
-          <span><i class="dot done"></i>완료</span>
-          <span><i class="dot missed"></i>미실시</span>
-          <span><i class="dot next"></i>차기예약</span>
+          <span class="legend-text received">접수완료</span>
+          <span class="legend-text planned">예정</span>
+          <span class="legend-text done">종료</span>
+          <span class="legend-text missed">미실시</span>
+          <span class="legend-text next">차기예약</span>
         </div>
         <div class="month-tools">
           <button class="today-btn" id="todayBtn" type="button">오늘</button>
@@ -184,10 +183,9 @@ button{font:inherit}
 
       <div class="status-summary">
         <div class="summary-grid">
-          <div class="summary-box received"><small>접수</small><strong id="sumReceived">0건</strong></div>
+          <div class="summary-box received"><small>접수완료</small><strong id="sumReceived">0건</strong></div>
           <div class="summary-box planned"><small>예정</small><strong id="sumPlanned">0건</strong></div>
-          <div class="summary-box progress"><small>진행중</small><strong id="sumProgress">0건</strong></div>
-          <div class="summary-box done"><small>완료</small><strong id="sumDone">0건</strong></div>
+          <div class="summary-box done"><small>종료</small><strong id="sumDone">0건</strong></div>
           <div class="summary-box missed"><small>미실시</small><strong id="sumMissed">0건</strong></div>
           <div class="summary-box next"><small>차기예약</small><strong id="sumNext">0건</strong></div>
           <div class="summary-box total"><small>총 일정</small><strong id="sumTotal">0건</strong></div>
@@ -232,7 +230,7 @@ button{font:inherit}
 
 (() => {
   'use strict';
-  console.info('schedule build: 20260913-secure-read-receipt-dedup-v2');
+  console.info('schedule build: 20260913-status-text-primary-dedup-v3');
 
   const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
@@ -287,7 +285,7 @@ button{font:inherit}
     timelineTotal: document.getElementById('timelineTotal'), timelineScroll: document.getElementById('timelineScroll'),
     loading: document.getElementById('loadingCover'), toast: document.getElementById('toast'),
     sumReceived: document.getElementById('sumReceived'),
-    sumPlanned: document.getElementById('sumPlanned'), sumProgress: document.getElementById('sumProgress'),
+    sumPlanned: document.getElementById('sumPlanned'),
     sumDone: document.getElementById('sumDone'), sumMissed: document.getElementById('sumMissed'),
     sumNext: document.getElementById('sumNext'), sumTotal: document.getElementById('sumTotal')
   };
@@ -328,10 +326,9 @@ button{font:inherit}
 
   function statusMeta(status){
     return {
-      received:{label:'접수',color:'#0f766e',cls:'received'},
+      received:{label:'접수완료',color:'#0f766e',cls:'received'},
       planned:{label:'예정',color:'#2563eb',cls:'planned'},
-      progress:{label:'진행중',color:'#f97316',cls:'progress'},
-      done:{label:'완료',color:'#16a34a',cls:'done'},
+      done:{label:'종료',color:'#16a34a',cls:'done'},
       missed:{label:'미실시',color:'#8a94a4',cls:'missed'},
       next:{label:'차기예약',color:'#7c3aed',cls:'next'}
     }[status] || {label:'예정',color:'#2563eb',cls:'planned'};
@@ -373,11 +370,14 @@ button{font:inherit}
   }
 
   function primaryStatus(row, scheduledIso){
-    const start=row.session_start_at ? new Date(row.session_start_at).getTime() : NaN;
     const end=row.session_end_at ? new Date(row.session_end_at).getTime() : NaN;
+    const sessionStatus=String(row.session_status || '').trim();
     const now=Date.now();
-    if(Number.isFinite(end)) return 'done';
-    if(Number.isFinite(start) && start<=now) return 'progress';
+
+    // 진행중 상태는 사용하지 않는다.
+    // 실제 종료시각 또는 상담 상태가 '종결'이면 종료로 확정한다.
+    if(Number.isFinite(end) || sessionStatus==='종결' || sessionStatus==='상담종료') return 'done';
+
     const scheduled=scheduledIso ? new Date(scheduledIso).getTime() : NaN;
     if(Number.isFinite(scheduled) && scheduled<now) return 'missed';
     return 'planned';
@@ -419,6 +419,8 @@ button{font:inherit}
       sessionNo:row.session_no || null,
       location:row.counseling_location || '-',
       sessionStatus:row.session_status || '-',
+      hasSessionStart:!!row.session_start_at,
+      hasSessionEnd:!!row.session_end_at,
       counselLabel:source==='psych'?'심리상담':'진로상담'
     };
   }
@@ -439,6 +441,79 @@ button{font:inherit}
       location:row.counseling_location || '-',sessionStatus:row.session_status || '-',
       counselLabel:source==='psych'?'심리상담':'진로상담'
     };
+  }
+
+  function normalizedSessionStatus(v){
+    return String(v || '').replace(/\s+/g,'').trim();
+  }
+
+  function eventDisplayStatus(ev){
+    if(ev.kind==='receipt') return '접수완료';
+    if(ev.kind==='next') return '차기예약';
+
+    const sessionStatus=normalizedSessionStatus(ev.sessionStatus);
+    const isCounselClosed=sessionStatus==='종결' || sessionStatus==='상담종료';
+
+    if(ev.status==='done'){
+      if(isCounselClosed) return '상담종료';
+      if(ev.sessionNo) return `${ev.sessionNo}회기 종료`;
+      return '상담종료';
+    }
+
+    if(ev.status==='missed'){
+      if(ev.sessionNo) return `${ev.sessionNo}회기 미실시`;
+      return '상담미실시';
+    }
+
+    if(ev.status==='planned'){
+      return ev.date===todayYmd() ? '금일예정' : '예정';
+    }
+
+    return statusMeta(ev.status).label;
+  }
+
+  function eventIdentity(ev){
+    if(ev.clientId!=null && String(ev.clientId)!=='') return `client:${ev.clientId}`;
+    return `fallback:${ev.name}|${ev.phone}`;
+  }
+
+  function primaryEventQuality(ev){
+    // 동일 회원·동일 시각 중복 시 실제 완료 기록을 최우선으로 남긴다.
+    const statusScore={done:300,planned:200,missed:100}[ev.status] || 0;
+    const finalScore=(normalizedSessionStatus(ev.sessionStatus)==='종결' || normalizedSessionStatus(ev.sessionStatus)==='상담종료') ? 40 : 0;
+    const sessionScore=ev.sessionNo ? 10 : 0;
+    const endScore=ev.hasSessionEnd ? 5 : 0;
+    return statusScore+finalScore+sessionScore+endScore;
+  }
+
+  function dedupePrimaryEvents(items){
+    const result=[];
+    const indexByKey=new Map();
+
+    for(const ev of items){
+      if(ev.kind!=='primary'){
+        result.push(ev);
+        continue;
+      }
+
+      // 핵심 중복키: 동일 회원 + 동일 상담 일시.
+      // 상담구분이 바뀌어 psych/career 양쪽에 같은 시간이 남아도 한 일정으로 계산한다.
+      const key=`primary|${eventIdentity(ev)}|${ev.sortMs}`;
+      const oldIndex=indexByKey.get(key);
+
+      if(oldIndex===undefined){
+        indexByKey.set(key,result.length);
+        result.push(ev);
+        continue;
+      }
+
+      const current=result[oldIndex];
+      if(primaryEventQuality(ev)>primaryEventQuality(current)){
+        result[oldIndex]=ev;
+      }
+    }
+
+    return result;
   }
 
   async function getEmployee(){
@@ -519,11 +594,12 @@ button{font:inherit}
         if(next && next.date>=monthStart && next.date<monthEnd) events.push(next);
       }
 
-      events.sort((a,b)=>a.date.localeCompare(b.date)||a.sortMs-b.sortMs||a.name.localeCompare(b.name,'ko'));
-      state.events=events;
+      const normalizedEvents=dedupePrimaryEvents(events);
+      normalizedEvents.sort((a,b)=>a.date.localeCompare(b.date)||a.sortMs-b.sortMs||a.name.localeCompare(b.name,'ko'));
+      state.events=normalizedEvents;
       state.byDate=new Map();
 
-      for(const ev of events){
+      for(const ev of normalizedEvents){
         if(!state.byDate.has(ev.date)) state.byDate.set(ev.date,[]);
         state.byDate.get(ev.date).push(ev);
       }
@@ -585,11 +661,15 @@ button{font:inherit}
       const holder=document.createElement('div'); holder.className='day-events';
       const events=(state.byDate.get(c.key)||[]).slice().sort((a,b)=>a.sortMs-b.sortMs);
       events.slice(0,MAX_CELL_ITEMS).forEach(ev=>{
-        const meta=statusMeta(ev.status); const row=document.createElement('div'); row.className='day-event';
-        const dot=document.createElement('i'); dot.style.background=meta.color;
-        const time=document.createElement('span'); time.className='time'; time.textContent=ev.time;
-        const name=document.createElement('span'); name.className='name'; name.textContent=ev.name;
-        row.append(dot,time,name); holder.appendChild(row);
+        const meta=statusMeta(ev.status);
+        const row=document.createElement('div');
+        row.className=`day-event ${meta.cls}`;
+        row.title=`${eventDisplayStatus(ev)}-${ev.time}-${ev.name}`;
+        const text=document.createElement('span');
+        text.className='event-text';
+        text.textContent=`${eventDisplayStatus(ev)}-${ev.time}-${ev.name}`;
+        row.appendChild(text);
+        holder.appendChild(row);
       });
       if(events.length>MAX_CELL_ITEMS){ const more=document.createElement('div'); more.className='more-event'; more.textContent=`+${events.length-MAX_CELL_ITEMS}건 더보기`; holder.appendChild(more); }
       cell.appendChild(holder);
@@ -599,22 +679,21 @@ button{font:inherit}
   }
 
   function countStatuses(items){
-    const c={received:0,planned:0,progress:0,done:0,missed:0,next:0,total:0};
+    const c={received:0,planned:0,done:0,missed:0,next:0,total:0};
     items.forEach(x=>{
-      if(['received','planned','progress','done','missed','next'].includes(x.status)) c[x.status]++;
+      if(['received','planned','done','missed','next'].includes(x.status)) c[x.status]++;
     });
-    c.total=c.received+c.planned+c.progress+c.done+c.missed+c.next;
+    c.total=c.received+c.planned+c.done+c.missed+c.next;
     return c;
   }
 
   function renderSummary(){
     // 하단 KPI = Supabase에서 현재 조회 월로 불러온 실제 일정(state.events)을 직접 집계
-    // 접수/예정/진행중/완료/미실시/차기예약의 합계가 총 일정이 된다.
+    // 접수완료/예정/종료/미실시/차기예약의 합계가 총 일정이 된다.
     const monthCount=countStatuses(state.events);
 
     els.sumReceived.textContent=`${monthCount.received}건`;
     els.sumPlanned.textContent=`${monthCount.planned}건`;
-    els.sumProgress.textContent=`${monthCount.progress}건`;
     els.sumDone.textContent=`${monthCount.done}건`;
     els.sumMissed.textContent=`${monthCount.missed}건`;
     els.sumNext.textContent=`${monthCount.next}건`;
@@ -654,7 +733,7 @@ button{font:inherit}
     const time=document.createElement('div'); time.className='t-time'; time.textContent=ev.time;
     const top=document.createElement('div'); top.className='t-top';
     const name=document.createElement('div'); name.className='t-name'; name.textContent=age==null?ev.name:`${ev.name} (${age}세)`;
-    const pill=document.createElement('span'); pill.className='status-pill'; pill.textContent=meta.label; top.append(name,pill);
+    const pill=document.createElement('span'); pill.className='status-pill'; pill.textContent=eventDisplayStatus(ev); top.append(name,pill);
     const metaRow=document.createElement('div'); metaRow.className='t-meta';
     const fields = ev.kind==='receipt'
       ? [`◉ ${ev.counselLabel}`, '│ 접수등록', '⌖ 접수일시']
