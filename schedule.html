@@ -240,7 +240,7 @@ button{font:inherit}
 
 (() => {
   'use strict';
-  console.info('schedule build: 20260913-day-detail-history-v4');
+  console.info('schedule build: 20260913-day-detail-asof-v5');
 
   const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
@@ -284,22 +284,30 @@ button{font:inherit}
     };
   }
 
-  async function secureConsultationRecord(recordId,source){
+  async function secureConsultationRead(payload){
     const {data:sessionData,error:sessionError}=await sb.auth.getSession();
     if(sessionError) throw sessionError;
     const accessToken=sessionData?.session?.access_token;
     if(!accessToken) throw new Error('로그인 세션을 확인할 수 없습니다.');
-    const type=source==='psych'?'PC':'CC';
     const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consultation-read`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${accessToken}`,'apikey':SUPABASE_KEY},
-      body:JSON.stringify({action:'record_by_id',record_id:recordId,type}),
+      body:JSON.stringify(payload),
       cache:'no-store'
     });
     let result=null;
     try{ result=await response.json(); }catch(_){ result=null; }
     if(!response.ok || !result?.ok) throw new Error(result?.error || `상담 이력 조회에 실패했습니다. (${response.status})`);
     return result.data;
+  }
+
+  async function secureConsultationRecord(recordId,source){
+    const type=source==='psych'?'PC':'CC';
+    return secureConsultationRead({action:'record_by_id',record_id:recordId,type});
+  }
+
+  async function secureConsultationMemberHistory(memberKey){
+    return secureConsultationRead({action:'member_history',member_key:String(memberKey||'').trim()});
   }
 
   const IDLE_MS = 10 * 60 * 1000;
@@ -782,9 +790,31 @@ button{font:inherit}
     const cacheKey=`${ev.source}|${ev.clientId}`;
     if(state.historyCache.has(cacheKey)) return state.historyCache.get(cacheKey);
     if(!ev.recordId) throw new Error('상담기록 ID가 없습니다.');
-    const data=await secureConsultationRecord(ev.recordId,ev.source);
-    state.historyCache.set(cacheKey,data);
-    return data;
+
+    /*
+      record_by_id 응답은 basic + 해당 1개 row만 반환한다.
+      우측 진행현황은 회원 전체 회기 이력이 필요하므로 member_key를 확인한 뒤
+      member_history를 한 번 더 조회한다.
+    */
+    const recordData=await secureConsultationRecord(ev.recordId,ev.source);
+    const memberKey=String(recordData?.basic?.member_key||'').trim();
+    if(!/^\d{8}$/.test(memberKey)) throw new Error('회원 KEY를 확인할 수 없습니다.');
+
+    const historyData=await secureConsultationMemberHistory(memberKey);
+    if(!historyData?.basic) throw new Error('회원 상담 이력을 확인할 수 없습니다.');
+    state.historyCache.set(cacheKey,historyData);
+    return historyData;
+  }
+
+  function selectedDayEndMs(dateKey){
+    const {y,m,d}=dateOnlyParts(dateKey);
+    if(!y) return Number.NaN;
+    // 선택일의 한국시간 23:59:59.999
+    return Date.UTC(y,m-1,d+1)-KST_OFFSET_MS-1;
+  }
+
+  function primaryIsoForHistoryRow(row,source){
+    return row?.session_start_at || (source==='psych'?row?.visit_at:row?.appointment_at) || null;
   }
 
   function summarizeHistory(bundle,source,refDate){
@@ -792,47 +822,72 @@ button{font:inherit}
     const type=source==='psych'?'PC':'CC';
     const rows=Array.isArray(bundle?.[type])?bundle[type]:[];
     const activeRows=rows.filter(r=>r?.record_active===true || r?.session_end_at);
+    const refEndMs=selectedDayEndMs(refDate);
 
+    // 선택 날짜까지 실제 발생한 접수만 완료 이력으로 계산한다.
     const receiptDates=uniqueBy(
-      activeRows.filter(r=>r?.receipt_at).map(r=>isoToDateKey(r.receipt_at)).filter(Boolean).sort(),
+      activeRows
+        .filter(r=>r?.receipt_at && new Date(r.receipt_at).getTime()<=refEndMs)
+        .map(r=>isoToDateKey(r.receipt_at)).filter(Boolean).sort(),
       x=>x
     );
 
-    const completed=activeRows
-      .filter(r=>r?.session_end_at && Number(r?.session_no)>0)
-      .map(r=>({no:Number(r.session_no),date:isoToDateKey(r.session_end_at)}))
-      .filter(x=>x.date)
-      .sort((a,b)=>a.no-b.no || a.date.localeCompare(b.date));
+    // 선택 날짜까지 실제 종료(session_end_at)된 회기만 완료로 계산한다.
+    const completedRows=activeRows
+      .filter(r=>r?.session_end_at && Number(r?.session_no)>0 && new Date(r.session_end_at).getTime()<=refEndMs)
+      .slice()
+      .sort((a,b)=>Number(a.session_no)-Number(b.session_no) || new Date(a.session_end_at)-new Date(b.session_end_at));
+
+    const completed=completedRows
+      .map(r=>({no:Number(r.session_no),date:isoToDateKey(r.session_end_at),row:r}))
+      .filter(x=>x.date);
     const completedUnique=uniqueBy(completed,x=>`${x.no}|${x.date}`);
 
     const completedParts=[];
     if(receiptDates.length) completedParts.push(`접수(${shortDate(receiptDates[0])})`);
     for(const x of completedUnique) completedParts.push(`${x.no}회기(${shortDate(x.date)})`);
 
-    let latestNext=null;
-    for(const r of activeRows){
-      const raw=r?.next_session_at || r?.next_session_date;
-      if(!raw) continue;
-      const date=r?.next_session_at?isoToDateKey(r.next_session_at):String(r.next_session_date).slice(0,10);
-      if(!date) continue;
-      const ms=r?.next_session_at?new Date(r.next_session_at).getTime():Date.parse(`${date}T00:00:00+09:00`);
-      if(!latestNext || ms>latestNext.ms) latestNext={date,ms};
-    }
-
     const maxCompleted=completedUnique.reduce((m,x)=>Math.max(m,x.no),0);
     const plannedParts=[];
-    if(latestNext){
-      plannedParts.push(`${maxCompleted+1}회기 예정(${shortDate(latestNext.date)})`);
-    }else{
+
+    /*
+      선택일 시점의 예정 회기를 계산한다.
+      1) 완료 회기가 있으면 그 중 마지막 완료 회기의 next_session을 사용한다.
+      2) 아직 완료 회기가 없으면 선택일 이후 가장 빠른 실제 예약/상담일을 사용한다.
+      이후에 생성된 더 높은 회기의 next_session을 끌어오지 않는다.
+    */
+    let plannedDate='';
+    let plannedNo=maxCompleted+1;
+
+    if(completedUnique.length){
+      const latestCompleted=completedUnique
+        .slice()
+        .sort((a,b)=>b.no-a.no || b.date.localeCompare(a.date))[0];
+      const r=latestCompleted.row;
+      if(r?.next_session_at){
+        const date=isoToDateKey(r.next_session_at);
+        if(date && date>=refDate) plannedDate=date;
+      }else if(r?.next_session_date){
+        const date=String(r.next_session_date).slice(0,10);
+        if(date && date>=refDate) plannedDate=date;
+      }
+    }
+
+    if(!plannedDate){
       const future=activeRows
         .map(r=>({
           no:Number(r?.session_no)||null,
-          iso:r?.session_start_at || (source==='psych'?r?.visit_at:r?.appointment_at)
+          iso:primaryIsoForHistoryRow(r,source)
         }))
-        .filter(x=>x.iso && new Date(x.iso).getTime()>Date.now())
+        .filter(x=>x.iso && isoToDateKey(x.iso)>=refDate)
         .sort((a,b)=>new Date(a.iso)-new Date(b.iso))[0];
-      if(future){ plannedParts.push(`${future.no||maxCompleted+1}회기 예정(${isoShortDate(future.iso)})`); }
+      if(future){
+        plannedNo=future.no || maxCompleted+1 || 1;
+        plannedDate=isoToDateKey(future.iso);
+      }
     }
+
+    if(plannedDate) plannedParts.push(`${plannedNo}회기 예정(${shortDate(plannedDate)})`);
 
     return {
       name:basic.client_name||'이름없음',
