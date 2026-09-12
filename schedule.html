@@ -59,7 +59,7 @@ button{font:inherit}
 .user-meta strong{font-size:13px}.user-meta span{font-size:10px;opacity:.8}
 .logout-btn{height:30px;padding:0 11px;border:1px solid rgba(255,255,255,.45);border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font-size:11px;font-weight:400;cursor:pointer}
 
-.workspace{min-height:0;padding:14px 18px 16px;display:grid;grid-template-columns:minmax(0,2.08fr) minmax(360px,.92fr);gap:12px}
+.workspace{min-height:0;padding:14px 18px 16px;display:grid;grid-template-columns:minmax(0,2.17fr) minmax(340px,.83fr);gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:0;min-height:0}
 
 /* ===== LEFT : CALENDAR ===== */
@@ -121,6 +121,16 @@ button{font:inherit}
 .t-time{position:absolute;left:-88px;top:18px;width:58px;text-align:right;font-size:14px;font-weight:950;color:var(--status-color)}
 .t-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.t-name{font-size:14px;font-weight:950;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.status-pill{flex:0 0 auto;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:400;background:color-mix(in srgb,var(--status-color) 11%, white);color:var(--status-color)}
 .t-meta{display:flex;flex-wrap:wrap;gap:8px 11px;margin-top:8px;color:#475569;font-size:12px;font-weight:750}.t-meta span{white-space:nowrap}.t-phone{margin-top:6px;color:#64748b;font-size:12px;font-weight:400}
+.day-detail-list{display:grid;gap:10px;padding:12px 2px 0}
+.day-detail-card{border:1px solid #cbd5e1;border-radius:10px;background:#fffaf0;padding:12px 13px;box-shadow:0 2px 6px rgba(15,23,42,.03)}
+.day-detail-title{font-size:14px;font-weight:850!important;color:#1f2937;line-height:1.35;word-break:keep-all}
+.day-detail-key{color:#475569;font-size:11px;margin-top:3px}
+.day-detail-row{display:flex;gap:8px;margin-top:9px;align-items:flex-start;font-size:11.5px;line-height:1.55}
+.day-detail-row .label{flex:0 0 40px;font-weight:850!important;color:#334155}
+.day-detail-row .value{min-width:0;color:#475569;word-break:keep-all}
+.day-detail-row.complete .label{color:#16823c}.day-detail-row.plan .label{color:#245fd0}
+.day-detail-empty{height:160px;display:grid;place-items:center;text-align:center;color:#667085;font-size:12px;padding:20px}
+.day-detail-loading{height:120px;display:grid;place-items:center;color:#64748b;font-size:12px}
 .type-summary{border-top:1px solid var(--line2);padding:11px 14px;background:#fff}
 .type-summary h3{font-size:12px;margin:0 0 8px;font-weight:950}.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.type-row{border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10.5px}.type-row strong{font-size:11px}.type-row b{color:#245fd0;font-size:12px}
 
@@ -128,7 +138,7 @@ button{font:inherit}
 .toast{position:fixed;right:20px;bottom:18px;z-index:1000;max-width:390px;padding:11px 14px;border-radius:9px;background:#1f2937;color:#fff;font-size:11px;font-weight:750;box-shadow:0 10px 26px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateY(0)}
 
 @media(max-width:1450px){
-  html,body{min-width:1180px}.workspace{grid-template-columns:minmax(0,1.9fr) minmax(340px,.9fr);padding-left:12px;padding-right:12px}.legend{gap:8px}.calendar-head{padding-left:12px;padding-right:12px}.day-cell{padding-left:6px;padding-right:6px}.day-event{font-size:10.2px}
+  html,body{min-width:1180px}.workspace{grid-template-columns:minmax(0,1.99fr) minmax(320px,.81fr);padding-left:12px;padding-right:12px}.legend{gap:8px}.calendar-head{padding-left:12px;padding-right:12px}.day-cell{padding-left:6px;padding-right:6px}.day-event{font-size:10.2px}
 }
 
 @media print{
@@ -195,7 +205,7 @@ button{font:inherit}
 
     <aside class="card timeline-card">
       <div class="timeline-head">
-        <h2 id="timelineDate">선택일 일정</h2>
+        <h2 id="timelineDate">선택일 상담정보</h2>
         <span class="total-badge" id="timelineTotal">총 0건</span>
       </div>
       <div class="timeline-scroll" id="timelineScroll">
@@ -230,7 +240,7 @@ button{font:inherit}
 
 (() => {
   'use strict';
-  console.info('schedule build: 20260913-status-text-primary-dedup-v3');
+  console.info('schedule build: 20260913-day-detail-history-v4');
 
   const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
@@ -274,6 +284,24 @@ button{font:inherit}
     };
   }
 
+  async function secureConsultationRecord(recordId,source){
+    const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+    if(sessionError) throw sessionError;
+    const accessToken=sessionData?.session?.access_token;
+    if(!accessToken) throw new Error('로그인 세션을 확인할 수 없습니다.');
+    const type=source==='psych'?'PC':'CC';
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/secure-consultation-read`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${accessToken}`,'apikey':SUPABASE_KEY},
+      body:JSON.stringify({action:'record_by_id',record_id:recordId,type}),
+      cache:'no-store'
+    });
+    let result=null;
+    try{ result=await response.json(); }catch(_){ result=null; }
+    if(!response.ok || !result?.ok) throw new Error(result?.error || `상담 이력 조회에 실패했습니다. (${response.status})`);
+    return result.data;
+  }
+
   const IDLE_MS = 10 * 60 * 1000;
   const MAX_CELL_ITEMS = 4;
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -298,6 +326,8 @@ button{font:inherit}
     selectedDate: '',
     events: [],
     byDate: new Map(),
+    historyCache: new Map(),
+    detailRequestSeq: 0,
     idleTimer: null,
     timelineScrollRaf: 0,
     timelineProgrammaticUntil: 0
@@ -390,6 +420,7 @@ button{font:inherit}
 
     return {
       uid:`${source}:${row.id}:receipt`,
+      recordId:row.id,
       source,
       kind:'receipt',
       date:key,
@@ -411,7 +442,7 @@ button{font:inherit}
     if(!scheduledIso) return null;
     const key=isoToDateKey(scheduledIso); if(!key) return null;
     return {
-      uid:`${source}:${row.id}:primary`, source, kind:'primary', date:key,
+      uid:`${source}:${row.id}:primary`, recordId:row.id, source, kind:'primary', date:key,
       time:isoToTime(scheduledIso), sortMs:new Date(scheduledIso).getTime(),
       status:primaryStatus(row,scheduledIso),
       clientId:row.client_id, name:basic?.client_name || '이름없음', phone:basic?.client_phone || '-',
@@ -435,7 +466,7 @@ button{font:inherit}
     }
     if(!date) return null;
     return {
-      uid:`${source}:${row.id}:next`,source,kind:'next',date,time,sortMs,status:'next',
+      uid:`${source}:${row.id}:next`,recordId:row.id,source,kind:'next',date,time,sortMs,status:'next',
       clientId:row.client_id,name:basic?.client_name || '이름없음',phone:basic?.client_phone || '-',birthDate:basic?.birth_date || null,
       sessionNo:row.session_no ? Number(row.session_no)+1 : null,
       location:row.counseling_location || '-',sessionStatus:row.session_status || '-',
@@ -664,10 +695,10 @@ button{font:inherit}
         const meta=statusMeta(ev.status);
         const row=document.createElement('div');
         row.className=`day-event ${meta.cls}`;
-        row.title=`${eventDisplayStatus(ev)}-${ev.time}-${ev.name}`;
+        row.title=`${ev.name}-${ev.time}-${eventDisplayStatus(ev)}`;
         const text=document.createElement('span');
         text.className='event-text';
-        text.textContent=`${eventDisplayStatus(ev)}-${ev.time}-${ev.name}`;
+        text.textContent=`${ev.name}-${ev.time}-${eventDisplayStatus(ev)}`;
         row.appendChild(text);
         holder.appendChild(row);
       });
@@ -701,9 +732,9 @@ button{font:inherit}
 
     // 우측 타임라인 = 현재 선택된 날짜 기준
     const selectedItems=state.byDate.get(state.selectedDate)||[];
-    const selectedCount=countStatuses(selectedItems);
+    const uniqueClients=new Set(selectedItems.map(eventIdentity));
     els.timelineDate.textContent=formatKoreanDate(state.selectedDate);
-    els.timelineTotal.textContent=`총 ${selectedCount.total}건`;
+    els.timelineTotal.textContent=`총 ${uniqueClients.size}명`;
 
   }
 
@@ -727,106 +758,159 @@ button{font:inherit}
     let age=r.y-b.y; if(r.m<b.m || (r.m===b.m && r.d<b.d)) age--; return age>=0?age:null;
   }
 
-  function createTimelineEvent(ev,dateKey){
-    const meta=statusMeta(ev.status), age=calculateAge(ev.birthDate,dateKey);
-    const item=document.createElement('div'); item.className='t-item'; item.style.setProperty('--status-color',meta.color);
-    const time=document.createElement('div'); time.className='t-time'; time.textContent=ev.time;
-    const top=document.createElement('div'); top.className='t-top';
-    const name=document.createElement('div'); name.className='t-name'; name.textContent=age==null?ev.name:`${ev.name} (${age}세)`;
-    const pill=document.createElement('span'); pill.className='status-pill'; pill.textContent=eventDisplayStatus(ev); top.append(name,pill);
-    const metaRow=document.createElement('div'); metaRow.className='t-meta';
-    const fields = ev.kind==='receipt'
-      ? [`◉ ${ev.counselLabel}`, '│ 접수등록', '⌖ 접수일시']
-      : [`◉ ${ev.counselLabel}`, ev.sessionNo?`│ ${ev.sessionNo}회기`:'│ 회기 미지정', `⌖ ${ev.location||'-'}`];
-    fields.forEach(v=>{ const s=document.createElement('span'); s.textContent=v; metaRow.appendChild(s); });
-    const phone=document.createElement('div'); phone.className='t-phone'; phone.textContent=`연락처 ${ev.phone||'-'}`;
-    item.append(time,top,metaRow,phone);
-    return item;
+  function shortDate(dateStr){
+    const p=dateOnlyParts(String(dateStr||'').slice(0,10));
+    return p.y?`${p.m}/${p.d}`:'-';
   }
 
-  function monthDayKeys(y,m){
-    const last=new Date(Date.UTC(y,m,0)).getUTCDate();
-    return Array.from({length:last},(_,i)=>ymd(y,m,i+1));
+  function isoShortDate(iso){
+    const key=isoToDateKey(iso);
+    return key?shortDate(key):'-';
   }
 
-  function renderTimeline(){
+  function uniqueBy(items,keyFn){
+    const out=[],seen=new Set();
+    for(const item of items){
+      const key=keyFn(item);
+      if(seen.has(key)) continue;
+      seen.add(key); out.push(item);
+    }
+    return out;
+  }
+
+  async function loadMemberHistoryForEvent(ev){
+    const cacheKey=`${ev.source}|${ev.clientId}`;
+    if(state.historyCache.has(cacheKey)) return state.historyCache.get(cacheKey);
+    if(!ev.recordId) throw new Error('상담기록 ID가 없습니다.');
+    const data=await secureConsultationRecord(ev.recordId,ev.source);
+    state.historyCache.set(cacheKey,data);
+    return data;
+  }
+
+  function summarizeHistory(bundle,source,refDate){
+    const basic=bundle?.basic||{};
+    const type=source==='psych'?'PC':'CC';
+    const rows=Array.isArray(bundle?.[type])?bundle[type]:[];
+    const activeRows=rows.filter(r=>r?.record_active===true || r?.session_end_at);
+
+    const receiptDates=uniqueBy(
+      activeRows.filter(r=>r?.receipt_at).map(r=>isoToDateKey(r.receipt_at)).filter(Boolean).sort(),
+      x=>x
+    );
+
+    const completed=activeRows
+      .filter(r=>r?.session_end_at && Number(r?.session_no)>0)
+      .map(r=>({no:Number(r.session_no),date:isoToDateKey(r.session_end_at)}))
+      .filter(x=>x.date)
+      .sort((a,b)=>a.no-b.no || a.date.localeCompare(b.date));
+    const completedUnique=uniqueBy(completed,x=>`${x.no}|${x.date}`);
+
+    const completedParts=[];
+    if(receiptDates.length) completedParts.push(`접수(${shortDate(receiptDates[0])})`);
+    for(const x of completedUnique) completedParts.push(`${x.no}회기(${shortDate(x.date)})`);
+
+    let latestNext=null;
+    for(const r of activeRows){
+      const raw=r?.next_session_at || r?.next_session_date;
+      if(!raw) continue;
+      const date=r?.next_session_at?isoToDateKey(r.next_session_at):String(r.next_session_date).slice(0,10);
+      if(!date) continue;
+      const ms=r?.next_session_at?new Date(r.next_session_at).getTime():Date.parse(`${date}T00:00:00+09:00`);
+      if(!latestNext || ms>latestNext.ms) latestNext={date,ms};
+    }
+
+    const maxCompleted=completedUnique.reduce((m,x)=>Math.max(m,x.no),0);
+    const plannedParts=[];
+    if(latestNext){
+      plannedParts.push(`${maxCompleted+1}회기 예정(${shortDate(latestNext.date)})`);
+    }else{
+      const future=activeRows
+        .map(r=>({
+          no:Number(r?.session_no)||null,
+          iso:r?.session_start_at || (source==='psych'?r?.visit_at:r?.appointment_at)
+        }))
+        .filter(x=>x.iso && new Date(x.iso).getTime()>Date.now())
+        .sort((a,b)=>new Date(a.iso)-new Date(b.iso))[0];
+      if(future){ plannedParts.push(`${future.no||maxCompleted+1}회기 예정(${isoShortDate(future.iso)})`); }
+    }
+
+    return {
+      name:basic.client_name||'이름없음',
+      age:calculateAge(basic.birth_date,refDate),
+      memberKey:basic.member_key||'-',
+      counselLabel:source==='psych'?'심리상담':'진로상담',
+      completedText:completedParts.length?completedParts.join(' - '):'없음',
+      plannedText:plannedParts.length?plannedParts.join(' - '):'없음'
+    };
+  }
+
+  function createDayDetailCard(summary){
+    const card=document.createElement('div'); card.className='day-detail-card';
+    const title=document.createElement('div'); title.className='day-detail-title';
+    title.textContent=`${summary.name}${summary.age==null?'':` (${summary.age}세)`} - ${summary.counselLabel} - ${summary.memberKey}`;
+
+    const complete=document.createElement('div'); complete.className='day-detail-row complete';
+    const cl=document.createElement('span'); cl.className='label'; cl.textContent='완료';
+    const cv=document.createElement('span'); cv.className='value'; cv.textContent=summary.completedText;
+    complete.append(cl,cv);
+
+    const plan=document.createElement('div'); plan.className='day-detail-row plan';
+    const pl=document.createElement('span'); pl.className='label'; pl.textContent='예정';
+    const pv=document.createElement('span'); pv.className='value'; pv.textContent=summary.plannedText;
+    plan.append(pl,pv);
+
+    card.append(title,complete,plan);
+    return card;
+  }
+
+  async function renderTimeline(){
+    const requestSeq=++state.detailRequestSeq;
     els.timelineScroll.textContent='';
-    const monthList=document.createElement('div'); monthList.className='timeline-month-list';
-
-    for(const dateKey of monthDayKeys(state.viewYear,state.viewMonth)){
-      const items=(state.byDate.get(dateKey)||[]).slice().sort((a,b)=>a.sortMs-b.sortMs||a.name.localeCompare(b.name,'ko'));
-      const group=document.createElement('section');
-      group.className='timeline-date-group';
-      group.dataset.date=dateKey;
-
-      const label=document.createElement('div'); label.className='timeline-date-label';
-      const strong=document.createElement('strong'); strong.textContent=formatKoreanDate(dateKey);
-      const cnt=document.createElement('span'); cnt.textContent=`${items.length}건`;
-      label.append(strong,cnt);
-      group.appendChild(label);
-
-      if(items.length){
-        const list=document.createElement('div'); list.className='timeline-list';
-        items.forEach(ev=>list.appendChild(createTimelineEvent(ev,dateKey)));
-        group.appendChild(list);
-      }else{
-        const empty=document.createElement('div'); empty.className='timeline-date-empty'; empty.textContent='등록된 상담 일정이 없습니다.';
-        group.appendChild(empty);
-      }
-      monthList.appendChild(group);
+    const selected=(state.byDate.get(state.selectedDate)||[]).slice().sort((a,b)=>a.sortMs-b.sortMs||a.name.localeCompare(b.name,'ko'));
+    if(!selected.length){
+      const empty=document.createElement('div'); empty.className='day-detail-empty'; empty.textContent='선택한 날짜에 등록된 상담 일정이 없습니다.';
+      els.timelineScroll.appendChild(empty); return;
     }
 
-    els.timelineScroll.appendChild(monthList);
-  }
+    const loading=document.createElement('div'); loading.className='day-detail-loading'; loading.textContent='상담 진행정보를 불러오는 중입니다...';
+    els.timelineScroll.appendChild(loading);
 
-  function scrollTimelineToDate(date,behavior='auto'){
-    const group=els.timelineScroll.querySelector(`.timeline-date-group[data-date="${date}"]`);
-    if(!group) return;
-    state.timelineProgrammaticUntil=performance.now()+(behavior==='smooth'?800:160);
-    const target=Math.max(0,group.offsetTop-2);
-    els.timelineScroll.scrollTo({top:target,behavior});
-  }
-
-  function detectTimelineDate(){
-    if(performance.now()<state.timelineProgrammaticUntil) return;
-    const groups=[...els.timelineScroll.querySelectorAll('.timeline-date-group')];
-    if(!groups.length) return;
-
-    const base=els.timelineScroll.getBoundingClientRect().top+88;
-    let activeGroup=null;
-    let nearest=null;
-    let nearestDistance=Infinity;
-
-    for(const group of groups){
-      const r=group.getBoundingClientRect();
-      if(r.top<=base && r.bottom>base){
-        activeGroup=group;
-        break;
-      }
-      const dist=Math.abs(r.top-base);
-      if(dist<nearestDistance){
-        nearestDistance=dist;
-        nearest=group;
-      }
+    const representatives=[];
+    const seen=new Set();
+    for(const ev of selected){
+      const key=`${ev.source}|${eventIdentity(ev)}`;
+      if(seen.has(key)) continue;
+      seen.add(key); representatives.push(ev);
     }
 
-    activeGroup=activeGroup||nearest;
-    if(activeGroup) syncSelectedDateFromTimeline(activeGroup.dataset.date);
+    try{
+      const summaries=await Promise.all(representatives.map(async ev=>{
+        const bundle=await loadMemberHistoryForEvent(ev);
+        return summarizeHistory(bundle,ev.source,state.selectedDate);
+      }));
+      if(requestSeq!==state.detailRequestSeq) return;
+      els.timelineScroll.textContent='';
+      const list=document.createElement('div'); list.className='day-detail-list';
+      summaries.forEach(x=>list.appendChild(createDayDetailCard(x)));
+      els.timelineScroll.appendChild(list);
+    }catch(err){
+      console.error('선택일 상담 진행정보 조회 오류:',err);
+      if(requestSeq!==state.detailRequestSeq) return;
+      els.timelineScroll.textContent='';
+      const empty=document.createElement('div'); empty.className='day-detail-empty'; empty.textContent='상담 진행정보를 불러오지 못했습니다.';
+      els.timelineScroll.appendChild(empty);
+      toast('선택일 상담 진행정보 조회 중 오류가 발생했습니다.');
+    }
   }
 
-  function onTimelineScroll(){
-    if(state.timelineScrollRaf) return;
-    state.timelineScrollRaf=requestAnimationFrame(()=>{
-      state.timelineScrollRaf=0;
-      detectTimelineDate();
-    });
-  }
+  function scrollTimelineToDate(){ /* 선택일 상세형 화면에서는 사용하지 않음 */ }
+  function detectTimelineDate(){ /* 선택일 상세형 화면에서는 사용하지 않음 */ }
+  function onTimelineScroll(){ /* 선택일 상세형 화면에서는 사용하지 않음 */ }
 
   function renderAll(){
     renderCalendar();
     renderSummary();
     renderTimeline();
-    requestAnimationFrame(()=>scrollTimelineToDate(state.selectedDate,'auto'));
   }
 
   function selectDate(date,y,m){
@@ -840,7 +924,7 @@ button{font:inherit}
     state.selectedDate=date;
     renderCalendarSelectionOnly();
     renderSummary();
-    scrollTimelineToDate(date,'smooth');
+    renderTimeline();
   }
 
   function goMonth(delta){
@@ -854,7 +938,6 @@ button{font:inherit}
   function resetIdle(){ clearTimeout(state.idleTimer); state.idleTimer=setTimeout(async()=>{ try{await sb.auth.signOut();}catch{} alert('10분 동안 사용이 없어 자동 로그아웃되었습니다.'); location.href='index.html'; },IDLE_MS); }
   ['click','keydown','mousemove','scroll','touchstart'].forEach(evt=>document.addEventListener(evt,resetIdle,{passive:true}));
 
-  els.timelineScroll.addEventListener('scroll',onTimelineScroll,{passive:true});
 
   document.getElementById('prevBtn').addEventListener('click',()=>goMonth(-1));
   document.getElementById('nextBtn').addEventListener('click',()=>goMonth(1));
