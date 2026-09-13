@@ -2028,7 +2028,7 @@
     .counsel-ppp-title{
       min-width:0;
       color:#26364f;
-      font-size:10.2px;
+      font-size:11.22px;
       font-weight:900;
       letter-spacing:-.20px;
       white-space:nowrap;
@@ -2071,11 +2071,12 @@
       font-size:7.8px;
       line-height:1;
     }
-    .counsel-ppp-table col.ppp-date{width:18%}
-    .counsel-ppp-table col.ppp-type{width:15%}
-    .counsel-ppp-table col.ppp-partner{width:30%}
-    .counsel-ppp-table col.ppp-contact{width:18%}
-    .counsel-ppp-table col.ppp-field{width:19%}
+    .counsel-ppp-table col.ppp-date{width:16%}
+    .counsel-ppp-table col.ppp-type{width:14%}
+    .counsel-ppp-table col.ppp-partner{width:24%}
+    .counsel-ppp-table col.ppp-industry{width:17%}
+    .counsel-ppp-table col.ppp-contact{width:15%}
+    .counsel-ppp-table col.ppp-field{width:14%}
     .counsel-ppp-table th,
     .counsel-ppp-table td{
       height:13px;
@@ -2101,7 +2102,8 @@
     .counsel-ppp-table tbody tr:nth-child(even) td{background:#fbfcfd}
     .counsel-ppp-table td:nth-child(3),
     .counsel-ppp-table td:nth-child(4),
-    .counsel-ppp-table td:nth-child(5){text-align:left}
+    .counsel-ppp-table td:nth-child(5),
+    .counsel-ppp-table td:nth-child(6){text-align:left}
     .counsel-ppp-empty{color:#a0a9b7;font-weight:600!important;text-align:center!important}
 
     /* 기존 PPP Partner 하단 카드 자리의 세로 높이를 오늘 요약이 그대로 사용 */
@@ -2135,7 +2137,7 @@
     @media (max-height:820px){
       .counsel-ppp-top-card{padding:3px 7px}
       .counsel-ppp-header{height:18px;margin-bottom:1px}
-      .counsel-ppp-title{font-size:9.5px}
+      .counsel-ppp-title{font-size:10.45px}
       .counsel-ppp-filters{font-size:7.8px;gap:6px}
       .counsel-ppp-table{font-size:7.3px}
       .counsel-ppp-table th,
@@ -2180,6 +2182,7 @@
   min-height:25px;
   margin:0;
 }
+.counsel-operation-only-card .counsel-section-title strong{font-size:13.6125px}
 .counsel-operation-only-grid{
   height:auto;
   min-height:0;
@@ -2621,6 +2624,7 @@
               <col class="ppp-date">
               <col class="ppp-type">
               <col class="ppp-partner">
+              <col class="ppp-industry">
               <col class="ppp-contact">
               <col class="ppp-field">
             </colgroup>
@@ -2629,21 +2633,22 @@
                 <th>가입일</th>
                 <th>기관/기업체</th>
                 <th>Partner명</th>
+                <th>업종</th>
                 <th>담당자</th>
                 <th>분야</th>
               </tr>
             </thead>
             <tbody id="pppPartnerDashboardBody">
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
-              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
             </tbody>
           </table>
           </div>
@@ -3578,10 +3583,11 @@
         appendPppCell(tr, formatPppJoinDate(row.join_date));
         appendPppCell(tr, row.partner_type || "-");
         appendPppCell(tr, row.partner_name || "-");
+        appendPppCell(tr, row.industry || "-");
         appendPppCell(tr, row.contact_person_name || "-");
         appendPppCell(tr, row.field || "-");
       } else {
-        for (let c = 0; c < 5; c += 1) appendPppCell(tr, "-", true);
+        for (let c = 0; c < 6; c += 1) appendPppCell(tr, "-", true);
       }
 
       fragment.appendChild(tr);
@@ -3601,7 +3607,7 @@
   async function loadPppPartnerDashboard() {
     const { data, error } = await client
       .from("ppp_partner")
-      .select("join_date,partner_type,partner_name,contact_person_name,field,created_at")
+      .select("join_date,partner_type,partner_name,industry,contact_person_name,field,created_at")
       .order("join_date", { ascending:false })
       .order("created_at", { ascending:false });
 
