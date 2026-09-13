@@ -798,7 +798,7 @@
         terms.push(exactGoogleTerm(careerType));
       }
 
-      // 4. 업종: 업체명과 독립 조건이다. 업체명을 입력해도 자동 삭제하지 않는다.
+      // 4. 업종: 업체명 입력 시 자동으로 비워지며, 이후 사용자가 필요하면 다시 선택할 수 있다.
       if(industryText){
         terms.push(exactGoogleTerm(industryText));
       }
@@ -967,6 +967,14 @@
 
       searchStatus.textContent = '검색조건을 확인하고 검색하세요.';
     }
+
+    // 업체명을 입력하면 업종은 자동으로 빈칸 처리한다.
+    // 업체명 입력 후 필요하면 사용자가 업종을 다시 선택할 수 있다.
+    companyName.addEventListener('input', () => {
+      if(companyName.value.trim()){
+        setComboDefault(industryCombo, '');
+      }
+    });
 
     companyName.addEventListener('keydown', event => {
       if(event.key === 'Enter'){
