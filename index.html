@@ -2133,6 +2133,151 @@
     }
 </style>
 
+
+<style>
+/* =========================================================
+   Dashboard 운영현황 ↔ 오늘 요약/오늘 상담 운영 교환 2026-09-13
+   - 01 상담·구직: 운영현황 3개 카드만 유지, 회원 LIST 제거
+   - 02 기업·매칭·취업: 우측 하단을 오늘 요약 / 오늘 상담 운영 2그룹으로 분할
+   - 외곽 Dashboard 크기와 좌우 분할은 변경하지 않음
+   ========================================================= */
+
+/* 01 Dashboard: 하단 운영현황을 카드 3개에 맞게 축소하고 남는 높이를 PPP Partner에 배분 */
+.counsel-pane:not(.job-pane){
+  grid-template-rows:38px 148px minmax(0,1fr) 112px;
+}
+.counsel-operation-only-card{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  padding:8px 10px;
+  border:1px solid #dfe5ed;
+  border-radius:12px;
+  background:#fff;
+  display:grid;
+  grid-template-rows:25px minmax(0,1fr);
+  row-gap:6px;
+  overflow:hidden;
+}
+.counsel-operation-only-card .counsel-section-title{
+  height:25px;
+  min-height:25px;
+  margin:0;
+}
+.counsel-operation-only-grid{
+  height:auto;
+  min-height:0;
+  align-self:stretch;
+  gap:7px;
+}
+.counsel-operation-only-grid .job-operation-item{
+  height:100%;
+  min-height:0;
+  cursor:default;
+  transform:none !important;
+  box-shadow:none;
+}
+
+/* 02 Dashboard: 기존 운영현황 자리 전체를 두 그룹으로 균등 분할 */
+.job-summary-operation-card{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  padding:8px;
+  border:1px solid #dfe5ed;
+  border-radius:12px;
+  background:#fff;
+  display:grid;
+  grid-template-rows:minmax(0,1fr) minmax(0,1fr);
+  row-gap:8px;
+  overflow:hidden;
+}
+.job-summary-operation-group{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  margin:0;
+  padding:7px 8px;
+  border:1px solid #e1e6ee;
+  border-radius:10px;
+  background:#fbfdff;
+  overflow:hidden;
+}
+.job-summary-operation-card .counsel-summary-bottom-card,
+.job-summary-operation-card .counsel-today-card{
+  height:100%;
+  min-height:0;
+}
+.job-summary-operation-card .counsel-section-title{
+  height:24px;
+  min-height:24px;
+  margin-bottom:5px;
+}
+.job-summary-operation-card .counsel-summary-grid{
+  height:calc(100% - 29px);
+  min-height:0;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:5px;
+}
+.job-summary-operation-card .counsel-stat{
+  min-width:0;
+  min-height:0;
+  padding:3px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:3px;
+}
+.job-summary-operation-card .counsel-stat small{font-size:9px;line-height:1.05}
+.job-summary-operation-card .counsel-stat strong{font-size:14.5px;line-height:1;margin:0}
+.job-summary-operation-card .counsel-stat span{font-size:8px;line-height:1}
+.job-summary-operation-card .counsel-today-grid{
+  height:calc(100% - 29px) !important;
+  min-height:0 !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-template-rows:repeat(2,minmax(0,1fr)) !important;
+  gap:5px !important;
+  align-content:stretch !important;
+}
+.job-summary-operation-card .counsel-today-grid > div{
+  height:auto !important;
+  min-height:0 !important;
+  padding:3px;
+}
+.job-summary-operation-card .counsel-today-grid small{font-size:9px}
+.job-summary-operation-card .counsel-today-grid strong{font-size:15px}
+
+@media (max-height:820px){
+  .counsel-pane:not(.job-pane){
+    grid-template-rows:34px 127px minmax(0,1fr) 96px;
+  }
+  .counsel-operation-only-card{
+    padding:6px 8px;
+    grid-template-rows:22px minmax(0,1fr);
+    row-gap:5px;
+  }
+  .counsel-operation-only-card .counsel-section-title{height:22px;min-height:22px}
+  .counsel-operation-only-grid{gap:5px}
+  .counsel-operation-only-grid .job-operation-item{padding:3px 2px;gap:3px}
+  .counsel-operation-only-grid .job-operation-item small{font-size:8.5px}
+  .counsel-operation-only-grid .job-operation-item strong{font-size:13px}
+
+  .job-summary-operation-card{padding:6px;row-gap:6px}
+  .job-summary-operation-group{padding:5px 6px}
+  .job-summary-operation-card .counsel-section-title{height:21px;min-height:21px;margin-bottom:4px}
+  .job-summary-operation-card .counsel-summary-grid,
+  .job-summary-operation-card .counsel-today-grid{height:calc(100% - 25px) !important}
+  .job-summary-operation-card .counsel-summary-grid{gap:4px}
+  .job-summary-operation-card .counsel-stat{gap:2px;padding:2px}
+  .job-summary-operation-card .counsel-stat small{font-size:8.3px}
+  .job-summary-operation-card .counsel-stat strong{font-size:13px}
+  .job-summary-operation-card .counsel-today-grid{gap:4px !important}
+  .job-summary-operation-card .counsel-today-grid small{font-size:8.4px}
+  .job-summary-operation-card .counsel-today-grid strong{font-size:13.5px}
+}
+</style>
 </head>
 <body>
 
@@ -2487,34 +2632,22 @@
           </div>
         </div>
 
-        <div class="counsel-bottom-grid">
-          <div class="counsel-summary-card counsel-summary-bottom-card summary-clickable" id="counselSummaryCard" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="memberSummaryModal" title="클릭하면 회원수 기준 회원요약을 표시합니다.">
-            <div class="counsel-section-title">
-              <strong>📌 오늘 요약</strong>
-              <div class="counsel-summary-meta">
-                <span id="counselSummaryPeriod">기준일 확인 중</span>
-                <b id="counselSummaryMembers">총인원 -명</b>
-              </div>
-            </div>
-            <div class="counsel-summary-grid">
-              <div class="counsel-stat"><small>년전체</small><strong id="summaryYearTotal">-</strong><span>건</span></div>
-              <div class="counsel-stat"><small>당월전체</small><strong id="summaryMonthTotal">-</strong><span>건</span></div>
-              <div class="counsel-stat"><small>심리진행중</small><strong id="summaryPsychProgress">-</strong><span>건</span></div>
-              <div class="counsel-stat"><small>진로진행중</small><strong id="summaryCareerProgress">-</strong><span>건</span></div>
-              <div class="counsel-stat"><small>완료</small><strong id="summaryCompleted">-</strong><span>건</span></div>
-            </div>
+        <div class="counsel-operation-only-card" aria-label="운영현황">
+          <div class="counsel-section-title">
+            <strong>📊 운영현황</strong>
           </div>
-
-          <div class="counsel-today-card">
-            <div class="counsel-section-title">
-              <strong>오늘 상담 운영</strong>
-              <span id="todayOperationDate">실시간 확인</span>
+          <div class="job-operation-grid counsel-operation-only-grid" aria-label="회원 유형별 운영현황 카드">
+            <div class="job-operation-item" aria-label="기업회원 100개사">
+              <small>기업회원</small>
+              <strong>100<span>개사</span></strong>
             </div>
-            <div class="counsel-today-grid">
-              <div><small>신규상담(1회기)</small><strong id="todayNewConsultations">-</strong></div>
-              <div><small>심리상담</small><strong id="todayPsychological">-</strong></div>
-              <div><small>진로상담</small><strong id="todayCareer">-</strong></div>
-              <div><small>외국인상담</small><strong id="todayForeign">-</strong></div>
+            <div class="job-operation-item" aria-label="개인회원 100명">
+              <small>개인회원</small>
+              <strong>100<span>명</span></strong>
+            </div>
+            <div class="job-operation-item" aria-label="외국인 100명">
+              <small>외국인</small>
+              <strong>100<span>명</span></strong>
             </div>
           </div>
         </div>
@@ -2576,40 +2709,36 @@
             </div>
           </div>
 
-          <div class="counsel-today-card job-operation-card">
-            <div class="counsel-section-title">
-              <strong>📊 운영현황</strong>
-              <span>카드 클릭 → 회원 LIST</span>
-            </div>
-
-            <div class="job-operation-grid" aria-label="회원 유형별 운영현황">
-              <button type="button" class="job-operation-item active" data-member-type="company" aria-pressed="true">
-                <small>기업회원</small>
-                <strong>100<span>개사</span></strong>
-              </button>
-              <button type="button" class="job-operation-item" data-member-type="personal" aria-pressed="false">
-                <small>개인회원</small>
-                <strong>100<span>명</span></strong>
-              </button>
-              <button type="button" class="job-operation-item" data-member-type="foreign" aria-pressed="false">
-                <small>외국인</small>
-                <strong>100<span>명</span></strong>
-              </button>
-            </div>
-
-            <div class="member-list-panel" aria-label="선택 회원 목록">
-              <div class="member-list-head">
-                <strong id="memberListTitle">기업회원 LIST</strong>
-                <span id="memberListCount">예시 10건</span>
+          <div class="job-summary-operation-card" aria-label="오늘 요약 및 오늘 상담 운영">
+            <section class="job-summary-operation-group counsel-summary-card counsel-summary-bottom-card summary-clickable" id="counselSummaryCard" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="memberSummaryModal" title="클릭하면 회원수 기준 회원요약을 표시합니다.">
+              <div class="counsel-section-title">
+                <strong>📌 오늘 요약</strong>
+                <div class="counsel-summary-meta">
+                  <span id="counselSummaryPeriod">기준일 확인 중</span>
+                  <b id="counselSummaryMembers">총인원 -명</b>
+                </div>
               </div>
-              <div class="member-list-scroll" id="memberListScroll" role="region" aria-label="회원 목록 가로 세로 스크롤 영역" tabindex="0">
-                <table class="member-list-table mode-company" id="memberListTable">
-                  <colgroup id="memberListCols"></colgroup>
-                  <thead id="memberListHead"></thead>
-                  <tbody id="memberListBody"></tbody>
-                </table>
+              <div class="counsel-summary-grid">
+                <div class="counsel-stat"><small>년전체</small><strong id="summaryYearTotal">-</strong><span>건</span></div>
+                <div class="counsel-stat"><small>당월전체</small><strong id="summaryMonthTotal">-</strong><span>건</span></div>
+                <div class="counsel-stat"><small>심리진행중</small><strong id="summaryPsychProgress">-</strong><span>건</span></div>
+                <div class="counsel-stat"><small>진로진행중</small><strong id="summaryCareerProgress">-</strong><span>건</span></div>
+                <div class="counsel-stat"><small>완료</small><strong id="summaryCompleted">-</strong><span>건</span></div>
               </div>
-            </div>
+            </section>
+
+            <section class="job-summary-operation-group counsel-today-card job-today-operation-group">
+              <div class="counsel-section-title">
+                <strong>오늘 상담 운영</strong>
+                <span id="todayOperationDate">실시간 확인</span>
+              </div>
+              <div class="counsel-today-grid">
+                <div><small>신규상담(1회기)</small><strong id="todayNewConsultations">-</strong></div>
+                <div><small>심리상담</small><strong id="todayPsychological">-</strong></div>
+                <div><small>진로상담</small><strong id="todayCareer">-</strong></div>
+                <div><small>외국인상담</small><strong id="todayForeign">-</strong></div>
+              </div>
+            </section>
           </div>
         </div>
       </section>
@@ -2835,149 +2964,6 @@
       weatherEls.area?.classList.remove("is-loading");
     }
   }
-
-  /* =========================================================
-     02 Dashboard 운영현황 회원 LIST
-     ---------------------------------------------------------
-     - 기업회원 / 개인회원 / 외국인 카드를 클릭하면 하단 LIST 전환
-     - 현재는 각 유형별 가상 DATA 10건
-     - 추후 Supabase 조회 결과를 renderMemberList(type, rows)에 전달하면 됨
-     - 전체 Dashboard 프레임은 고정, LIST 내부에만 가로/세로 스크롤 발생
-     ========================================================= */
-  const memberConfigs = {
-    company: {
-      label:"기업회원",
-      tableClass:"mode-company",
-      columns:[
-        {key:"company", label:"회사명", left:true},
-        {key:"industry", label:"업종", left:true},
-        {key:"manager", label:"담당자"},
-        {key:"phone", label:"전화번호"}
-      ]
-    },
-    personal: {
-      label:"개인회원",
-      tableClass:"mode-personal",
-      columns:[
-        {key:"name", label:"이름"},
-        {key:"phone", label:"전화번호"},
-        {key:"gender", label:"성별"},
-        {key:"age", label:"나이"},
-        {key:"address", label:"주소", left:true},
-        {key:"desiredJob", label:"희망직종", left:true}
-      ]
-    },
-    foreign: {
-      label:"외국인",
-      tableClass:"mode-foreign",
-      columns:[
-        {key:"nationality", label:"국적"},
-        {key:"name", label:"이름"},
-        {key:"phone", label:"전화번호"},
-        {key:"gender", label:"성별"},
-        {key:"visa", label:"비자"},
-        {key:"entryDate", label:"입국일"}
-      ]
-    }
-  };
-
-  const companyMemberData = [
-    {company:"(주)한빛정밀", industry:"정밀가공", manager:"김성우", phone:"02-856-2101"},
-    {company:"에이치테크(주)", industry:"자동화설비", manager:"박민호", phone:"031-443-7721"},
-    {company:"(주)미래솔루션", industry:"IT서비스", manager:"이서현", phone:"02-6677-1204"},
-    {company:"세움물류서비스", industry:"물류·운송", manager:"정도현", phone:"032-812-4408"},
-    {company:"(주)대성산업", industry:"기계부품", manager:"최재원", phone:"031-498-9033"},
-    {company:"가온테크", industry:"CNC가공", manager:"오지훈", phone:"031-455-6180"},
-    {company:"(주)신성모빌리티", industry:"자동차부품", manager:"한유진", phone:"031-366-2755"},
-    {company:"동우전자", industry:"전자부품", manager:"서준혁", phone:"032-525-1730"},
-    {company:"(주)케이원시스템", industry:"ERP·전산", manager:"윤지수", phone:"02-2634-8192"},
-    {company:"한성케미칼(주)", industry:"화학·소재", manager:"조민석", phone:"031-491-2206"}
-  ];
-
-  const personalMemberData = [
-    {name:"김○○", phone:"010-32**-1180", gender:"남", age:"42", address:"서울 금천구", desiredJob:"생산설비 운영"},
-    {name:"이○○", phone:"010-48**-7312", gender:"여", age:"36", address:"경기 안양시", desiredJob:"품질관리·검사"},
-    {name:"박○○", phone:"010-55**-2046", gender:"여", age:"29", address:"서울 구로구", desiredJob:"사무·고객관리"},
-    {name:"최○○", phone:"010-61**-4920", gender:"남", age:"51", address:"경기 시흥시", desiredJob:"설비보전"},
-    {name:"정○○", phone:"010-27**-8851", gender:"남", age:"44", address:"경기 군포시", desiredJob:"CNC 가공"},
-    {name:"윤○○", phone:"010-73**-1029", gender:"여", age:"33", address:"인천 부평구", desiredJob:"전자부품 조립"},
-    {name:"강○○", phone:"010-19**-6744", gender:"남", age:"38", address:"서울 영등포구", desiredJob:"ERP 운영지원"},
-    {name:"임○○", phone:"010-84**-3105", gender:"여", age:"47", address:"경기 광명시", desiredJob:"물류·재고관리"},
-    {name:"송○○", phone:"010-41**-9928", gender:"남", age:"31", address:"경기 안산시", desiredJob:"생산관리"},
-    {name:"배○○", phone:"010-68**-5572", gender:"여", age:"40", address:"서울 양천구", desiredJob:"회계·총무"}
-  ];
-
-  const foreignMemberData = [
-    {nationality:"베트남", name:"NGUYEN A", phone:"010-92**-1184", gender:"남", visa:"E-9", entryDate:"2024-03-18"},
-    {nationality:"베트남", name:"TRAN B", phone:"010-37**-5502", gender:"여", visa:"F-6", entryDate:"2021-09-02"},
-    {nationality:"중국", name:"LI C", phone:"010-64**-7813", gender:"남", visa:"F-4", entryDate:"2022-11-21"},
-    {nationality:"네팔", name:"RAJ D", phone:"010-28**-3435", gender:"남", visa:"E-9", entryDate:"2025-01-09"},
-    {nationality:"태국", name:"SOM E", phone:"010-75**-2208", gender:"여", visa:"E-9", entryDate:"2024-07-14"},
-    {nationality:"우즈베키스탄", name:"ALI F", phone:"010-53**-6191", gender:"남", visa:"E-7", entryDate:"2023-05-30"},
-    {nationality:"필리핀", name:"MARIA G", phone:"010-86**-4017", gender:"여", visa:"F-6", entryDate:"2020-12-11"},
-    {nationality:"몽골", name:"BAT H", phone:"010-31**-9786", gender:"남", visa:"E-9", entryDate:"2024-10-23"},
-    {nationality:"캄보디아", name:"SOK I", phone:"010-69**-1440", gender:"남", visa:"E-9", entryDate:"2025-02-17"},
-    {nationality:"인도네시아", name:"DEWI J", phone:"010-47**-7326", gender:"여", visa:"E-7", entryDate:"2023-08-05"}
-  ];
-
-  const memberDataMap = {
-    company:companyMemberData,
-    personal:personalMemberData,
-    foreign:foreignMemberData
-  };
-
-  const memberListTitle = document.getElementById("memberListTitle");
-  const memberListCount = document.getElementById("memberListCount");
-  const memberListScroll = document.getElementById("memberListScroll");
-  const memberListTable = document.getElementById("memberListTable");
-  const memberListCols = document.getElementById("memberListCols");
-  const memberListHead = document.getElementById("memberListHead");
-  const memberListBody = document.getElementById("memberListBody");
-
-  function memberEscape(value){
-    return String(value ?? "").replace(/[&<>\"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"}[ch]));
-  }
-
-  function renderMemberList(type, rows){
-    const config = memberConfigs[type] || memberConfigs.company;
-    const safeRows = Array.isArray(rows) ? rows : [];
-
-    memberListTitle.textContent = `${config.label} LIST`;
-    memberListCount.textContent = `예시 ${safeRows.length}건`;
-
-    memberListTable.classList.remove("mode-company","mode-personal","mode-foreign");
-    memberListTable.classList.add(config.tableClass);
-    memberListCols.innerHTML = config.columns.map(() => "<col>").join("");
-    memberListHead.innerHTML = `<tr>${config.columns.map(col => `<th>${memberEscape(col.label)}</th>`).join("")}</tr>`;
-    memberListBody.innerHTML = safeRows.map(row => `
-      <tr>
-        ${config.columns.map(col => {
-          const value = row[col.key] ?? "-";
-          const cls = col.left ? ' class="member-left"' : "";
-          return `<td${cls} title="${memberEscape(value)}">${memberEscape(value)}</td>`;
-        }).join("")}
-      </tr>`).join("");
-
-    if (memberListScroll){
-      memberListScroll.scrollTop = 0;
-      memberListScroll.scrollLeft = 0;
-    }
-  }
-
-  document.querySelectorAll(".job-operation-item[data-member-type]").forEach(button => {
-    button.addEventListener("click", () => {
-      const type = button.dataset.memberType || "company";
-      document.querySelectorAll(".job-operation-item[data-member-type]").forEach(item => {
-        const active = item === button;
-        item.classList.toggle("active", active);
-        item.setAttribute("aria-pressed", active ? "true" : "false");
-      });
-      renderMemberList(type, memberDataMap[type] || []);
-    });
-  });
-
-  // 최초 화면은 기업회원 10건
-  renderMemberList("company", companyMemberData);
 
   /* =========================================================
      02 Dashboard 구인공고 / 구직공고 전환
