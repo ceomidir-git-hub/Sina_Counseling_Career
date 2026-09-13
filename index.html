@@ -620,6 +620,22 @@
       overflow:auto;
     }
     .counsel-note-body p{margin:2px 0}
+    textarea.counsel-note-body{
+      display:block;
+      resize:none;
+      font-family:inherit;
+      outline:none;
+    }
+    textarea.counsel-note-body[readonly]{
+      background:#f8fafc;
+      color:#475569;
+    }
+    textarea.counsel-note-body:not([readonly]){
+      background:#fff9d9;
+      border-color:#b9c8dc;
+      color:#1f2937;
+      box-shadow:inset 0 0 0 1px rgba(49,93,167,.06);
+    }
     .counsel-note-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
     .counsel-note-actions button{
       height:34px;border:0;border-radius:10px;background:#1565d8;
@@ -2137,12 +2153,12 @@
 <style>
 /* =========================================================
    Dashboard 운영현황 ↔ 오늘 요약/오늘 상담 운영 교환 2026-09-13
-   - 01 상담·구직: 운영현황 3개 카드만 유지, 회원 LIST 제거
+   - 01 상담·구직: 운영현황 5개 카드 한 행, 회원 LIST 없음
    - 02 기업·매칭·취업: 우측 하단을 오늘 요약 / 오늘 상담 운영 2그룹으로 분할
    - 외곽 Dashboard 크기와 좌우 분할은 변경하지 않음
    ========================================================= */
 
-/* 01 Dashboard: 하단 운영현황을 카드 3개에 맞게 축소하고 남는 높이를 PPP Partner에 배분 */
+/* 01 Dashboard: 하단 운영현황을 카드 5개 한 행으로 유지하고 남는 높이를 PPP Partner에 배분 */
 .counsel-pane:not(.job-pane){
   grid-template-rows:38px 148px minmax(0,1fr) 112px;
 }
@@ -2168,6 +2184,7 @@
   height:auto;
   min-height:0;
   align-self:stretch;
+  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:7px;
 }
 .counsel-operation-only-grid .job-operation-item{
@@ -2636,18 +2653,26 @@
           <div class="counsel-section-title">
             <strong>📊 운영현황</strong>
           </div>
-          <div class="job-operation-grid counsel-operation-only-grid" aria-label="회원 유형별 운영현황 카드">
-            <div class="job-operation-item" aria-label="기업회원 100개사">
-              <small>기업회원</small>
-              <strong>100<span>개사</span></strong>
+          <div class="job-operation-grid counsel-operation-only-grid" aria-label="PPP Partner 및 회원 운영현황 카드">
+            <div class="job-operation-item" aria-label="전체 PPP Partner">
+              <small>전체</small>
+              <strong id="operationPppTotal">-<span>개</span></strong>
             </div>
-            <div class="job-operation-item" aria-label="개인회원 100명">
+            <div class="job-operation-item" aria-label="기관 PPP Partner">
+              <small>기관</small>
+              <strong id="operationPppInstitution">-<span>개</span></strong>
+            </div>
+            <div class="job-operation-item" aria-label="기업체 PPP Partner">
+              <small>기업체</small>
+              <strong id="operationPppCompany">-<span>개</span></strong>
+            </div>
+            <div class="job-operation-item" aria-label="개인회원">
               <small>개인회원</small>
-              <strong>100<span>명</span></strong>
+              <strong id="operationPersonalMembers">-<span>명</span></strong>
             </div>
-            <div class="job-operation-item" aria-label="외국인 100명">
+            <div class="job-operation-item" aria-label="외국인 회원">
               <small>외국인</small>
-              <strong>100<span>명</span></strong>
+              <strong id="operationForeignMembers">-<span>명</span></strong>
             </div>
           </div>
         </div>
@@ -2694,18 +2719,14 @@
               <span id="jobTodayLabel">오늘</span>
             </div>
             <div class="counsel-note-nav">
-              <button type="button">◀ 이전</button>
-              <b>2026-08-23 (일)</b>
-              <button type="button" disabled>다음 ▶</button>
+              <button type="button" id="counselNotePrevBtn">◀ 이전</button>
+              <b id="counselNoteDateLabel">날짜 확인 중</b>
+              <button type="button" id="counselNoteNextBtn" disabled>다음 ▶</button>
             </div>
-            <div class="counsel-note-body">
-              <p>· 초기 상담 예약 대상 확인</p>
-              <p>· 심층 상담 예정자 사전 자료 검토</p>
-              <p>· 미배정 상담 건 담당자 지정</p>
-            </div>
+            <textarea class="counsel-note-body" id="counselNoteInput" aria-label="상담자 노트 내용" placeholder="상담자 노트를 작성하세요." readonly></textarea>
             <div class="counsel-note-actions">
-              <button type="button" class="secondary">작성</button>
-              <button type="button">저장</button>
+              <button type="button" class="secondary" id="counselNoteEditBtn" disabled>작성</button>
+              <button type="button" id="counselNoteSaveBtn" disabled>저장</button>
             </div>
           </div>
 
@@ -3610,6 +3631,245 @@
   }
   window.addEventListener("resize", syncPppDashboardRowHeight);
 
+  // =========================================================
+  // 01 Dashboard 운영현황
+  // - 전체 = PPP Partner 기관 + 기업체 전체 건수
+  // - 기관 / 기업체 = ppp_partner.partner_type 실데이터 기준
+  // - 개인회원 = DB_basic.nationality가 NULL 또는 공백인 내국인
+  // - 외국인 = DB_basic.nationality가 입력된 회원
+  // =========================================================
+  const operationStatusEls = {
+    pppTotal: document.getElementById("operationPppTotal"),
+    pppInstitution: document.getElementById("operationPppInstitution"),
+    pppCompany: document.getElementById("operationPppCompany"),
+    personalMembers: document.getElementById("operationPersonalMembers"),
+    foreignMembers: document.getElementById("operationForeignMembers")
+  };
+
+  function setOperationStatusValue(element, value, unit) {
+    if (!element) return;
+    element.replaceChildren(
+      document.createTextNode(formatCount(value)),
+      Object.assign(document.createElement("span"), { textContent: unit })
+    );
+  }
+
+  async function fetchOperationStatusRows(table, columns) {
+    const rows = [];
+    let from = 0;
+    const pageSize = 1000;
+
+    while (true) {
+      const { data, error } = await client
+        .from(table)
+        .select(columns)
+        .range(from, from + pageSize - 1);
+
+      if (error) throw error;
+
+      const batch = Array.isArray(data) ? data : [];
+      rows.push(...batch);
+      if (batch.length < pageSize) break;
+      from += pageSize;
+    }
+
+    return rows;
+  }
+
+  async function loadDashboardOperationStatus() {
+    // DB_basic.nationality는 개인정보 보호를 위해 브라우저 직접 SELECT 권한이 없습니다.
+    // 따라서 SECURITY DEFINER RPC에서 집계값만 반환하고 원본 국적값은 브라우저로 전달하지 않습니다.
+    const { data, error } = await client.rpc("get_dashboard_operation_status");
+    if (error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const totalCount = Number(row?.total_partner_count ?? 0);
+    const institutionCount = Number(row?.institution_count ?? 0);
+    const companyCount = Number(row?.company_count ?? 0);
+    const personalCount = Number(row?.personal_count ?? 0);
+    const foreignCount = Number(row?.foreign_count ?? 0);
+
+    setOperationStatusValue(operationStatusEls.pppTotal, totalCount, "개");
+    setOperationStatusValue(operationStatusEls.pppInstitution, institutionCount, "개");
+    setOperationStatusValue(operationStatusEls.pppCompany, companyCount, "개");
+    setOperationStatusValue(operationStatusEls.personalMembers, personalCount, "명");
+    setOperationStatusValue(operationStatusEls.foreignMembers, foreignCount, "명");
+
+    return {
+      total: totalCount,
+      institution: institutionCount,
+      company: companyCount,
+      personal: personalCount,
+      foreign: foreignCount
+    };
+  }
+
+  // =========================================================
+  // 상담자 노트
+  // - 별도 DB public.counselor_note 사용
+  // - note_date PK 기준으로 날짜당 1건
+  // - 관리자/사용자: 작성 및 수정/저장, 조회자: 조회만 가능
+  // =========================================================
+  const counselorNoteEls = {
+    prev: document.getElementById("counselNotePrevBtn"),
+    next: document.getElementById("counselNoteNextBtn"),
+    dateLabel: document.getElementById("counselNoteDateLabel"),
+    input: document.getElementById("counselNoteInput"),
+    edit: document.getElementById("counselNoteEditBtn"),
+    save: document.getElementById("counselNoteSaveBtn")
+  };
+
+  let counselorNoteDate = getSeoulIsoDate();
+  let counselorNoteExists = false;
+  let counselorNotePermission = "조회자";
+  let counselorNoteEditing = false;
+
+  function getSeoulIsoDate() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
+    const map = {};
+    parts.forEach(part => { if (part.type !== "literal") map[part.type] = part.value; });
+    return `${map.year}-${map.month}-${map.day}`;
+  }
+
+  function shiftIsoDate(dateText, days) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateText || ""));
+    if (!match) return getSeoulIsoDate();
+    const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    date.setUTCDate(date.getUTCDate() + Number(days || 0));
+    return [
+      date.getUTCFullYear(),
+      String(date.getUTCMonth() + 1).padStart(2, "0"),
+      String(date.getUTCDate()).padStart(2, "0")
+    ].join("-");
+  }
+
+  function formatCounselorNoteDate(dateText) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateText || ""));
+    if (!match) return dateText || "-";
+    const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    const weekday = new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "UTC",
+      weekday: "short"
+    }).format(date);
+    return `${dateText} (${weekday})`;
+  }
+
+  function canWriteCounselorNote() {
+    return counselorNotePermission === "관리자" || counselorNotePermission === "사용자";
+  }
+
+  function setCounselorNoteEditing(editing) {
+    counselorNoteEditing = Boolean(editing) && canWriteCounselorNote();
+    if (counselorNoteEls.input) counselorNoteEls.input.readOnly = !counselorNoteEditing;
+    if (counselorNoteEls.save) counselorNoteEls.save.disabled = !counselorNoteEditing;
+    if (counselorNoteEls.edit) counselorNoteEls.edit.disabled = !canWriteCounselorNote();
+    if (counselorNoteEditing) counselorNoteEls.input?.focus();
+  }
+
+  function syncCounselorNoteNav() {
+    const today = getSeoulIsoDate();
+    if (counselorNoteEls.dateLabel) {
+      counselorNoteEls.dateLabel.textContent = formatCounselorNoteDate(counselorNoteDate);
+    }
+    if (counselorNoteEls.next) {
+      counselorNoteEls.next.disabled = counselorNoteDate >= today;
+    }
+  }
+
+  async function loadCounselorNote(dateText = counselorNoteDate) {
+    counselorNoteDate = dateText;
+    syncCounselorNoteNav();
+    setCounselorNoteEditing(false);
+
+    const { data, error } = await client
+      .from("counselor_note")
+      .select("note_date,content,updated_at")
+      .eq("note_date", counselorNoteDate)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    counselorNoteExists = Boolean(data);
+    if (counselorNoteEls.input) {
+      counselorNoteEls.input.value = data?.content || "";
+    }
+    if (counselorNoteEls.edit) {
+      counselorNoteEls.edit.textContent = counselorNoteExists ? "수정" : "작성";
+      counselorNoteEls.edit.disabled = !canWriteCounselorNote();
+    }
+    if (counselorNoteEls.save) counselorNoteEls.save.disabled = true;
+
+    return data || null;
+  }
+
+  async function saveCounselorNote() {
+    if (!canWriteCounselorNote()) {
+      showMessage(null, "조회자 권한은 상담자 노트를 저장할 수 없습니다.", "error");
+      return;
+    }
+    if (!counselorNoteEditing) return;
+
+    const content = counselorNoteEls.input?.value ?? "";
+    const payload = {
+      content,
+      updated_at: new Date().toISOString()
+    };
+
+    let error = null;
+    if (counselorNoteExists) {
+      ({ error } = await client
+        .from("counselor_note")
+        .update(payload)
+        .eq("note_date", counselorNoteDate));
+    } else {
+      ({ error } = await client
+        .from("counselor_note")
+        .insert({ note_date: counselorNoteDate, ...payload }));
+    }
+
+    if (error) throw error;
+
+    counselorNoteExists = true;
+    setCounselorNoteEditing(false);
+    if (counselorNoteEls.edit) counselorNoteEls.edit.textContent = "수정";
+    showMessage(null, "상담자 노트를 저장했습니다.", "success");
+  }
+
+  counselorNoteEls.prev?.addEventListener("click", () => {
+    counselorNoteDate = shiftIsoDate(counselorNoteDate, -1);
+    loadCounselorNote().catch(error => {
+      console.error("상담자 노트 조회 실패:", error);
+      showMessage(null, "상담자 노트 조회 중 오류가 발생했습니다.", "error");
+    });
+  });
+
+  counselorNoteEls.next?.addEventListener("click", () => {
+    const nextDate = shiftIsoDate(counselorNoteDate, 1);
+    if (nextDate > getSeoulIsoDate()) return;
+    counselorNoteDate = nextDate;
+    loadCounselorNote().catch(error => {
+      console.error("상담자 노트 조회 실패:", error);
+      showMessage(null, "상담자 노트 조회 중 오류가 발생했습니다.", "error");
+    });
+  });
+
+  counselorNoteEls.edit?.addEventListener("click", () => {
+    if (!canWriteCounselorNote()) return;
+    setCounselorNoteEditing(true);
+  });
+
+  counselorNoteEls.save?.addEventListener("click", () => {
+    saveCounselorNote().catch(error => {
+      console.error("상담자 노트 저장 실패:", error);
+      showMessage(null, "상담자 노트 저장 중 오류가 발생했습니다.", "error");
+    });
+  });
+
   function formatCount(value) {
     const n = Number(value);
     return Number.isFinite(n) ? n.toLocaleString("ko-KR") : "-";
@@ -4164,6 +4424,24 @@
     loadPppPartnerDashboard().catch(error => {
       console.error("PPP Partner DB 조회 실패:", error);
       renderPppPartnerDashboard([]);
+    });
+
+    loadDashboardOperationStatus().catch(error => {
+      console.error("운영현황 DB 조회 실패:", error);
+      setOperationStatusValue(operationStatusEls.pppTotal, "-", "개");
+      setOperationStatusValue(operationStatusEls.pppInstitution, "-", "개");
+      setOperationStatusValue(operationStatusEls.pppCompany, "-", "개");
+      setOperationStatusValue(operationStatusEls.personalMembers, "-", "명");
+      setOperationStatusValue(operationStatusEls.foreignMembers, "-", "명");
+    });
+
+    counselorNotePermission = employee?.permission || "조회자";
+    counselorNoteDate = getSeoulIsoDate();
+    loadCounselorNote(counselorNoteDate).catch(error => {
+      console.error("상담자 노트 DB 조회 실패:", error);
+      if (counselorNoteEls.input) counselorNoteEls.input.value = "";
+      if (counselorNoteEls.edit) counselorNoteEls.edit.disabled = true;
+      if (counselorNoteEls.save) counselorNoteEls.save.disabled = true;
     });
   }
 
