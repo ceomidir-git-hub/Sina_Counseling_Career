@@ -2446,12 +2446,14 @@
         <div class="counsel-ppp-top-card" id="counselPppPartnerCard" aria-label="Public-Private Partnership Partner">
           <div class="counsel-ppp-header">
             <div class="counsel-ppp-title">Public-Private Partnership (PPP) Partner</div>
-            <div class="counsel-ppp-filters" role="radiogroup" aria-label="PPP Partner 기관 기업체 구분">
+            <div class="counsel-ppp-filters" role="radiogroup" aria-label="PPP Partner 전체 기관 기업체 구분">
+              <label><input type="radio" name="pppDashboardType" value="" checked>전체</label>
               <label><input type="radio" name="pppDashboardType" value="기관">기관</label>
               <label><input type="radio" name="pppDashboardType" value="기업체">기업체</label>
             </div>
           </div>
-          <table class="counsel-ppp-table" aria-label="PPP Partner 최근 5건 목록">
+          <div class="counsel-ppp-scroll" id="pppPartnerDashboardScroll">
+            <table class="counsel-ppp-table" aria-label="PPP Partner 목록">
             <colgroup>
               <col class="ppp-date">
               <col class="ppp-type">
@@ -2474,8 +2476,14 @@
               <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
               <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
               <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
+              <tr><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td><td class="counsel-ppp-empty">-</td></tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <div class="counsel-bottom-grid">
@@ -3507,12 +3515,14 @@
   // PPP Partner Dashboard
   // - DB public.ppp_partner를 직접 조회
   // - 가입일 내림차순, 동일 가입일은 등록일시 내림차순
-  // - 화면에는 정확히 5행을 유지하고 부족한 행은 빈칸(-)으로 표시
-  // - 라디오 미선택: 전체 / 기관 선택: 기관 / 기업체 선택: 기업체
+  // - 화면에는 최소 10행을 유지하고 부족한 행은 빈칸(-)으로 표시
+  // - 10건 초과 데이터는 PPP Partner 영역 내부 스크롤로 확인
+  // - 전체 / 기관 / 기업체 라디오 필터 적용
   // =========================================================
-  const PPP_DASHBOARD_LIMIT = 5;
+  const PPP_DASHBOARD_VISIBLE_ROWS = 10;
   const pppDashboardEls = {
     body: document.getElementById("pppPartnerDashboardBody"),
+    scroll: document.getElementById("pppPartnerDashboardScroll"),
     typeRadios: Array.from(document.querySelectorAll('input[name="pppDashboardType"]'))
   };
 
@@ -3532,13 +3542,27 @@
     rowEl.appendChild(cell);
   }
 
+  function syncPppDashboardRowHeight() {
+    const scroll = pppDashboardEls.scroll;
+    if (!scroll) return;
+
+    const table = scroll.querySelector(".counsel-ppp-table");
+    const thead = table?.tHead;
+    if (!table || !thead) return;
+
+    const available = Math.max(0, scroll.clientHeight - thead.getBoundingClientRect().height - 2);
+    const rowHeight = Math.max(24, Math.floor(available / PPP_DASHBOARD_VISIBLE_ROWS));
+    scroll.style.setProperty("--ppp-row-h", `${rowHeight}px`);
+  }
+
   function renderPppPartnerDashboard(rows) {
     if (!pppDashboardEls.body) return;
 
-    const safeRows = Array.isArray(rows) ? rows.slice(0, PPP_DASHBOARD_LIMIT) : [];
+    const safeRows = Array.isArray(rows) ? rows : [];
+    const renderCount = Math.max(PPP_DASHBOARD_VISIBLE_ROWS, safeRows.length);
     const fragment = document.createDocumentFragment();
 
-    for (let i = 0; i < PPP_DASHBOARD_LIMIT; i += 1) {
+    for (let i = 0; i < renderCount; i += 1) {
       const row = safeRows[i] || null;
       const tr = document.createElement("tr");
 
@@ -3556,6 +3580,7 @@
     }
 
     pppDashboardEls.body.replaceChildren(fragment);
+    requestAnimationFrame(syncPppDashboardRowHeight);
   }
 
   async function loadPppPartnerDashboard() {
@@ -3563,8 +3588,7 @@
       .from("ppp_partner")
       .select("join_date,partner_type,partner_name,contact_person_name,field,created_at")
       .order("join_date", { ascending:false })
-      .order("created_at", { ascending:false })
-      .limit(PPP_DASHBOARD_LIMIT);
+      .order("created_at", { ascending:false });
 
     const typeFilter = selectedPppDashboardType();
     if (typeFilter) query = query.eq("partner_type", typeFilter);
@@ -3585,6 +3609,14 @@
       });
     });
   });
+
+  if (pppDashboardEls.scroll && "ResizeObserver" in window) {
+    const pppDashboardResizeObserver = new ResizeObserver(() => {
+      syncPppDashboardRowHeight();
+    });
+    pppDashboardResizeObserver.observe(pppDashboardEls.scroll);
+  }
+  window.addEventListener("resize", syncPppDashboardRowHeight);
 
   function formatCount(value) {
     const n = Number(value);
@@ -4940,6 +4972,176 @@
     height:44px;
     min-height:44px;
   }
+}
+</style>
+
+
+<style>
+/* =========================================================
+   01 Dashboard 최종 최적화 2026-09-13
+   - 전체 Dashboard 외곽 크기/좌우 분할/상단 6개 바로가기 크기 변경 없음
+   - PPP Partner: 전체/기관/기업체, 10행 표시, 10건 초과 내부 스크롤
+   - 오늘 요약 / 오늘 상담 운영: 하단 높이 대폭 축소
+   ========================================================= */
+.counsel-pane{
+  grid-template-rows:38px 148px minmax(0,1fr) 240px;
+}
+
+.counsel-ppp-top-card{
+  height:100%;
+  min-height:0;
+  padding:7px 10px 8px;
+  display:grid;
+  grid-template-rows:30px minmax(0,1fr);
+  overflow:hidden;
+}
+.counsel-ppp-header{
+  height:30px;
+  min-height:30px;
+  margin-bottom:0;
+  gap:10px;
+}
+.counsel-ppp-title{
+  font-size:12px;
+  line-height:1.2;
+}
+.counsel-ppp-filters{
+  gap:10px;
+  font-size:10.4px;
+}
+.counsel-ppp-filters label{gap:3px}
+.counsel-ppp-filters input[type="radio"]{
+  width:13px;
+  height:13px;
+}
+.counsel-ppp-scroll{
+  --ppp-row-h:28px;
+  min-width:0;
+  min-height:0;
+  height:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  border:1px solid #dfe5ed;
+  border-radius:8px;
+  background:#fff;
+  scrollbar-width:thin;
+  scrollbar-color:#aeb8c7 #f4f6f9;
+}
+.counsel-ppp-scroll::-webkit-scrollbar{width:8px}
+.counsel-ppp-scroll::-webkit-scrollbar-track{background:#f4f6f9}
+.counsel-ppp-scroll::-webkit-scrollbar-thumb{background:#aeb8c7;border:2px solid #f4f6f9;border-radius:8px}
+.counsel-ppp-table{
+  border:0;
+  border-radius:0;
+  overflow:visible;
+  font-size:10.4px;
+  line-height:1.15;
+}
+.counsel-ppp-table thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  height:27px;
+  min-height:27px;
+  font-size:10.2px;
+  background:#eef2f7;
+  box-shadow:0 1px 0 #dfe5ed;
+}
+.counsel-ppp-table tbody td{
+  height:var(--ppp-row-h);
+  min-height:var(--ppp-row-h);
+  padding:2px 5px;
+  font-size:10.4px;
+  line-height:1.2;
+}
+.counsel-ppp-table tbody tr:last-child td{border-bottom:1px solid #e6eaf0}
+
+/* 하단 두 카드의 외곽 높이는 counsel-pane의 240px 행 안에서만 사용 */
+.counsel-bottom-grid{
+  height:100%;
+  min-height:0;
+  align-items:stretch;
+}
+.counsel-summary-bottom-card,
+.counsel-today-card{
+  height:100%;
+  min-height:0;
+  padding:8px 9px;
+  overflow:hidden;
+}
+.counsel-summary-bottom-card .counsel-section-title,
+.counsel-today-card .counsel-section-title{
+  height:25px;
+  min-height:25px;
+  margin-bottom:5px;
+}
+
+/* 오늘 요약: 세로 5칸을 3열×2행으로 압축 */
+.counsel-summary-bottom-card .counsel-summary-grid{
+  height:calc(100% - 30px);
+  min-height:0;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:5px;
+}
+.counsel-summary-bottom-card .counsel-stat{
+  min-width:0;
+  min-height:0;
+  padding:4px 3px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+.counsel-summary-bottom-card .counsel-stat small{font-size:9.4px;line-height:1.1}
+.counsel-summary-bottom-card .counsel-stat strong{margin:0;font-size:15px;line-height:1}
+.counsel-summary-bottom-card .counsel-stat span{font-size:8.4px;line-height:1}
+
+/* 오늘 상담 운영: 남는 빈 공간 없이 2×2 카드가 높이를 균등 사용 */
+.counsel-today-card .counsel-today-grid{
+  height:calc(100% - 30px) !important;
+  min-height:0 !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-template-rows:repeat(2,minmax(0,1fr)) !important;
+  gap:6px !important;
+  align-content:stretch !important;
+}
+.counsel-today-card .counsel-today-grid > div{
+  height:auto !important;
+  min-height:0 !important;
+  padding:4px 3px;
+}
+.counsel-today-card .counsel-today-grid small{font-size:9.5px}
+.counsel-today-card .counsel-today-grid strong{font-size:16px}
+
+@media (max-height:820px){
+  .counsel-pane{
+    grid-template-rows:34px 127px minmax(0,1fr) 170px;
+  }
+  .counsel-ppp-top-card{
+    padding:5px 8px 6px;
+    grid-template-rows:27px minmax(0,1fr);
+  }
+  .counsel-ppp-header{height:27px;min-height:27px}
+  .counsel-ppp-title{font-size:11.2px}
+  .counsel-ppp-filters{font-size:9.8px;gap:8px}
+  .counsel-ppp-filters input[type="radio"]{width:12px;height:12px}
+  .counsel-ppp-table{font-size:9.8px}
+  .counsel-ppp-table thead th{height:24px;min-height:24px;font-size:9.5px}
+  .counsel-ppp-table tbody td{font-size:9.8px;padding:1px 4px}
+
+  .counsel-summary-bottom-card,
+  .counsel-today-card{padding:6px 7px}
+  .counsel-summary-bottom-card .counsel-section-title,
+  .counsel-today-card .counsel-section-title{height:22px;min-height:22px;margin-bottom:4px}
+  .counsel-summary-bottom-card .counsel-summary-grid,
+  .counsel-today-card .counsel-today-grid{height:calc(100% - 26px) !important}
+  .counsel-summary-bottom-card .counsel-stat{gap:2px;padding:2px}
+  .counsel-summary-bottom-card .counsel-stat small{font-size:8.8px}
+  .counsel-summary-bottom-card .counsel-stat strong{font-size:13.5px}
+  .counsel-today-card .counsel-today-grid small{font-size:8.9px}
+  .counsel-today-card .counsel-today-grid strong{font-size:14.5px}
 }
 </style>
 
