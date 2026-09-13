@@ -2132,6 +2132,7 @@
       .counsel-summary-bottom-card .counsel-stat strong{font-size:13.4px}
     }
 </style>
+
 </head>
 <body>
 
@@ -2520,7 +2521,7 @@
       </section>
 
       <!-- ================= RIGHT PANE : 01과 동일 구조 ================= -->
-      <section class="dashboard-pane counsel-pane">
+      <section class="dashboard-pane counsel-pane job-pane">
         <div class="pane-head counsel-pane-head">
           <h2>02. 기업 · 매칭 · 취업 Dashboard</h2>
         </div>
@@ -3583,21 +3584,26 @@
     requestAnimationFrame(syncPppDashboardRowHeight);
   }
 
+  function filterPppPartnerDashboardRows(rows, typeFilter) {
+    const safeRows = Array.isArray(rows) ? rows : [];
+    const filter = String(typeFilter || "").trim();
+    if (!filter) return safeRows;
+    return safeRows.filter(row => String(row?.partner_type || "").trim() === filter);
+  }
+
   async function loadPppPartnerDashboard() {
-    let query = client
+    const { data, error } = await client
       .from("ppp_partner")
       .select("join_date,partner_type,partner_name,contact_person_name,field,created_at")
       .order("join_date", { ascending:false })
       .order("created_at", { ascending:false });
 
-    const typeFilter = selectedPppDashboardType();
-    if (typeFilter) query = query.eq("partner_type", typeFilter);
-
-    const { data, error } = await query;
     if (error) throw error;
 
-    renderPppPartnerDashboard(data || []);
-    return data || [];
+    const allRows = Array.isArray(data) ? data : [];
+    const visibleRows = filterPppPartnerDashboardRows(allRows, selectedPppDashboardType());
+    renderPppPartnerDashboard(visibleRows);
+    return visibleRows;
   }
 
   pppDashboardEls.typeRadios.forEach(radio => {
@@ -5144,4 +5150,46 @@
   .counsel-today-card .counsel-today-grid strong{font-size:14.5px}
 }
 </style>
+<style>
+/* =========================================================
+   02 Dashboard 표시행 최적화 2026-09-13
+   - 구인/구직 LIST: 화면에 8개 데이터행 + 헤더 표시
+   - 9번째 이후 데이터는 기존 내부 세로 스크롤로 확인
+   - 02 Dashboard 전체 외곽 높이/폭은 변경하지 않음
+   - 줄어든 상단 LIST 높이를 상담자 노트/운영현황에 배분
+   ========================================================= */
+.counsel-pane.job-pane{
+  grid-template-rows:38px 148px 126px minmax(0,1fr);
+}
 
+.job-pane .counsel-note-card{
+  display:grid;
+  grid-template-rows:25px 34px minmax(0,1fr) 34px;
+  row-gap:8px;
+}
+.job-pane .counsel-note-card .counsel-section-title{
+  height:25px;
+  min-height:25px;
+  margin:0;
+}
+.job-pane .counsel-note-nav{height:34px;margin:0}
+.job-pane .counsel-note-body{min-height:0;max-height:none;height:100%}
+.job-pane .counsel-note-actions{height:34px;margin:0}
+.job-pane .counsel-note-actions button{height:34px}
+.job-pane .job-operation-card{height:100%;min-height:0}
+
+@media (max-height:820px){
+  .counsel-pane.job-pane{
+    grid-template-rows:34px 127px 147px minmax(0,1fr);
+  }
+  .job-pane .counsel-note-card{
+    grid-template-rows:23px 30px minmax(0,1fr) 32px;
+    row-gap:6px;
+  }
+  .job-pane .counsel-note-card .counsel-section-title{height:23px;min-height:23px}
+  .job-pane .counsel-note-nav{height:30px}
+  .job-pane .counsel-note-nav button{height:28px}
+  .job-pane .counsel-note-actions{height:32px}
+  .job-pane .counsel-note-actions button{height:32px}
+}
+</style>
