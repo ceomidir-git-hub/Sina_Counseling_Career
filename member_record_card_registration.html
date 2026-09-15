@@ -59,6 +59,7 @@
     }
     .action-btn:disabled{opacity:.55;cursor:not-allowed}
     .register-btn{background:#5f6b73}
+    .lookup-btn{background:#6a5f8d}
     .edit-btn{background:#356b8c}
     .save-btn{background:var(--primary)}
     .delete-btn{background:var(--danger)}
@@ -163,7 +164,45 @@
       tr>td:last-child{border-bottom:0}
       .label{text-align:left}
       .service-box{gap:10px 14px}
+      .lookup-fields{grid-template-columns:90px 1fr}
     }
+
+
+    .lookup-modal{
+      position:fixed;inset:0;z-index:1000;display:none;
+      align-items:center;justify-content:center;padding:20px;
+      background:rgba(0,0,0,.38);
+    }
+    .lookup-modal.open{display:flex}
+    .lookup-card{
+      width:min(620px,96vw);max-height:82vh;overflow:auto;
+      background:#fff;border:1px solid #9fa6ad;border-radius:6px;
+      box-shadow:0 12px 35px rgba(0,0,0,.22);padding:18px;
+    }
+    .lookup-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .lookup-head h2{font-size:18px;margin:0}
+    .lookup-close{
+      border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:#555;
+    }
+    .lookup-fields{display:grid;grid-template-columns:105px 1fr 105px 1fr;gap:8px;align-items:center}
+    .lookup-fields label{font-weight:700;text-align:center}
+    .lookup-fields input{min-height:34px}
+    .lookup-actions{display:flex;justify-content:flex-end;gap:7px;margin:12px 0}
+    .lookup-sub-btn{
+      min-width:72px;padding:7px 12px;border:1px solid #667085;border-radius:4px;
+      background:#fff;font:inherit;font-weight:700;cursor:pointer;
+    }
+    .lookup-sub-btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .lookup-status{min-height:22px;color:var(--muted);font-size:12px;margin-bottom:5px}
+    .lookup-table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .lookup-table th,.lookup-table td{border:1px solid var(--line);padding:7px 8px;text-align:left}
+    .lookup-table th{background:var(--label);text-align:center}
+    .lookup-table th:last-child,.lookup-table td:last-child{width:70px;text-align:center}
+    .select-member-btn{
+      padding:5px 9px;border:1px solid #356b8c;border-radius:4px;background:#fff;
+      color:#234d6b;font-weight:700;cursor:pointer;
+    }
+    .lookup-empty{text-align:center!important;color:var(--muted);padding:18px!important}
 
     @page{size:A4 portrait;margin:0}
     @media print{
@@ -177,7 +216,7 @@
         border:0!important;
         box-shadow:none!important;
       }
-      .top-actions{display:none!important}
+      .top-actions,.lookup-modal{display:none!important}
       .doc-header{padding-top:0!important}
       input,select,textarea{
         -webkit-print-color-adjust:exact;
@@ -191,6 +230,7 @@
   <main class="page type-company" id="pageShell">
     <div class="top-actions">
       <button type="button" class="action-btn register-btn" id="registerBtn">등록</button>
+      <button type="button" class="action-btn lookup-btn" id="lookupBtn">조회</button>
       <button type="button" class="action-btn edit-btn" id="editBtn">수정</button>
       <button type="button" class="action-btn save-btn" id="saveBtn">저장</button>
       <button type="button" class="action-btn delete-btn" id="deleteBtn">삭제</button>
@@ -237,7 +277,7 @@
           <tr>
             <td class="label">연락처 <span class="required">*</span></td>
             <td><input type="tel" name="company_phone" maxlength="50"></td>
-            <td class="label">이메일 <span class="required">*</span></td>
+            <td class="label">이메일</td>
             <td><input type="email" name="company_email" maxlength="255"></td>
           </tr>
           <tr>
@@ -264,7 +304,7 @@
             <td colspan="3"><textarea name="company_note" maxlength="2000"></textarea></td>
           </tr>
           <tr>
-            <td class="label">가입일</td>
+            <td class="label">가입일 <span class="required">*</span></td>
             <td colspan="3"><input type="date" name="company_join_date"></td>
           </tr>
         </table>
@@ -323,7 +363,7 @@
             <td colspan="3"><textarea name="domestic_note"></textarea></td>
           </tr>
           <tr>
-            <td class="label">가입일</td>
+            <td class="label">가입일 <span class="required">*</span></td>
             <td colspan="3"><input type="date" name="domestic_join_date"></td>
           </tr>
         </table>
@@ -400,13 +440,37 @@
             <td colspan="3"><textarea name="foreigner_note"></textarea></td>
           </tr>
           <tr>
-            <td class="label">가입일</td>
+            <td class="label">가입일 <span class="required">*</span></td>
             <td colspan="3"><input type="date" name="foreigner_join_date"></td>
           </tr>
         </table>
       </section>
     </form>
   </main>
+
+  <div class="lookup-modal" id="lookupModal" aria-hidden="true">
+    <section class="lookup-card" role="dialog" aria-modal="true" aria-labelledby="lookupTitle">
+      <div class="lookup-head">
+        <h2 id="lookupTitle">회원 조회</h2>
+        <button type="button" class="lookup-close" id="lookupCloseBtn" aria-label="닫기">×</button>
+      </div>
+      <div class="lookup-fields">
+        <label for="lookupCompany">회사명</label>
+        <input type="text" id="lookupCompany" maxlength="150" autocomplete="off">
+        <label for="lookupCeo">대표자명</label>
+        <input type="text" id="lookupCeo" maxlength="100" autocomplete="off">
+      </div>
+      <div class="lookup-actions">
+        <button type="button" class="lookup-sub-btn" id="lookupResetBtn">초기화</button>
+        <button type="button" class="lookup-sub-btn primary" id="lookupSearchBtn">조회</button>
+      </div>
+      <div class="lookup-status" id="lookupStatus">회사명 또는 대표자명을 입력한 뒤 조회해 주세요.</div>
+      <table class="lookup-table">
+        <thead><tr><th>회사명</th><th>대표자명</th><th>선택</th></tr></thead>
+        <tbody id="lookupResults"><tr><td colspan="3" class="lookup-empty">조회 결과가 없습니다.</td></tr></tbody>
+      </table>
+    </section>
+  </div>
 
   <script>
   (() => {
@@ -418,11 +482,21 @@
     const companySectionTitle = document.getElementById('companySectionTitle');
     const membershipForm = document.getElementById('membershipForm');
     const registerBtn = document.getElementById('registerBtn');
+    const lookupBtn = document.getElementById('lookupBtn');
     const editBtn = document.getElementById('editBtn');
     const saveBtn = document.getElementById('saveBtn');
     const deleteBtn = document.getElementById('deleteBtn');
     const pdfBtn = document.getElementById('pdfBtn');
+    const lookupModal = document.getElementById('lookupModal');
+    const lookupCloseBtn = document.getElementById('lookupCloseBtn');
+    const lookupCompany = document.getElementById('lookupCompany');
+    const lookupCeo = document.getElementById('lookupCeo');
+    const lookupResetBtn = document.getElementById('lookupResetBtn');
+    const lookupSearchBtn = document.getElementById('lookupSearchBtn');
+    const lookupStatus = document.getElementById('lookupStatus');
+    const lookupResults = document.getElementById('lookupResults');
     let currentRecordId = null;
+    let editMode = false;
 
     const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
@@ -489,6 +563,7 @@
 
     function clearCurrentRecord(){
       currentRecordId = null;
+      editMode = false;
     }
 
     function startNewRegistration(){
@@ -503,64 +578,123 @@
       alert('신규 회원 등록 모드입니다. 회원 유형을 선택하고 내용을 입력한 뒤 저장해 주세요.');
     }
 
-    async function loadMembershipForEdit(){
-      const selectedType = selectedMemberType();
-      if(selectedType !== 'institution' && selectedType !== 'company'){
-        alert('현재 수정 조회는 기관과 기업체 대표 회원만 가능합니다.');
+    function openLookupModal(){
+      lookupCompany.value = '';
+      lookupCeo.value = '';
+      lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">조회 결과가 없습니다.</td></tr>';
+      lookupStatus.textContent = '회사명 또는 대표자명을 입력한 뒤 조회해 주세요.';
+      lookupModal.classList.add('open');
+      lookupModal.setAttribute('aria-hidden', 'false');
+      setTimeout(() => lookupCompany.focus(), 0);
+    }
+
+    function closeLookupModal(){
+      lookupModal.classList.remove('open');
+      lookupModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function resetLookup(){
+      lookupCompany.value = '';
+      lookupCeo.value = '';
+      lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">조회 결과가 없습니다.</td></tr>';
+      lookupStatus.textContent = '회사명 또는 대표자명을 입력한 뒤 조회해 주세요.';
+      lookupCompany.focus();
+    }
+
+    function escapeHtml(value){
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    async function searchMemberships(){
+      const company = lookupCompany.value.trim();
+      const ceo = lookupCeo.value.trim();
+      if(!company && !ceo){
+        lookupStatus.textContent = '회사명 또는 대표자명 중 하나 이상 입력해 주세요.';
+        lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">검색조건을 입력해 주세요.</td></tr>';
         return;
       }
 
-      const partnerName = valueOf('company_name');
-      const businessNo = valueOf('business_no');
-      if(!partnerName && !businessNo){
-        alert('수정할 회원의 회사명 또는 사업자등록번호를 입력해 주세요.');
-        return;
-      }
-
-      editBtn.disabled = true;
+      lookupSearchBtn.disabled = true;
+      lookupStatus.textContent = '조회 중입니다...';
       try{
         let query = db.from('ppp_partner')
           .select('id,join_date,partner_name,field,active,partner_type,industry,contact_person_name,representative_name,business_registration_no,contact_person_position,contact_phone,contact_email,address,request_note,updated_at')
-          .eq('partner_type', partnerTypeFor(selectedType));
+          .order('updated_at', { ascending:false })
+          .limit(50);
 
-        if(businessNo){
-          query = query.eq('business_registration_no', businessNo);
-        }else{
-          query = query.eq('partner_name', partnerName);
-        }
+        if(company) query = query.ilike('partner_name', `%${company}%`);
+        if(ceo) query = query.ilike('representative_name', `%${ceo}%`);
 
-        const { data, error } = await query.order('updated_at', { ascending:false }).limit(2);
+        const { data, error } = await query;
         if(error) throw error;
-        if(!data || data.length === 0){
-          alert('해당 회원을 찾을 수 없습니다.');
-          return;
-        }
-        if(data.length > 1 && !businessNo){
-          alert('동일한 회사명이 2건 이상 있습니다. 사업자등록번호를 입력한 뒤 다시 수정 버튼을 눌러 주세요.');
+        const rows = Array.isArray(data) ? data : [];
+        lookupStatus.textContent = `조회 결과 ${rows.length}건`;
+        if(rows.length === 0){
+          lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">일치하는 회원이 없습니다.</td></tr>';
           return;
         }
 
-        const row = data[0];
-        currentRecordId = row.id;
-        setValue('company_name', row.partner_name);
-        setValue('company_ceo', row.representative_name);
-        setValue('business_no', row.business_registration_no);
-        setValue('business_type', row.industry);
-        setValue('manager_name', row.contact_person_name);
-        setValue('manager_position', row.contact_person_position);
-        setValue('company_phone', row.contact_phone);
-        setValue('company_email', row.contact_email);
-        setValue('company_address', row.address);
-        setValue('company_note', row.request_note);
-        setValue('company_join_date', row.join_date);
-        setServices('company_service', row.field);
-        alert('회원 정보를 불러왔습니다. 수정 후 저장 버튼을 눌러 주세요.');
+        lookupResults.innerHTML = rows.map((row, index) => `
+          <tr>
+            <td>${escapeHtml(row.partner_name)}</td>
+            <td>${escapeHtml(row.representative_name)}</td>
+            <td><button type="button" class="select-member-btn" data-result-index="${index}">선택</button></td>
+          </tr>`).join('');
+
+        lookupResults.querySelectorAll('.select-member-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const row = rows[Number(btn.dataset.resultIndex)];
+            if(row) loadMembershipRow(row);
+          });
+        });
       }catch(err){
         console.error(err);
-        alert(`수정 조회 실패: ${err?.message || err}`);
+        lookupStatus.textContent = '조회에 실패했습니다.';
+        lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">조회 중 오류가 발생했습니다.</td></tr>';
+        alert(`회원 조회 실패: ${err?.message || err}`);
       }finally{
-        editBtn.disabled = false;
+        lookupSearchBtn.disabled = false;
       }
+    }
+
+    function loadMembershipRow(row){
+      const radioValue = row.partner_type === '기관' ? 'institution' : 'company';
+      const radio = document.querySelector(`input[name="memberType"][value="${radioValue}"]`);
+      if(radio){
+        radio.checked = true;
+        showPanel(radioValue);
+      }
+
+      currentRecordId = row.id;
+      editMode = false;
+      setValue('company_name', row.partner_name);
+      setValue('company_ceo', row.representative_name);
+      setValue('business_no', row.business_registration_no);
+      setValue('business_type', row.industry);
+      setValue('manager_name', row.contact_person_name);
+      setValue('manager_position', row.contact_person_position);
+      setValue('company_phone', row.contact_phone);
+      setValue('company_email', row.contact_email);
+      setValue('company_address', row.address);
+      setValue('company_note', row.request_note);
+      setValue('company_join_date', row.join_date);
+      setServices('company_service', row.field);
+      closeLookupModal();
+      alert('회원 정보를 조회했습니다. 수정하려면 수정 버튼을 눌러 주세요.');
+    }
+
+    function beginEditMembership(){
+      if(!currentRecordId){
+        alert('수정할 회원을 먼저 조회해 주세요.');
+        return;
+      }
+      editMode = true;
+      alert('수정 모드입니다. 내용을 수정한 뒤 저장 버튼을 눌러 주세요.');
     }
 
     async function saveMembership(){
@@ -593,7 +727,6 @@
         ['회사명', partnerName],
         ['대표자명', representativeName],
         ['연락처', contactPhone],
-        ['이메일', contactEmail],
         ['가입일', joinDate],
         ['업종', industry],
         ['담당자명', contactName],
@@ -656,6 +789,10 @@
         };
 
         if(currentRecordId){
+          if(!editMode){
+            alert('조회한 회원을 수정하려면 수정 버튼을 먼저 눌러 주세요.');
+            return;
+          }
           const { data, error } = await db.from('ppp_partner')
             .update(payload)
             .eq('id', currentRecordId)
@@ -663,6 +800,7 @@
             .single();
           if(error) throw error;
           currentRecordId = data.id;
+          editMode = false;
           alert('회원 정보가 수정 저장되었습니다.');
         }else{
           const { data, error } = await db.from('ppp_partner')
@@ -688,7 +826,7 @@
         return;
       }
       if(!currentRecordId){
-        alert('삭제할 회원을 먼저 수정 버튼으로 불러와 주세요.');
+        alert('삭제할 회원을 먼저 조회해 주세요.');
         return;
       }
       const partnerName = valueOf('company_name') || '선택한 회원';
@@ -709,10 +847,18 @@
     }
 
     registerBtn.addEventListener('click', startNewRegistration);
-    editBtn.addEventListener('click', loadMembershipForEdit);
+    lookupBtn.addEventListener('click', openLookupModal);
+    editBtn.addEventListener('click', beginEditMembership);
     saveBtn.addEventListener('click', saveMembership);
     deleteBtn.addEventListener('click', deleteMembership);
     pdfBtn.addEventListener('click', () => window.print());
+    lookupCloseBtn.addEventListener('click', closeLookupModal);
+    lookupResetBtn.addEventListener('click', resetLookup);
+    lookupSearchBtn.addEventListener('click', searchMemberships);
+    lookupCompany.addEventListener('keydown', e => { if(e.key === 'Enter') searchMemberships(); });
+    lookupCeo.addEventListener('keydown', e => { if(e.key === 'Enter') searchMemberships(); });
+    lookupModal.addEventListener('click', e => { if(e.target === lookupModal) closeLookupModal(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape' && lookupModal.classList.contains('open')) closeLookupModal(); });
 
     // 초기 화면: 라디오는 미선택, 기관/기업체 대표 공용 양식을 기본 표시
     typeRadios.forEach(radio => { radio.checked = false; });
