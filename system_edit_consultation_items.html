@@ -22,29 +22,30 @@
     *{box-sizing:border-box}
     [hidden]{display:none!important}
     html,body{margin:0;background:var(--page);color:var(--ink);font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif}
-    body{padding:18px}
+    body{padding:12px}
     button,input,select{font:inherit}
     .paper{
-      width:min(1100px,100%);
-      min-height:calc(100vh - 36px);
+      width:min(794px,calc(100vw - 24px));
+      min-height:1123px;
       margin:0 auto;
       background:var(--paper);
       border:1px solid #d6dce4;
       box-shadow:0 10px 28px rgba(15,23,42,.08);
-      padding:28px 34px 22px;
+      padding:22px 24px 18px;
       display:flex;
       flex-direction:column;
+      overflow:hidden;
     }
-    .doc-head{border-top:3px solid #111827;border-bottom:1px solid var(--line-strong);padding:13px 2px 12px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
-    .brand{font-size:14px;font-weight:700;letter-spacing:-.2px;color:#475569;margin-bottom:5px}
-    h1{font-size:25px;line-height:1.15;margin:0;letter-spacing:-1px;color:#111827}
-    .head-meta{font-size:12px;line-height:1.65;text-align:right;color:#475569;white-space:nowrap}
+    .doc-head{border-top:3px solid #111827;border-bottom:1px solid var(--line-strong);padding:10px 2px 9px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
+    .brand{font-size:13px;font-weight:700;letter-spacing:-.2px;color:#475569;margin-bottom:4px}
+    h1{font-size:23px;line-height:1.15;margin:0;letter-spacing:-1px;color:#111827}
+    .head-meta{font-size:11px;line-height:1.55;text-align:right;color:#475569;white-space:nowrap}
     .head-meta strong{color:#111827}
 
-    .guide{margin:15px 0 12px;border:1px solid var(--line);background:#f8fafc;padding:10px 13px;font-size:13px;line-height:1.65}
+    .guide{margin:11px 0 9px;border:1px solid var(--line);background:#f8fafc;padding:8px 10px;font-size:11.5px;line-height:1.55}
     .guide b{color:#111827}
 
-    .section-title{margin:12px 0 7px;font-size:14px;font-weight:800;color:#111827;display:flex;align-items:center;gap:7px}
+    .section-title{margin:9px 0 6px;font-size:13px;font-weight:800;color:#111827;display:flex;align-items:center;gap:6px}
     .section-title:before{content:"";width:4px;height:15px;background:#475569;display:inline-block;flex:0 0 4px}
     .section-title-line{justify-content:flex-start}
     .section-title-line .section-spacer{flex:1}
@@ -62,39 +63,39 @@
     .ppp-type-radio label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}
     .ppp-type-radio input{width:15px;height:15px;margin:0;accent-color:#334155}
 
-    .tabs{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px}
-    .tab{height:42px;border:1px solid var(--line-strong);background:white;font-weight:700;cursor:pointer;border-radius:2px}
+    .tabs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-bottom:8px}
+    .tab{height:36px;min-width:0;padding:0 4px;border:1px solid var(--line-strong);background:white;font-weight:700;font-size:11px;cursor:pointer;border-radius:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .tab:hover{background:#f8fafc}
     .tab.active{background:#334155;color:white;border-color:#334155}
 
-    .form-grid{display:grid;grid-template-columns:150px minmax(180px,1fr) 150px minmax(180px,1fr);border-top:1px solid var(--line-strong);border-left:1px solid var(--line-strong)}
-    .label,.field{min-height:48px;border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);display:flex;align-items:center;padding:7px 10px}
-    .label{background:var(--head);font-size:13px;font-weight:800;justify-content:center;text-align:center}
+    .form-grid{display:grid;grid-template-columns:96px minmax(0,1fr) 96px minmax(0,1fr);border-top:1px solid var(--line-strong);border-left:1px solid var(--line-strong);min-width:0}
+    .label,.field{min-height:42px;border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);display:flex;align-items:center;padding:5px 7px;min-width:0}
+    .label{background:var(--head);font-size:11.5px;font-weight:800;justify-content:center;text-align:center;word-break:keep-all}
     .field{background:#fff}
-    .field input,.field select{width:100%;height:34px;border:1px solid #aeb8c5;border-radius:2px;background:var(--input);padding:0 10px;color:#111827;outline:none}
+    .field input,.field select{width:100%;min-width:0;height:31px;border:1px solid #aeb8c5;border-radius:2px;background:var(--input);padding:0 8px;color:#111827;outline:none;font-size:11.5px}
     .field input:focus,.field select:focus{border-color:#334155;box-shadow:0 0 0 2px rgba(51,65,85,.10)}
     .field input[readonly],.field select:disabled{background:#f4f4f5;color:#52525b}
     .field .value-static{font-size:13px;color:#475569;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .required-mark{color:#b91c1c;margin-left:3px}
 
-    .toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0 15px;align-items:center}
-    .btn{height:38px;min-width:84px;padding:0 15px;border:1px solid #64748b;background:#fff;color:#1f2937;border-radius:3px;font-weight:800;font-size:13px;cursor:pointer}
+    .toolbar{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0 10px;align-items:center}
+    .btn{height:33px;min-width:68px;padding:0 10px;border:1px solid #64748b;background:#fff;color:#1f2937;border-radius:3px;font-weight:800;font-size:11.5px;cursor:pointer}
     .btn:hover:not(:disabled){background:#f1f5f9}
     .btn.primary{background:#334155;color:white;border-color:#334155}
     .btn.danger{color:var(--danger);border-color:#b91c1c}
     .btn:disabled{opacity:.42;cursor:not-allowed}
     .spacer{flex:1}
-    .mode-badge{height:32px;display:inline-flex;align-items:center;padding:0 10px;border:1px solid var(--line);background:#f8fafc;font-size:12px;font-weight:800}
+    .mode-badge{height:30px;display:inline-flex;align-items:center;padding:0 8px;border:1px solid var(--line);background:#f8fafc;font-size:11px;font-weight:800}
 
-    .search-row{display:grid;grid-template-columns:120px minmax(220px,1fr) 150px 130px 100px;gap:7px;align-items:center;margin-bottom:8px}
-    .search-row label{font-size:13px;font-weight:800;text-align:right;padding-right:6px}
-    .search-row input,.search-row select{height:36px;border:1px solid #aeb8c5;background:var(--input);padding:0 10px}
+    .search-row{display:grid;grid-template-columns:92px minmax(0,1fr) 104px 70px 70px;gap:5px;align-items:center;margin-bottom:7px;min-width:0}
+    .search-row label{font-size:11.5px;font-weight:800;text-align:right;padding-right:4px}
+    .search-row input,.search-row select{width:100%;min-width:0;height:32px;border:1px solid #aeb8c5;background:var(--input);padding:0 7px;font-size:11.5px}
 
-    .table-wrap{border:1px solid var(--line-strong);overflow:auto;min-height:250px;max-height:420px}
-    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
-    #pppTable{min-width:1320px}
-    thead th{position:sticky;top:0;background:#e9eef4;color:#111827;border-bottom:1px solid var(--line-strong);border-right:1px solid var(--line);height:39px;padding:7px 6px;z-index:1}
-    tbody td{border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;height:38px;padding:6px 8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .table-wrap{width:100%;min-width:0;border:1px solid var(--line-strong);overflow-x:hidden;overflow-y:auto;min-height:230px;max-height:360px}
+    table{width:100%;max-width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+    #pppTable{width:100%;min-width:0;max-width:100%;font-size:9.5px}
+    thead th{position:sticky;top:0;background:#e9eef4;color:#111827;border-bottom:1px solid var(--line-strong);border-right:1px solid var(--line);height:34px;padding:5px 4px;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    tbody td{border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;height:33px;padding:4px 5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     tbody tr{cursor:pointer}
     tbody tr:hover{background:#f8fafc}
     tbody tr.selected{background:#e8edf3;font-weight:700}
@@ -103,13 +104,13 @@
     .active-no{color:var(--danger);font-weight:800}
     .empty{height:150px!important;color:#64748b;text-align:center!important}
 
-    .pager{display:flex;justify-content:center;align-items:center;gap:7px;padding:9px 0 2px}
+    .pager{display:flex;justify-content:center;align-items:center;gap:6px;padding:7px 0 1px}
     .pager button{height:30px;min-width:35px;border:1px solid var(--line);background:white;cursor:pointer}
     .pager button:disabled{opacity:.4;cursor:not-allowed}
     .pager span{font-size:12px;color:#475569;min-width:110px;text-align:center}
 
-    .foot-note{font-size:12px;line-height:1.6;color:#64748b;margin-top:7px}
-    .copyright{margin-top:auto;padding-top:18px;border-top:1px solid #d6dce4;font-size:15pt;color:#555;text-align:left;line-height:1.3}
+    .foot-note{font-size:10.5px;line-height:1.5;color:#64748b;margin-top:6px}
+    .copyright{margin-top:auto;padding-top:13px;border-top:1px solid #d6dce4;font-size:12.5pt;color:#555;text-align:left;line-height:1.3}
 
     .toast{position:fixed;left:50%;top:28px;transform:translateX(-50%) translateY(-15px);z-index:9999;min-width:340px;max-width:min(680px,90vw);padding:12px 16px;border-radius:6px;background:#111827;color:white;font-size:13px;font-weight:700;box-shadow:0 12px 26px rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:.22s}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -127,16 +128,16 @@
       .tabs{grid-template-columns:repeat(4,1fr)}
     }
     @media(max-width:760px){
-      body{padding:8px}.paper{padding:18px 14px}.doc-head{grid-template-columns:1fr}.head-meta{text-align:left}.tabs{grid-template-columns:repeat(2,1fr)}
-      .form-grid{grid-template-columns:110px 1fr}.label,.field{min-height:45px}.search-row{grid-template-columns:90px 1fr}.search-row label{text-align:left}.search-row select,.search-row .search-btn{grid-column:auto}
+      body{padding:8px}.paper{width:100%;min-height:calc(100vh - 16px);padding:18px 14px}.doc-head{grid-template-columns:1fr}.head-meta{text-align:left}.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .form-grid{grid-template-columns:96px minmax(0,1fr)}.label,.field{min-height:42px}.search-row{grid-template-columns:82px minmax(0,1fr)}.search-row label{text-align:left}.search-row select,.search-row .search-btn{grid-column:auto}
       .section-title-line{flex-wrap:wrap}
       .ppp-type-radio{width:100%;justify-content:flex-start;padding-left:11px;margin-left:0}
       .copyright{font-size:13pt}
     }
     @media print{
       @page{size:A4 portrait;margin:14mm 12mm 18mm 12mm}
-      body{background:#fff;padding:0}.paper{width:auto;min-height:auto;border:0;box-shadow:none;padding:0}.toolbar,.search-row,.pager,.toast,.modal-backdrop{display:none!important}.table-wrap{max-height:none;overflow:visible}.copyright{margin-top:16px}
-      #pppTable{min-width:0;font-size:9px}
+      body{background:#fff;padding:0}.paper{width:auto;min-height:auto;border:0;box-shadow:none;padding:0;overflow:visible}.toolbar,.search-row,.pager,.toast,.modal-backdrop{display:none!important}.table-wrap{max-height:none;overflow:visible}.copyright{margin-top:16px}
+      #pppTable{width:100%;min-width:0;max-width:100%;font-size:8.5px}
     }
   </style>
 </head>
@@ -284,12 +285,12 @@
       <!-- 기존 7개 상담항목 목록 -->
       <table id="generalTable">
         <colgroup>
-          <col style="width:70px">
-          <col style="width:150px">
-          <col>
-          <col style="width:110px">
-          <col style="width:110px">
-          <col style="width:180px">
+          <col style="width:8%">
+          <col style="width:17%">
+          <col style="width:31%">
+          <col style="width:13%">
+          <col style="width:12%">
+          <col style="width:19%">
         </colgroup>
         <thead>
           <tr>
@@ -307,16 +308,16 @@
       <!-- PPP Partner 목록 -->
       <table id="pppTable" hidden>
         <colgroup>
-          <col style="width:55px">
-          <col style="width:80px">
-          <col style="width:105px">
-          <col style="width:205px">
-          <col style="width:135px">
-          <col style="width:135px">
-          <col style="width:145px">
-          <col style="width:125px">
-          <col style="width:85px">
-          <col style="width:170px">
+          <col style="width:5%">
+          <col style="width:7%">
+          <col style="width:9%">
+          <col style="width:21%">
+          <col style="width:10%">
+          <col style="width:10%">
+          <col style="width:10%">
+          <col style="width:9%">
+          <col style="width:8%">
+          <col style="width:11%">
         </colgroup>
         <thead>
           <tr>
