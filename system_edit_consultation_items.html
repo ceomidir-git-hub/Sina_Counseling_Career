@@ -49,15 +49,6 @@
     .section-title:before{content:"";width:4px;height:15px;background:#475569;display:inline-block;flex:0 0 4px}
     .section-title-line{justify-content:flex-start}
     .section-title-line .section-spacer{flex:1}
-      margin-left:auto;
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:15px;
-      min-height:30px;
-      font-size:13px;
-      font-weight:800;
-    }
 
     .tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-bottom:8px}
     .tab{height:36px;min-width:0;padding:0 4px;border:1px solid var(--line-strong);background:white;font-weight:700;font-size:11px;cursor:pointer;border-radius:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -180,10 +171,6 @@
     <div class="section-title section-title-line">
       <span id="inputTitle">항목 입력</span>
       <span class="section-spacer"></span>
-        <span>구분<span class="required-mark">*</span></span>
-        <label><input type="radio" name="partnerType" value="기관" disabled required> 기관</label>
-        <label><input type="radio" name="partnerType" value="기업체" disabled required> 기업체</label>
-      </div>
     </div>
 
     <!-- 기존 7개 상담항목 입력폼 -->
