@@ -2298,6 +2298,36 @@
   .job-summary-operation-card .counsel-today-grid strong{font-size:13.5px}
 }
 </style>
+
+<style>
+/* =========================================================
+   PPP Partner 열폭 최적화 2026-09-16
+   - 전체 표 폭 100% 유지
+   - 가로 스크롤 없이 현재 화면 폭 안에서 재배분
+   - 가입일/기관·기업체/담당자 축소, 분야 확대
+   ========================================================= */
+.counsel-ppp-table col.ppp-date{width:12%}
+.counsel-ppp-table col.ppp-type{width:10%}
+.counsel-ppp-table col.ppp-partner{width:22%}
+.counsel-ppp-table col.ppp-industry{width:17%}
+.counsel-ppp-table col.ppp-contact{width:12%}
+.counsel-ppp-table col.ppp-field{width:27%}
+
+/* 확대된 글자 크기는 유지하면서 열 내부 여백만 소폭 절약 */
+.counsel-ppp-table th,
+.counsel-ppp-table td{
+  padding-left:4px;
+  padding-right:4px;
+}
+
+/* 분야는 가장 긴 값이 들어가므로 좌측 정렬 + 최대 폭 활용 */
+.counsel-ppp-table th:nth-child(6),
+.counsel-ppp-table td:nth-child(6){
+  padding-left:6px;
+  padding-right:5px;
+}
+</style>
+
 </head>
 <body>
 
@@ -3584,7 +3614,9 @@
 
   function appendPppCell(rowEl, value, isEmpty = false) {
     const cell = document.createElement("td");
-    cell.textContent = value || "-";
+    const text = value || "-";
+    cell.textContent = text;
+    if (!isEmpty && text !== "-") cell.title = text;
     if (isEmpty) cell.className = "counsel-ppp-empty";
     rowEl.appendChild(cell);
   }
