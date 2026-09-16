@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PPP Partner Network</title>
+<style>
+:root{
+  --bg:#08101a; --bg2:#0b1320; --panel:#0e1624; --line:#5f7ea5; --muted:#9cb0c8; --text:#edf4ff;
+  --center:#f8fbff; --centerText:#0f172a; --service:#6fb4ff; --inst:#3ce3a6; --corp:#ffb84d; --grid:#21324a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Malgun Gothic","맑은 고딕",system-ui,sans-serif;color:var(--text);background:
+ radial-gradient(circle at 50% 45%, rgba(23,55,103,.36), transparent 32%),
+ radial-gradient(circle at 50% 52%, rgba(90,140,215,.09), transparent 50%),
+ linear-gradient(180deg, #0a1220 0%, #08101a 100%);
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.26;
+  background-image:
+    linear-gradient(rgba(96,165,250,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(96,165,250,.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.shell{height:100vh;display:grid;grid-template-rows:auto 1fr;padding:18px 20px 16px;gap:12px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.title-wrap{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.back-link{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 11px;margin-top:2px;border:1px solid rgba(148,163,184,.22);border-radius:9px;background:rgba(15,23,42,.72);color:#dbeafe;text-decoration:none;font-size:11px;font-weight:800;transition:.15s}
+.back-link:hover{background:#1e293b;border-color:rgba(148,163,184,.38);color:#fff;transform:translateY(-1px)}
+.title h1{font-size:28px;letter-spacing:.15px;margin:0 0 6px;font-weight:900}
+.title p{margin:0;color:var(--muted);font-size:13px}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.kpi{min-width:104px;background:rgba(10,18,32,.78);border:1px solid rgba(161,185,214,.15);border-radius:16px;padding:11px 14px;box-shadow:0 8px 28px rgba(0,0,0,.22)}
+.kpi b{display:block;font-size:22px;line-height:1.1}
+.kpi span{font-size:11px;color:#9fb0c5}
+.board{position:relative;border:1px solid rgba(148,163,184,.14);border-radius:24px;background:linear-gradient(180deg, rgba(10,18,32,.68), rgba(6,10,16,.82));overflow:hidden;box-shadow:0 18px 45px rgba(0,0,0,.28)}
+.controls{position:absolute;top:14px;left:14px;z-index:10;display:flex;gap:7px;background:rgba(8,12,19,.62);padding:7px;border-radius:12px;border:1px solid rgba(148,163,184,.16);backdrop-filter:blur(8px)}
+.btn{border:0;border-radius:9px;padding:7px 11px;background:#1d2b40;color:#cbd5e1;font-weight:800;font-size:12px;cursor:pointer;transition:.15s}
+.btn.active{background:#eef5ff;color:#0f172a}
+.legend{position:absolute;right:14px;bottom:12px;display:flex;gap:13px;z-index:10;background:rgba(8,12,19,.68);border:1px solid rgba(148,163,184,.16);padding:8px 11px;border-radius:11px;font-size:11px;color:#cbd5e1}
+.dot{display:inline-block;width:9px;height:9px;border-radius:99px;margin-right:5px}
+.dot.inst{background:var(--inst)} .dot.corp{background:var(--corp)} .dot.service{background:var(--service)}
+.badge{position:absolute;right:14px;top:14px;z-index:10;color:#9ae6b4;background:rgba(20,83,45,.20);border:1px solid rgba(74,222,128,.26);padding:7px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.footerNote{position:absolute;left:14px;bottom:14px;color:#6f8196;font-size:10px;letter-spacing:.2px;z-index:10}
+svg{width:100%;height:100%;display:block}
+.edge{stroke:#6d7f98;stroke-opacity:.22;stroke-width:1.1}
+.edge[data-hidden="1"]{opacity:.04}
+.corePath{
+  fill:none; stroke:#78beff; stroke-opacity:.82; stroke-width:2.5; stroke-linecap:round;
+  stroke-dasharray:4 10; filter:url(#glow);
+  animation:coreDash 7s linear infinite;
+}
+.coreHalo{fill:none;stroke:#59a8ff;stroke-opacity:.15;stroke-width:7;filter:url(#glow)}
+.partnerEdge{stroke:#8ea1b6;stroke-opacity:.18;stroke-width:1.25}
+.partnerEdge.highlight{stroke-opacity:.34}
+.flowDot{fill:#dbeeff;filter:url(#particleGlow)}
+.servicePulse{fill:none;stroke:#7fc3ff;stroke-opacity:.52;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:serviceRipple 2.7s ease-out infinite}
+.servicePulse.p2{animation-delay:1.35s}
+.node{cursor:pointer}
+.node.dim{opacity:.10}
+.node.hidden{display:none}
+.node text{pointer-events:none;text-anchor:middle}
+.centerOrb{filter:url(#centerGlow);animation:orbPulse 3s ease-in-out infinite}
+.centerRing{fill:none;stroke:rgba(180,210,255,.38);stroke-width:2;stroke-dasharray:2 10;animation:spinSlow 22s linear infinite;transform-origin:center center;transform-box:fill-box}
+.centerRing2{fill:none;stroke:rgba(111,180,255,.26);stroke-width:1.3;stroke-dasharray:10 8;animation:spinReverse 28s linear infinite;transform-origin:center center;transform-box:fill-box}
+.node.service circle.main{fill:#18365c;stroke:#72b8ff;stroke-width:2.2;filter:url(#serviceGlow)}
+.node.service text.name{fill:#eff6ff;font-size:11px;font-weight:800}
+.node.service text.count{fill:#a9d5ff;font-size:9px;font-weight:700}
+.node.partner circle.main{stroke-width:2.1}
+.node.partner text{fill:#dfe9f8;font-size:9.8px;font-weight:700}
+.node.partner.inst circle.main{fill:#083c33;stroke:#37d9a1;filter:url(#instGlow)}
+.node.partner.corp circle.main{fill:#4d2d07;stroke:#ffbe55;filter:url(#corpGlow)}
+.float{
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: drift var(--dur, 7s) ease-in-out infinite var(--delay, 0s);
+}
+.float.alt{animation-name:driftAlt}
+.float.subtle{animation-name:driftSubtle}
+.tooltip{position:absolute;pointer-events:none;z-index:20;min-width:240px;max-width:360px;background:rgba(6,10,17,.96);border:1px solid rgba(148,163,184,.24);box-shadow:0 16px 40px rgba(0,0,0,.42);border-radius:13px;padding:12px 13px;opacity:0;transform:translateY(4px);transition:.12s}
+.tooltip h3{font-size:14px;margin:0 0 8px}
+.row{display:grid;grid-template-columns:52px 1fr;gap:7px;font-size:11px;margin-top:5px}.row span:first-child{color:#8ea0b6}.row span:last-child{color:#e5edf8;line-height:1.45}
+@keyframes coreDash{to{stroke-dashoffset:-280}}
+@keyframes drift{0%,100%{transform:translate(0px,0px)}25%{transform:translate(var(--dx1,5px), var(--dy1,-4px))}50%{transform:translate(var(--dx2,-4px), var(--dy2,6px))}75%{transform:translate(var(--dx3,3px), var(--dy3,-2px))}}
+@keyframes driftAlt{0%,100%{transform:translate(0px,0px)}33%{transform:translate(var(--dx2,-5px), var(--dy1,4px))}66%{transform:translate(var(--dx1,4px), var(--dy2,-5px))}}
+@keyframes driftSubtle{0%,100%{transform:translate(0px,0px)}50%{transform:translate(var(--dx1,3px), var(--dy2,-3px))}}
+@keyframes serviceRipple{0%{transform:scale(1);opacity:.65}100%{transform:scale(1.7);opacity:0}}
+@keyframes orbPulse{50%{filter:drop-shadow(0 0 16px rgba(255,255,255,.45))}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+@keyframes spinReverse{to{transform:rotate(-360deg)}}
+@media(max-width:900px){.shell{padding:12px}.header{display:block}.kpis{justify-content:flex-start;margin-top:10px}.title h1{font-size:22px}.board{min-height:620px}.legend{display:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="header">
+    <div class="title-wrap">
+      <a class="back-link" href="index.html" title="대시보드로 돌아가기">← 이전화면</a>
+      <div class="title">
+        <h1>PPP Partner Network</h1>
+        <p>마음:시나브로 심리상담연구소 · 기관·기업체 협력 생태계 시각화</p>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b id="kpiTotal">-</b><span>전체 Partner</span></div>
+      <div class="kpi"><b id="kpiInstitution">-</b><span>기관</span></div>
+      <div class="kpi"><b id="kpiCompany">-</b><span>기업체</span></div>
+      <div class="kpi"><b id="kpiServices">-</b><span>협력 서비스</span></div>
+    </div>
+  </div>
+  <div class="board" id="board">
+    <div class="controls">
+      <button class="btn active" data-filter="all">전체</button>
+      <button class="btn" data-filter="기관">기관</button>
+      <button class="btn" data-filter="기업체">기업체</button>
+    </div>
+    <div class="badge" id="dbStatusBadge">DB 연결 중...</div>
+    <svg id="graph" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="legend"><span><i class="dot service"></i>서비스</span><span><i class="dot inst"></i>기관</span><span><i class="dot corp"></i>기업체</span></div>
+    <div class="footerNote">DB 최신 Partner를 불러와 자동 구성합니다. 노드와 중심선에는 동적 애니메이션이 적용됩니다.</div>
+    <div class="tooltip" id="tip"></div>
+  </div>
+</div>
+<script>
+const SUPABASE_URL = "https://fafdxaifluftnertbpvr.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db";
+const KNOWN_SERVICE_ORDER = ['심리상담','진로상담','청소년상담','기업상담','취업정보','구인상담','교육'];
+
+const svg = document.getElementById('graph');
+const tip = document.getElementById('tip');
+const board = document.getElementById('board');
+const dbStatusBadge = document.getElementById('dbStatusBadge');
+const kpiTotal = document.getElementById('kpiTotal');
+const kpiInstitution = document.getElementById('kpiInstitution');
+const kpiCompany = document.getElementById('kpiCompany');
+const kpiServices = document.getElementById('kpiServices');
+const NS = 'http://www.w3.org/2000/svg';
+const W=1280,H=720,cx=640,cy=372;
+let active = 'all';
+let lastLoadedAt = 0;
+
+const client = window.supabase?.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      storage: window.sessionStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+);
+
+function E(name,attrs={},text=''){
+  const el=document.createElementNS(NS,name);
+  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+  if(text) el.textContent=text;
+  return el;
+}
+
+function splitFields(value){
+  return String(value || '')
+    .split(/[,，;|]/)
+    .map(v => v.trim())
+    .filter(Boolean);
+}
+
+function normalizePartnerRows(rows){
+  return (Array.isArray(rows) ? rows : [])
+    .filter(row => row && row.active !== false)
+    .filter(row => ['기관','기업체'].includes(String(row.partner_type || '').trim()))
+    .map(row => ({
+      id: String(row.id || ''),
+      d: String(row.join_date || ''),
+      n: String(row.partner_name || '').trim() || '(Partner명 없음)',
+      t: String(row.partner_type || '').trim(),
+      i: String(row.industry || '').trim() || '-',
+      f: splitFields(row.field)
+    }));
+}
+
+function buildServiceList(partners){
+  const used = new Set();
+  partners.forEach(p => p.f.forEach(s => used.add(s)));
+  const known = KNOWN_SERVICE_ORDER.filter(s => used.has(s));
+  const extras = [...used].filter(s => !KNOWN_SERVICE_ORDER.includes(s)).sort((a,b)=>a.localeCompare(b,'ko'));
+  return [...known, ...extras];
+}
+
+function getKoreaTimestamp(){
+  return new Intl.DateTimeFormat('ko-KR',{
+    timeZone:'Asia/Seoul', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false
+  }).format(new Date());
+}
+
+function setStatus(text, isError=false){
+  if (!dbStatusBadge) return;
+  dbStatusBadge.textContent = text;
+  dbStatusBadge.style.color = isError ? '#fecaca' : '#9ae6b4';
+  dbStatusBadge.style.borderColor = isError ? 'rgba(248,113,113,.38)' : 'rgba(74,222,128,.26)';
+  dbStatusBadge.style.background = isError ? 'rgba(127,29,29,.22)' : 'rgba(20,83,45,.20)';
+}
+
+function updateKpis(partners, services){
+  const institutionCount = partners.filter(p=>p.t==='기관').length;
+  const companyCount = partners.filter(p=>p.t==='기업체').length;
+  if (kpiTotal) kpiTotal.textContent = partners.length.toLocaleString('ko-KR');
+  if (kpiInstitution) kpiInstitution.textContent = institutionCount.toLocaleString('ko-KR');
+  if (kpiCompany) kpiCompany.textContent = companyCount.toLocaleString('ko-KR');
+  if (kpiServices) kpiServices.textContent = services.length.toLocaleString('ko-KR');
+}
+
+function setFloatVars(el, idx, scale=1){
+  const dx1=((idx%5)-2)*2.2*scale, dy1=((idx%4)-1.5)*2.1*scale;
+  const dx2=((idx%6)-3)*1.8*scale, dy2=((idx%3)-1)*3.0*scale;
+  const dx3=((idx%7)-3)*1.4*scale, dy3=((idx%5)-2)*1.5*scale;
+  el.style.setProperty('--dx1', dx1.toFixed(1)+'px');
+  el.style.setProperty('--dy1', dy1.toFixed(1)+'px');
+  el.style.setProperty('--dx2', dx2.toFixed(1)+'px');
+  el.style.setProperty('--dy2', dy2.toFixed(1)+'px');
+  el.style.setProperty('--dx3', dx3.toFixed(1)+'px');
+  el.style.setProperty('--dy3', dy3.toFixed(1)+'px');
+  el.style.setProperty('--dur', (6.6 + (idx%5)*0.9 + (idx%3)*0.35)+'s');
+  el.style.setProperty('--delay', (idx%7 * -0.55)+'s');
+}
+
+function addLabel(g,x,y,label,max=14){
+  const lines=[];
+  let chunk='';
+  for(const ch of [...label]){
+    chunk+=ch;
+    if(chunk.length>=max){ lines.push(chunk); chunk=''; }
+  }
+  if(chunk) lines.push(chunk);
+  lines.slice(0,2).forEach((w,idx)=>{
+    g.append(E('text',{x,y:y+(idx-(Math.min(lines.length,2)-1)/2)*12},w));
+  });
+}
+
+function renderEmptyMessage(message){
+  svg.replaceChildren();
+  const text = E('text',{
+    x:cx,y:cy,'text-anchor':'middle',fill:'#cbd5e1','font-size':'18','font-weight':'800'
+  },message);
+  svg.append(text);
+}
+
+function renderGraph(partners){
+  const services = buildServiceList(partners);
+  updateKpis(partners, services);
+
+  if (!partners.length){
+    renderEmptyMessage('표시할 PPP Partner가 없습니다.');
+    return;
+  }
+
+  svg.replaceChildren();
+  tip.style.opacity = 0;
+
+  const defs = E('defs');
+  defs.innerHTML = `
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="particleGlow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="2.4" result="b"/><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="centerGlow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="3.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="serviceGlow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="instGlow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="2.1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="corpGlow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="2.1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  `;
+  svg.append(defs);
+
+  const edgeLayer=E('g');
+  const flowLayer=E('g');
+  const nodeLayer=E('g');
+  svg.append(edgeLayer,flowLayer,nodeLayer);
+
+  const serviceCount={};
+  services.forEach(s=>serviceCount[s]=0);
+  partners.forEach(p=>p.f.forEach(s=>{ if(s in serviceCount) serviceCount[s]++; }));
+
+  const servicePos={};
+  const serviceRadius = services.length <= 7 ? 188 : Math.max(170, 214 - Math.min(40, (services.length-7)*7));
+  services.forEach((s,k)=>{
+    const a=-Math.PI/2+k*(Math.PI*2/Math.max(1,services.length));
+    servicePos[s]={x:cx+Math.cos(a)*serviceRadius,y:cy+Math.sin(a)*serviceRadius};
+  });
+
+  const inst=partners.filter(p=>p.t==='기관');
+  const corp=partners.filter(p=>p.t==='기업체');
+  const partnerPos=new Map();
+
+  inst.forEach((p,k)=>{
+    const span=Math.PI*0.82;
+    const a=Math.PI*0.59 + k*(span/Math.max(1,inst.length-1));
+    const radius=inst.length>10 ? 340 : 320;
+    partnerPos.set(p,{x:cx+Math.cos(a)*radius,y:cy+Math.sin(a)*302});
+  });
+  corp.forEach((p,k)=>{
+    const span=Math.PI*0.82;
+    const a=-Math.PI*0.41 + k*(span/Math.max(1,corp.length-1));
+    const radius=corp.length>16 ? 350 : 334;
+    partnerPos.set(p,{x:cx+Math.cos(a)*radius,y:cy+Math.sin(a)*314});
+  });
+
+  services.forEach((s,k)=>{
+    const q=servicePos[s];
+    const pathId='core-'+k;
+    const p = E('path',{id:pathId,d:`M ${cx} ${cy} L ${q.x} ${q.y}`,class:'corePath'});
+    const halo = E('path',{d:`M ${cx} ${cy} L ${q.x} ${q.y}`,class:'coreHalo'});
+    edgeLayer.append(halo,p);
+    for(let j=0;j<2;j++){
+      const dot=E('circle',{r:j===0?3.8:2.4,class:'flowDot'});
+      const motion=E('animateMotion',{dur:(3.2 + (k%4)*0.45 + j*0.7)+'s',repeatCount:'indefinite',begin:(j*0.8 + k*0.18)+'s'});
+      const mpath=E('mpath',{'href':'#'+pathId});
+      motion.append(mpath);
+      dot.append(motion);
+      flowLayer.append(dot);
+    }
+  });
+
+  partners.forEach((p,pi)=>{
+    const q=partnerPos.get(p);
+    p.f.forEach(s=>{
+      const z=servicePos[s];
+      if(!z) return;
+      edgeLayer.append(E('line',{
+        x1:q.x,y1:q.y,x2:z.x,y2:z.y,class:'edge partnerEdge',
+        'data-type':p.t,'data-partner':pi,'data-service':s
+      }));
+    });
+  });
+
+  const center=E('g',{class:'node center float subtle'});
+  setFloatVars(center,50,0.55);
+  center.append(E('circle',{cx,cy,r:57,fill:'#f8fbff',stroke:'#d9e5f5','stroke-width':2,class:'centerOrb'}));
+  center.append(E('circle',{cx,cy,r:72,class:'centerRing'}));
+  center.append(E('circle',{cx,cy,r:86,class:'centerRing2'}));
+  center.append(E('text',{x:cx,y:cy-8,fill:'#0f172a','font-size':'13px','font-weight':'900'},'마음:시나브로'));
+  center.append(E('text',{x:cx,y:cy+11,fill:'#0f172a','font-size':'13px','font-weight':'900'},'심리상담연구소'));
+  nodeLayer.append(center);
+
+  services.forEach((s,idx)=>{
+    const q=servicePos[s];
+    const r=24 + Math.min(10,(serviceCount[s] || 0)*0.5);
+    const g=E('g',{class:'node service float alt','data-service':s});
+    setFloatVars(g,idx+1,0.8);
+    g.append(E('circle',{cx:q.x,cy:q.y,r:r+5,class:'servicePulse'}));
+    g.append(E('circle',{cx:q.x,cy:q.y,r:r+5,class:'servicePulse p2'}));
+    g.append(E('circle',{cx:q.x,cy:q.y,r,class:'main'}));
+    g.append(E('text',{x:q.x,y:q.y-2,class:'name'},s));
+    g.append(E('text',{x:q.x,y:q.y+13,class:'count'},(serviceCount[s] || 0)+'개'));
+    nodeLayer.append(g);
+  });
+
+  partners.forEach((p,idx)=>{
+    const q=partnerPos.get(p);
+    const isInst=p.t==='기관';
+    const g=E('g',{
+      class:`node partner float ${isInst?'inst':'corp'}`,
+      'data-type':p.t,'data-index':idx
+    });
+    setFloatVars(g,idx+20,1.0);
+    g.append(E('circle',{cx:q.x,cy:q.y,r:isInst?16.5:14.8,class:'main'}));
+    addLabel(g,q.x,q.y+(isInst?30:27),p.n,isInst?13:11);
+    g.addEventListener('mousemove',ev=>showTip(ev,p));
+    g.addEventListener('mouseleave',()=>tip.style.opacity=0);
+    nodeLayer.append(g);
+  });
+
+  applyFilter();
+}
+
+function showTip(ev,p){
+  tip.innerHTML=`<h3>${escapeHtml(p.n)}</h3><div class="row"><span>구분</span><span>${escapeHtml(p.t)}</span></div><div class="row"><span>업종</span><span>${escapeHtml(p.i)}</span></div><div class="row"><span>분야</span><span>${escapeHtml(p.f.join(' · ') || '-')}</span></div><div class="row"><span>가입일</span><span>${escapeHtml(p.d || '-')}</span></div>`;
+  const br=board.getBoundingClientRect();
+  let x=ev.clientX-br.left+14,y=ev.clientY-br.top+14;
+  if(x+350>br.width)x-=365;
+  if(y+175>br.height)y-=185;
+  tip.style.left=x+'px';
+  tip.style.top=y+'px';
+  tip.style.opacity=1;
+}
+
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g,ch=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[ch]));
+}
+
+function applyFilter(){
+  document.querySelectorAll('.node.partner').forEach(n=>{
+    n.classList.toggle('dim',active!=='all' && n.dataset.type!==active);
+  });
+  document.querySelectorAll('.partnerEdge').forEach(e=>{
+    const show=(active==='all'||e.dataset.type===active);
+    e.setAttribute('data-hidden',show?'0':'1');
+    e.style.opacity=show?'1':'0.05';
+  });
+}
+
+document.querySelectorAll('.btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    active=b.dataset.filter;
+    applyFilter();
+  });
+});
+
+async function fetchLatestPartners(){
+  if(!client) throw new Error('Supabase 라이브러리를 불러오지 못했습니다.');
+
+  const { data:{ session }, error:sessionError } = await client.auth.getSession();
+  if(sessionError) throw sessionError;
+  if(!session?.access_token) throw new Error('로그인 세션이 없습니다. 대시보드에서 다시 로그인해 주세요.');
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/secure-ppp-partner`,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':SUPABASE_PUBLISHABLE_KEY,
+      'Authorization':`Bearer ${session.access_token}`
+    },
+    body:JSON.stringify({action:'dashboard'}),
+    cache:'no-store'
+  });
+
+  const result = await response.json().catch(()=>({}));
+  if(!response.ok || !result?.ok){
+    throw new Error(result?.error || `PPP Partner 조회 실패 (${response.status})`);
+  }
+  return normalizePartnerRows(result.data);
+}
+
+async function loadLatestPartnerNetwork(force=false){
+  const now=Date.now();
+  if(!force && now-lastLoadedAt < 1200) return;
+  lastLoadedAt=now;
+  setStatus('DB 최신자료 조회 중...');
+
+  try{
+    const partners = await fetchLatestPartners();
+    renderGraph(partners);
+    setStatus(`DB 최신 · ${getKoreaTimestamp()}`);
+  }catch(error){
+    console.error('PPP Partner Network 조회 실패:',error);
+    updateKpis([],[]);
+    renderEmptyMessage(error?.message || 'PPP Partner 조회 중 오류가 발생했습니다.');
+    setStatus('DB 조회 실패',true);
+  }
+}
+
+// 메뉴에서 이 파일을 다시 열 때마다 최신 DB를 조회한다.
+window.addEventListener('pageshow', event => {
+  loadLatestPartnerNetwork(Boolean(event.persisted));
+});
+</script>
+</body>
+</html>
