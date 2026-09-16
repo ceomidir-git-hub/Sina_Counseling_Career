@@ -3639,15 +3639,27 @@
   }
 
   async function loadPppPartnerDashboard() {
-    const { data, error } = await client
-      .from("ppp_partner")
-      .select("join_date,partner_type,partner_name,industry,contact_person_name,field,created_at")
-      .order("join_date", { ascending:false })
-      .order("created_at", { ascending:false });
+    const { data: { session }, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!session?.access_token) throw new Error("로그인 세션을 확인할 수 없습니다.");
 
-    if (error) throw error;
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/secure-ppp-partner`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ action: "dashboard" }),
+      cache: "no-store"
+    });
 
-    const allRows = Array.isArray(data) ? data : [];
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result?.ok) {
+      throw new Error(result?.error || `PPP Partner 조회 실패 (${response.status})`);
+    }
+
+    const allRows = Array.isArray(result.data) ? result.data : [];
     const visibleRows = filterPppPartnerDashboardRows(allRows, selectedPppDashboardType());
     renderPppPartnerDashboard(visibleRows);
     return visibleRows;
@@ -5312,12 +5324,12 @@
   gap:10px;
 }
 .counsel-ppp-title{
-  font-size:12px;
+  font-size:14.4px;
   line-height:1.2;
 }
 .counsel-ppp-filters{
   gap:10px;
-  font-size:10.4px;
+  font-size:12.48px;
 }
 .counsel-ppp-filters label{gap:3px}
 .counsel-ppp-filters input[type="radio"]{
@@ -5344,7 +5356,7 @@
   border:0;
   border-radius:0;
   overflow:visible;
-  font-size:10.4px;
+  font-size:12.48px;
   line-height:1.15;
 }
 .counsel-ppp-table thead th{
@@ -5353,7 +5365,7 @@
   z-index:2;
   height:27px;
   min-height:27px;
-  font-size:10.2px;
+  font-size:12.24px;
   background:#eef2f7;
   box-shadow:0 1px 0 #dfe5ed;
 }
@@ -5361,7 +5373,7 @@
   height:var(--ppp-row-h);
   min-height:var(--ppp-row-h);
   padding:2px 5px;
-  font-size:10.4px;
+  font-size:12.48px;
   line-height:1.2;
 }
 .counsel-ppp-table tbody tr:last-child td{border-bottom:1px solid #e6eaf0}
@@ -5434,12 +5446,12 @@
     grid-template-rows:27px minmax(0,1fr);
   }
   .counsel-ppp-header{height:27px;min-height:27px}
-  .counsel-ppp-title{font-size:11.2px}
-  .counsel-ppp-filters{font-size:9.8px;gap:8px}
+  .counsel-ppp-title{font-size:13.44px}
+  .counsel-ppp-filters{font-size:11.76px;gap:8px}
   .counsel-ppp-filters input[type="radio"]{width:12px;height:12px}
-  .counsel-ppp-table{font-size:9.8px}
-  .counsel-ppp-table thead th{height:24px;min-height:24px;font-size:9.5px}
-  .counsel-ppp-table tbody td{font-size:9.8px;padding:1px 4px}
+  .counsel-ppp-table{font-size:11.76px}
+  .counsel-ppp-table thead th{height:24px;min-height:24px;font-size:11.4px}
+  .counsel-ppp-table tbody td{font-size:11.76px;padding:1px 4px}
 
   .counsel-summary-bottom-card,
   .counsel-today-card{padding:6px 7px}
