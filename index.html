@@ -2328,6 +2328,33 @@
 }
 </style>
 
+
+<style>
+/* PPP Partner명 → 회원 가입 등록 조회 연결 */
+.counsel-ppp-table .ppp-partner-link{
+  display:block;
+  width:100%;
+  color:#1f5ca8;
+  font:inherit;
+  font-weight:900;
+  text-decoration:none;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  cursor:pointer;
+}
+.counsel-ppp-table .ppp-partner-link:hover{
+  color:#0b4ea2;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+.counsel-ppp-table .ppp-partner-link:focus-visible{
+  outline:2px solid #7da4da;
+  outline-offset:1px;
+  border-radius:2px;
+}
+</style>
+
 </head>
 <body>
 
@@ -3621,6 +3648,33 @@
     rowEl.appendChild(cell);
   }
 
+  function appendPppPartnerLinkCell(rowEl, partnerId, partnerName) {
+    const cell = document.createElement("td");
+    const id = String(partnerId || "").trim();
+    const text = String(partnerName || "").trim();
+
+    if (!id || !text) {
+      cell.textContent = text || "-";
+      if (!text) cell.className = "counsel-ppp-empty";
+      rowEl.appendChild(cell);
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = "member_record_card_registration.html";
+    link.className = "ppp-partner-link";
+    link.textContent = text;
+    link.title = `${text} 회원 가입 등록 조회`;
+    link.setAttribute("aria-label", `${text} 회원 가입 등록 조회`);
+
+    link.addEventListener("click", () => {
+      sessionStorage.setItem("sina_ppp_lookup_id", id);
+    });
+
+    cell.appendChild(link);
+    rowEl.appendChild(cell);
+  }
+
   function syncPppDashboardRowHeight() {
     const scroll = pppDashboardEls.scroll;
     if (!scroll) return;
@@ -3648,7 +3702,7 @@
       if (row) {
         appendPppCell(tr, formatPppJoinDate(row.join_date));
         appendPppCell(tr, row.partner_type || "-");
-        appendPppCell(tr, row.partner_name || "-");
+        appendPppPartnerLinkCell(tr, row.id, row.partner_name);
         appendPppCell(tr, row.industry || "-");
         appendPppCell(tr, row.contact_person_name || "-");
         appendPppCell(tr, row.field || "-");
