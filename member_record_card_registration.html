@@ -682,7 +682,7 @@
       }
     }
 
-    function loadMembershipRow(row){
+    function loadMembershipRow(row, options = {}){
       const radioValue = row.partner_type === '기관' ? 'institution' : 'company';
       const radio = document.querySelector(`input[name="memberType"][value="${radioValue}"]`);
       if(radio){
@@ -705,7 +705,9 @@
       setValue('company_join_date', row.join_date);
       setServices('company_service', row.field);
       closeLookupModal();
-      alert('회원 정보를 조회했습니다. 수정하려면 수정 버튼을 눌러 주세요.');
+      if(!options.silent){
+        alert('회원 정보를 조회했습니다. 수정하려면 수정 버튼을 눌러 주세요.');
+      }
     }
 
     function beginEditMembership(){
@@ -859,6 +861,26 @@
       }
     }
 
+
+    async function applyDashboardPartnerLookup(){
+      const partnerId = String(
+        sessionStorage.getItem('sina_ppp_lookup_id') || ''
+      ).trim();
+
+      if(!partnerId) return false;
+
+      // 재진입/새로고침 시 반복 실행되지 않도록 1회 사용 후 즉시 제거
+      sessionStorage.removeItem('sina_ppp_lookup_id');
+
+      const row = await securePppRequest('get', { id: partnerId });
+      if(!row?.id){
+        throw new Error('선택한 PPP Partner 정보를 찾을 수 없습니다.');
+      }
+
+      loadMembershipRow(row, { silent:true });
+      return true;
+    }
+
     registerBtn.addEventListener('click', startNewRegistration);
     lookupBtn.addEventListener('click', openLookupModal);
     editBtn.addEventListener('click', beginEditMembership);
@@ -876,6 +898,16 @@
     // 초기 화면: 라디오는 미선택, 기관/기업체 대표 공용 양식을 기본 표시
     typeRadios.forEach(radio => { radio.checked = false; });
     companySectionTitle.textContent = '기관 / 기업체 대표 회원정보';
+
+    // Dashboard의 PPP Partner명 클릭으로 진입한 경우
+    // PPP Partner 고유 ID로 정확히 1건을 보안 조회하여 회원 가입 등록 화면에 표시한다.
+    setTimeout(() => {
+      applyDashboardPartnerLookup().catch(err => {
+        console.error('PPP Partner 자동 조회 실패:', err);
+        lookupStatus.textContent = '자동 조회에 실패했습니다. 조회 버튼으로 다시 시도해 주세요.';
+        alert(`회원 조회 실패: ${err?.message || err}`);
+      });
+    }, 0);
   })();
   </script>
 </body>
