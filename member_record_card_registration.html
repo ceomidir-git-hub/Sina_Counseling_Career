@@ -509,6 +509,35 @@
       }
     });
 
+    async function securePppRequest(action, params = {}){
+      const { data: sessionData, error: sessionError } = await db.auth.getSession();
+      const session = sessionData?.session;
+      if(sessionError || !session?.access_token){
+        throw new Error('로그인 세션을 확인할 수 없습니다. 메인 화면에서 다시 로그인해 주세요.');
+      }
+
+      const { data, error } = await db.functions.invoke('secure-ppp-partner', {
+        body: { action, ...params }
+      });
+
+      if(error){
+        let message = error.message || '보안 서버 호출에 실패했습니다.';
+        try{
+          const context = error.context;
+          if(context && typeof context.json === 'function'){
+            const body = await context.json();
+            if(body?.error) message = body.error;
+          }
+        }catch(_){}
+        throw new Error(message);
+      }
+
+      if(!data?.ok){
+        throw new Error(data?.error || '보안 처리에 실패했습니다.');
+      }
+      return data.data;
+    }
+
     function showPanel(type){
       panels.forEach(panel => {
         const types = String(panel.dataset.types || '').split(/\s+/).filter(Boolean);
@@ -622,16 +651,7 @@
       lookupSearchBtn.disabled = true;
       lookupStatus.textContent = '조회 중입니다...';
       try{
-        let query = db.from('ppp_partner')
-          .select('id,join_date,partner_name,field,active,partner_type,industry,contact_person_name,representative_name,business_registration_no,contact_person_position,contact_phone,contact_email,address,request_note,updated_at')
-          .order('updated_at', { ascending:false })
-          .limit(50);
-
-        if(company) query = query.ilike('partner_name', `%${company}%`);
-        if(ceo) query = query.ilike('representative_name', `%${ceo}%`);
-
-        const { data, error } = await query;
-        if(error) throw error;
+        const data = await securePppRequest('search', { company, ceo });
         const rows = Array.isArray(data) ? data : [];
         lookupStatus.textContent = `조회 결과 ${rows.length}건`;
         if(rows.length === 0){
@@ -793,21 +813,15 @@
             alert('조회한 회원을 수정하려면 수정 버튼을 먼저 눌러 주세요.');
             return;
           }
-          const { data, error } = await db.from('ppp_partner')
-            .update(payload)
-            .eq('id', currentRecordId)
-            .select('id')
-            .single();
-          if(error) throw error;
+          const data = await securePppRequest('update', {
+            id: currentRecordId,
+            payload
+          });
           currentRecordId = data.id;
           editMode = false;
           alert('회원 정보가 수정 저장되었습니다.');
         }else{
-          const { data, error } = await db.from('ppp_partner')
-            .insert({ ...payload, created_by:user.id })
-            .select('id')
-            .single();
-          if(error) throw error;
+          const data = await securePppRequest('insert', { payload });
           currentRecordId = data.id;
           alert('회원 가입 등록이 저장되었습니다.');
         }
@@ -834,8 +848,7 @@
 
       deleteBtn.disabled = true;
       try{
-        const { error } = await db.from('ppp_partner').delete().eq('id', currentRecordId);
-        if(error) throw error;
+        await securePppRequest('delete', { id: currentRecordId });
         alert('회원 정보가 삭제되었습니다.');
         startNewRegistration();
       }catch(err){
