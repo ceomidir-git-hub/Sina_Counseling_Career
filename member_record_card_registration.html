@@ -58,6 +58,7 @@
       cursor:pointer;
     }
     .action-btn:disabled{opacity:.55;cursor:not-allowed}
+    .back-btn{background:#7a858c}
     .register-btn{background:#5f6b73}
     .lookup-btn{background:#6a5f8d}
     .edit-btn{background:#356b8c}
@@ -133,6 +134,14 @@
       color:var(--text);
       outline:none;
     }
+    /* 빈 날짜 입력칸은 화면/PDF에서 날짜 예시 문구(mm/dd/yyyy 등)를 숨겨 완전한 빈칸으로 표시 */
+    input[type="date"].date-empty::-webkit-datetime-edit{
+      color:transparent;
+    }
+    input[type="date"].date-empty:focus::-webkit-datetime-edit{
+      color:var(--text);
+    }
+
     input:focus,select:focus,textarea:focus{
       border-color:var(--primary);
       box-shadow:0 0 0 2px rgba(41,77,70,.08);
@@ -206,22 +215,56 @@
 
     @page{size:A4 portrait;margin:0}
     @media print{
-      html,body{width:210mm;height:297mm;background:#fff!important}
-      body{padding:0}
-      .page{
+      html,body{
         width:210mm!important;
+        height:297mm!important;
         min-height:297mm!important;
+        max-height:297mm!important;
         margin:0!important;
-        padding:10mm!important;
+        padding:0!important;
+        background:#fff!important;
+        overflow:hidden!important;
+      }
+      body{padding:0!important}
+      .page{
+        position:relative!important;
+        width:210mm!important;
+        height:297mm!important;
+        min-height:297mm!important;
+        max-height:297mm!important;
+        margin:0!important;
+        padding:8mm 9mm 7mm!important;
         border:0!important;
         box-shadow:none!important;
+        overflow:hidden!important;
+        page-break-before:avoid!important;
+        page-break-after:avoid!important;
+        page-break-inside:avoid!important;
+        break-before:avoid!important;
+        break-after:avoid!important;
+        break-inside:avoid!important;
+      }
+      #membershipForm,.form-panel.active,table,tbody,tr,td{
+        page-break-inside:avoid!important;
+        break-inside:avoid!important;
       }
       .top-actions,.lookup-modal{display:none!important}
-      .doc-header{padding-top:0!important}
-      input,select,textarea{
+      .doc-header{padding-top:0!important;margin-bottom:8px!important}
+      .type-box{margin-bottom:8px!important}
+      .section-title{margin:6px 0 4px!important}
+      td{padding:4px 6px!important}
+      input[type="text"],
+      input[type="tel"],
+      input[type="email"],
+      input[type="date"],
+      select,textarea{
+        min-height:28px!important;
+        padding:3px 5px!important;
         -webkit-print-color-adjust:exact;
         print-color-adjust:exact;
       }
+      textarea{height:46px!important;min-height:46px!important}
+      .service-box{gap:10px 13px!important;min-height:28px!important}
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
@@ -229,6 +272,7 @@
 <body>
   <main class="page type-company" id="pageShell">
     <div class="top-actions">
+      <button type="button" class="action-btn back-btn" id="backBtn">이전화면</button>
       <button type="button" class="action-btn register-btn" id="registerBtn">등록</button>
       <button type="button" class="action-btn lookup-btn" id="lookupBtn">조회</button>
       <button type="button" class="action-btn edit-btn" id="editBtn">수정</button>
@@ -243,7 +287,7 @@
       <div class="subtitle">Membership Registration</div>
     </div>
 
-    <form id="membershipForm" novalidate>
+    <form id="membershipForm" novalidate autocomplete="off">
       <div class="type-box">
         <strong>회원 유형 <span class="required">*</span></strong>
         <label><input type="radio" name="memberType" value="institution"> 기관</label>
@@ -481,6 +525,7 @@
     const panels = Array.from(document.querySelectorAll('.form-panel'));
     const companySectionTitle = document.getElementById('companySectionTitle');
     const membershipForm = document.getElementById('membershipForm');
+    const backBtn = document.getElementById('backBtn');
     const registerBtn = document.getElementById('registerBtn');
     const lookupBtn = document.getElementById('lookupBtn');
     const editBtn = document.getElementById('editBtn');
@@ -567,6 +612,13 @@
 
     typeRadios.forEach(radio => radio.addEventListener('change', () => showPanel(radio.value)));
 
+    document.querySelectorAll('input[type="date"]').forEach(el => {
+      updateDateBlankState(el);
+      el.addEventListener('input', () => updateDateBlankState(el));
+      el.addEventListener('change', () => updateDateBlankState(el));
+      el.addEventListener('blur', () => updateDateBlankState(el));
+    });
+
     function valueOf(name){
       return String(document.querySelector(`[name="${name}"]`)?.value || '').trim();
     }
@@ -587,9 +639,19 @@
       if(type === 'foreigner') return '외국인';
       return '';
     }
+    function updateDateBlankState(el){
+      if(!el || el.type !== 'date') return;
+      el.classList.toggle('date-empty', !el.value);
+    }
+    function refreshDateBlankStates(){
+      document.querySelectorAll('input[type="date"]').forEach(updateDateBlankState);
+    }
     function setValue(name, value){
       const el = document.querySelector(`[name="${name}"]`);
-      if(el) el.value = value ?? '';
+      if(el){
+        el.value = value ?? '';
+        updateDateBlankState(el);
+      }
     }
     function setServices(name, values){
       const selected = new Set(Array.isArray(values)
@@ -609,8 +671,30 @@
       return !start || !end || start <= end;
     }
 
-    function startNewRegistration(){
+    function clearAllEntryFields(){
       membershipForm.reset();
+
+      membershipForm.querySelectorAll(
+        'input[type="text"], input[type="tel"], input[type="email"], input[type="date"], textarea'
+      ).forEach(el => { el.value = ''; });
+
+      membershipForm.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+      membershipForm.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => {
+        el.checked = false;
+      });
+      refreshDateBlankStates();
+    }
+
+    function goPreviousScreen(){
+      if(window.history.length > 1){
+        window.history.back();
+        return;
+      }
+      window.location.href = 'index.html';
+    }
+
+    function startNewRegistration(){
+      clearAllEntryFields();
       clearCurrentRecord();
       typeRadios.forEach(radio => { radio.checked = false; });
       panels.forEach(panel => panel.classList.remove('active'));
@@ -986,6 +1070,7 @@
       return true;
     }
 
+    backBtn.addEventListener('click', goPreviousScreen);
     registerBtn.addEventListener('click', startNewRegistration);
     lookupBtn.addEventListener('click', openLookupModal);
     editBtn.addEventListener('click', beginEditMembership);
@@ -1000,7 +1085,13 @@
     lookupModal.addEventListener('click', e => { if(e.target === lookupModal) closeLookupModal(); });
     document.addEventListener('keydown', e => { if(e.key === 'Escape' && lookupModal.classList.contains('open')) closeLookupModal(); });
 
+    // 최초 화면은 날짜를 포함한 모든 입력값을 빈칸으로 시작한다.
+    clearAllEntryFields();
     typeRadios.forEach(radio => { radio.checked = false; });
+    panels.forEach(panel => panel.classList.remove('active'));
+    document.getElementById('companyForm').classList.add('active');
+    pageShell.classList.remove('type-institution','type-company','type-domestic','type-foreigner');
+    pageShell.classList.add('type-company');
     companySectionTitle.textContent = '기관 / 기업체 대표 회원정보';
 
     setTimeout(() => {
