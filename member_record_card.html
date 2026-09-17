@@ -604,6 +604,37 @@
       }
       .footer{margin:0 !important; padding-top:5px !important;}
     }
+
+    /* 최종 A4 세로 1장 출력 보정 */
+    @media screen and (min-width:721px), print{
+      .page{
+        width:210mm !important;
+        height:297mm !important;
+        min-height:297mm !important;
+        padding:8mm 9mm 5.5mm !important;
+        overflow:hidden !important;
+      }
+      .doc-header{margin:0 !important;}
+      h1{font-size:22px !important;}
+      .subtitle{font-size:10.8px !important;}
+      .type-box{min-height:34px !important; padding:6px 9px !important;}
+      .form-panel.active .section-title{margin:0 0 5px !important;}
+      .form-panel.active th, .form-panel.active td{padding:3.5px 5px !important;}
+      .form-panel.active input[type="text"],
+      .form-panel.active input[type="tel"],
+      .form-panel.active input[type="email"],
+      .form-panel.active select{min-height:25px !important; padding:3px 5px !important;}
+      .form-panel.active textarea{height:36px !important; min-height:36px !important;}
+      #commonArea[style*="block"]{gap:6px !important;}
+      .terms{font-size:10.2px !important; line-height:1.24 !important; padding:6px 9px !important;}
+      .terms h3{font-size:10.9px !important; line-height:1.2 !important; margin:3px 0 1px !important;}
+      .terms li{margin:0 !important;}
+      .notice{font-size:9.9px !important; line-height:1.2 !important; padding:4px 7px !important;}
+      .agree{font-size:10.4px !important; line-height:1.2 !important; padding:5px 7px !important;}
+      .document-signature{font-size:11px !important; gap:28px !important;}
+      .footer{font-size:22px !important; line-height:1 !important; padding-top:4px !important;}
+    }
+
 </style>
 </head>
 <body>
@@ -614,7 +645,7 @@
     <div class="doc-header">
       <div class="brand" id="brandText">마음:시나브로심리상담연구소</div>
       <h1 id="pageTitle">회원가입</h1>
-      <div class="subtitle" id="pageSubtitle">Membership Registration</div>
+      <div class="subtitle" id="pageSubtitle">심리상담 · 진로상담 · 기업상담</div>
     </div>
 
     <form id="membershipForm" novalidate>
@@ -622,7 +653,7 @@
         <strong id="memberTypeLabel">회원 유형 <span class="required">*</span></strong>
         <label><input type="radio" name="memberType" value="company"> <span id="typeCompanyText">기업체 대표</span></label>
         <label><input type="radio" name="memberType" value="domestic"> <span id="typeDomesticText">내국인</span></label>
-        <label><input type="radio" name="memberType" value="foreigner"> <span id="typeForeignerText">외국인(Foreigner)</span></label>
+        <label><input type="radio" name="memberType" value="foreigner"> <span id="typeForeignerText">외국인</span></label>
       </div>
       <div id="typeError" class="error-message" style="text-align:center;margin:-8px 0 10px;">회원 유형을 선택해 주세요.</div>
 
@@ -728,68 +759,68 @@
 
       <!-- 외국인 -->
       <section id="foreignerForm" class="form-panel" data-type="foreigner">
-        <div class="section-title">Foreigner Member Information</div>
+        <div class="section-title">외국인 회원정보</div>
         <table>
           <tr>
-            <td class="label">Name <span class="required">*</span></td>
+            <td class="label">성명 <span class="required">*</span></td>
             <td><input type="text" name="foreigner_name" data-required></td>
-            <td class="label">English Name <span class="required">*</span></td>
+            <td class="label">영문이름 <span class="required">*</span></td>
             <td><input type="text" name="foreigner_english_name" data-required></td>
           </tr>
           <tr>
-            <td class="label">Nationality <span class="required">*</span></td>
+            <td class="label">국적 <span class="required">*</span></td>
             <td><input type="text" name="nationality" data-required></td>
-            <td class="label">Date of Birth <span class="required">*</span></td>
+            <td class="label">생년월일 <span class="required">*</span></td>
             <td><input type="text" name="foreigner_birth" data-required></td>
           </tr>
           <tr>
-            <td class="label">Gender</td>
+            <td class="label">성별</td>
             <td>
               <select name="foreigner_gender">
                 <option value="" selected></option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
+                <option>남성</option>
+                <option>여성</option>
+                <option>기타</option>
               </select>
             </td>
-            <td class="label">Phone <span class="required">*</span></td>
+            <td class="label">연락처 <span class="required">*</span></td>
             <td><input type="tel" name="foreigner_phone" data-required data-phone></td>
           </tr>
           <tr>
-            <td class="label">Email</td>
+            <td class="label">이메일</td>
             <td><input type="email" name="foreigner_email"></td>
-            <td class="label">Visa</td>
+            <td class="label">비자</td>
             <td><input type="text" name="visa"></td>
           </tr>
           <tr>
-            <td class="label">Date of Entry</td>
+            <td class="label">입국일</td>
             <td><input type="text" name="entry_date"></td>
-            <td class="label">Expected Departure</td>
+            <td class="label">출국예정일</td>
             <td><input type="text" name="departure_date"></td>
           </tr>
           <tr>
-            <td class="label">Occupation</td>
+            <td class="label">직업</td>
             <td><input type="text" name="foreigner_job"></td>
-            <td class="label">Career Summary</td>
+            <td class="label">주요경력</td>
             <td><input type="text" name="career_summary" maxlength="30"></td>
           </tr>
           <tr>
-            <td class="label">Address</td>
+            <td class="label">주소</td>
             <td colspan="3"><input type="text" name="foreigner_address"></td>
           </tr>
           <tr>
-            <td class="label">Preferred Service</td>
+            <td class="label">희망 서비스</td>
             <td colspan="3">
               <div class="service-box">
-                <label><input type="checkbox" name="foreigner_service" value="심리상담"> Psychological Counseling</label>
-                <label><input type="checkbox" name="foreigner_service" value="진로상담"> Career Counseling</label>
-                <label><input type="checkbox" name="foreigner_service" value="진로취업정보"> Career & Employment Information</label>
-                <label><input type="checkbox" name="foreigner_service" value="생활정착정보"> Living & Settlement Information</label>
+                <label><input type="checkbox" name="foreigner_service" value="심리상담"> 심리상담</label>
+                <label><input type="checkbox" name="foreigner_service" value="진로상담"> 진로상담</label>
+                <label><input type="checkbox" name="foreigner_service" value="진로취업정보"> 진로·취업정보</label>
+                <label><input type="checkbox" name="foreigner_service" value="생활정착정보"> 생활·정착정보</label>
               </div>
             </td>
           </tr>
           <tr>
-            <td class="label">Notes</td>
+            <td class="label">특이사항</td>
             <td colspan="3"><textarea name="foreigner_note"></textarea></td>
           </tr>
         </table>
@@ -906,88 +937,39 @@
     }
 
     function setLanguage(type){
-      const isForeigner = type === 'foreigner';
+      // 모든 회원 유형을 한글 화면으로 통일한다.
+      document.getElementById('brandText').textContent = '마음:시나브로심리상담연구소';
+      document.getElementById('pageTitle').textContent = '회원가입';
+      document.getElementById('pageSubtitle').textContent = '심리상담 · 진로상담 · 기업상담';
+      document.getElementById('memberTypeLabel').innerHTML = '회원 유형 <span class="required">*</span>';
+      document.getElementById('typeCompanyText').textContent = '기업체 대표';
+      document.getElementById('typeDomesticText').textContent = '내국인';
+      document.getElementById('typeForeignerText').textContent = '외국인';
+      document.getElementById('typeError').textContent = '회원 유형을 선택해 주세요.';
 
-      document.getElementById('brandText').textContent =
-        isForeigner ? 'Maum:SINABRO Psychological Counseling Research Institute' : '마음:시나브로심리상담연구소';
-
-      document.getElementById('pageTitle').textContent =
-        isForeigner ? 'Membership Registration' : '회원가입';
-
-      document.getElementById('pageSubtitle').textContent =
-        isForeigner ? 'Psychological · Career · Corporate Counseling' : 'Membership Registration';
-
-      document.getElementById('memberTypeLabel').innerHTML =
-        isForeigner ? 'Member Type <span class="required">*</span>' : '회원 유형 <span class="required">*</span>';
-
-      document.getElementById('typeCompanyText').textContent =
-        isForeigner ? 'Company Representative' : '기업체 대표';
-
-      document.getElementById('typeDomesticText').textContent =
-        isForeigner ? 'Korean' : '내국인';
-
-      document.getElementById('typeForeignerText').textContent =
-        isForeigner ? 'Foreigner' : '외국인(Foreigner)';
-
-      document.getElementById('typeError').textContent =
-        isForeigner ? 'Please select a member type.' : '회원 유형을 선택해 주세요.';
-
-      document.getElementById('commonKorean').style.display =
-        isForeigner ? 'none' : 'block';
-
-      document.getElementById('commonEnglish').style.display =
-        isForeigner ? 'block' : 'none';
+      document.getElementById('commonKorean').style.display = 'block';
+      document.getElementById('commonEnglish').style.display = 'none';
 
       document.getElementById('agreeText').textContent =
-        isForeigner
-          ? 'I confirm that the information above and the information I have entered are true and accurate.'
-          : '위의 내용과 본인이 작성한 정보가 사실과 다름이 없음을 확인합니다.';
+        '위의 내용과 본인이 작성한 정보가 사실과 다름이 없음을 확인합니다.';
+      document.getElementById('agreeError').textContent = '확인란에 체크해 주세요.';
+      document.getElementById('footerText').textContent = '마음:시나브로심리상담연구소';
+      document.getElementById('footerText').style.fontSize = '24px';
 
-      document.getElementById('agreeError').textContent =
-        isForeigner ? 'Please check the confirmation box.' : '확인란에 체크해 주세요.';
-
-      document.getElementById('footerText').textContent =
-        isForeigner
-          ? 'Maum:SINABRO Psychological Counseling Research Institute'
-          : '마음:시나브로심리상담연구소';
-
-      document.getElementById('footerText').style.fontSize =
-        isForeigner ? '22.8px' : '24px';
-
-      const dateWriteLabel = document.getElementById('dateWriteLabel');
-      const authorWriteLabel = document.getElementById('authorWriteLabel');
-
-      if(isForeigner){
-        dateWriteLabel.innerHTML = `
-          <span>Date :</span>
-          <input type="text" class="date-year" inputmode="numeric" maxlength="4" aria-label="Year">
-          <span>Year</span>
-          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="Month">
-          <span>Month</span>
-          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="Day">
-          <span>Day.</span>
-        `;
-        authorWriteLabel.innerHTML = `
-          <span>Name :</span>
-          <input type="text" class="author-name" aria-label="Name">
-          <span>Sign</span>
-        `;
-      }else{
-        dateWriteLabel.innerHTML = `
-          <span>작성일 :</span>
-          <input type="text" class="date-year" inputmode="numeric" maxlength="4" aria-label="작성 연도">
-          <span>년</span>
-          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 월">
-          <span>월</span>
-          <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 일">
-          <span>일.</span>
-        `;
-        authorWriteLabel.innerHTML = `
-          <span>작성자 :</span>
-          <input type="text" class="author-name" aria-label="작성자">
-          <span>인</span>
-        `;
-      }
+      document.getElementById('dateWriteLabel').innerHTML = `
+        <span>작성일 :</span>
+        <input type="text" class="date-year" inputmode="numeric" maxlength="4" aria-label="작성 연도">
+        <span>년</span>
+        <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 월">
+        <span>월</span>
+        <input type="text" class="date-part" inputmode="numeric" maxlength="2" aria-label="작성 일">
+        <span>일.</span>
+      `;
+      document.getElementById('authorWriteLabel').innerHTML = `
+        <span>작성자 :</span>
+        <input type="text" class="author-name" aria-label="작성자">
+        <span>인</span>
+      `;
     }
 
     function showPanel(type, resetAgreement = true){
