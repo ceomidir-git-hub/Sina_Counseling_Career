@@ -213,6 +213,69 @@
     }
     .lookup-empty{text-align:center!important;color:var(--muted);padding:18px!important}
 
+
+    /* 공통 바닥글: 화면과 A4 PDF에서 동일 위치 */
+    .page-footer{
+      position:absolute;
+      left:9mm;
+      right:9mm;
+      bottom:5mm;
+      padding-top:5px;
+      border-top:1px solid #d8d8d8;
+      text-align:center;
+      font-size:17px;
+      line-height:1.15;
+      font-weight:700;
+      color:#555;
+      white-space:nowrap;
+    }
+
+    /* 외국인만: 한 항목 = 한 행, A4 세로 1장 높이에 맞춰 균등 배분 */
+    @media screen and (min-width:721px){
+      .page.type-foreigner{
+        width:210mm;
+        height:297mm;
+        min-height:297mm;
+        max-height:297mm;
+        padding:8mm 9mm 14mm;
+      }
+      .page.type-foreigner .doc-header{
+        padding-top:7mm;
+        margin-bottom:7px;
+      }
+      .page.type-foreigner .type-box{
+        margin-bottom:7px;
+      }
+      .page.type-foreigner #foreignerForm .section-title{
+        margin:5px 0 4px;
+      }
+      .page.type-foreigner #foreignerForm table{
+        height:228mm;
+        table-layout:fixed;
+      }
+      .page.type-foreigner #foreignerForm td{
+        padding:4px 7px;
+      }
+      .page.type-foreigner #foreignerForm .label{
+        width:36mm;
+      }
+      .page.type-foreigner #foreignerForm input[type="text"],
+      .page.type-foreigner #foreignerForm input[type="tel"],
+      .page.type-foreigner #foreignerForm input[type="email"],
+      .page.type-foreigner #foreignerForm input[type="date"],
+      .page.type-foreigner #foreignerForm select{
+        min-height:31px;
+        height:31px;
+      }
+      .page.type-foreigner #foreignerForm textarea{
+        height:48px;
+        min-height:48px;
+      }
+      .page.type-foreigner #foreignerForm .service-box{
+        min-height:42px;
+        gap:8px 14px;
+      }
+    }
     @page{size:A4 portrait;margin:0}
     @media print{
       html,body{
@@ -265,6 +328,23 @@
       }
       textarea{height:46px!important;min-height:46px!important}
       .service-box{gap:10px 13px!important;min-height:28px!important}
+
+      /* 외국인 PDF는 화면과 동일한 1행 배치/높이 사용 */
+      .page.type-foreigner{padding:8mm 9mm 14mm!important}
+      .page.type-foreigner .doc-header{padding-top:7mm!important;margin-bottom:7px!important}
+      .page.type-foreigner .type-box{margin-bottom:7px!important}
+      .page.type-foreigner #foreignerForm .section-title{margin:5px 0 4px!important}
+      .page.type-foreigner #foreignerForm table{height:228mm!important;table-layout:fixed!important}
+      .page.type-foreigner #foreignerForm td{padding:4px 7px!important}
+      .page.type-foreigner #foreignerForm .label{width:36mm!important}
+      .page.type-foreigner #foreignerForm input[type="text"],
+      .page.type-foreigner #foreignerForm input[type="tel"],
+      .page.type-foreigner #foreignerForm input[type="email"],
+      .page.type-foreigner #foreignerForm input[type="date"],
+      .page.type-foreigner #foreignerForm select{min-height:31px!important;height:31px!important}
+      .page.type-foreigner #foreignerForm textarea{height:48px!important;min-height:48px!important}
+      .page.type-foreigner #foreignerForm .service-box{min-height:42px!important;gap:8px 14px!important}
+      .page-footer{left:9mm!important;right:9mm!important;bottom:5mm!important}
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
@@ -413,19 +493,23 @@
         </table>
       </section>
 
-      <!-- 외국인 -->
+      <!-- 외국인 : 한 항목을 한 행으로 배치 -->
       <section id="foreignerForm" class="form-panel" data-types="foreigner">
         <div class="section-title">외국인 회원정보</div>
         <table>
           <tr>
             <td class="label">이름 <span class="required">*</span></td>
             <td><input type="text" name="foreigner_name" maxlength="100"></td>
+          </tr>
+          <tr>
             <td class="label">영문이름 <span class="required">*</span></td>
             <td><input type="text" name="foreigner_english_name" maxlength="150"></td>
           </tr>
           <tr>
             <td class="label">국적 <span class="required">*</span></td>
             <td><input type="text" name="nationality" maxlength="100"></td>
+          </tr>
+          <tr>
             <td class="label">생년월일 <span class="required">*</span></td>
             <td><input type="date" name="foreigner_birth"></td>
           </tr>
@@ -439,34 +523,42 @@
                 <option>기타</option>
               </select>
             </td>
+          </tr>
+          <tr>
             <td class="label">연락처 <span class="required">*</span></td>
             <td><input type="tel" name="foreigner_phone" maxlength="50"></td>
           </tr>
           <tr>
             <td class="label">이메일</td>
             <td><input type="email" name="foreigner_email" maxlength="255"></td>
+          </tr>
+          <tr>
             <td class="label">비자</td>
             <td><input type="text" name="visa" maxlength="100"></td>
           </tr>
           <tr>
             <td class="label">입국일</td>
             <td><input type="date" name="entry_date"></td>
+          </tr>
+          <tr>
             <td class="label">출국예정일</td>
             <td><input type="date" name="departure_date"></td>
           </tr>
           <tr>
             <td class="label">직업</td>
             <td><input type="text" name="foreigner_job" maxlength="100"></td>
+          </tr>
+          <tr>
             <td class="label">주요경력</td>
             <td><input type="text" name="career_summary" maxlength="30"></td>
           </tr>
           <tr>
             <td class="label">주소</td>
-            <td colspan="3"><input type="text" name="foreigner_address" maxlength="500"></td>
+            <td><input type="text" name="foreigner_address" maxlength="500"></td>
           </tr>
           <tr>
             <td class="label">희망 서비스</td>
-            <td colspan="3">
+            <td>
               <div class="service-box">
                 <label><input type="checkbox" name="foreigner_service" value="심리상담"> 심리상담</label>
                 <label><input type="checkbox" name="foreigner_service" value="진로상담"> 진로상담</label>
@@ -481,15 +573,17 @@
           </tr>
           <tr>
             <td class="label">특이사항</td>
-            <td colspan="3"><textarea name="foreigner_note" maxlength="2000"></textarea></td>
+            <td><textarea name="foreigner_note" maxlength="2000"></textarea></td>
           </tr>
           <tr>
             <td class="label">가입일 <span class="required">*</span></td>
-            <td colspan="3"><input type="date" name="foreigner_join_date"></td>
+            <td><input type="date" name="foreigner_join_date"></td>
           </tr>
         </table>
       </section>
     </form>
+
+    <footer class="page-footer">마음:시나브로심리상담연구소</footer>
   </main>
 
   <div class="lookup-modal" id="lookupModal" aria-hidden="true">
