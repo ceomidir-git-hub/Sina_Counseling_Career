@@ -2683,10 +2683,12 @@
         <div class="counsel-ppp-top-card" id="counselPppPartnerCard" aria-label="Public-Private Partnership Partner">
           <div class="counsel-ppp-header">
             <div class="counsel-ppp-title">Public-Private Partnership (PPP) Partner</div>
-            <div class="counsel-ppp-filters" role="radiogroup" aria-label="PPP Partner 전체 기관 기업체 구분">
+            <div class="counsel-ppp-filters" role="radiogroup" aria-label="회원 및 PPP Partner 유형 구분">
               <label><input type="radio" name="pppDashboardType" value="" checked>전체</label>
               <label><input type="radio" name="pppDashboardType" value="기관">기관</label>
               <label><input type="radio" name="pppDashboardType" value="기업체">기업체</label>
+              <label><input type="radio" name="pppDashboardType" value="내국인">내국인</label>
+              <label><input type="radio" name="pppDashboardType" value="외국인">외국인</label>
             </div>
           </div>
           <div class="counsel-ppp-scroll" id="pppPartnerDashboardScroll">
@@ -2702,11 +2704,11 @@
             <thead>
               <tr>
                 <th>가입일</th>
-                <th>기관/기업체</th>
-                <th>Partner명</th>
-                <th>업종</th>
-                <th>담당자</th>
-                <th>분야</th>
+                <th>구분</th>
+                <th>회원/Partner명</th>
+                <th>업종/직업</th>
+                <th>담당자/국적</th>
+                <th>분야/희망서비스</th>
               </tr>
             </thead>
             <tbody id="pppPartnerDashboardBody">
@@ -3713,7 +3715,8 @@
       if (row) {
         appendPppCell(tr, formatPppJoinDate(row.join_date));
         appendPppCell(tr, row.partner_type || "-");
-        appendPppPartnerLinkCell(tr, row.id, row.partner_name);
+        if (row.source === "ppp") appendPppPartnerLinkCell(tr, row.id, row.partner_name);
+        else appendPppCell(tr, row.partner_name || "-");
         appendPppCell(tr, row.industry || "-");
         appendPppCell(tr, row.contact_person_name || "-");
         appendPppCell(tr, row.field || "-");
@@ -3728,35 +3731,68 @@
     requestAnimationFrame(syncPppDashboardRowHeight);
   }
 
+  function normalizeIndividualDashboardRow(row) {
+    const services = Array.isArray(row?.requested_services) ? row.requested_services.join(', ') : '';
+    return {
+      source: 'individual',
+      id: row?.id || '',
+      join_date: row?.join_date || '',
+      partner_type: row?.member_type || '',
+      partner_name: row?.name || '',
+      industry: row?.job_name || '',
+      contact_person_name: row?.nationality || (row?.member_type === '내국인' ? '대한민국' : ''),
+      field: services
+    };
+  }
+
+  function normalizePppDashboardRow(row) {
+    return { ...row, source: 'ppp' };
+  }
+
   function filterPppPartnerDashboardRows(rows, typeFilter) {
     const safeRows = Array.isArray(rows) ? rows : [];
-    const filter = String(typeFilter || "").trim();
+    const filter = String(typeFilter || '').trim();
     if (!filter) return safeRows;
-    return safeRows.filter(row => String(row?.partner_type || "").trim() === filter);
+    return safeRows.filter(row => String(row?.partner_type || '').trim() === filter);
+  }
+
+  async function secureDashboardFetch(functionName, action) {
+    const { data: { session }, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!session?.access_token) throw new Error('로그인 세션을 확인할 수 없습니다.');
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_PUBLISHABLE_KEY,
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ action }),
+      cache: 'no-store'
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result?.ok) {
+      throw new Error(result?.error || `${functionName} 조회 실패 (${response.status})`);
+    }
+    return Array.isArray(result.data) ? result.data : [];
   }
 
   async function loadPppPartnerDashboard() {
-    const { data: { session }, error: sessionError } = await client.auth.getSession();
-    if (sessionError) throw sessionError;
-    if (!session?.access_token) throw new Error("로그인 세션을 확인할 수 없습니다.");
+    const [pppRows, individualRows] = await Promise.all([
+      secureDashboardFetch('secure-ppp-partner', 'dashboard'),
+      secureDashboardFetch('secure-individual-member', 'dashboard')
+    ]);
 
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/secure-ppp-partner`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_PUBLISHABLE_KEY,
-        "Authorization": `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify({ action: "dashboard" }),
-      cache: "no-store"
+    const allRows = [
+      ...pppRows.map(normalizePppDashboardRow),
+      ...individualRows.map(normalizeIndividualDashboardRow)
+    ].sort((a, b) => {
+      const byDate = String(b.join_date || '').localeCompare(String(a.join_date || ''));
+      if (byDate !== 0) return byDate;
+      return String(a.partner_name || '').localeCompare(String(b.partner_name || ''), 'ko');
     });
 
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok || !result?.ok) {
-      throw new Error(result?.error || `PPP Partner 조회 실패 (${response.status})`);
-    }
-
-    const allRows = Array.isArray(result.data) ? result.data : [];
     const visibleRows = filterPppPartnerDashboardRows(allRows, selectedPppDashboardType());
     renderPppPartnerDashboard(visibleRows);
     return visibleRows;
@@ -3826,23 +3862,22 @@
   }
 
   async function loadDashboardOperationStatus() {
-    // DB_basic.nationality는 개인정보 보호를 위해 브라우저 직접 SELECT 권한이 없습니다.
-    // 따라서 SECURITY DEFINER RPC에서 집계값만 반환하고 원본 국적값은 브라우저로 전달하지 않습니다.
-    const { data, error } = await client.rpc("get_dashboard_operation_status");
-    if (error) throw error;
+    const [pppRows, individualRows] = await Promise.all([
+      secureDashboardFetch('secure-ppp-partner', 'dashboard'),
+      secureDashboardFetch('secure-individual-member', 'dashboard')
+    ]);
 
-    const row = Array.isArray(data) ? data[0] : data;
-    const totalCount = Number(row?.total_partner_count ?? 0);
-    const institutionCount = Number(row?.institution_count ?? 0);
-    const companyCount = Number(row?.company_count ?? 0);
-    const personalCount = Number(row?.personal_count ?? 0);
-    const foreignCount = Number(row?.foreign_count ?? 0);
+    const institutionCount = pppRows.filter(row => String(row?.partner_type || '').trim() === '기관').length;
+    const companyCount = pppRows.filter(row => String(row?.partner_type || '').trim() === '기업체').length;
+    const personalCount = individualRows.filter(row => String(row?.member_type || '').trim() === '내국인').length;
+    const foreignCount = individualRows.filter(row => String(row?.member_type || '').trim() === '외국인').length;
+    const totalCount = institutionCount + companyCount;
 
-    setOperationStatusValue(operationStatusEls.pppTotal, totalCount, "개");
-    setOperationStatusValue(operationStatusEls.pppInstitution, institutionCount, "개");
-    setOperationStatusValue(operationStatusEls.pppCompany, companyCount, "개");
-    setOperationStatusValue(operationStatusEls.personalMembers, personalCount, "명");
-    setOperationStatusValue(operationStatusEls.foreignMembers, foreignCount, "명");
+    setOperationStatusValue(operationStatusEls.pppTotal, totalCount, '개');
+    setOperationStatusValue(operationStatusEls.pppInstitution, institutionCount, '개');
+    setOperationStatusValue(operationStatusEls.pppCompany, companyCount, '개');
+    setOperationStatusValue(operationStatusEls.personalMembers, personalCount, '명');
+    setOperationStatusValue(operationStatusEls.foreignMembers, foreignCount, '명');
 
     return {
       total: totalCount,
