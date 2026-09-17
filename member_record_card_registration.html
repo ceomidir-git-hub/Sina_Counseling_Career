@@ -316,9 +316,9 @@
         <table>
           <tr>
             <td class="label">성명 <span class="required">*</span></td>
-            <td><input type="text" name="domestic_name"></td>
+            <td><input type="text" name="domestic_name" maxlength="100"></td>
             <td class="label">생년월일 <span class="required">*</span></td>
-            <td><input type="text" name="domestic_birth"></td>
+            <td><input type="date" name="domestic_birth"></td>
           </tr>
           <tr>
             <td class="label">성별</td>
@@ -331,17 +331,17 @@
               </select>
             </td>
             <td class="label">연락처 <span class="required">*</span></td>
-            <td><input type="tel" name="domestic_phone"></td>
+            <td><input type="tel" name="domestic_phone" maxlength="50"></td>
           </tr>
           <tr>
             <td class="label">이메일</td>
-            <td><input type="email" name="domestic_email"></td>
+            <td><input type="email" name="domestic_email" maxlength="255"></td>
             <td class="label">직업</td>
-            <td><input type="text" name="domestic_job"></td>
+            <td><input type="text" name="domestic_job" maxlength="100"></td>
           </tr>
           <tr>
             <td class="label">주소</td>
-            <td colspan="3"><input type="text" name="domestic_address"></td>
+            <td colspan="3"><input type="text" name="domestic_address" maxlength="500"></td>
           </tr>
           <tr>
             <td class="label">희망 서비스</td>
@@ -360,7 +360,7 @@
           </tr>
           <tr>
             <td class="label">특이사항</td>
-            <td colspan="3"><textarea name="domestic_note"></textarea></td>
+            <td colspan="3"><textarea name="domestic_note" maxlength="2000"></textarea></td>
           </tr>
           <tr>
             <td class="label">가입일 <span class="required">*</span></td>
@@ -375,15 +375,15 @@
         <table>
           <tr>
             <td class="label">이름 <span class="required">*</span></td>
-            <td><input type="text" name="foreigner_name"></td>
+            <td><input type="text" name="foreigner_name" maxlength="100"></td>
             <td class="label">영문이름 <span class="required">*</span></td>
-            <td><input type="text" name="foreigner_english_name"></td>
+            <td><input type="text" name="foreigner_english_name" maxlength="150"></td>
           </tr>
           <tr>
             <td class="label">국적 <span class="required">*</span></td>
-            <td><input type="text" name="nationality"></td>
+            <td><input type="text" name="nationality" maxlength="100"></td>
             <td class="label">생년월일 <span class="required">*</span></td>
-            <td><input type="text" name="foreigner_birth"></td>
+            <td><input type="date" name="foreigner_birth"></td>
           </tr>
           <tr>
             <td class="label">성별</td>
@@ -396,29 +396,29 @@
               </select>
             </td>
             <td class="label">연락처 <span class="required">*</span></td>
-            <td><input type="tel" name="foreigner_phone"></td>
+            <td><input type="tel" name="foreigner_phone" maxlength="50"></td>
           </tr>
           <tr>
             <td class="label">이메일</td>
-            <td><input type="email" name="foreigner_email"></td>
+            <td><input type="email" name="foreigner_email" maxlength="255"></td>
             <td class="label">비자</td>
-            <td><input type="text" name="visa"></td>
+            <td><input type="text" name="visa" maxlength="100"></td>
           </tr>
           <tr>
             <td class="label">입국일</td>
-            <td><input type="text" name="entry_date"></td>
+            <td><input type="date" name="entry_date"></td>
             <td class="label">출국예정일</td>
-            <td><input type="text" name="departure_date"></td>
+            <td><input type="date" name="departure_date"></td>
           </tr>
           <tr>
             <td class="label">직업</td>
-            <td><input type="text" name="foreigner_job"></td>
+            <td><input type="text" name="foreigner_job" maxlength="100"></td>
             <td class="label">주요경력</td>
             <td><input type="text" name="career_summary" maxlength="30"></td>
           </tr>
           <tr>
             <td class="label">주소</td>
-            <td colspan="3"><input type="text" name="foreigner_address"></td>
+            <td colspan="3"><input type="text" name="foreigner_address" maxlength="500"></td>
           </tr>
           <tr>
             <td class="label">희망 서비스</td>
@@ -437,7 +437,7 @@
           </tr>
           <tr>
             <td class="label">특이사항</td>
-            <td colspan="3"><textarea name="foreigner_note"></textarea></td>
+            <td colspan="3"><textarea name="foreigner_note" maxlength="2000"></textarea></td>
           </tr>
           <tr>
             <td class="label">가입일 <span class="required">*</span></td>
@@ -455,9 +455,9 @@
         <button type="button" class="lookup-close" id="lookupCloseBtn" aria-label="닫기">×</button>
       </div>
       <div class="lookup-fields">
-        <label for="lookupCompany">회사명</label>
+        <label for="lookupCompany" id="lookupLabel1">회사명</label>
         <input type="text" id="lookupCompany" maxlength="150" autocomplete="off">
-        <label for="lookupCeo">대표자명</label>
+        <label for="lookupCeo" id="lookupLabel2">대표자명</label>
         <input type="text" id="lookupCeo" maxlength="100" autocomplete="off">
       </div>
       <div class="lookup-actions">
@@ -466,7 +466,7 @@
       </div>
       <div class="lookup-status" id="lookupStatus">회사명 또는 대표자명을 입력한 뒤 조회해 주세요.</div>
       <table class="lookup-table">
-        <thead><tr><th>회사명</th><th>대표자명</th><th>선택</th></tr></thead>
+        <thead><tr><th id="lookupHead1">회사명</th><th id="lookupHead2">대표자명</th><th>선택</th></tr></thead>
         <tbody id="lookupResults"><tr><td colspan="3" class="lookup-empty">조회 결과가 없습니다.</td></tr></tbody>
       </table>
     </section>
@@ -491,11 +491,17 @@
     const lookupCloseBtn = document.getElementById('lookupCloseBtn');
     const lookupCompany = document.getElementById('lookupCompany');
     const lookupCeo = document.getElementById('lookupCeo');
+    const lookupLabel1 = document.getElementById('lookupLabel1');
+    const lookupLabel2 = document.getElementById('lookupLabel2');
+    const lookupHead1 = document.getElementById('lookupHead1');
+    const lookupHead2 = document.getElementById('lookupHead2');
     const lookupResetBtn = document.getElementById('lookupResetBtn');
     const lookupSearchBtn = document.getElementById('lookupSearchBtn');
     const lookupStatus = document.getElementById('lookupStatus');
     const lookupResults = document.getElementById('lookupResults');
+
     let currentRecordId = null;
+    let currentRecordKind = null; // partner | individual
     let editMode = false;
 
     const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
@@ -509,14 +515,14 @@
       }
     });
 
-    async function securePppRequest(action, params = {}){
+    async function secureRequest(functionName, action, params = {}){
       const { data: sessionData, error: sessionError } = await db.auth.getSession();
       const session = sessionData?.session;
       if(sessionError || !session?.access_token){
         throw new Error('로그인 세션을 확인할 수 없습니다. 메인 화면에서 다시 로그인해 주세요.');
       }
 
-      const { data, error } = await db.functions.invoke('secure-ppp-partner', {
+      const { data, error } = await db.functions.invoke(functionName, {
         body: { action, ...params }
       });
 
@@ -528,7 +534,7 @@
             const body = await context.json();
             if(body?.error) message = body.error;
           }
-        }catch(_){}
+        }catch(_){ }
         throw new Error(message);
       }
 
@@ -537,6 +543,9 @@
       }
       return data.data;
     }
+
+    const securePppRequest = (action, params = {}) => secureRequest('secure-ppp-partner', action, params);
+    const secureIndividualRequest = (action, params = {}) => secureRequest('secure-individual-member', action, params);
 
     function showPanel(type){
       panels.forEach(panel => {
@@ -547,52 +556,57 @@
       pageShell.classList.remove('type-institution','type-company','type-domestic','type-foreigner');
       pageShell.classList.add(`type-${type}`);
 
-      if(type === 'institution'){
-        companySectionTitle.textContent = '기관 회원정보';
-      }else if(type === 'company'){
-        companySectionTitle.textContent = '기업체 대표 회원정보';
+      if(type === 'institution') companySectionTitle.textContent = '기관 회원정보';
+      else if(type === 'company') companySectionTitle.textContent = '기업체 대표 회원정보';
+
+      if(currentRecordId){
+        const newKind = (type === 'domestic' || type === 'foreigner') ? 'individual' : 'partner';
+        if(newKind !== currentRecordKind) clearCurrentRecord();
       }
     }
 
-    typeRadios.forEach(radio => {
-      radio.addEventListener('change', () => showPanel(radio.value));
-    });
+    typeRadios.forEach(radio => radio.addEventListener('change', () => showPanel(radio.value)));
 
     function valueOf(name){
       return String(document.querySelector(`[name="${name}"]`)?.value || '').trim();
     }
-
     function selectedServices(name){
       return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
-        .map(el => el.value.trim())
-        .filter(Boolean);
+        .map(el => el.value.trim()).filter(Boolean);
     }
-
     function selectedMemberType(){
       return document.querySelector('input[name="memberType"]:checked')?.value || '';
     }
-
     function partnerTypeFor(type){
       if(type === 'institution') return '기관';
       if(type === 'company') return '기업체';
       return '';
     }
-
+    function individualTypeFor(type){
+      if(type === 'domestic') return '내국인';
+      if(type === 'foreigner') return '외국인';
+      return '';
+    }
     function setValue(name, value){
       const el = document.querySelector(`[name="${name}"]`);
       if(el) el.value = value ?? '';
     }
-
-    function setServices(name, field){
-      const selected = new Set(String(field || '').split(',').map(v => v.trim()).filter(Boolean));
-      document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
-        el.checked = selected.has(el.value);
-      });
+    function setServices(name, values){
+      const selected = new Set(Array.isArray(values)
+        ? values.map(v => String(v).trim()).filter(Boolean)
+        : String(values || '').split(',').map(v => v.trim()).filter(Boolean));
+      document.querySelectorAll(`input[name="${name}"]`).forEach(el => { el.checked = selected.has(el.value); });
     }
-
     function clearCurrentRecord(){
       currentRecordId = null;
+      currentRecordKind = null;
       editMode = false;
+    }
+    function isIndividualType(type){
+      return type === 'domestic' || type === 'foreigner';
+    }
+    function isValidDateOrder(start, end){
+      return !start || !end || start <= end;
     }
 
     function startNewRegistration(){
@@ -607,65 +621,111 @@
       alert('신규 회원 등록 모드입니다. 회원 유형을 선택하고 내용을 입력한 뒤 저장해 주세요.');
     }
 
+    function configureLookupModal(){
+      const type = selectedMemberType();
+      const individual = isIndividualType(type);
+      lookupCompany.maxLength = individual ? 100 : 150;
+      lookupCeo.maxLength = individual ? 50 : 100;
+      lookupLabel1.textContent = individual ? '성명' : '회사명';
+      lookupLabel2.textContent = individual ? '연락처' : '대표자명';
+      lookupHead1.textContent = individual ? '성명' : '회사명';
+      lookupHead2.textContent = individual ? '연락처' : '대표자명';
+      lookupStatus.textContent = individual
+        ? '성명 또는 연락처를 입력한 뒤 조회해 주세요.'
+        : '회사명 또는 대표자명을 입력한 뒤 조회해 주세요.';
+    }
+
     function openLookupModal(){
+      configureLookupModal();
       lookupCompany.value = '';
       lookupCeo.value = '';
       lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">조회 결과가 없습니다.</td></tr>';
-      lookupStatus.textContent = '회사명 또는 대표자명을 입력한 뒤 조회해 주세요.';
       lookupModal.classList.add('open');
       lookupModal.setAttribute('aria-hidden', 'false');
       setTimeout(() => lookupCompany.focus(), 0);
     }
-
     function closeLookupModal(){
       lookupModal.classList.remove('open');
       lookupModal.setAttribute('aria-hidden', 'true');
     }
-
     function resetLookup(){
       lookupCompany.value = '';
       lookupCeo.value = '';
       lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">조회 결과가 없습니다.</td></tr>';
-      lookupStatus.textContent = '회사명 또는 대표자명을 입력한 뒤 조회해 주세요.';
+      configureLookupModal();
       lookupCompany.focus();
     }
-
     function escapeHtml(value){
       return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     async function searchMemberships(){
-      const company = lookupCompany.value.trim();
-      const ceo = lookupCeo.value.trim();
-      if(!company && !ceo){
-        lookupStatus.textContent = '회사명 또는 대표자명 중 하나 이상 입력해 주세요.';
-        lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">검색조건을 입력해 주세요.</td></tr>';
-        return;
-      }
-
+      const type = selectedMemberType();
+      const first = lookupCompany.value.trim();
+      const second = lookupCeo.value.trim();
       lookupSearchBtn.disabled = true;
       lookupStatus.textContent = '조회 중입니다...';
+
       try{
-        const data = await securePppRequest('search', { company, ceo });
-        const rows = Array.isArray(data) ? data : [];
-        lookupStatus.textContent = `조회 결과 ${rows.length}건`;
-        if(rows.length === 0){
-          lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">일치하는 회원이 없습니다.</td></tr>';
+        if(isIndividualType(type)){
+          if(!first && !second){
+            lookupStatus.textContent = '성명 또는 연락처 중 하나 이상 입력해 주세요.';
+            lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">검색조건을 입력해 주세요.</td></tr>';
+            return;
+          }
+          const data = await secureIndividualRequest('search', {
+            memberType: individualTypeFor(type),
+            name: first,
+            phone: second
+          });
+          const rows = Array.isArray(data) ? data : [];
+          lookupStatus.textContent = `조회 결과 ${rows.length}건`;
+          if(!rows.length){
+            lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">일치하는 회원이 없습니다.</td></tr>';
+            return;
+          }
+          lookupResults.innerHTML = rows.map((row, index) => `
+            <tr>
+              <td>${escapeHtml(row.name)}</td>
+              <td>${escapeHtml(row.phone)}</td>
+              <td><button type="button" class="select-member-btn" data-result-index="${index}">선택</button></td>
+            </tr>`).join('');
+          lookupResults.querySelectorAll('.select-member-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const row = rows[Number(btn.dataset.resultIndex)];
+              if(!row?.id) return;
+              try{
+                const full = await secureIndividualRequest('get', { id: row.id });
+                loadIndividualRow(full);
+              }catch(err){
+                console.error(err);
+                alert(`회원 조회 실패: ${err?.message || err}`);
+              }
+            });
+          });
           return;
         }
 
+        if(!first && !second){
+          lookupStatus.textContent = '회사명 또는 대표자명 중 하나 이상 입력해 주세요.';
+          lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">검색조건을 입력해 주세요.</td></tr>';
+          return;
+        }
+        const data = await securePppRequest('search', { company:first, ceo:second });
+        const rows = Array.isArray(data) ? data : [];
+        lookupStatus.textContent = `조회 결과 ${rows.length}건`;
+        if(!rows.length){
+          lookupResults.innerHTML = '<tr><td colspan="3" class="lookup-empty">일치하는 회원이 없습니다.</td></tr>';
+          return;
+        }
         lookupResults.innerHTML = rows.map((row, index) => `
           <tr>
             <td>${escapeHtml(row.partner_name)}</td>
             <td>${escapeHtml(row.representative_name)}</td>
             <td><button type="button" class="select-member-btn" data-result-index="${index}">선택</button></td>
           </tr>`).join('');
-
         lookupResults.querySelectorAll('.select-member-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const row = rows[Number(btn.dataset.resultIndex)];
@@ -685,12 +745,9 @@
     function loadMembershipRow(row, options = {}){
       const radioValue = row.partner_type === '기관' ? 'institution' : 'company';
       const radio = document.querySelector(`input[name="memberType"][value="${radioValue}"]`);
-      if(radio){
-        radio.checked = true;
-        showPanel(radioValue);
-      }
-
+      if(radio){ radio.checked = true; showPanel(radioValue); }
       currentRecordId = row.id;
+      currentRecordKind = 'partner';
       editMode = false;
       setValue('company_name', row.partner_name);
       setValue('company_ceo', row.representative_name);
@@ -705,9 +762,48 @@
       setValue('company_join_date', row.join_date);
       setServices('company_service', row.field);
       closeLookupModal();
-      if(!options.silent){
-        alert('회원 정보를 조회했습니다. 수정하려면 수정 버튼을 눌러 주세요.');
+      if(!options.silent) alert('회원 정보를 조회했습니다. 수정하려면 수정 버튼을 눌러 주세요.');
+    }
+
+    function loadIndividualRow(row){
+      const radioValue = row.member_type === '외국인' ? 'foreigner' : 'domestic';
+      const radio = document.querySelector(`input[name="memberType"][value="${radioValue}"]`);
+      if(radio){ radio.checked = true; showPanel(radioValue); }
+      currentRecordId = row.id;
+      currentRecordKind = 'individual';
+      editMode = false;
+
+      if(radioValue === 'domestic'){
+        setValue('domestic_name', row.name);
+        setValue('domestic_birth', row.birth_date);
+        setValue('domestic_gender', row.sex_code);
+        setValue('domestic_phone', row.phone);
+        setValue('domestic_email', row.email);
+        setValue('domestic_job', row.job_name);
+        setValue('domestic_address', row.address);
+        setValue('domestic_note', row.note);
+        setValue('domestic_join_date', row.join_date);
+        setServices('domestic_service', row.requested_services);
+      }else{
+        setValue('foreigner_name', row.name);
+        setValue('foreigner_english_name', row.english_name);
+        setValue('nationality', row.nationality);
+        setValue('foreigner_birth', row.birth_date);
+        setValue('foreigner_gender', row.sex_code);
+        setValue('foreigner_phone', row.phone);
+        setValue('foreigner_email', row.email);
+        setValue('visa', row.visa);
+        setValue('entry_date', row.entry_date);
+        setValue('departure_date', row.departure_date);
+        setValue('foreigner_job', row.job_name);
+        setValue('career_summary', row.career_summary);
+        setValue('foreigner_address', row.address);
+        setValue('foreigner_note', row.note);
+        setValue('foreigner_join_date', row.join_date);
+        setServices('foreigner_service', row.requested_services);
       }
+      closeLookupModal();
+      alert('회원 정보를 조회했습니다. 수정하려면 수정 버튼을 눌러 주세요.');
     }
 
     function beginEditMembership(){
@@ -719,18 +815,7 @@
       alert('수정 모드입니다. 내용을 수정한 뒤 저장 버튼을 눌러 주세요.');
     }
 
-    async function saveMembership(){
-      const selectedType = selectedMemberType();
-      if(!selectedType){
-        alert('회원 유형을 선택해 주세요.');
-        return;
-      }
-
-      if(selectedType !== 'institution' && selectedType !== 'company'){
-        alert('현재 PPP Partner DB 저장 대상은 기관과 기업체 대표입니다.');
-        return;
-      }
-
+    async function savePartnerMembership(selectedType){
       const partnerName = valueOf('company_name');
       const representativeName = valueOf('company_ceo');
       const businessNo = valueOf('business_no');
@@ -742,91 +827,120 @@
       const address = valueOf('company_address');
       const requestNote = valueOf('company_note');
       const joinDate = valueOf('company_join_date');
-      const services = selectedServices('company_service');
-      const field = services.join(', ');
+      const field = selectedServices('company_service').join(', ');
 
       const required = [
-        ['회사명', partnerName],
-        ['대표자명', representativeName],
-        ['연락처', contactPhone],
-        ['가입일', joinDate],
-        ['업종', industry],
-        ['담당자명', contactName],
-        ['희망 서비스', field]
+        ['회사명', partnerName], ['대표자명', representativeName], ['연락처', contactPhone],
+        ['가입일', joinDate], ['업종', industry], ['담당자명', contactName], ['희망 서비스', field]
       ];
       const missing = required.filter(([,v]) => !v).map(([k]) => k);
-      if(missing.length){
-        alert(`필수 입력값을 확인해 주세요: ${missing.join(', ')}`);
-        return;
-      }
-      const limits = [
-        ['회사명', partnerName, 150],
-        ['대표자명', representativeName, 100],
-        ['사업자등록번호', businessNo, 30],
-        ['업종', industry, 100],
-        ['담당자명', contactName, 100],
-        ['직책', contactPosition, 100],
-        ['연락처', contactPhone, 50],
-        ['이메일', contactEmail, 255],
-        ['주소', address, 500],
-        ['요청사항', requestNote, 2000],
-        ['희망 서비스', field, 100]
-      ];
-      const over = limits.find(([,value,max]) => value.length > max);
-      if(over){
-        alert(`${over[0]}은(는) ${over[2]}자 이하로 입력해 주세요. 현재 ${over[1].length}자입니다.`);
-        return;
-      }
+      if(missing.length) throw new Error(`필수 입력값을 확인해 주세요: ${missing.join(', ')}`);
 
       const emailInput = document.querySelector('[name="company_email"]');
-      if(emailInput && !emailInput.checkValidity()){
-        alert('이메일 형식을 확인해 주세요.');
-        emailInput.focus();
-        return;
+      if(emailInput && !emailInput.checkValidity()) throw new Error('이메일 형식을 확인해 주세요.');
+
+      const payload = {
+        join_date: joinDate, partner_name: partnerName, field, active: true,
+        partner_type: partnerTypeFor(selectedType), industry, contact_person_name: contactName,
+        representative_name: representativeName || null, business_registration_no: businessNo || null,
+        contact_person_position: contactPosition || null, contact_phone: contactPhone || null,
+        contact_email: contactEmail || null, address: address || null, request_note: requestNote || null
+      };
+
+      if(currentRecordId){
+        if(currentRecordKind !== 'partner') throw new Error('현재 조회된 회원 유형과 저장 유형이 일치하지 않습니다.');
+        if(!editMode) throw new Error('조회한 회원을 수정하려면 수정 버튼을 먼저 눌러 주세요.');
+        const data = await securePppRequest('update', { id:currentRecordId, payload });
+        currentRecordId = data.id;
+        editMode = false;
+        return '회원 정보가 수정 저장되었습니다.';
       }
+      const data = await securePppRequest('insert', { payload });
+      currentRecordId = data.id;
+      currentRecordKind = 'partner';
+      return '회원 가입 등록이 저장되었습니다.';
+    }
+
+    function buildIndividualPayload(type){
+      const foreigner = type === 'foreigner';
+      const prefix = foreigner ? 'foreigner' : 'domestic';
+      const birthDate = valueOf(`${prefix}_birth`);
+      const phone = valueOf(`${prefix}_phone`);
+      const email = valueOf(`${prefix}_email`);
+      const joinDate = valueOf(`${prefix}_join_date`);
+      const name = valueOf(`${prefix}_name`);
+      const services = selectedServices(`${prefix}_service`);
+      const note = valueOf(`${prefix}_note`);
+      const job = valueOf(`${prefix}_job`);
+      const address = valueOf(`${prefix}_address`);
+      const gender = valueOf(`${prefix}_gender`);
+
+      const required = [['성명',name],['생년월일',birthDate],['연락처',phone],['가입일',joinDate]];
+      if(foreigner){
+        required.push(['영문이름',valueOf('foreigner_english_name')],['국적',valueOf('nationality')]);
+      }
+      const missing = required.filter(([,v]) => !v).map(([k]) => k);
+      if(missing.length) throw new Error(`필수 입력값을 확인해 주세요: ${missing.join(', ')}`);
+
+      const emailInput = document.querySelector(`[name="${prefix}_email"]`);
+      if(emailInput && !emailInput.checkValidity()) throw new Error('이메일 형식을 확인해 주세요.');
+
+      const entryDate = foreigner ? valueOf('entry_date') : '';
+      const departureDate = foreigner ? valueOf('departure_date') : '';
+      if(foreigner && !isValidDateOrder(entryDate, departureDate)){
+        throw new Error('출국예정일은 입국일보다 빠를 수 없습니다.');
+      }
+
+      return {
+        member_type: individualTypeFor(type),
+        name,
+        english_name: foreigner ? valueOf('foreigner_english_name') || null : null,
+        nationality: foreigner ? valueOf('nationality') || null : null,
+        birth_date: birthDate,
+        sex_code: gender || null,
+        phone,
+        email: email || null,
+        job_name: job || null,
+        address: address || null,
+        visa: foreigner ? valueOf('visa') || null : null,
+        entry_date: foreigner ? entryDate || null : null,
+        departure_date: foreigner ? departureDate || null : null,
+        career_summary: foreigner ? valueOf('career_summary') || null : null,
+        requested_services: services,
+        note: note || null,
+        join_date: joinDate
+      };
+    }
+
+    async function saveIndividualMembership(selectedType){
+      const payload = buildIndividualPayload(selectedType);
+      if(currentRecordId){
+        if(currentRecordKind !== 'individual') throw new Error('현재 조회된 회원 유형과 저장 유형이 일치하지 않습니다.');
+        if(!editMode) throw new Error('조회한 회원을 수정하려면 수정 버튼을 먼저 눌러 주세요.');
+        const data = await secureIndividualRequest('update', { id:currentRecordId, payload });
+        currentRecordId = data.id;
+        editMode = false;
+        return '개인 회원 정보가 수정 저장되었습니다.';
+      }
+      const data = await secureIndividualRequest('insert', { payload });
+      currentRecordId = data.id;
+      currentRecordKind = 'individual';
+      return `${individualTypeFor(selectedType)} 회원 가입 등록이 저장되었습니다.`;
+    }
+
+    async function saveMembership(){
+      const selectedType = selectedMemberType();
+      if(!selectedType){ alert('회원 유형을 선택해 주세요.'); return; }
 
       saveBtn.disabled = true;
       try{
-        const { data: { user }, error: userError } = await db.auth.getUser();
-        if(userError || !user){
-          alert('로그인 세션을 확인할 수 없습니다. 메인 화면에서 다시 로그인해 주세요.');
-          return;
-        }
+        const { data:{ user }, error:userError } = await db.auth.getUser();
+        if(userError || !user) throw new Error('로그인 세션을 확인할 수 없습니다. 메인 화면에서 다시 로그인해 주세요.');
 
-        const payload = {
-          join_date: joinDate,
-          partner_name: partnerName,
-          field,
-          active: true,
-          partner_type: partnerTypeFor(selectedType),
-          industry,
-          contact_person_name: contactName,
-          representative_name: representativeName || null,
-          business_registration_no: businessNo || null,
-          contact_person_position: contactPosition || null,
-          contact_phone: contactPhone || null,
-          contact_email: contactEmail || null,
-          address: address || null,
-          request_note: requestNote || null
-        };
-
-        if(currentRecordId){
-          if(!editMode){
-            alert('조회한 회원을 수정하려면 수정 버튼을 먼저 눌러 주세요.');
-            return;
-          }
-          const data = await securePppRequest('update', {
-            id: currentRecordId,
-            payload
-          });
-          currentRecordId = data.id;
-          editMode = false;
-          alert('회원 정보가 수정 저장되었습니다.');
-        }else{
-          const data = await securePppRequest('insert', { payload });
-          currentRecordId = data.id;
-          alert('회원 가입 등록이 저장되었습니다.');
-        }
+        const message = isIndividualType(selectedType)
+          ? await saveIndividualMembership(selectedType)
+          : await savePartnerMembership(selectedType);
+        alert(message);
       }catch(err){
         console.error(err);
         alert(`저장 실패: ${err?.message || err}`);
@@ -837,20 +951,21 @@
 
     async function deleteMembership(){
       const selectedType = selectedMemberType();
-      if(selectedType !== 'institution' && selectedType !== 'company'){
-        alert('현재 삭제 대상은 기관과 기업체 대표 회원입니다.');
-        return;
-      }
-      if(!currentRecordId){
-        alert('삭제할 회원을 먼저 조회해 주세요.');
-        return;
-      }
-      const partnerName = valueOf('company_name') || '선택한 회원';
-      if(!confirm(`${partnerName} 정보를 삭제하시겠습니까?`)) return;
+      if(!selectedType){ alert('회원 유형을 선택해 주세요.'); return; }
+      if(!currentRecordId){ alert('삭제할 회원을 먼저 조회해 주세요.'); return; }
+
+      const expectedKind = isIndividualType(selectedType) ? 'individual' : 'partner';
+      if(currentRecordKind !== expectedKind){ alert('현재 조회된 회원 유형과 삭제 유형이 일치하지 않습니다.'); return; }
+
+      const displayName = isIndividualType(selectedType)
+        ? valueOf(selectedType === 'foreigner' ? 'foreigner_name' : 'domestic_name')
+        : valueOf('company_name');
+      if(!confirm(`${displayName || '선택한 회원'} 정보를 삭제하시겠습니까?`)) return;
 
       deleteBtn.disabled = true;
       try{
-        await securePppRequest('delete', { id: currentRecordId });
+        if(expectedKind === 'individual') await secureIndividualRequest('delete', { id:currentRecordId });
+        else await securePppRequest('delete', { id:currentRecordId });
         alert('회원 정보가 삭제되었습니다.');
         startNewRegistration();
       }catch(err){
@@ -861,22 +976,12 @@
       }
     }
 
-
     async function applyDashboardPartnerLookup(){
-      const partnerId = String(
-        sessionStorage.getItem('sina_ppp_lookup_id') || ''
-      ).trim();
-
+      const partnerId = String(sessionStorage.getItem('sina_ppp_lookup_id') || '').trim();
       if(!partnerId) return false;
-
-      // 재진입/새로고침 시 반복 실행되지 않도록 1회 사용 후 즉시 제거
       sessionStorage.removeItem('sina_ppp_lookup_id');
-
-      const row = await securePppRequest('get', { id: partnerId });
-      if(!row?.id){
-        throw new Error('선택한 PPP Partner 정보를 찾을 수 없습니다.');
-      }
-
+      const row = await securePppRequest('get', { id:partnerId });
+      if(!row?.id) throw new Error('선택한 PPP Partner 정보를 찾을 수 없습니다.');
       loadMembershipRow(row, { silent:true });
       return true;
     }
@@ -895,12 +1000,9 @@
     lookupModal.addEventListener('click', e => { if(e.target === lookupModal) closeLookupModal(); });
     document.addEventListener('keydown', e => { if(e.key === 'Escape' && lookupModal.classList.contains('open')) closeLookupModal(); });
 
-    // 초기 화면: 라디오는 미선택, 기관/기업체 대표 공용 양식을 기본 표시
     typeRadios.forEach(radio => { radio.checked = false; });
     companySectionTitle.textContent = '기관 / 기업체 대표 회원정보';
 
-    // Dashboard의 PPP Partner명 클릭으로 진입한 경우
-    // PPP Partner 고유 ID로 정확히 1건을 보안 조회하여 회원 가입 등록 화면에 표시한다.
     setTimeout(() => {
       applyDashboardPartnerLookup().catch(err => {
         console.error('PPP Partner 자동 조회 실패:', err);
