@@ -4,6 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>회원 가입 등록 - 마음:시나브로심리상담연구소</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style id="sinaVersionGate">html{visibility:hidden}</style>
+  <script>
+  (() => {
+    'use strict';
+    const VERSION_FILE = 'app_version.json';
+    let gateTimer = null;
+
+    function revealPage(){
+      if(gateTimer){ clearTimeout(gateTimer); gateTimer = null; }
+      const gate = document.getElementById('sinaVersionGate');
+      if(gate) gate.remove();
+      document.documentElement.style.visibility = '';
+    }
+
+    async function checkAppVersion(options = {}){
+      const showGate = options.showGate !== false;
+      if(showGate && !document.getElementById('sinaVersionGate')){
+        const style = document.createElement('style');
+        style.id = 'sinaVersionGate';
+        style.textContent = 'html{visibility:hidden}';
+        document.head.appendChild(style);
+      }
+
+      try{
+        const response = await fetch(`${VERSION_FILE}?_cb=${Date.now()}`, {
+          cache: 'no-store',
+          credentials: 'same-origin',
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        });
+        if(!response.ok) throw new Error(`version HTTP ${response.status}`);
+
+        const data = await response.json();
+        const latestVersion = String(data?.version || '').trim();
+        if(!latestVersion) throw new Error('version value missing');
+
+        window.SINA_ASSET_VERSION = latestVersion;
+        try{ sessionStorage.setItem('sina_app_version', latestVersion); }catch(_e){}
+
+        const url = new URL(window.location.href);
+        const loadedVersion = String(url.searchParams.get('v') || '').trim();
+
+        if(loadedVersion !== latestVersion){
+          url.searchParams.set('v', latestVersion);
+          url.searchParams.set('_cb', String(Date.now()));
+          window.location.replace(url.toString());
+          return false;
+        }
+
+        if(url.searchParams.has('_cb')){
+          url.searchParams.delete('_cb');
+          try{ window.history.replaceState(window.history.state, '', url.toString()); }catch(_e){}
+        }
+        revealPage();
+        return true;
+      }catch(error){
+        console.warn('최신 버전 확인 실패:', error);
+        revealPage();
+        return false;
+      }
+    }
+
+    window.sinaCheckAppVersion = checkAppVersion;
+    gateTimer = setTimeout(revealPage, 2500);
+    checkAppVersion({showGate:true});
+
+    // Edge/Chrome 뒤로가기 캐시(BFCache)에서 화면이 복원되면 최신 버전을 다시 확인한다.
+    window.addEventListener('pageshow', event => {
+      if(event.persisted) checkAppVersion({showGate:false});
+    });
+  })();
+  </script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
