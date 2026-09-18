@@ -3661,10 +3661,11 @@
     rowEl.appendChild(cell);
   }
 
-  function appendPppPartnerLinkCell(rowEl, partnerId, partnerName) {
+  function appendPppPartnerLinkCell(rowEl, recordId, displayName, source = "ppp") {
     const cell = document.createElement("td");
-    const id = String(partnerId || "").trim();
-    const text = String(partnerName || "").trim();
+    const id = String(recordId || "").trim();
+    const text = String(displayName || "").trim();
+    const isIndividual = source === "individual";
 
     if (!id || !text) {
       cell.textContent = text || "-";
@@ -3681,7 +3682,13 @@
     link.setAttribute("aria-label", `${text} 회원 가입 등록 조회`);
 
     link.addEventListener("click", () => {
-      sessionStorage.setItem("sina_ppp_lookup_id", id);
+      if (isIndividual) {
+        sessionStorage.removeItem("sina_ppp_lookup_id");
+        sessionStorage.setItem("sina_individual_lookup_id", id);
+      } else {
+        sessionStorage.removeItem("sina_individual_lookup_id");
+        sessionStorage.setItem("sina_ppp_lookup_id", id);
+      }
     });
 
     cell.appendChild(link);
@@ -3715,8 +3722,11 @@
       if (row) {
         appendPppCell(tr, formatPppJoinDate(row.join_date));
         appendPppCell(tr, row.partner_type || "-");
-        if (row.source === "ppp") appendPppPartnerLinkCell(tr, row.id, row.partner_name);
-        else appendPppCell(tr, row.partner_name || "-");
+        if (row.source === "ppp" || row.source === "individual") {
+          appendPppPartnerLinkCell(tr, row.id, row.partner_name, row.source);
+        } else {
+          appendPppCell(tr, row.partner_name || "-");
+        }
         appendPppCell(tr, row.industry || "-");
         appendPppCell(tr, row.contact_person_name || "-");
         appendPppCell(tr, row.field || "-");
