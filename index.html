@@ -22,6 +22,80 @@
     upgrade-insecure-requests;
   " />
   <title>마음:시나브로심리상담연구소 PC-ARC</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style id="sinaVersionGate">html{visibility:hidden}</style>
+  <script>
+  (() => {
+    'use strict';
+    const VERSION_FILE = 'app_version.json';
+    let gateTimer = null;
+
+    function revealPage(){
+      if(gateTimer){ clearTimeout(gateTimer); gateTimer = null; }
+      const gate = document.getElementById('sinaVersionGate');
+      if(gate) gate.remove();
+      document.documentElement.style.visibility = '';
+    }
+
+    async function checkAppVersion(options = {}){
+      const showGate = options.showGate !== false;
+      if(showGate && !document.getElementById('sinaVersionGate')){
+        const style = document.createElement('style');
+        style.id = 'sinaVersionGate';
+        style.textContent = 'html{visibility:hidden}';
+        document.head.appendChild(style);
+      }
+
+      try{
+        const response = await fetch(`${VERSION_FILE}?_cb=${Date.now()}`, {
+          cache: 'no-store',
+          credentials: 'same-origin',
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        });
+        if(!response.ok) throw new Error(`version HTTP ${response.status}`);
+
+        const data = await response.json();
+        const latestVersion = String(data?.version || '').trim();
+        if(!latestVersion) throw new Error('version value missing');
+
+        window.SINA_ASSET_VERSION = latestVersion;
+        try{ sessionStorage.setItem('sina_app_version', latestVersion); }catch(_e){}
+
+        const url = new URL(window.location.href);
+        const loadedVersion = String(url.searchParams.get('v') || '').trim();
+
+        if(loadedVersion !== latestVersion){
+          url.searchParams.set('v', latestVersion);
+          url.searchParams.set('_cb', String(Date.now()));
+          window.location.replace(url.toString());
+          return false;
+        }
+
+        if(url.searchParams.has('_cb')){
+          url.searchParams.delete('_cb');
+          try{ window.history.replaceState(window.history.state, '', url.toString()); }catch(_e){}
+        }
+        revealPage();
+        return true;
+      }catch(error){
+        console.warn('최신 버전 확인 실패:', error);
+        revealPage();
+        return false;
+      }
+    }
+
+    window.sinaCheckAppVersion = checkAppVersion;
+    gateTimer = setTimeout(revealPage, 2500);
+    checkAppVersion({showGate:true});
+
+    // Edge/Chrome 뒤로가기 캐시(BFCache)에서 화면이 복원되면 최신 버전을 다시 확인한다.
+    window.addEventListener('pageshow', event => {
+      if(event.persisted) checkAppVersion({showGate:false});
+    });
+  })();
+  </script>
   <style>
     :root{
       --sidebar-w:210px;
@@ -2525,7 +2599,7 @@
         <span class="nav-menu-arrow">▼</span>
       </div>
       <div class="nav-submenu" id="jobCompanyManagementSubmenu" aria-label="기관.구인기업관리 하위메뉴">
-        <a class="nav-subitem" id="memberRecordCardRegistrationMenu" href="member_record_card_registration.html?v=20260918-1948">
+        <a class="nav-subitem" id="memberRecordCardRegistrationMenu" href="member_record_card_registration.html?v=20260918-2051">
           <span class="nav-subicon">├</span>
           <span>회원기록카드 등록</span>
         </a>
@@ -3485,9 +3559,14 @@
     counselProgressChartMenu?.classList.remove("active");
   });
 
-  // 회원가입등록은 클릭 시마다 캐시 우회 파라미터를 새로 생성해 최신 HTML을 강제 요청한다.
+  // 회원가입등록은 app_version.json의 최신 버전 + 클릭 시각을 함께 사용해 캐시 재사용을 차단한다.
   function getFreshMemberRegistrationUrl(){
-    return `member_record_card_registration.html?v=${Date.now()}`;
+    let version = String(window.SINA_ASSET_VERSION || '').trim();
+    if(!version){
+      try{ version = String(sessionStorage.getItem('sina_app_version') || '').trim(); }catch(_e){}
+    }
+    if(!version) version = String(Date.now());
+    return `member_record_card_registration.html?v=${encodeURIComponent(version)}&_cb=${Date.now()}`;
   }
 
   memberRecordCardRegistrationMenu?.addEventListener("click", (event) => {
@@ -3687,7 +3766,7 @@
 
     const link = document.createElement("a");
     // JS가 비활성화되거나 이벤트 처리 전에도 고정 버전값으로 이전 캐시를 피하도록 fallback URL을 둔다.
-    link.href = "member_record_card_registration.html?v=20260918-1948";
+    link.href = "member_record_card_registration.html?v=20260918-2051";
     link.className = "ppp-partner-link";
     link.textContent = text;
     link.title = `${text} 회원 가입 등록 조회`;
@@ -3706,7 +3785,7 @@
 
       // 기관/기업체/내국인/외국인 모두 클릭 순간의 고유 URL로 이동하여
       // Edge/Chrome의 이전 HTML 캐시 재사용을 차단한다.
-      window.location.assign(`member_record_card_registration.html?v=${Date.now()}`);
+      window.location.assign(getFreshMemberRegistrationUrl());
     });
 
     cell.appendChild(link);
