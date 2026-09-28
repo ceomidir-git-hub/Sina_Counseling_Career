@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://fafdxaifluftnertbpvr.supabase.co wss://fafdxaifluftnertbpvr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;">
+  <title>상담자 노트 | 마음:시나브로심리상담연구소 PC-ARC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0"></script>
+  <style>
+    :root{
+      --sidebar-w:210px;--bg:#f4f7fb;--card:#fff;--line:#dfe5ef;--text:#1d2940;
+      --muted:#7f8a9c;--navy:#172742;--purple:#6c63e8;--blue:#4e90f8;
+      --danger:#e15764;--shadow:0 6px 18px rgba(32,48,76,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif}
+    body{background:var(--bg);color:var(--text);min-width:1180px;overflow:hidden}
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    .layout{width:100vw;height:100vh;display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);overflow:hidden}
+    .sidebar{background:linear-gradient(180deg,var(--navy) 0%,#122038 100%);color:#fff;padding:8px;display:flex;flex-direction:column;min-height:0}
+    .brand{height:72px;flex:0 0 72px;padding:4px 5px 8px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:6px;display:flex;align-items:flex-start}
+    .brand-title{font-size:15.5px;font-weight:900;line-height:1.14;letter-spacing:-.9px}
+    .brand-line{display:block;white-space:nowrap}
+    .nav{display:grid;grid-auto-rows:max-content;align-content:start;gap:2px;flex:1;min-height:0;overflow-y:auto;padding-right:2px}
+    .nav-item{height:38px;border-radius:8px;padding:0 9px;display:flex;align-items:center;gap:8px;color:#d4deec;font-size:14.1px;font-weight:700;text-decoration:none;transition:.18s ease}
+    .nav-item:hover{transform:translateX(2px);background:rgba(255,255,255,.09);color:#fff}
+    .nav-item.active{background:linear-gradient(135deg,#7466ef,#5d58d8);color:#fff;box-shadow:0 5px 12px rgba(102,90,226,.22)}
+    .nav-icon{width:19px;text-align:center;font-size:12.8px}
+    .nav-item.has-submenu{position:relative;padding-right:27px}
+    .nav-menu-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%) rotate(180deg);font-size:9px;color:#fff}
+    .nav-submenu{display:block;margin:1px 0 2px 25px;padding:1px 3px;border-left:1px solid rgba(255,255,255,.16)}
+    .nav-subitem{height:27px;padding:0 7px;display:flex;align-items:center;gap:6px;border-radius:6px;color:#cbd7e7;text-decoration:none;font-size:11.9px;font-weight:750;white-space:nowrap}
+    .nav-subitem:hover{background:rgba(255,255,255,.10);color:#fff}
+    .nav-subitem.active{background:rgba(116,102,239,.25);color:#fff}
+    .nav-subicon{width:12px;text-align:center;color:#8fa6c6;font-size:9px}
+    .user-box{flex:0 0 auto;margin-top:7px;padding:10px;border:1px solid rgba(255,255,255,.10);border-radius:10px;background:rgba(255,255,255,.055)}
+    .user-info{font-size:10.5px;line-height:1.5;color:#aebdd0;overflow:hidden;text-overflow:ellipsis}
+    .user-info strong{font-size:11.5px;color:#eef4ff;white-space:nowrap}
+    .logout-btn{width:100%;height:28px;margin-top:7px;border:1px solid rgba(255,255,255,.16);border-radius:6px;background:rgba(255,255,255,.07);color:#dfe8f5;font-size:10.5px;font-weight:800}
+    .main{min-width:0;height:100vh;padding:12px 16px 16px;display:grid;grid-template-rows:54px minmax(0,1fr);gap:8px;overflow:hidden}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .heading h1{margin:0;font-size:21px;letter-spacing:-.75px}.heading h1 strong{color:var(--purple)}
+    .breadcrumb{margin-top:3px;font-size:11.5px;color:#8995a8}
+    .today{font-size:12px;font-weight:800;color:#69758a;background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 13px}
+    .card{min-height:0;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;overflow:hidden}
+    .card-head{padding:20px 22px 15px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .card-title{display:flex;align-items:center;gap:12px}
+    .title-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#eeecff;color:#6459db;font-size:19px}
+    .card-title h2{font-size:17px;margin:0;letter-spacing:-.5px}.card-title p{font-size:11.5px;color:var(--muted);margin:4px 0 0}
+    .primary-btn{height:36px;border:0;border-radius:8px;padding:0 15px;background:linear-gradient(135deg,#7466ef,#5d58d8);color:#fff;font-size:12px;font-weight:850;box-shadow:0 4px 10px rgba(102,90,226,.22)}
+    .primary-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+    .toolbar{padding:0 22px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #edf0f5}
+    .summary{font-size:12px;color:#657187}.summary strong{font-size:14px;color:var(--purple)}
+    .filters{display:flex;align-items:center;gap:7px}
+    .filter-input{height:34px;border:1px solid var(--line);border-radius:8px;background:#fbfcfe;padding:0 10px;font-size:11.5px;color:var(--text);outline:none}
+    .filter-input:focus{border-color:#8e85ec;box-shadow:0 0 0 3px rgba(108,99,232,.10)}
+    input[type="date"]{width:132px}.search-input{width:220px}
+    .ghost-btn{height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#647087;padding:0 11px;font-size:11.5px;font-weight:800}
+    .table-wrap{min-height:0;overflow:auto;padding:0 22px}
+    table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+    thead th{position:sticky;top:0;z-index:1;height:43px;background:#f6f8fb;border-bottom:1px solid #dfe5ef;color:#566278;font-size:11.5px;font-weight:850;text-align:center}
+    thead th:first-child{border-radius:8px 0 0 8px}thead th:last-child{border-radius:0 8px 8px 0}
+    tbody td{height:61px;border-bottom:1px solid #edf0f5;font-size:12px;color:#344158;text-align:center;padding:9px 12px;background:#fff}
+    tbody tr:hover td{background:#fbfbff}
+    .col-no{width:72px}.col-date{width:145px}.col-actions{width:154px}
+    .note-content{text-align:left;white-space:pre-wrap;word-break:break-word;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .date-text{font-weight:750;color:#4e5b71}
+    .actions{display:flex;justify-content:center;gap:6px}
+    .action-btn{height:29px;border-radius:7px;padding:0 10px;background:#fff;font-size:11px;font-weight:800}
+    .edit-btn{border:1px solid #a8a2ef;color:#6259cf}.delete-btn{border:1px solid #edacb2;color:#cf4d59}
+    .action-btn:disabled{opacity:.4;cursor:not-allowed}
+    .empty-row td{height:240px;color:#98a2b3}.empty-icon{display:block;font-size:26px;margin-bottom:8px;opacity:.55}
+    .loading{height:240px;display:grid;place-items:center;color:#7f8a9c;font-size:12px}
+    .card-foot{height:50px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #edf0f5;color:#8a95a6;font-size:10.5px}
+    .legend{display:flex;align-items:center;gap:6px}.legend-dot{width:6px;height:6px;border-radius:50%;background:#6c63e8}
+    .status{font-weight:750;color:#667287}
+    dialog{width:min(650px,calc(100vw - 60px));border:0;border-radius:15px;padding:0;box-shadow:0 22px 60px rgba(22,35,60,.28);color:var(--text)}
+    dialog::backdrop{background:rgba(17,29,50,.42);backdrop-filter:blur(2px)}
+    .modal-head{height:61px;padding:0 21px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+    .modal-head h3{font-size:16px;margin:0}.modal-close{width:31px;height:31px;border:0;border-radius:8px;background:#f2f4f8;color:#6f7b8e;font-size:17px}
+    .modal-body{padding:19px 21px}.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+    .field label{display:block;margin-bottom:7px;font-size:11.5px;font-weight:850;color:#526077}
+    .field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;padding:10px 12px;outline:none;color:var(--text)}
+    .field input{height:39px}.field textarea{height:180px;resize:vertical;line-height:1.55}
+    .field input:focus,.field textarea:focus{border-color:#8e85ec;box-shadow:0 0 0 3px rgba(108,99,232,.10)}
+    .modal-foot{padding:14px 21px 18px;display:flex;justify-content:flex-end;gap:8px}
+    .modal-btn{height:35px;border-radius:8px;padding:0 16px;font-size:11.5px;font-weight:850}.cancel-btn{border:1px solid var(--line);background:#fff;color:#657187}.save-btn{border:0;background:#6c63e8;color:#fff}
+    .toast{position:fixed;right:24px;bottom:22px;z-index:30;max-width:360px;padding:12px 16px;border-radius:10px;background:#263650;color:#fff;font-size:11.5px;font-weight:750;box-shadow:0 10px 30px rgba(22,35,60,.22);opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s ease}
+    .toast.show{opacity:1;transform:translateY(0)}.toast.error{background:#b5424c}
+    @media (max-height:760px){.brand{height:56px;flex-basis:56px}.nav-item{height:33px;font-size:13px}.nav-subitem{height:23px;font-size:11px}.card-head{padding-top:14px;padding-bottom:11px}.toolbar{padding-bottom:11px}.main{padding-top:8px}}
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-title"><span class="brand-line">마음:시나브로심리상담</span><span class="brand-line">연구소 PC-ARC</span></div></div>
+      <nav class="nav" aria-label="주 메뉴">
+        <a class="nav-item" href="index.html"><span class="nav-icon">◫</span><span>대시보드</span></a>
+        <div class="nav-item has-submenu active"><span class="nav-icon">◉</span><span>상담 관리</span><span class="nav-menu-arrow">▼</span></div>
+        <div class="nav-submenu" aria-label="상담 관리 하위메뉴">
+          <a class="nav-subitem active" href="Counselor%27s%20Note.html"><span class="nav-subicon">├</span><span>상담자 노트</span></a>
+          <a class="nav-subitem" href="counsel_record_card.html"><span class="nav-subicon">├</span><span>상담기록카드</span></a>
+          <a class="nav-subitem" href="counseling_progress_chart.html"><span class="nav-subicon">├</span><span>상담진행챠트</span></a>
+          <a class="nav-subitem" href="counseling_gantt_chart.html"><span class="nav-subicon">└</span><span>상담칸트챠트</span></a>
+        </div>
+        <a class="nav-item" href="#"><span class="nav-icon">♙</span><span>구직자 관리</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">▦</span><span>기관.구인기업관리</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">∞</span><span>매칭 관리</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">▣</span><span>문서관리(양식)</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">▥</span><span>통계 분석</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">📢</span><span>공지사항</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">⚙</span><span>시스템 설정</span></a>
+      </nav>
+      <div class="user-box">
+        <div class="user-info" id="userInfo"><strong>사용자 확인 중</strong><br><span>상담자 노트 전체보기</span></div>
+        <button class="logout-btn" id="logoutBtn" type="button">로그아웃</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="heading"><h1><strong>상담자 노트</strong> 전체보기</h1><div class="breadcrumb">대시보드 &gt; 상담 관리 &gt; 상담자 노트</div></div>
+        <div class="today" id="todayLabel">-</div>
+      </header>
+
+      <section class="card" aria-label="상담자 노트 목록">
+        <div class="card-head">
+          <div class="card-title"><div class="title-icon">📝</div><div><h2>상담자 노트 목록</h2><p>등록된 상담자 노트를 날짜순으로 조회하고 관리합니다.</p></div></div>
+          <button class="primary-btn" id="newNoteBtn" type="button">＋ 노트 작성</button>
+        </div>
+        <div class="toolbar">
+          <div class="summary">전체 <strong id="totalCount">0</strong>건</div>
+          <div class="filters">
+            <input class="filter-input" id="startDate" type="date" aria-label="시작 날짜">
+            <span style="color:#9aa4b4;font-size:11px">~</span>
+            <input class="filter-input" id="endDate" type="date" aria-label="종료 날짜">
+            <input class="filter-input search-input" id="searchInput" type="search" placeholder="노트 내용 검색" aria-label="노트 내용 검색">
+            <button class="ghost-btn" id="resetBtn" type="button">초기화</button>
+          </div>
+        </div>
+        <div class="table-wrap" id="tableWrap">
+          <table>
+            <thead><tr><th class="col-no">번호</th><th class="col-date">날짜</th><th>내용</th><th class="col-actions">수정 / 삭제</th></tr></thead>
+            <tbody id="noteTableBody"><tr><td colspan="4"><div class="loading">상담자 노트를 불러오는 중입니다.</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="card-foot"><div class="legend"><span class="legend-dot"></span><span>최근 날짜가 위에 표시됩니다.</span></div><div class="status" id="statusText">조회 준비</div></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="noteDialog">
+    <form id="noteForm" method="dialog">
+      <div class="modal-head"><h3 id="dialogTitle">상담자 노트 수정</h3><button class="modal-close" id="modalCloseBtn" type="button" aria-label="닫기">×</button></div>
+      <div class="modal-body">
+        <div class="field"><label for="noteDate">날짜</label><input id="noteDate" type="date" required></div>
+        <div class="field"><label for="noteContent">내용</label><textarea id="noteContent" maxlength="5000" required placeholder="상담자 노트 내용을 입력하세요."></textarea></div>
+      </div>
+      <div class="modal-foot"><button class="modal-btn cancel-btn" id="cancelBtn" type="button">취소</button><button class="modal-btn save-btn" id="saveBtn" type="submit">저장</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (() => {
+    'use strict';
+    const SUPABASE_URL = 'https://fafdxaifluftnertbpvr.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_RNEAVQD2wZRtZojxVU11aA_Dacmf7db';
+    const isPreview = new URLSearchParams(location.search).get('preview') === '1';
+    const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    const els = {
+      body:document.getElementById('noteTableBody'), total:document.getElementById('totalCount'), status:document.getElementById('statusText'),
+      search:document.getElementById('searchInput'), start:document.getElementById('startDate'), end:document.getElementById('endDate'),
+      reset:document.getElementById('resetBtn'), add:document.getElementById('newNoteBtn'), dialog:document.getElementById('noteDialog'),
+      form:document.getElementById('noteForm'), dialogTitle:document.getElementById('dialogTitle'), date:document.getElementById('noteDate'),
+      content:document.getElementById('noteContent'), close:document.getElementById('modalCloseBtn'), cancel:document.getElementById('cancelBtn'),
+      save:document.getElementById('saveBtn'), toast:document.getElementById('toast'), user:document.getElementById('userInfo'), logout:document.getElementById('logoutBtn')
+    };
+    let notes = [];
+    let editingDate = null;
+    let employee = null;
+    let toastTimer = null;
+
+    function seoulDate(){
+      return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    }
+    function formatDate(value){
+      const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||''));
+      if(!match) return value||'-';
+      const date=new Date(Date.UTC(+match[1],+match[2]-1,+match[3]));
+      const weekday=new Intl.DateTimeFormat('ko-KR',{timeZone:'UTC',weekday:'short'}).format(date);
+      return `${value} (${weekday})`;
+    }
+    function canEdit(){return ['관리자','사용자'].includes(employee?.permission)}
+    function showToast(message,type=''){
+      clearTimeout(toastTimer);els.toast.textContent=message;els.toast.className=`toast ${type} show`;
+      toastTimer=setTimeout(()=>{els.toast.className='toast'},2600);
+    }
+    function filteredNotes(){
+      const keyword=els.search.value.trim().toLowerCase();
+      return notes.filter(note=>(!els.start.value||note.note_date>=els.start.value)&&(!els.end.value||note.note_date<=els.end.value)&&(!keyword||String(note.content||'').toLowerCase().includes(keyword)));
+    }
+    function render(){
+      const rows=filteredNotes();
+      els.total.textContent=String(rows.length);
+      els.status.textContent=`${rows.length}건 표시 중`;
+      els.body.replaceChildren();
+      if(!rows.length){
+        const tr=document.createElement('tr');tr.className='empty-row';
+        const td=document.createElement('td');td.colSpan=4;
+        const icon=document.createElement('span');icon.className='empty-icon';icon.textContent='🗒️';
+        td.append(icon,document.createTextNode('조건에 맞는 상담자 노트가 없습니다.'));tr.appendChild(td);els.body.appendChild(tr);return;
+      }
+      rows.forEach((note,index)=>{
+        const tr=document.createElement('tr');
+        const no=document.createElement('td');no.textContent=String(rows.length-index);
+        const date=document.createElement('td');date.className='date-text';date.textContent=formatDate(note.note_date);
+        const content=document.createElement('td');const contentBox=document.createElement('div');contentBox.className='note-content';contentBox.textContent=note.content||'';content.appendChild(contentBox);
+        const action=document.createElement('td');const buttons=document.createElement('div');buttons.className='actions';
+        const edit=document.createElement('button');edit.type='button';edit.className='action-btn edit-btn';edit.textContent='수정';edit.disabled=!canEdit();edit.addEventListener('click',()=>openDialog(note));
+        const del=document.createElement('button');del.type='button';del.className='action-btn delete-btn';del.textContent='삭제';del.disabled=!canEdit();del.addEventListener('click',()=>deleteNote(note));
+        buttons.append(edit,del);action.appendChild(buttons);tr.append(no,date,content,action);els.body.appendChild(tr);
+      });
+    }
+    function openDialog(note=null){
+      if(!canEdit()) return showToast('조회자 권한은 노트를 수정할 수 없습니다.','error');
+      editingDate=note?.note_date||null;els.dialogTitle.textContent=note?'상담자 노트 수정':'상담자 노트 작성';
+      els.date.value=note?.note_date||seoulDate();els.date.disabled=Boolean(note);els.content.value=note?.content||'';els.dialog.showModal();setTimeout(()=>els.content.focus(),30);
+    }
+    async function loadNotes(){
+      els.status.textContent='조회 중';
+      if(isPreview){
+        notes=[
+          {note_date:'2026-09-28',content:'오전 상담 일정 및 신규 접수 내용을 확인했습니다. 초기상담 대상자에게 안내 문자를 발송하고 담당 상담사를 배정했습니다.'},
+          {note_date:'2026-09-27',content:'사례회의에서 장기상담 대상자의 진행 상황을 공유했습니다. 다음 회기 전 심리검사 결과를 정리할 예정입니다.'},
+          {note_date:'2026-09-25',content:'취업 준비 내담자의 이력서 보완 상담을 진행했습니다. 직무 역량 중심으로 자기소개서 문장을 수정하기로 했습니다.'},
+          {note_date:'2026-09-23',content:'외부 연계기관 담당자와 상담 일정 및 지원 범위를 협의했습니다.'},
+          {note_date:'2026-09-21',content:'금주 상담 종결 대상자를 확인하고 만족도 조사와 사후관리 일정을 등록했습니다.'}
+        ];render();return;
+      }
+      const {data,error}=await client.from('counselor_note').select('note_date,content,updated_at').order('note_date',{ascending:false});
+      if(error) throw error;notes=data||[];render();
+    }
+    async function saveNote(event){
+      event.preventDefault();
+      const noteDate=els.date.value;const content=els.content.value.trim();
+      if(!noteDate||!content) return showToast('날짜와 내용을 입력해 주세요.','error');
+      els.save.disabled=true;
+      try{
+        if(isPreview){
+          const idx=notes.findIndex(item=>item.note_date===(editingDate||noteDate));
+          const item={note_date:noteDate,content,updated_at:new Date().toISOString()};if(idx>=0)notes[idx]=item;else notes.push(item);
+        }else if(editingDate){
+          const {error}=await client.from('counselor_note').update({content,updated_at:new Date().toISOString()}).eq('note_date',editingDate);if(error)throw error;
+        }else{
+          const {error}=await client.from('counselor_note').insert({note_date:noteDate,content,updated_at:new Date().toISOString()});if(error)throw error;
+        }
+        notes.sort((a,b)=>b.note_date.localeCompare(a.note_date));els.dialog.close();render();showToast(editingDate?'상담자 노트를 수정했습니다.':'상담자 노트를 작성했습니다.');
+      }catch(error){console.error(error);showToast(error?.code==='23505'?'해당 날짜의 노트가 이미 있습니다.':'저장 중 오류가 발생했습니다.','error')}
+      finally{els.save.disabled=false}
+    }
+    async function deleteNote(note){
+      if(!canEdit()) return;
+      if(!confirm(`${formatDate(note.note_date)} 노트를 삭제하시겠습니까?`)) return;
+      try{
+        if(!isPreview){const {error}=await client.from('counselor_note').delete().eq('note_date',note.note_date);if(error)throw error}
+        notes=notes.filter(item=>item.note_date!==note.note_date);render();showToast('상담자 노트를 삭제했습니다.');
+      }catch(error){console.error(error);showToast('삭제 중 오류가 발생했습니다.','error')}
+    }
+    async function initialize(){
+      document.getElementById('todayLabel').textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date());
+      if(isPreview){employee={name:'김상담',position:'상담사',permission:'관리자',employee_code:'SINA-001'};}
+      else{
+        const {data:{session}}=await client.auth.getSession();
+        if(!session?.user){location.replace('index.html');return}
+        try{employee=JSON.parse(sessionStorage.getItem('sina_employee')||'null')}catch(_e){employee=null}
+        if(!employee){location.replace('index.html');return}
+      }
+      els.user.replaceChildren();const strong=document.createElement('strong');strong.textContent=`${employee.name||'-'}${employee.position?' '+employee.position:''} · ${employee.permission||'-'}`;
+      els.user.append(strong,document.createElement('br'),document.createTextNode(employee.employee_code||'상담자 노트 전체보기'));
+      els.add.disabled=!canEdit();await loadNotes();
+    }
+    [els.search,els.start,els.end].forEach(el=>el.addEventListener('input',render));
+    els.reset.addEventListener('click',()=>{els.search.value='';els.start.value='';els.end.value='';render()});
+    els.add.addEventListener('click',()=>openDialog());els.close.addEventListener('click',()=>els.dialog.close());els.cancel.addEventListener('click',()=>els.dialog.close());els.form.addEventListener('submit',saveNote);
+    els.logout.addEventListener('click',async()=>{if(!confirm('로그아웃 하시겠습니까?'))return;if(!isPreview)await client.auth.signOut({scope:'local'});sessionStorage.removeItem('sina_employee');location.replace('index.html')});
+    initialize().catch(error=>{console.error(error);els.body.innerHTML='<tr class="empty-row"><td colspan="4">상담자 노트를 불러오지 못했습니다.</td></tr>';els.status.textContent='조회 오류';showToast('상담자 노트 조회 중 오류가 발생했습니다.','error')});
+  })();
+  </script>
+</body>
+</html>
