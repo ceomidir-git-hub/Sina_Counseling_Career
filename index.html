@@ -2739,7 +2739,7 @@
 
         <div class="counsel-operation-only-card" aria-label="운영현황">
           <div class="counsel-section-title">
-            <strong>📊 운영현황</strong>
+            <strong>📊 PPP 운영현황</strong>
           </div>
           <div class="job-operation-grid counsel-operation-only-grid" aria-label="PPP Partner 및 회원 운영현황 카드">
             <div class="job-operation-item" aria-label="전체 PPP Partner">
@@ -3691,7 +3691,8 @@
 
   function formatPppJoinDate(value) {
     const text = String(value || "").trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text.replaceAll("-", ".") : (text || "-");
+    const match = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[1].slice(2)}.${match[2]}` : (text || "-");
   }
 
   function appendPppCell(rowEl, value, isEmpty = false) {
@@ -3878,7 +3879,7 @@
 
   // =========================================================
   // 01 Dashboard 운영현황
-  // - 전체 = PPP Partner 기관 + 기업체 전체 건수
+  // - 전체 = 기관 + 기업체 + 개인회원 + 외국인
   // - 기관 / 기업체 = ppp_partner.partner_type 실데이터 기준
   // - 개인회원 = DB_basic.nationality가 NULL 또는 공백인 내국인
   // - 외국인 = DB_basic.nationality가 입력된 회원
@@ -3931,7 +3932,7 @@
     const companyCount = pppRows.filter(row => String(row?.partner_type || '').trim() === '기업체').length;
     const personalCount = individualRows.filter(row => String(row?.member_type || '').trim() === '내국인').length;
     const foreignCount = individualRows.filter(row => String(row?.member_type || '').trim() === '외국인').length;
-    const totalCount = institutionCount + companyCount;
+    const totalCount = institutionCount + companyCount + personalCount + foreignCount;
 
     setOperationStatusValue(operationStatusEls.pppTotal, totalCount, '개');
     setOperationStatusValue(operationStatusEls.pppInstitution, institutionCount, '개');
