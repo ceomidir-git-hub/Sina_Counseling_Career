@@ -2511,7 +2511,7 @@
         <span class="nav-menu-arrow">▼</span>
       </div>
       <div class="nav-submenu" id="counselManagementSubmenu" aria-label="상담 관리 하위메뉴">
-        <a class="nav-subitem" id="counselorNoteMenu" href="counselor_note_v2.html">
+        <a class="nav-subitem" id="counselorNoteMenu" href="counselor%27s%20Note.html">
           <span class="nav-subicon">├</span>
           <span>상담자 노트</span>
         </a>
@@ -4106,7 +4106,7 @@
     const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(String(counselorNoteDate || ""))
       ? counselorNoteDate
       : getSeoulIsoDate();
-    const url = `counselor_note_v2.html?date=${encodeURIComponent(selectedDate)}`;
+    const url = `counselor%27s%20Note.html?date=${encodeURIComponent(selectedDate)}`;
     window.location.href = url;
   }
 
