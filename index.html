@@ -601,6 +601,9 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
+    .counsel-note-nav b[role="button"]{cursor:pointer;border-radius:6px;padding:5px 4px;transition:background .15s ease,color .15s ease}
+    .counsel-note-nav b[role="button"]:hover{background:#eef5ff;color:#164f9e;text-decoration:underline;text-underline-offset:2px}
+    .counsel-note-nav b[role="button"]:focus-visible{outline:2px solid #7da4da;outline-offset:1px;background:#eef5ff}
     .counsel-note-nav button{
       min-width:0;
       padding:0 3px;
@@ -2805,7 +2808,7 @@
             </div>
             <div class="counsel-note-nav">
               <button type="button" id="counselNotePrevBtn">◀ 이전</button>
-              <b id="counselNoteDateLabel">날짜 확인 중</b>
+              <b id="counselNoteDateLabel" role="button" tabindex="0" title="선택한 날짜의 상담자 노트 전체보기">날짜 확인 중</b>
               <button type="button" id="counselNoteNextBtn" disabled>다음 ▶</button>
             </div>
             <textarea class="counsel-note-body" id="counselNoteInput" aria-label="상담자 노트 내용" placeholder="상담자 노트를 작성하세요." readonly></textarea>
@@ -4087,6 +4090,22 @@
       console.error("상담자 노트 조회 실패:", error);
       showMessage(null, "상담자 노트 조회 중 오류가 발생했습니다.", "error");
     });
+  });
+
+  function openCounselorNoteBySelectedDate() {
+    const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(String(counselorNoteDate || ""))
+      ? counselorNoteDate
+      : getSeoulIsoDate();
+    const url = `counselor%27s%20Note.html?date=${encodeURIComponent(selectedDate)}`;
+    window.location.href = url;
+  }
+
+  counselorNoteEls.dateLabel?.addEventListener("click", openCounselorNoteBySelectedDate);
+  counselorNoteEls.dateLabel?.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openCounselorNoteBySelectedDate();
+    }
   });
 
   counselorNoteEls.edit?.addEventListener("click", () => {
