@@ -1204,29 +1204,61 @@
       }
     }
 
-    async function applyDashboardMemberLookup(){
-      const partnerId = String(sessionStorage.getItem('sina_ppp_lookup_id') || '').trim();
-      const individualId = String(sessionStorage.getItem('sina_individual_lookup_id') || '').trim();
+    function isUuid(value){
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || '').trim());
+    }
 
-      // 대시보드에서 넘어온 조회키는 1회 사용 후 즉시 제거한다.
+    function clearDashboardLookupState(){
       sessionStorage.removeItem('sina_ppp_lookup_id');
       sessionStorage.removeItem('sina_individual_lookup_id');
 
-      if(individualId){
-        const row = await secureIndividualRequest('get', { id:individualId });
+      try{
+        const url = new URL(window.location.href);
+        url.searchParams.delete('lookup_kind');
+        url.searchParams.delete('lookup_id');
+        url.searchParams.delete('_cb');
+        window.history.replaceState(window.history.state, '', url.toString());
+      }catch(_e){}
+    }
+
+    async function applyDashboardMemberLookup(){
+      const url = new URL(window.location.href);
+      const queryKind = String(url.searchParams.get('lookup_kind') || '').trim();
+      const queryId = String(url.searchParams.get('lookup_id') || '').trim();
+      const storedPartnerId = String(sessionStorage.getItem('sina_ppp_lookup_id') || '').trim();
+      const storedIndividualId = String(sessionStorage.getItem('sina_individual_lookup_id') || '').trim();
+
+      // URL 전달값을 우선 사용한다. 버전 확인으로 재로딩되어도 URL 파라미터가 유지되므로
+      // sessionStorage가 예상치 못하게 초기화된 경우에도 선택한 회원을 복구할 수 있다.
+      let kind = '';
+      let id = '';
+      if((queryKind === 'partner' || queryKind === 'individual') && isUuid(queryId)){
+        kind = queryKind;
+        id = queryId;
+      }else if(isUuid(storedIndividualId)){
+        kind = 'individual';
+        id = storedIndividualId;
+      }else if(isUuid(storedPartnerId)){
+        kind = 'partner';
+        id = storedPartnerId;
+      }
+
+      if(!kind || !id) return false;
+
+      // 조회에 성공한 뒤에만 전달값을 삭제한다. 실패 시에는 값을 보존해 재시도가 가능하다.
+      if(kind === 'individual'){
+        const row = await secureIndividualRequest('get', { id });
         if(!row?.id) throw new Error('선택한 개인 회원 정보를 찾을 수 없습니다.');
         loadIndividualRow(row, { silent:true });
+        clearDashboardLookupState();
         return true;
       }
 
-      if(partnerId){
-        const row = await securePppRequest('get', { id:partnerId });
-        if(!row?.id) throw new Error('선택한 PPP Partner 정보를 찾을 수 없습니다.');
-        loadMembershipRow(row, { silent:true });
-        return true;
-      }
-
-      return false;
+      const row = await securePppRequest('get', { id });
+      if(!row?.id) throw new Error('선택한 PPP Partner 정보를 찾을 수 없습니다.');
+      loadMembershipRow(row, { silent:true });
+      clearDashboardLookupState();
+      return true;
     }
 
     backBtn.addEventListener('click', goPreviousScreen);
