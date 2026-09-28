@@ -2808,7 +2808,7 @@
             </div>
             <div class="counsel-note-nav">
               <button type="button" id="counselNotePrevBtn">◀ 이전</button>
-              <b id="counselNoteDateLabel" role="button" tabindex="0" title="선택한 날짜의 상담자 노트 전체보기">날짜 확인 중</b>
+              <b id="counselNoteDateLabel" role="button" tabindex="0" title="날짜 선택">날짜 확인 중</b><input id="counselNoteDatePicker" type="date" aria-label="상담자 노트 날짜 선택" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
               <button type="button" id="counselNoteNextBtn" disabled>다음 ▶</button>
             </div>
             <textarea class="counsel-note-body" id="counselNoteInput" aria-label="상담자 노트 내용" placeholder="상담자 노트를 작성하세요." readonly></textarea>
@@ -3958,6 +3958,7 @@
     prev: document.getElementById("counselNotePrevBtn"),
     next: document.getElementById("counselNoteNextBtn"),
     dateLabel: document.getElementById("counselNoteDateLabel"),
+    datePicker: document.getElementById("counselNoteDatePicker"),
     input: document.getElementById("counselNoteInput"),
     edit: document.getElementById("counselNoteEditBtn"),
     save: document.getElementById("counselNoteSaveBtn")
@@ -4019,6 +4020,10 @@
     const today = getSeoulIsoDate();
     if (counselorNoteEls.dateLabel) {
       counselorNoteEls.dateLabel.textContent = formatCounselorNoteDate(counselorNoteDate);
+    }
+    if (counselorNoteEls.datePicker) {
+      counselorNoteEls.datePicker.value = counselorNoteDate;
+      counselorNoteEls.datePicker.max = today;
     }
     if (counselorNoteEls.next) {
       counselorNoteEls.next.disabled = counselorNoteDate >= today;
@@ -4102,20 +4107,36 @@
     });
   });
 
-  function openCounselorNoteBySelectedDate() {
-    const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(String(counselorNoteDate || ""))
-      ? counselorNoteDate
-      : getSeoulIsoDate();
-    const url = `counselor_note.html?date=${encodeURIComponent(selectedDate)}`;
-    window.location.href = url;
+  function openCounselorNoteDatePicker() {
+    const picker = counselorNoteEls.datePicker;
+    if (!picker) return;
+    picker.value = counselorNoteDate;
+    picker.max = getSeoulIsoDate();
+    if (typeof picker.showPicker === "function") {
+      picker.showPicker();
+    } else {
+      picker.focus();
+      picker.click();
+    }
   }
 
-  counselorNoteEls.dateLabel?.addEventListener("click", openCounselorNoteBySelectedDate);
+  counselorNoteEls.dateLabel?.addEventListener("click", openCounselorNoteDatePicker);
   counselorNoteEls.dateLabel?.addEventListener("keydown", event => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      openCounselorNoteBySelectedDate();
+      openCounselorNoteDatePicker();
     }
+  });
+
+  counselorNoteEls.datePicker?.addEventListener("change", () => {
+    const selectedDate = String(counselorNoteEls.datePicker?.value || "");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) return;
+    if (selectedDate > getSeoulIsoDate()) return;
+    counselorNoteDate = selectedDate;
+    loadCounselorNote().catch(error => {
+      console.error("상담자 노트 조회 실패:", error);
+      showMessage(null, "상담자 노트 조회 중 오류가 발생했습니다.", "error");
+    });
   });
 
   counselorNoteEls.edit?.addEventListener("click", () => {
